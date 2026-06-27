@@ -20,7 +20,7 @@
 | App name | EDTC |
 | Auto-jump / autopilot | Implemented with prominent Frontier ToS warning modal in FleetCarriers.jsx |
 | Frontier CAPI / OAuth | Deferred — later phase |
-| Repo visibility | TBD (doesn't block anything) |
+| Repo visibility | Public — https://github.com/keaganbmackinnon-coder/EDTC |
 | Overlay URL scheme | `?overlay=<key>` query param — works for both dev (localhost:5173) and prod (file://) |
 | Route clipboard hotkey | Ctrl+Shift+C (global, via `keyboard` lib) |
 
@@ -103,31 +103,34 @@
 
 ---
 
-## Next session — Colonisation module (Session 3)
+## Build status — Session 3 (COMPLETE)
 
-Build the full Colonisation module. Replace the "Coming Soon" stubs in `Colonisation.jsx`.
+| Item | Status | File |
+|---|---|---|
+| Colonisation.jsx — full tabbed UI (replaces all "Coming Soon" stubs) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Tab 1: Build Progress Tracker (project cards + per-commodity progress bars) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Tab 2: Aggregated Shopping List (net remaining across active projects) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Tab 3: FC Cargo (auto-tracked via CargoTransfer + manual override) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Tab 4: Market Finder (Spansh nearest commodity search) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| `fc_cargo` DB table + get/set/update functions | DONE | `core/database.py` |
+| `CargoTransfer` journal event handler | DONE | `main.py` |
+| FC cargo API methods (get/set/clear) | DONE | `main.py` |
+| `search_commodity_markets` API method (calls Spansh) | DONE | `main.py` |
+| `construction_update` event also emitted to main window (live updates in Colonisation tab) | DONE | `main.py` |
+| `commodity_markets()` method in SpanshAPI | DONE | `api/spansh.py` |
+| GitHub repo initialised and pushed | DONE | https://github.com/keaganbmackinnon-coder/EDTC |
 
-### Features to implement
+---
 
-1. **Build Progress Tracker** — multiple projects, commodity requirements vs delivered, ties to construction overlay
-2. **Aggregated Shopping List** — combine all active projects, subtract delivered, net remaining per commodity
-3. **Fleet Carrier Cargo vs Requirements** — compare FC cargo (from journal) against open project needs
-4. **System Planner + Economy Simulator** — which building types produce which economies
-5. **Commodity Shopping Tool** — find nearest markets with stock for shopping list items (Spansh/EDDN)
-6. **Nexus Building Planner** (stretch) — plan build order for target economy
+## Known issues / notes for next session
 
-### Files to touch
-- `frontend/src/pages/Colonisation.jsx` — replace stubs with real UI (currently all "Coming Soon")
-- `core/database.py` — `construction_projects` table already exists from session 2
-- `main.py` — construction API methods already wired from session 2
-- `api/spansh.py` — add colonisation commodity market endpoints if needed
-- Possibly new: `data/colonisation_buildings.json` — building types, costs, economy contributions
-
-### Notes
-- Construction CRUD already in `database.py` + `main.py` from session 2
-- Construction overlay already built and tracking live deliveries
-- `ColonisationContribution` journal event already handled in `main.py`
-- GitHub setup still pending — doesn't block this work
+- `routes.active` column: added in session 2 schema. If DB existed from before session 2, run: `ALTER TABLE routes ADD COLUMN active INTEGER DEFAULT 0;`
+- CMDR ping `hide_after(8s)`: if a second ping arrives within 8 seconds, the first timer will hide the new ping early. Fix: track and cancel pending timers.
+- Exobiology: if the game fires `ScanOrganic.ScanType == "Logged"` as the final event (rather than a third `Analysed`), adjust `_handle_scan_organic()` in `main.py` accordingly.
+- `keyboard` hotkey: may need elevated privileges on Linux. Works without admin on Windows.
+- **Spansh commodity search**: `/api/stations/search` with `market[name][]` param — verify this works in-game. Response field names (`distance_to_arrival`, `market[].sell_price`, `market[].supply`) are best-guess from Spansh API conventions; may need adjusting if response shape differs.
+- **FC cargo tracking**: `CargoTransfer` only fires when YOU personally move cargo to/from your FC. Cargo sold by your market, loaded by NPCs, or present before EDTC started won't be tracked. "Edit Manually" on the FC Cargo tab handles this.
+- System Planner + Economy Simulator and Nexus Building Planner are still unbuilt (need authoritative game data for building types/costs/economy contributions — suggest sourcing from EDCD or community wikis).
 
 ---
 
@@ -148,7 +151,7 @@ Terminal 2:  python main.py --dev
 
 ---
 
-*Last updated: Session 2 complete — all 6 overlays fully implemented*
+*Last updated: Session 3 complete — Colonisation module implemented, GitHub repo live*
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
