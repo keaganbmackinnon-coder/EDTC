@@ -1,0 +1,86 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: EDTC.exe
+            label: windows
+          - os: macos-latest
+            artifact: EDTC
+            label: macos
+          - os: ubuntu-latest
+            artifact: EDTC
+            label: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --onefile --windowed --name EDTC \
+            --add-data "frontend/dist;frontend/dist" \
+            --add-data "data;data" \
+            main.py
+
+      - name: Build with PyInstaller (macOS / Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          pyinstaller --onefile --windowed --name EDTC \
+            --add-data "frontend/dist:frontend/dist" \
+            --add-data "data:data" \
+            main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EDTC-${{ matrix.label }}
+          path: dist/${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            EDTC-windows/EDTC.exe
+            EDTC-macos/EDTC
+            EDTC-linux/EDTC
+          generate_release_notes: true

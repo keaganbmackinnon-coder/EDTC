@@ -1,0 +1,48 @@
+{
+  "_source": "EDCD/Coriolis-Data — replace with full dataset from https://github.com/EDCD/coriolis-data",
+  "modules": [
+    {
+      "id": "Hpt_PulseLaser_Fixed_Small",
+      "name": "Pulse Laser",
+      "class": 1,
+      "rating": "F",
+      "category": "hardpoint",
+      "mount": "Fixed",
+      "cost": 1930,
+      "power_draw": 0.39,
+      "damage": 2.0,
+      "dps": 8.58,
+      "range": 3000,
+      "thermal_load": 0.39
+    },
+    {
+      "id": "Hpt_BeamLaser_Fixed_Small",
+      "name": "Beam Laser",
+      "class": 1,
+      "rating": "E",
+      "category": "hardpoint",
+      "mount": "Fixed",
+      "cost": 37450,
+      "power_draw": 0.62,
+      "damage": 9.8,
+      "dps": 9.8,
+      "range": 3000,
+      "thermal_load": 1.49
+    },
+    {
+      "id": "Int_ShieldGenerator_Size1_Class1",
+      "name": "Shield Generator",
+      "class": 1,
+      "rating": "E",
+      "category": "internal",
+      "cost": 1980,
+      "power_draw": 0.72,
+      "min_mass": 13,
+      "opt_mass": 25,
+      "max_mass": 63,
+      "min_strength": 30,
+      "opt_strength": 40,
+      "max_strength": 50
+    }
+  ]
+}

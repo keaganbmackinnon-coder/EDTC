@@ -1,0 +1,38 @@
+{
+  "_source": "Canonn / EDCD community data",
+  "genus": [
+    {
+      "id": "aleoids",
+      "name": "Aleoids",
+      "species": ["Aleoida Arcus", "Aleoida Coronamus", "Aleoida Gravis", "Aleoida Laminiae", "Aleoida Spica"],
+      "base_value": 1000000,
+      "conditions": {
+        "atmosphere": ["CO2", "CO2-rich"],
+        "gravity_max": 0.27,
+        "star_types": ["F", "G", "K"]
+      }
+    },
+    {
+      "id": "bacterium",
+      "name": "Bacterium",
+      "species": ["Bacterium Acies", "Bacterium Alcyoneum", "Bacterium Aurasus", "Bacterium Bullaris", "Bacterium Cerbrus"],
+      "base_value": 150000,
+      "conditions": {
+        "atmosphere": ["Any"],
+        "gravity_max": 0.27,
+        "star_types": ["Any"]
+      }
+    },
+    {
+      "id": "stratum",
+      "name": "Stratum",
+      "species": ["Stratum Araneamus", "Stratum Cucumisis", "Stratum Excutitus", "Stratum Frigus", "Stratum Laminamus"],
+      "base_value": 2500000,
+      "conditions": {
+        "atmosphere": ["CO2", "H2O"],
+        "gravity_max": 0.27,
+        "star_types": ["Any"]
+      }
+    }
+  ]
+}

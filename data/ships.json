@@ -1,0 +1,43 @@
+{
+  "_source": "EDCD/Coriolis-Data — replace with full dataset from https://github.com/EDCD/coriolis-data",
+  "ships": [
+    {
+      "id": "sidewinder",
+      "name": "Sidewinder Mk I",
+      "manufacturer": "Faulcon DeLacy",
+      "cost": 32000,
+      "mass": 25,
+      "cargo_capacity": 4,
+      "max_cargo": 16,
+      "fuel_capacity": 2,
+      "jump_range": 7.73,
+      "speed": 220,
+      "boost": 320,
+      "maneuverability": 5,
+      "shields": 40,
+      "hull": 180,
+      "hardpoints": [2, 2],
+      "utility_slots": 4,
+      "internal_slots": [3, 3, 1, 1, 1]
+    },
+    {
+      "id": "anaconda",
+      "name": "Anaconda",
+      "manufacturer": "Faulcon DeLacy",
+      "cost": 146969451,
+      "mass": 400,
+      "cargo_capacity": 114,
+      "max_cargo": 468,
+      "fuel_capacity": 32,
+      "jump_range": 9.81,
+      "speed": 180,
+      "boost": 240,
+      "maneuverability": 1,
+      "shields": 297,
+      "hull": 945,
+      "hardpoints": [8, 8, 4, 4, 4, 3, 3],
+      "utility_slots": 8,
+      "internal_slots": [7, 7, 6, 6, 5, 5, 4, 3, 3, 2, 1, 1]
+    }
+  ]
+}

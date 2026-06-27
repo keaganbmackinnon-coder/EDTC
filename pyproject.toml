@@ -1,0 +1,15 @@
+[project]
+name = "edtc"
+version = "0.1.0"
+description = "Elite Dangerous Tools & Companion"
+requires-python = ">=3.11"
+
+[tool.pyinstaller]
+name = "EDTC"
+onefile = true
+windowed = true
+icon = "frontend/public/icon.ico"
+add-data = [
+    "frontend/dist:frontend/dist",
+    "data:data",
+]

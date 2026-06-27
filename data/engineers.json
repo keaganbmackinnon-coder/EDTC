@@ -1,0 +1,27 @@
+{
+  "_source": "Frontier / community data",
+  "engineers": [
+    {
+      "id": "felicity_farseer",
+      "name": "Felicity Farseer",
+      "location": "Deciat / Farseer Inc",
+      "system": "Deciat",
+      "station": "Farseer Inc",
+      "specialties": ["FSD", "Thrusters", "Sensors", "Life Support"],
+      "max_grade": 5,
+      "unlock": "Provide 1 unit of Meta-Alloys",
+      "invitation": "Reach 3 kly of exploration data OR hand in 1 Soontill Relic"
+    },
+    {
+      "id": "tod_mcquinn",
+      "name": "Tod 'The Blaster' McQuinn",
+      "location": "Wolf 397 / Trophy Camp",
+      "system": "Wolf 397",
+      "station": "Trophy Camp",
+      "specialties": ["Multicannon", "Fragmentation Cannon"],
+      "max_grade": 5,
+      "unlock": "Bounty vouchers worth 100,000 CR in his home system",
+      "invitation": "Earn a bounty voucher worth 50,000 CR in Wolf 397"
+    }
+  ]
+}

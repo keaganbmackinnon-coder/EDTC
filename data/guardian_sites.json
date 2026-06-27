@@ -1,0 +1,22 @@
+{
+  "_source": "Canonn / community data — https://canonn.science",
+  "ruins": [
+    {
+      "id": "synuefe_xr_h_d11_102",
+      "system": "Synuefe XR-H d11-102",
+      "body": "1 b",
+      "type": "Alpha",
+      "coordinates": {"lat": -31.7065, "lon": -128.9319},
+      "notes": "Well-documented Alpha site, good for Ram Tah missions"
+    }
+  ],
+  "structures": [
+    {
+      "id": "vela_dark_region_fy_c_b3",
+      "system": "Vela Dark Region FY-C b3",
+      "body": "A 2",
+      "type": "Gamma",
+      "coordinates": {"lat": 42.1, "lon": -17.3}
+    }
+  ]
+}

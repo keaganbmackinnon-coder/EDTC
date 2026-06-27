@@ -1,0 +1,32 @@
+{
+  "_source": "Frontier / community data",
+  "items": [
+    {
+      "id": "guardian_fsd_booster",
+      "name": "Guardian FSD Booster",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {"name": "Guardian Power Cell", "category": "Guardian", "amount": 10},
+        {"name": "Guardian Sentinel Weapon Parts", "category": "Guardian", "amount": 10},
+        {"name": "Guardian Technology Component", "category": "Guardian", "amount": 6},
+        {"name": "Focus Crystals", "category": "Manufactured", "amount": 8},
+        {"name": "HN Shock Mount", "category": "Manufactured", "amount": 10},
+        {"name": "Manganese", "category": "Raw", "amount": 10},
+        {"name": "Arsenic", "category": "Raw", "amount": 10}
+      ]
+    },
+    {
+      "id": "meta_alloy_hull_reinforcement",
+      "name": "Meta-Alloy Hull Reinforcement Package",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {"name": "Meta-Alloys", "category": "Commodity", "amount": 1},
+        {"name": "Reinforced Mounting Plate", "category": "Manufactured", "amount": 15},
+        {"name": "Compound Shielding", "category": "Manufactured", "amount": 10},
+        {"name": "Proprietary Composites", "category": "Manufactured", "amount": 10}
+      ]
+    }
+  ]
+}

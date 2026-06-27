@@ -1,0 +1,13 @@
+{
+  "_source": "Frontier / EDCD community data",
+  "commodities": [
+    {"id": "gold", "name": "Gold", "category": "Metals", "average_price": 9401},
+    {"id": "silver", "name": "Silver", "category": "Metals", "average_price": 4775},
+    {"id": "palladium", "name": "Palladium", "category": "Metals", "average_price": 13244},
+    {"id": "tritium", "name": "Tritium", "category": "Chemicals", "average_price": 44144},
+    {"id": "food_cartridges", "name": "Food Cartridges", "category": "Foods", "average_price": 100},
+    {"id": "biowaste", "name": "Biowaste", "category": "Waste", "average_price": 63},
+    {"id": "bertrandite", "name": "Bertrandite", "category": "Minerals", "average_price": 2374},
+    {"id": "void_opals", "name": "Void Opals", "category": "Minerals", "average_price": 173649}
+  ]
+}

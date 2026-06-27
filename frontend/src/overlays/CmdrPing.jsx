@@ -1,0 +1,38 @@
+import { useEffect, useState } from 'react'
+
+export default function CmdrPing() {
+  const [ping, setPing] = useState(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const off = window.__edtc.on('cmdr_detected', (payload) => {
+      setPing(payload)
+      setVisible(true)
+    })
+    return off
+  }, [])
+
+  if (!visible || !ping) return null
+
+  return (
+    <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
+      <div className="bg-ed-panel/95 border border-ed-orange/70 rounded-lg px-4 py-3 shadow-2xl backdrop-blur-sm min-w-[280px]">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="w-2 h-2 rounded-full bg-ed-danger animate-pulse shrink-0" />
+          <span className="text-ed-muted text-xs font-mono uppercase tracking-widest">CMDR Detected</span>
+          {ping.on_watchlist && (
+            <span className="ml-auto text-[10px] font-mono bg-ed-danger/20 text-ed-danger px-1.5 py-0.5 rounded">
+              WATCHLIST
+            </span>
+          )}
+        </div>
+        <p className="text-ed-orange font-mono text-lg font-bold leading-tight">
+          CMDR {ping.cmdr}
+        </p>
+        {ping.ship && (
+          <p className="text-ed-text text-sm mt-0.5">{ping.ship}</p>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,34 @@
+{
+  "_source": "EDCD/EDSY / Inara — replace with full dataset",
+  "blueprints": [
+    {
+      "id": "weapon_longrange",
+      "name": "Long Range Weapon",
+      "applies_to": ["Hpt_PulseLaser_Fixed_Small", "Hpt_BeamLaser_Fixed_Small"],
+      "grades": {
+        "1": {
+          "materials": [
+            {"name": "Sulphur", "category": "Raw", "amount": 1}
+          ],
+          "effects": [
+            {"attribute": "range", "modifier": 1.3, "positive": true},
+            {"attribute": "power_draw", "modifier": 1.03, "positive": false},
+            {"attribute": "mass", "modifier": 1.0, "positive": true},
+            {"attribute": "damage_falloff_range", "modifier": 1.3, "positive": true}
+          ]
+        },
+        "5": {
+          "materials": [
+            {"name": "Electrochemical Arrays", "category": "Manufactured", "amount": 5},
+            {"name": "Configurable Components", "category": "Manufactured", "amount": 3},
+            {"name": "Pharmaceutical Isolators", "category": "Encoded", "amount": 1}
+          ],
+          "effects": [
+            {"attribute": "range", "modifier": 1.6, "positive": true},
+            {"attribute": "power_draw", "modifier": 1.12, "positive": false}
+          ]
+        }
+      }
+    }
+  ]
+}

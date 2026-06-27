@@ -1,0 +1,36 @@
+{
+  "_source": "Frontier / community data",
+  "synthesis": [
+    {
+      "id": "ammo_basic",
+      "name": "Basic Munitions",
+      "category": "Ammunition",
+      "grade": "Basic",
+      "materials": [
+        {"name": "Nickel", "category": "Raw", "amount": 2},
+        {"name": "Sulphur", "category": "Raw", "amount": 1}
+      ]
+    },
+    {
+      "id": "afmu_basic",
+      "name": "AFMU Repairs (Basic)",
+      "category": "Repair",
+      "grade": "Basic",
+      "materials": [
+        {"name": "Nickel", "category": "Raw", "amount": 2},
+        {"name": "Vanadium", "category": "Raw", "amount": 1}
+      ]
+    },
+    {
+      "id": "fsd_premium",
+      "name": "FSD Injection (Premium)",
+      "category": "FSD",
+      "grade": "Premium",
+      "materials": [
+        {"name": "Arsenic", "category": "Raw", "amount": 1},
+        {"name": "Niobium", "category": "Raw", "amount": 1},
+        {"name": "Yttrium", "category": "Raw", "amount": 1}
+      ]
+    }
+  ]
+}
