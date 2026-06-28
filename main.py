@@ -271,6 +271,9 @@ class API:
             self._overlay_manager.emit_to_overlay("system_preview", "system_jumped", preview_payload)
             self._overlay_manager.hide_after("system_preview", 15)
 
+        self._overlay_manager.emit_to_overlay("fss", "system_jumped", {})
+        self._overlay_manager.emit_to_overlay("exo_tracker", "system_jumped", {})
+
         if self._auto_jump_active:
             self._schedule_next_jump()
 

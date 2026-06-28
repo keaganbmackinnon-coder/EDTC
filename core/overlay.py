@@ -52,6 +52,7 @@ class OverlayManager:
         self._shown: dict[str, bool] = {}
         self._user_enabled: dict[str, bool] = {}  # persistent per-overlay on/off preference
         self._opacity: dict[str, float] = {}
+        self._hide_timers: dict[str, threading.Timer] = {}
         self._dev_mode = dev_mode
         self._dist_path = dist_path
         self._enabled = False  # suppressed until webview is running
@@ -63,7 +64,7 @@ class OverlayManager:
         if self._dev_mode:
             return f"http://localhost:5173/?overlay={key}"
         base = self._dist_path.as_uri() if self._dist_path else "about:blank"
-        return f"{base}?overlay={key}"
+        return f"{base}#overlay={key}"
 
     def _apply_opacity(self, name: str):
         win = self._windows.get(name)
@@ -157,8 +158,14 @@ class OverlayManager:
             pass
 
     def hide_after(self, name: str, seconds: float):
+        existing = self._hide_timers.pop(name, None)
+        if existing:
+            existing.cancel()
+
         def _hide():
-            import time
-            time.sleep(seconds)
             self.hide(name)
-        threading.Thread(target=_hide, daemon=True).start()
+            self._hide_timers.pop(name, None)
+
+        timer = threading.Timer(seconds, _hide)
+        self._hide_timers[name] = timer
+        timer.start()
