@@ -105,6 +105,21 @@ def init_db():
                 pending_jump TEXT DEFAULT '',
                 updated      TEXT DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS cmdr_stats (
+                key     TEXT PRIMARY KEY,
+                value   TEXT NOT NULL,
+                updated TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS logbook (
+                id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                title   TEXT NOT NULL DEFAULT '',
+                system  TEXT NOT NULL DEFAULT '',
+                body    TEXT NOT NULL DEFAULT '',
+                created TEXT DEFAULT (datetime('now')),
+                updated TEXT DEFAULT (datetime('now'))
+            );
         """)
 
 
@@ -519,3 +534,59 @@ def upsert_engineer_progress(engineer: str, status: str, rank: int) -> None:
               status=excluded.status, rank=excluded.rank,
               updated=excluded.updated
         """, (engineer, status, rank))
+
+
+# --- CMDR Stats ---
+
+def set_cmdr_stat(key: str, value) -> None:
+    with _conn() as conn:
+        conn.execute("""
+            INSERT INTO cmdr_stats (key, value, updated)
+            VALUES (?, ?, datetime('now'))
+            ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated=excluded.updated
+        """, (key, json.dumps(value)))
+
+
+def get_cmdr_stats() -> dict:
+    with _conn() as conn:
+        rows = conn.execute("SELECT key, value FROM cmdr_stats").fetchall()
+        result = {}
+        for r in rows:
+            try:
+                result[r["key"]] = json.loads(r["value"])
+            except Exception:
+                result[r["key"]] = r["value"]
+        return result
+
+
+# --- Logbook ---
+
+def get_logbook() -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM logbook ORDER BY created DESC"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def save_log_entry(entry: dict) -> dict:
+    with _conn() as conn:
+        if entry.get("id"):
+            conn.execute(
+                "UPDATE logbook SET title=?, system=?, body=?, updated=datetime('now') WHERE id=?",
+                (entry.get("title", ""), entry.get("system", ""), entry.get("body", ""), entry["id"]),
+            )
+            row = conn.execute("SELECT * FROM logbook WHERE id=?", (entry["id"],)).fetchone()
+        else:
+            cur = conn.execute(
+                "INSERT INTO logbook (title, system, body) VALUES (?, ?, ?)",
+                (entry.get("title", ""), entry.get("system", ""), entry.get("body", "")),
+            )
+            row = conn.execute("SELECT * FROM logbook WHERE id=?", (cur.lastrowid,)).fetchone()
+        return dict(row)
+
+
+def delete_log_entry(entry_id: int) -> bool:
+    with _conn() as conn:
+        conn.execute("DELETE FROM logbook WHERE id=?", (entry_id,))
+    return True

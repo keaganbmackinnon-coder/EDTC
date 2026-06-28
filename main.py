@@ -132,6 +132,16 @@ class API:
             self._handle_synthesis_used(event)
         elif event_name == "EngineerProgress":
             self._handle_engineer_progress(event)
+        elif event_name == "Commander":
+            self._handle_commander(event)
+        elif event_name == "LoadGame":
+            self._handle_load_game(event)
+        elif event_name == "Rank":
+            self._handle_rank(event)
+        elif event_name == "Progress":
+            self._handle_progress(event)
+        elif event_name == "Statistics":
+            self._handle_statistics(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -461,6 +471,52 @@ class API:
             )
         self._emit("engineer_progress_update", {})
 
+    def _handle_commander(self, event: dict):
+        from core.database import set_cmdr_stat
+        name = event.get("Name", "")
+        if name:
+            set_cmdr_stat("name", name)
+        self._emit("cmdr_stats_update", {})
+
+    def _handle_load_game(self, event: dict):
+        from core.database import set_cmdr_stat
+        if event.get("Credits") is not None:
+            set_cmdr_stat("credits", event["Credits"])
+        if event.get("Ship"):
+            set_cmdr_stat("ship", event.get("Ship_Localised") or event["Ship"])
+        if event.get("ShipIdent"):
+            set_cmdr_stat("ship_ident", event["ShipIdent"])
+        if event.get("ShipName"):
+            set_cmdr_stat("ship_name", event["ShipName"])
+        if event.get("GameMode"):
+            set_cmdr_stat("gamemode", event["GameMode"])
+        if event.get("FuelLevel") is not None:
+            set_cmdr_stat("fuel_level", event["FuelLevel"])
+        if event.get("FuelCapacity") is not None:
+            set_cmdr_stat("fuel_capacity", event["FuelCapacity"])
+        self._emit("cmdr_stats_update", {})
+
+    def _handle_rank(self, event: dict):
+        from core.database import set_cmdr_stat
+        ranks = {k: v for k, v in event.items() if k != "event" and k != "timestamp"}
+        if ranks:
+            set_cmdr_stat("ranks", ranks)
+        self._emit("cmdr_stats_update", {})
+
+    def _handle_progress(self, event: dict):
+        from core.database import set_cmdr_stat
+        progress = {k: v for k, v in event.items() if k != "event" and k != "timestamp"}
+        if progress:
+            set_cmdr_stat("rank_progress", progress)
+        self._emit("cmdr_stats_update", {})
+
+    def _handle_statistics(self, event: dict):
+        from core.database import set_cmdr_stat
+        stats = {k: v for k, v in event.items() if k not in ("event", "timestamp")}
+        if stats:
+            set_cmdr_stat("statistics", stats)
+        self._emit("cmdr_stats_update", {})
+
     # --- Builds ---
 
     def get_builds(self) -> list:
@@ -711,6 +767,77 @@ class API:
             return asyncio.run(_run())
         except Exception:
             return []
+
+    # --- Commander ---
+
+    def lookup_commander(self, cmdr_name: str) -> dict:
+        import asyncio
+        from api.edsm import EdsmAPI
+        async def _run():
+            edsm = EdsmAPI()
+            try:
+                return await edsm.get_commander(cmdr_name)
+            finally:
+                await edsm.close()
+        try:
+            result = asyncio.run(_run())
+            return result or {"error": "Commander not found or profile not public"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_cmdr_stats(self) -> dict:
+        from core.database import get_cmdr_stats
+        return get_cmdr_stats()
+
+    def get_current_system(self) -> str:
+        return self._current_system
+
+    def get_logbook(self) -> list:
+        from core.database import get_logbook
+        return get_logbook()
+
+    def save_log_entry(self, entry: dict) -> dict:
+        from core.database import save_log_entry
+        return save_log_entry(entry)
+
+    def delete_log_entry(self, entry_id: int) -> bool:
+        from core.database import delete_log_entry
+        return delete_log_entry(entry_id)
+
+    def get_screenshots(self) -> list:
+        import os
+        from pathlib import Path
+        folder = Path(os.environ.get("USERPROFILE", "~")) / "Pictures" / "Frontier Developments" / "Elite Dangerous"
+        if not folder.exists():
+            return []
+        files = []
+        for f in sorted(folder.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+            if f.suffix.lower() in (".png", ".jpg", ".bmp"):
+                files.append({
+                    "name": f.name,
+                    "path": str(f),
+                    "modified": f.stat().st_mtime,
+                })
+        return files[:100]
+
+    def open_file(self, path: str) -> bool:
+        try:
+            import os
+            os.startfile(path)
+            return True
+        except Exception:
+            return False
+
+    def open_screenshots_folder(self) -> bool:
+        import os
+        from pathlib import Path
+        folder = Path(os.environ.get("USERPROFILE", "~")) / "Pictures" / "Frontier Developments" / "Elite Dangerous"
+        folder.mkdir(parents=True, exist_ok=True)
+        try:
+            os.startfile(str(folder))
+            return True
+        except Exception:
+            return False
 
     # --- Clipboard ---
 

@@ -206,8 +206,34 @@ Terminal 2:  python main.py --dev
 - **Data stubs**: `data/blueprints.json`, `data/engineers.json`, `data/synthesis.json`, `data/tech_brokers.json` are minimal stubs. Engineering page shows "No items found" until replaced with full EDCD datasets. EDCD links in README.
 - **Material names**: DB stores names lowercase. Blueprint/synthesis JSON material names should match (case-insensitive comparison applied in Engineering.jsx via `.toLowerCase()`).
 - **EngineerCraft category tracking**: Ingredients in the craft event don't include category. `upsert_material` retains existing category on delta updates; new materials inserted with empty category, corrected on next `MaterialCollected` event.
-- Remaining stub pages: Commander, Exploration, Galaxy, Guardian, Trading (all still "Coming Soon").
+- Remaining stub pages: Exploration, Galaxy, Guardian, Trading (all still "Coming Soon").
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt.
+
+---
+
+## Build status — Session 6 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `cmdr_stats` DB table + `set_cmdr_stat`, `get_cmdr_stats` | DONE | `core/database.py` |
+| `logbook` DB table + `get_logbook`, `save_log_entry`, `delete_log_entry` | DONE | `core/database.py` |
+| `Rank`, `Progress`, `Statistics`, `Reputation` added to WATCHED_EVENTS | DONE | `core/journal.py` |
+| `_handle_commander`, `_handle_load_game`, `_handle_rank`, `_handle_progress`, `_handle_statistics` | DONE | `main.py` |
+| `lookup_commander`, `get_cmdr_stats`, `get_current_system` API methods | DONE | `main.py` |
+| `get_logbook`, `save_log_entry`, `delete_log_entry` API methods | DONE | `main.py` |
+| `get_screenshots`, `open_file`, `open_screenshots_folder` API methods | DONE | `main.py` |
+| `Commander.jsx` — 4-tab UI (CMDR Lookup / My Stats / Logbook / Screenshots) | DONE | `frontend/src/pages/Commander.jsx` |
+| CMDR Lookup tab — EDSM search by name, shows last system + date + coords | DONE | `frontend/src/pages/Commander.jsx` |
+| My Stats tab — journal-tracked ranks with progress bars, credits, ship info, statistics groups | DONE | `frontend/src/pages/Commander.jsx` |
+| Logbook tab — SQLite-backed personal notes with title/system/body, create/edit/delete | DONE | `frontend/src/pages/Commander.jsx` |
+| Screenshots tab — lists files from ED screenshot folder, Open + Open Folder buttons | DONE | `frontend/src/pages/Commander.jsx` |
+
+## Known issues / notes for next session
+
+- Stats only populate after logging into Elite Dangerous with EDTC running (Rank/Progress/Statistics/Commander/LoadGame events fire on game start).
+- EDSM CMDR lookup requires the searched CMDR to have opted in to sharing position publicly.
+- `open_file` and `open_screenshots_folder` use `os.startfile()` — Windows only.
+- Remaining stub pages: Exploration, Galaxy, Guardian, Trading (all still "Coming Soon").
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -256,3 +282,12 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:19:11*
+
+---
+*Session checkpoint: 2026-06-27 20:19:39*
+
+---
+*Session checkpoint: 2026-06-27 20:20:01*
+
+---
+*Session checkpoint: 2026-06-27 20:25:10*
