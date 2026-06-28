@@ -60,6 +60,7 @@ class API:
             dev_mode=DEV_MODE,
             dist_path=FRONTEND_DIST,
         )
+        self._load_overlay_opacities()
         self._active_route: dict | None = None
         self._current_system: str = ""
         # exo state: (system, body, species) -> scan_count
@@ -631,6 +632,16 @@ class API:
 
     # --- Overlays ---
 
+    def _load_overlay_opacities(self):
+        from core.database import get_pref
+        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker", "construction"]
+        for name in names:
+            val = get_pref(f"overlay_opacity_{name}", 1.0)
+            try:
+                self._overlay_manager.load_opacity(name, float(val))
+            except Exception:
+                pass
+
     def show_overlay(self, name: str):
         self._overlay_manager.show(name)
 
@@ -639,6 +650,22 @@ class API:
 
     def toggle_overlay(self, name: str):
         self._overlay_manager.toggle(name)
+
+    def get_overlay_states(self) -> dict:
+        from core.database import get_pref
+        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker", "construction"]
+        return {
+            name: {
+                "shown": self._overlay_manager.is_shown(name),
+                "opacity": float(get_pref(f"overlay_opacity_{name}", 1.0)),
+            }
+            for name in names
+        }
+
+    def set_overlay_opacity(self, name: str, value: float) -> None:
+        from core.database import set_pref
+        self._overlay_manager.set_opacity(name, value)
+        set_pref(f"overlay_opacity_{name}", value)
 
     # --- Watchlist ---
 

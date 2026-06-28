@@ -189,8 +189,27 @@ function ConstructionManager() {
 
 // --- Main Overlays page ---
 export default function OverlaysPage() {
+  const [states, setStates] = useState({})
+
+  useEffect(() => {
+    api()?.get_overlay_states().then(r => setStates(r ?? {}))
+  }, [])
+
   function toggle(id) {
     api()?.toggle_overlay(id)
+    setStates(prev => ({
+      ...prev,
+      [id]: { ...prev[id], shown: !prev[id]?.shown },
+    }))
+  }
+
+  function setOpacity(id, value) {
+    const v = parseFloat(value)
+    api()?.set_overlay_opacity(id, v)
+    setStates(prev => ({
+      ...prev,
+      [id]: { ...prev[id], opacity: v },
+    }))
   }
 
   return (
@@ -198,24 +217,49 @@ export default function OverlaysPage() {
       <h1 className="text-2xl font-ui font-semibold text-ed-orange mb-1">Live In-Game Overlays</h1>
       <p className="text-ed-muted text-sm mb-6">
         Transparent always-on-top windows that sit over Elite Dangerous.
-        Toggle each overlay with the buttons below.
+        Toggle each overlay and adjust its opacity with the controls below.
       </p>
 
       <div className="grid grid-cols-1 gap-3">
-        {OVERLAYS.map(({ id, label, badge, desc }) => (
-          <div key={id} className="panel flex items-center gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-ed-text font-semibold">{label}</span>
-                <span className="badge bg-ed-orange text-black">{badge}</span>
+        {OVERLAYS.map(({ id, label, badge, desc }) => {
+          const shown = states[id]?.shown ?? false
+          const opacity = states[id]?.opacity ?? 1.0
+          return (
+            <div key={id} className="panel">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-ed-text font-semibold">{label}</span>
+                    <span className="badge bg-ed-orange text-black">{badge}</span>
+                    {shown && <span className="text-xs font-mono text-ed-success">● ON</span>}
+                  </div>
+                  <p className="text-ed-muted text-sm">{desc}</p>
+                </div>
+                <button
+                  className={`btn-ghost shrink-0 ${shown ? 'border-ed-success/50 text-ed-success' : ''}`}
+                  onClick={() => toggle(id)}
+                >
+                  {shown ? 'Hide' : 'Show'}
+                </button>
               </div>
-              <p className="text-ed-muted text-sm">{desc}</p>
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-ed-border/40">
+                <span className="text-ed-muted text-xs font-mono w-16 shrink-0">Opacity</span>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.05"
+                  value={opacity}
+                  onChange={e => setOpacity(id, e.target.value)}
+                  className="flex-1 accent-ed-orange"
+                />
+                <span className="text-ed-muted text-xs font-mono w-10 text-right shrink-0">
+                  {Math.round(opacity * 100)}%
+                </span>
+              </div>
             </div>
-            <button className="btn-ghost shrink-0" onClick={() => toggle(id)}>
-              Toggle
-            </button>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <WatchlistManager />

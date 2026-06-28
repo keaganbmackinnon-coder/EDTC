@@ -49,6 +49,8 @@ OVERLAYS = {
 class OverlayManager:
     def __init__(self, dev_mode: bool = False, dist_path: Path | None = None):
         self._windows: dict[str, webview.Window] = {}
+        self._shown: dict[str, bool] = {}
+        self._opacity: dict[str, float] = {}
         self._dev_mode = dev_mode
         self._dist_path = dist_path
 
@@ -58,9 +60,21 @@ class OverlayManager:
         base = self._dist_path.as_uri() if self._dist_path else "about:blank"
         return f"{base}?overlay={key}"
 
+    def _apply_opacity(self, name: str):
+        win = self._windows.get(name)
+        if win is None:
+            return
+        opacity = self._opacity.get(name, 1.0)
+        try:
+            win.evaluate_js(f"document.documentElement.style.opacity = '{opacity}'")
+        except Exception:
+            pass
+
     def show(self, name: str):
         if name in self._windows:
             self._windows[name].show()
+            self._shown[name] = True
+            self._apply_opacity(name)
             return
 
         cfg = OVERLAYS.get(name)
@@ -70,6 +84,7 @@ class OverlayManager:
         url = self._url(cfg["key"])
 
         def _create():
+            import time
             win = webview.create_window(
                 title=cfg["title"],
                 url=url,
@@ -81,18 +96,35 @@ class OverlayManager:
                 easy_drag=True,
             )
             self._windows[name] = win
+            self._shown[name] = True
+            time.sleep(1.5)
+            self._apply_opacity(name)
 
         threading.Thread(target=_create, daemon=True).start()
 
     def hide(self, name: str):
         if name in self._windows:
             self._windows[name].hide()
+            self._shown[name] = False
 
     def toggle(self, name: str):
-        if name in self._windows and self._windows[name].shown:
+        if self._shown.get(name, False):
             self.hide(name)
         else:
             self.show(name)
+
+    def set_opacity(self, name: str, value: float):
+        self._opacity[name] = max(0.1, min(1.0, value))
+        self._apply_opacity(name)
+
+    def get_opacity(self, name: str) -> float:
+        return self._opacity.get(name, 1.0)
+
+    def load_opacity(self, name: str, value: float):
+        self._opacity[name] = max(0.1, min(1.0, value))
+
+    def is_shown(self, name: str) -> bool:
+        return self._shown.get(name, False)
 
     def hide_all(self):
         for name in list(self._windows):
