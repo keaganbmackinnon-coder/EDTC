@@ -1,5 +1,5 @@
 {
-  "_source": "Frontier / community data",
+  "_source": "Community data / Inara / EDCD",
   "engineers": [
     {
       "id": "felicity_farseer",
@@ -7,21 +7,316 @@
       "location": "Deciat / Farseer Inc",
       "system": "Deciat",
       "station": "Farseer Inc",
-      "specialties": ["FSD", "Thrusters", "Sensors", "Life Support"],
+      "specialties": [
+        "FSD",
+        "Thrusters",
+        "Sensors",
+        "Life Support"
+      ],
       "max_grade": 5,
-      "unlock": "Provide 1 unit of Meta-Alloys",
-      "invitation": "Reach 3 kly of exploration data OR hand in 1 Soontill Relic"
+      "invitation": "Reach 3 kly exploration data OR deliver 1 Soontill Relic",
+      "unlock": "Provide 1 unit of Meta-Alloys"
+    },
+    {
+      "id": "elvira_martuuk",
+      "name": "Elvira Martuuk",
+      "location": "Long Sight Base / Khun",
+      "system": "Khun",
+      "station": "Long Sight Base",
+      "specialties": [
+        "FSD",
+        "Shields"
+      ],
+      "max_grade": 5,
+      "invitation": "Travel > 300 ly from starting system",
+      "unlock": "Provide 3 units of Soontill Relics"
+    },
+    {
+      "id": "the_dweller",
+      "name": "The Dweller",
+      "location": "Black Hide / Wyrd",
+      "system": "Wyrd",
+      "station": "Black Hide",
+      "specialties": [
+        "Power Distributor",
+        "Weapons"
+      ],
+      "max_grade": 5,
+      "invitation": "Spend 500,000 CR in black markets",
+      "unlock": "Provide 500,000 CR"
+    },
+    {
+      "id": "marco_qwent",
+      "name": "Marco Qwent",
+      "location": "Qwent Research Base / Sirius",
+      "system": "Sirius",
+      "station": "Qwent Research Base",
+      "specialties": [
+        "Power Plant"
+      ],
+      "max_grade": 4,
+      "invitation": "Referred by Elvira Martuuk (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Modular Terminals"
+    },
+    {
+      "id": "hera_tani",
+      "name": "Hera Tani",
+      "location": "The Jet's Hole / Kuwemaki",
+      "system": "Kuwemaki",
+      "station": "The Jet's Hole",
+      "specialties": [
+        "Power Plant",
+        "Sensors"
+      ],
+      "max_grade": 5,
+      "invitation": "Spend 1,000,000 CR at black markets",
+      "unlock": "Provide 50 units of Kamitra Cigars"
+    },
+    {
+      "id": "lori_jameson",
+      "name": "Lori Jameson",
+      "location": "Jameson Base / Col 285 Sector IX-T d3-43",
+      "system": "Col 285 Sector IX-T d3-43",
+      "station": "Jameson Base",
+      "specialties": [
+        "Sensors",
+        "Life Support"
+      ],
+      "max_grade": 3,
+      "invitation": "Referred by Marco Qwent (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Kongga Ale"
+    },
+    {
+      "id": "bill_turner",
+      "name": "Bill Turner",
+      "location": "Alioth Research Centre / Alioth",
+      "system": "Alioth",
+      "station": "Alioth Research Centre",
+      "specialties": [
+        "Armour",
+        "Sensors"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Marco Qwent (need grade 3 unlock)",
+      "unlock": "Provide 50 units of Bromellite"
+    },
+    {
+      "id": "professor_palin",
+      "name": "Professor Palin",
+      "location": "Palin Research Centre / Arque",
+      "system": "Arque",
+      "station": "Palin Research Centre",
+      "specialties": [
+        "Thrusters"
+      ],
+      "max_grade": 5,
+      "invitation": "Travel > 5,000 ly from starting system",
+      "unlock": "Provide 25 units of Sensor Fragments"
+    },
+    {
+      "id": "selene_jean",
+      "name": "Selene Jean",
+      "location": "Prospector's Rest / Kuk",
+      "system": "Kuk",
+      "station": "Prospector's Rest",
+      "specialties": [
+        "Armour",
+        "Hull Reinforcement"
+      ],
+      "max_grade": 5,
+      "invitation": "Mine 500 units of ore",
+      "unlock": "Provide 10 units of Painite"
+    },
+    {
+      "id": "lei_cheung",
+      "name": "Lei Cheung",
+      "location": "Trader's Rest / Laksak",
+      "system": "Laksak",
+      "station": "Trader's Rest",
+      "specialties": [
+        "Shields"
+      ],
+      "max_grade": 5,
+      "invitation": "Trade 50 markets",
+      "unlock": "Provide 200 units of Gold"
     },
     {
       "id": "tod_mcquinn",
       "name": "Tod 'The Blaster' McQuinn",
-      "location": "Wolf 397 / Trophy Camp",
+      "location": "Trophy Camp / Wolf 397",
       "system": "Wolf 397",
       "station": "Trophy Camp",
-      "specialties": ["Multicannon", "Fragmentation Cannon"],
+      "specialties": [
+        "Multi-cannon",
+        "Fragmentation Cannon"
+      ],
       "max_grade": 5,
-      "unlock": "Bounty vouchers worth 100,000 CR in his home system",
-      "invitation": "Earn a bounty voucher worth 50,000 CR in Wolf 397"
+      "invitation": "Earn a bounty voucher ≥ 50,000 CR in Wolf 397",
+      "unlock": "Provide bounty vouchers worth 100,000 CR in Wolf 397"
+    },
+    {
+      "id": "broo_tarquin",
+      "name": "Broo Tarquin",
+      "location": "Broo's Legacy / Muang",
+      "system": "Muang",
+      "station": "Broo's Legacy",
+      "specialties": [
+        "Beam Laser",
+        "Burst Laser"
+      ],
+      "max_grade": 5,
+      "invitation": "Earn combat bonds worth 5,000 CR",
+      "unlock": "Provide 50 units of Fujin Tea"
+    },
+    {
+      "id": "the_sarge",
+      "name": "The Sarge",
+      "location": "The Sarge's Saloon / Beta Sculptoris",
+      "system": "Beta Sculptoris",
+      "station": "The Sarge's Saloon",
+      "specialties": [
+        "Weapons"
+      ],
+      "max_grade": 3,
+      "invitation": "Earn 10 bounties",
+      "unlock": "Provide bounty vouchers worth 50,000 CR from Beta Sculptoris"
+    },
+    {
+      "id": "juri_ishmaak",
+      "name": "Juri Ishmaak",
+      "location": "Perkam Relay / Giryak",
+      "system": "Giryak",
+      "station": "Perkam Relay",
+      "specialties": [
+        "Mine",
+        "Missile",
+        "Scanner"
+      ],
+      "max_grade": 5,
+      "invitation": "Earn 10 combat bonds",
+      "unlock": "Provide combat bonds worth 100,000 CR"
+    },
+    {
+      "id": "zacariah_nemo",
+      "name": "Zacariah Nemo",
+      "location": "Nemo Cyber Party Base / Yoru",
+      "system": "Yoru",
+      "station": "Nemo Cyber Party Base",
+      "specialties": [
+        "Pulse Laser",
+        "Burst Laser"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by The Dweller (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Yoru Superspice"
+    },
+    {
+      "id": "didi_vatermann",
+      "name": "Didi Vatermann",
+      "location": "Vatermann LLC / Leesti",
+      "system": "Leesti",
+      "station": "Vatermann LLC",
+      "specialties": [
+        "Shield Booster"
+      ],
+      "max_grade": 5,
+      "invitation": "Trade 37 markets",
+      "unlock": "Provide 25 units of Leestian Evil Juice"
+    },
+    {
+      "id": "etienne_dorn",
+      "name": "Etienne Dorn",
+      "location": "The Brig / Los / Maia",
+      "system": "Los",
+      "station": "The Brig",
+      "specialties": [
+        "Plasma Accelerator",
+        "Cannon",
+        "Weapons"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Selene Jean (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Unknown Fragment"
+    },
+    {
+      "id": "mel_brandon",
+      "name": "Mel Brandon",
+      "location": "The Brig / Hyades Sector DR-V c2-23",
+      "system": "Hyades Sector DR-V c2-23",
+      "station": "The Brig",
+      "specialties": [
+        "FSD",
+        "Shields",
+        "Weapons"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by The Dweller (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Tanmark Tranquil Tea"
+    },
+    {
+      "id": "ram_tah",
+      "name": "Ram Tah",
+      "location": "Phoenix Base / Meene",
+      "system": "Meene",
+      "station": "Phoenix Base",
+      "specialties": [
+        "Weapons"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Elvira Martuuk (need grade 3 unlock)",
+      "unlock": "Provide 50 units of Occupied Escape Pod"
+    },
+    {
+      "id": "petra_olmanova",
+      "name": "Petra Olmanova",
+      "location": "Sp. Olmanova's Studio / Asphodel in Etain",
+      "system": "Etain",
+      "station": "Sp. Olmanova's Studio",
+      "specialties": [
+        "Armour"
+      ],
+      "max_grade": 3,
+      "invitation": "Earn 100 combat bonds",
+      "unlock": "Provide 200 units of Progenitor Cells"
+    },
+    {
+      "id": "kit_fowler",
+      "name": "Kit Fowler",
+      "location": "The Stained Saucer / Capoya",
+      "system": "Capoya",
+      "station": "The Stained Saucer",
+      "specialties": [
+        "Weapons"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Tod 'The Blaster' McQuinn (need grade 3 unlock)",
+      "unlock": "Provide 50 units of Uszaian Tree Grub"
+    },
+    {
+      "id": "eleanor_bresa",
+      "name": "Eleanor Bresa",
+      "location": "Bresa Modifications / Marralteki",
+      "system": "Marralteki",
+      "station": "Bresa Modifications",
+      "specialties": [
+        "Thrusters"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Professor Palin (need grade 3 unlock)",
+      "unlock": "Provide 25 units of Aganippe Rush"
+    },
+    {
+      "id": "yi_shen",
+      "name": "Yi Shen",
+      "location": "Awyra Flirble / Kuwemaki",
+      "system": "Kuwemaki",
+      "station": "Awyra Flirble",
+      "specialties": [
+        "Shields"
+      ],
+      "max_grade": 5,
+      "invitation": "Referred by Lei Cheung (need grade 3 unlock)",
+      "unlock": "Provide 50 units of Rusani Old Smokey"
     }
   ]
 }

@@ -1,13 +1,1118 @@
 {
-  "_source": "Frontier / EDCD community data",
+  "_source": "EDCD/FDevIDs commodity.csv",
   "commodities": [
-    {"id": "gold", "name": "Gold", "category": "Metals", "average_price": 9401},
-    {"id": "silver", "name": "Silver", "category": "Metals", "average_price": 4775},
-    {"id": "palladium", "name": "Palladium", "category": "Metals", "average_price": 13244},
-    {"id": "tritium", "name": "Tritium", "category": "Chemicals", "average_price": 44144},
-    {"id": "food_cartridges", "name": "Food Cartridges", "category": "Foods", "average_price": 100},
-    {"id": "biowaste", "name": "Biowaste", "category": "Waste", "average_price": 63},
-    {"id": "bertrandite", "name": "Bertrandite", "category": "Minerals", "average_price": 2374},
-    {"id": "void_opals", "name": "Void Opals", "category": "Minerals", "average_price": 173649}
+    {
+      "id": "agronomic_treatment",
+      "fdev_id": 128924334,
+      "name": "Agronomic Treatment",
+      "category": "Chemicals",
+      "average_price": 0
+    },
+    {
+      "id": "explosives",
+      "fdev_id": 128049204,
+      "name": "Explosives",
+      "category": "Chemicals",
+      "average_price": 261
+    },
+    {
+      "id": "hydrogen_fuel",
+      "fdev_id": 128049202,
+      "name": "Hydrogen Fuel",
+      "category": "Chemicals",
+      "average_price": 110
+    },
+    {
+      "id": "hydrogen_peroxide",
+      "fdev_id": 128673850,
+      "name": "Hydrogen Peroxide",
+      "category": "Chemicals",
+      "average_price": 917
+    },
+    {
+      "id": "liquid_oxygen",
+      "fdev_id": 128673851,
+      "name": "Liquid oxygen",
+      "category": "Chemicals",
+      "average_price": 263
+    },
+    {
+      "id": "mineral_oil",
+      "fdev_id": 128049203,
+      "name": "Mineral Oil",
+      "category": "Chemicals",
+      "average_price": 181
+    },
+    {
+      "id": "nerve_agents",
+      "fdev_id": 128672304,
+      "name": "Nerve Agents",
+      "category": "Chemicals",
+      "average_price": 14290
+    },
+    {
+      "id": "pesticides",
+      "fdev_id": 128049205,
+      "name": "Pesticides",
+      "category": "Chemicals",
+      "average_price": 241
+    },
+    {
+      "id": "rockforth_fertiliser",
+      "fdev_id": 128924333,
+      "name": "Rockforth Fertiliser",
+      "category": "Chemicals",
+      "average_price": 0
+    },
+    {
+      "id": "surface_stabilisers",
+      "fdev_id": 128672305,
+      "name": "Surface Stabilisers",
+      "category": "Chemicals",
+      "average_price": 467
+    },
+    {
+      "id": "synthetic_reagents",
+      "fdev_id": 128672303,
+      "name": "Synthetic Reagents",
+      "category": "Chemicals",
+      "average_price": 20260
+    },
+    {
+      "id": "tritium",
+      "fdev_id": 128961249,
+      "name": "Tritium",
+      "category": "Chemicals",
+      "average_price": 44144
+    },
+    {
+      "id": "water",
+      "fdev_id": 128049166,
+      "name": "Water",
+      "category": "Chemicals",
+      "average_price": 120
+    },
+    {
+      "id": "clothing",
+      "fdev_id": 128049241,
+      "name": "Clothing",
+      "category": "Consumer Items",
+      "average_price": 286
+    },
+    {
+      "id": "consumer_technology",
+      "fdev_id": 128049240,
+      "name": "Consumer Technology",
+      "category": "Consumer Items",
+      "average_price": 6816
+    },
+    {
+      "id": "domestic_appliances",
+      "fdev_id": 128049238,
+      "name": "Domestic Appliances",
+      "category": "Consumer Items",
+      "average_price": 487
+    },
+    {
+      "id": "evacuation_shelter",
+      "fdev_id": 128672314,
+      "name": "Evacuation Shelter",
+      "category": "Consumer Items",
+      "average_price": 2529
+    },
+    {
+      "id": "survival_equipment",
+      "fdev_id": 128682048,
+      "name": "Survival Equipment",
+      "category": "Consumer Items",
+      "average_price": 0
+    },
+    {
+      "id": "trinkets_of_hidden_fortune",
+      "fdev_id": 128671444,
+      "name": "Trinkets of Hidden Fortune",
+      "category": "Consumer Items",
+      "average_price": 0
+    },
+    {
+      "id": "algae",
+      "fdev_id": 128049177,
+      "name": "Algae",
+      "category": "Foods",
+      "average_price": 137
+    },
+    {
+      "id": "animal_meat",
+      "fdev_id": 128049182,
+      "name": "Animal Meat",
+      "category": "Foods",
+      "average_price": 632
+    },
+    {
+      "id": "coffee",
+      "fdev_id": 128049189,
+      "name": "Coffee",
+      "category": "Foods",
+      "average_price": 1279
+    },
+    {
+      "id": "fish",
+      "fdev_id": 128049183,
+      "name": "Fish",
+      "category": "Foods",
+      "average_price": 406
+    },
+    {
+      "id": "food_cartridges",
+      "fdev_id": 128049184,
+      "name": "Food Cartridges",
+      "category": "Foods",
+      "average_price": 100
+    },
+    {
+      "id": "fruit_and_vegetables",
+      "fdev_id": 128049178,
+      "name": "Fruit and Vegetables",
+      "category": "Foods",
+      "average_price": 312
+    },
+    {
+      "id": "grain",
+      "fdev_id": 128049180,
+      "name": "Grain",
+      "category": "Foods",
+      "average_price": 210
+    },
+    {
+      "id": "synthetic_meat",
+      "fdev_id": 128049185,
+      "name": "Synthetic Meat",
+      "category": "Foods",
+      "average_price": 271
+    },
+    {
+      "id": "tea",
+      "fdev_id": 128049188,
+      "name": "Tea",
+      "category": "Foods",
+      "average_price": 1245
+    },
+    {
+      "id": "cmm_composite",
+      "fdev_id": 128673856,
+      "name": "CMM Composite",
+      "category": "Industrial Materials",
+      "average_price": 3331
+    },
+    {
+      "id": "ceramic_composites",
+      "fdev_id": 128672302,
+      "name": "Ceramic Composites",
+      "category": "Industrial Materials",
+      "average_price": 232
+    },
+    {
+      "id": "insulating_membrane",
+      "fdev_id": 128673855,
+      "name": "Insulating Membrane",
+      "category": "Industrial Materials",
+      "average_price": 7838
+    },
+    {
+      "id": "meta_alloys",
+      "fdev_id": 128672701,
+      "name": "Meta-Alloys",
+      "category": "Industrial Materials",
+      "average_price": 88082
+    },
+    {
+      "id": "micro_weave_cooling_hoses",
+      "fdev_id": 128673857,
+      "name": "Micro-weave Cooling Hoses",
+      "category": "Industrial Materials",
+      "average_price": 1693
+    },
+    {
+      "id": "neofabric_insulation",
+      "fdev_id": 128673858,
+      "name": "Neofabric Insulation",
+      "category": "Industrial Materials",
+      "average_price": 2435
+    },
+    {
+      "id": "polymers",
+      "fdev_id": 128049197,
+      "name": "Polymers",
+      "category": "Industrial Materials",
+      "average_price": 171
+    },
+    {
+      "id": "semiconductors",
+      "fdev_id": 128049199,
+      "name": "Semiconductors",
+      "category": "Industrial Materials",
+      "average_price": 968
+    },
+    {
+      "id": "superconductors",
+      "fdev_id": 128049200,
+      "name": "Superconductors",
+      "category": "Industrial Materials",
+      "average_price": 6609
+    },
+    {
+      "id": "beer",
+      "fdev_id": 128049214,
+      "name": "Beer",
+      "category": "Legal Drugs",
+      "average_price": 186
+    },
+    {
+      "id": "bootleg_liquor",
+      "fdev_id": 128672306,
+      "name": "Bootleg Liquor",
+      "category": "Legal Drugs",
+      "average_price": 503
+    },
+    {
+      "id": "liquor",
+      "fdev_id": 128049216,
+      "name": "Liquor",
+      "category": "Legal Drugs",
+      "average_price": 587
+    },
+    {
+      "id": "narcotics",
+      "fdev_id": 128049212,
+      "name": "Narcotics",
+      "category": "Legal Drugs",
+      "average_price": 9567
+    },
+    {
+      "id": "onionhead_gamma_strain",
+      "fdev_id": 128983059,
+      "name": "Onionhead Gamma Strain",
+      "category": "Legal Drugs",
+      "average_price": 0
+    },
+    {
+      "id": "tobacco",
+      "fdev_id": 128049213,
+      "name": "Tobacco",
+      "category": "Legal Drugs",
+      "average_price": 5765
+    },
+    {
+      "id": "wine",
+      "fdev_id": 128049215,
+      "name": "Wine",
+      "category": "Legal Drugs",
+      "average_price": 260
+    },
+    {
+      "id": "articulation_motors",
+      "fdev_id": 128673859,
+      "name": "Articulation Motors",
+      "category": "Machinery",
+      "average_price": 4113
+    },
+    {
+      "id": "atmospheric_processors",
+      "fdev_id": 128064028,
+      "name": "Atmospheric Processors",
+      "category": "Machinery",
+      "average_price": 0
+    },
+    {
+      "id": "building_fabricators",
+      "fdev_id": 128672309,
+      "name": "Building Fabricators",
+      "category": "Machinery",
+      "average_price": 4293
+    },
+    {
+      "id": "crop_harvesters",
+      "fdev_id": 128049222,
+      "name": "Crop Harvesters",
+      "category": "Machinery",
+      "average_price": 2021
+    },
+    {
+      "id": "emergency_power_cells",
+      "fdev_id": 128673861,
+      "name": "Emergency Power Cells",
+      "category": "Machinery",
+      "average_price": 1009
+    },
+    {
+      "id": "energy_grid_assembly",
+      "fdev_id": 128673863,
+      "name": "Energy Grid Assembly",
+      "category": "Machinery",
+      "average_price": 1184
+    },
+    {
+      "id": "exhaust_manifold",
+      "fdev_id": 128673866,
+      "name": "Exhaust Manifold",
+      "category": "Machinery",
+      "average_price": 111
+    },
+    {
+      "id": "geological_equipment",
+      "fdev_id": 128672307,
+      "name": "Geological Equipment",
+      "category": "Machinery",
+      "average_price": 4076
+    },
+    {
+      "id": "hn_shock_mount",
+      "fdev_id": 128673860,
+      "name": "HN Shock Mount",
+      "category": "Machinery",
+      "average_price": 406
+    },
+    {
+      "id": "heatsink_interlink",
+      "fdev_id": 128673868,
+      "name": "Heatsink Interlink",
+      "category": "Machinery",
+      "average_price": 1288
+    },
+    {
+      "id": "ion_distributor",
+      "fdev_id": 128673874,
+      "name": "Ion Distributor",
+      "category": "Machinery",
+      "average_price": 1156
+    },
+    {
+      "id": "magnetic_emitter_coil",
+      "fdev_id": 128673869,
+      "name": "Magnetic Emitter Coil",
+      "category": "Machinery",
+      "average_price": 1220
+    },
+    {
+      "id": "marine_equipment",
+      "fdev_id": 128049223,
+      "name": "Marine Equipment",
+      "category": "Machinery",
+      "average_price": 3706
+    },
+    {
+      "id": "microbial_furnaces",
+      "fdev_id": 128049220,
+      "name": "Microbial Furnaces",
+      "category": "Machinery",
+      "average_price": 231
+    },
+    {
+      "id": "mineral_extractors",
+      "fdev_id": 128049221,
+      "name": "Mineral Extractors",
+      "category": "Machinery",
+      "average_price": 406
+    },
+    {
+      "id": "modular_terminals",
+      "fdev_id": 128673870,
+      "name": "Modular Terminals",
+      "category": "Machinery",
+      "average_price": 695
+    },
+    {
+      "id": "power_converter",
+      "fdev_id": 128673862,
+      "name": "Power Converter",
+      "category": "Machinery",
+      "average_price": 599
+    },
+    {
+      "id": "power_generators",
+      "fdev_id": 128049217,
+      "name": "Power Generators",
+      "category": "Machinery",
+      "average_price": 461
+    },
+    {
+      "id": "power_transfer_bus",
+      "fdev_id": 128673864,
+      "name": "Power Transfer Bus",
+      "category": "Machinery",
+      "average_price": 723
+    },
+    {
+      "id": "radiation_baffle",
+      "fdev_id": 128673865,
+      "name": "Radiation Baffle",
+      "category": "Machinery",
+      "average_price": 398
+    },
+    {
+      "id": "reinforced_mounting_plate",
+      "fdev_id": 128673867,
+      "name": "Reinforced Mounting Plate",
+      "category": "Machinery",
+      "average_price": 2018
+    },
+    {
+      "id": "skimmer_components",
+      "fdev_id": 128672313,
+      "name": "Skimmer Components",
+      "category": "Machinery",
+      "average_price": 859
+    },
+    {
+      "id": "thermal_cooling_units",
+      "fdev_id": 128672308,
+      "name": "Thermal Cooling Units",
+      "category": "Machinery",
+      "average_price": 3310
+    },
+    {
+      "id": "water_purifiers",
+      "fdev_id": 128049218,
+      "name": "Water Purifiers",
+      "category": "Machinery",
+      "average_price": 257
+    },
+    {
+      "id": "advanced_medicines",
+      "fdev_id": 128682046,
+      "name": "Advanced Medicines",
+      "category": "Medicines",
+      "average_price": 0
+    },
+    {
+      "id": "agri_medicines",
+      "fdev_id": 128049208,
+      "name": "Agri-Medicines",
+      "category": "Medicines",
+      "average_price": 1819
+    },
+    {
+      "id": "basic_medicines",
+      "fdev_id": 128049210,
+      "name": "Basic Medicines",
+      "category": "Medicines",
+      "average_price": 461
+    },
+    {
+      "id": "combat_stabilisers",
+      "fdev_id": 128049670,
+      "name": "Combat Stabilisers",
+      "category": "Medicines",
+      "average_price": 3528
+    },
+    {
+      "id": "performance_enhancers",
+      "fdev_id": 128049209,
+      "name": "Performance Enhancers",
+      "category": "Medicines",
+      "average_price": 6816
+    },
+    {
+      "id": "progenitor_cells",
+      "fdev_id": 128049669,
+      "name": "Progenitor Cells",
+      "category": "Medicines",
+      "average_price": 6779
+    },
+    {
+      "id": "aluminium",
+      "fdev_id": 128049176,
+      "name": "Aluminium",
+      "category": "Metals",
+      "average_price": 340
+    },
+    {
+      "id": "beryllium",
+      "fdev_id": 128049168,
+      "name": "Beryllium",
+      "category": "Metals",
+      "average_price": 8288
+    },
+    {
+      "id": "bismuth",
+      "fdev_id": 128672300,
+      "name": "Bismuth",
+      "category": "Metals",
+      "average_price": 2284
+    },
+    {
+      "id": "cobalt",
+      "fdev_id": 128049162,
+      "name": "Cobalt",
+      "category": "Metals",
+      "average_price": 647
+    },
+    {
+      "id": "copper",
+      "fdev_id": 128049175,
+      "name": "Copper",
+      "category": "Metals",
+      "average_price": 481
+    },
+    {
+      "id": "gallium",
+      "fdev_id": 128049170,
+      "name": "Gallium",
+      "category": "Metals",
+      "average_price": 5135
+    },
+    {
+      "id": "gold",
+      "fdev_id": 128049154,
+      "name": "Gold",
+      "category": "Metals",
+      "average_price": 9401
+    },
+    {
+      "id": "hafnium_178",
+      "fdev_id": 128668549,
+      "name": "Hafnium 178",
+      "category": "Metals",
+      "average_price": 69640
+    },
+    {
+      "id": "indium",
+      "fdev_id": 128049169,
+      "name": "Indium",
+      "category": "Metals",
+      "average_price": 5727
+    },
+    {
+      "id": "lanthanum",
+      "fdev_id": 128672298,
+      "name": "Lanthanum",
+      "category": "Metals",
+      "average_price": 8766
+    },
+    {
+      "id": "lithium",
+      "fdev_id": 128049173,
+      "name": "Lithium",
+      "category": "Metals",
+      "average_price": 1596
+    },
+    {
+      "id": "osmium",
+      "fdev_id": 128671118,
+      "name": "Osmium",
+      "category": "Metals",
+      "average_price": 7591
+    },
+    {
+      "id": "palladium",
+      "fdev_id": 128049153,
+      "name": "Palladium",
+      "category": "Metals",
+      "average_price": 13244
+    },
+    {
+      "id": "platinum",
+      "fdev_id": 128049152,
+      "name": "Platinum",
+      "category": "Metals",
+      "average_price": 57458
+    },
+    {
+      "id": "praseodymium",
+      "fdev_id": 128673845,
+      "name": "Praseodymium",
+      "category": "Metals",
+      "average_price": 10945
+    },
+    {
+      "id": "samarium",
+      "fdev_id": 128673847,
+      "name": "Samarium",
+      "category": "Metals",
+      "average_price": 15966
+    },
+    {
+      "id": "silver",
+      "fdev_id": 128049155,
+      "name": "Silver",
+      "category": "Metals",
+      "average_price": 4775
+    },
+    {
+      "id": "steel",
+      "fdev_id": 129031238,
+      "name": "Steel",
+      "category": "Metals",
+      "average_price": 114
+    },
+    {
+      "id": "tantalum",
+      "fdev_id": 128049171,
+      "name": "Tantalum",
+      "category": "Metals",
+      "average_price": 3962
+    },
+    {
+      "id": "thallium",
+      "fdev_id": 128672299,
+      "name": "Thallium",
+      "category": "Metals",
+      "average_price": 3427
+    },
+    {
+      "id": "thorium",
+      "fdev_id": 128672301,
+      "name": "Thorium",
+      "category": "Metals",
+      "average_price": 11513
+    },
+    {
+      "id": "titanium",
+      "fdev_id": 128049174,
+      "name": "Titanium",
+      "category": "Metals",
+      "average_price": 1006
+    },
+    {
+      "id": "uranium",
+      "fdev_id": 128049172,
+      "name": "Uranium",
+      "category": "Metals",
+      "average_price": 2771
+    },
+    {
+      "id": "alexandrite",
+      "fdev_id": 128924331,
+      "name": "Alexandrite",
+      "category": "Minerals",
+      "average_price": 51772
+    },
+    {
+      "id": "bauxite",
+      "fdev_id": 128049165,
+      "name": "Bauxite",
+      "category": "Minerals",
+      "average_price": 120
+    },
+    {
+      "id": "benitoite",
+      "fdev_id": 128924329,
+      "name": "Benitoite",
+      "category": "Minerals",
+      "average_price": 47046
+    },
+    {
+      "id": "bertrandite",
+      "fdev_id": 128049156,
+      "name": "Bertrandite",
+      "category": "Minerals",
+      "average_price": 2374
+    },
+    {
+      "id": "bromellite",
+      "fdev_id": 128673846,
+      "name": "Bromellite",
+      "category": "Minerals",
+      "average_price": 7284
+    },
+    {
+      "id": "coltan",
+      "fdev_id": 128049159,
+      "name": "Coltan",
+      "category": "Minerals",
+      "average_price": 1319
+    },
+    {
+      "id": "cryolite",
+      "fdev_id": 128672294,
+      "name": "Cryolite",
+      "category": "Minerals",
+      "average_price": 185
+    },
+    {
+      "id": "gallite",
+      "fdev_id": 128049158,
+      "name": "Gallite",
+      "category": "Minerals",
+      "average_price": 1819
+    },
+    {
+      "id": "goslarite",
+      "fdev_id": 128672295,
+      "name": "Goslarite",
+      "category": "Minerals",
+      "average_price": 290
+    },
+    {
+      "id": "grandidierite",
+      "fdev_id": 128924330,
+      "name": "Grandidierite",
+      "category": "Minerals",
+      "average_price": 45353
+    },
+    {
+      "id": "haematite",
+      "fdev_id": 129031327,
+      "name": "Haematite",
+      "category": "Minerals",
+      "average_price": 166
+    },
+    {
+      "id": "indite",
+      "fdev_id": 128049157,
+      "name": "Indite",
+      "category": "Minerals",
+      "average_price": 2064
+    },
+    {
+      "id": "jadeite",
+      "fdev_id": 128672776,
+      "name": "Jadeite",
+      "category": "Minerals",
+      "average_price": 0
+    },
+    {
+      "id": "lepidolite",
+      "fdev_id": 128049161,
+      "name": "Lepidolite",
+      "category": "Minerals",
+      "average_price": 544
+    },
+    {
+      "id": "lithium_hydroxide",
+      "fdev_id": 128673853,
+      "name": "Lithium Hydroxide",
+      "category": "Minerals",
+      "average_price": 5646
+    },
+    {
+      "id": "low_temperature_diamonds",
+      "fdev_id": 128673848,
+      "name": "Low Temperature Diamonds",
+      "category": "Minerals",
+      "average_price": 173649
+    },
+    {
+      "id": "methane_clathrate",
+      "fdev_id": 128673854,
+      "name": "Methane Clathrate",
+      "category": "Minerals",
+      "average_price": 630
+    },
+    {
+      "id": "methanol_monohydrate_crystals",
+      "fdev_id": 128673852,
+      "name": "Methanol Monohydrate Crystals",
+      "category": "Minerals",
+      "average_price": 2407
+    },
+    {
+      "id": "moissanite",
+      "fdev_id": 128672296,
+      "name": "Moissanite",
+      "category": "Minerals",
+      "average_price": 8971
+    },
+    {
+      "id": "monazite",
+      "fdev_id": 128924327,
+      "name": "Monazite",
+      "category": "Minerals",
+      "average_price": 47893
+    },
+    {
+      "id": "musgravite",
+      "fdev_id": 128924328,
+      "name": "Musgravite",
+      "category": "Minerals",
+      "average_price": 51807
+    },
+    {
+      "id": "painite",
+      "fdev_id": 128668550,
+      "name": "Painite",
+      "category": "Minerals",
+      "average_price": 40508
+    },
+    {
+      "id": "pyrophyllite",
+      "fdev_id": 128672297,
+      "name": "Pyrophyllite",
+      "category": "Minerals",
+      "average_price": 1736
+    },
+    {
+      "id": "rhodplumsite",
+      "fdev_id": 128924325,
+      "name": "Rhodplumsite",
+      "category": "Minerals",
+      "average_price": 47683
+    },
+    {
+      "id": "rutile",
+      "fdev_id": 128049163,
+      "name": "Rutile",
+      "category": "Minerals",
+      "average_price": 299
+    },
+    {
+      "id": "serendibite",
+      "fdev_id": 128924326,
+      "name": "Serendibite",
+      "category": "Minerals",
+      "average_price": 47866
+    },
+    {
+      "id": "taaffeite",
+      "fdev_id": 128672775,
+      "name": "Taaffeite",
+      "category": "Minerals",
+      "average_price": 51773
+    },
+    {
+      "id": "uraninite",
+      "fdev_id": 128049160,
+      "name": "Uraninite",
+      "category": "Minerals",
+      "average_price": 836
+    },
+    {
+      "id": "void_opal",
+      "fdev_id": 128924332,
+      "name": "Void Opal",
+      "category": "Minerals",
+      "average_price": 173649
+    },
+    {
+      "id": "imperial_slaves",
+      "fdev_id": 128667728,
+      "name": "Imperial Slaves",
+      "category": "Slavery",
+      "average_price": 0
+    },
+    {
+      "id": "slaves",
+      "fdev_id": 128049243,
+      "name": "Slaves",
+      "category": "Slavery",
+      "average_price": 10584
+    },
+    {
+      "id": "advanced_catalysers",
+      "fdev_id": 128049231,
+      "name": "Advanced Catalysers",
+      "category": "Technology",
+      "average_price": 2947
+    },
+    {
+      "id": "animal_monitors",
+      "fdev_id": 128049229,
+      "name": "Animal Monitors",
+      "category": "Technology",
+      "average_price": 313
+    },
+    {
+      "id": "aquaponic_systems",
+      "fdev_id": 128049230,
+      "name": "Aquaponic Systems",
+      "category": "Technology",
+      "average_price": 3158
+    },
+    {
+      "id": "auto_fabricators",
+      "fdev_id": 128049228,
+      "name": "Auto-Fabricators",
+      "category": "Technology",
+      "average_price": 3734
+    },
+    {
+      "id": "bioreducing_lichen",
+      "fdev_id": 128049672,
+      "name": "Bioreducing Lichen",
+      "category": "Technology",
+      "average_price": 0
+    },
+    {
+      "id": "computer_components",
+      "fdev_id": 128049225,
+      "name": "Computer Components",
+      "category": "Technology",
+      "average_price": 513
+    },
+    {
+      "id": "h_e_suits",
+      "fdev_id": 128049226,
+      "name": "H.E. Suits",
+      "category": "Technology",
+      "average_price": 348
+    },
+    {
+      "id": "hardware_diagnostic_sensor",
+      "fdev_id": 128673875,
+      "name": "Hardware Diagnostic Sensor",
+      "category": "Technology",
+      "average_price": 4375
+    },
+    {
+      "id": "land_enrichment_systems",
+      "fdev_id": 128049232,
+      "name": "Land Enrichment Systems",
+      "category": "Technology",
+      "average_price": 4179
+    },
+    {
+      "id": "medical_diagnostic_equipment",
+      "fdev_id": 128682047,
+      "name": "Medical Diagnostic Equipment",
+      "category": "Technology",
+      "average_price": 0
+    },
+    {
+      "id": "micro_controllers",
+      "fdev_id": 128673873,
+      "name": "Micro Controllers",
+      "category": "Technology",
+      "average_price": 3300
+    },
+    {
+      "id": "muon_imager",
+      "fdev_id": 128672310,
+      "name": "Muon Imager",
+      "category": "Technology",
+      "average_price": 6195
+    },
+    {
+      "id": "nanobreakers",
+      "fdev_id": 128673871,
+      "name": "Nanobreakers",
+      "category": "Technology",
+      "average_price": 2852
+    },
+    {
+      "id": "resonating_separators",
+      "fdev_id": 128049671,
+      "name": "Resonating Separators",
+      "category": "Technology",
+      "average_price": 0
+    },
+    {
+      "id": "robotics",
+      "fdev_id": 128049227,
+      "name": "Robotics",
+      "category": "Technology",
+      "average_price": 1856
+    },
+    {
+      "id": "structural_regulators",
+      "fdev_id": 128672311,
+      "name": "Structural Regulators",
+      "category": "Technology",
+      "average_price": 4324
+    },
+    {
+      "id": "telemetry_suite",
+      "fdev_id": 128673872,
+      "name": "Telemetry Suite",
+      "category": "Technology",
+      "average_price": 2113
+    },
+    {
+      "id": "conductive_fabrics",
+      "fdev_id": 128682044,
+      "name": "Conductive Fabrics",
+      "category": "Textiles",
+      "average_price": 0
+    },
+    {
+      "id": "leather",
+      "fdev_id": 128049190,
+      "name": "Leather",
+      "category": "Textiles",
+      "average_price": 205
+    },
+    {
+      "id": "military_grade_fabrics",
+      "fdev_id": 128682045,
+      "name": "Military Grade Fabrics",
+      "category": "Textiles",
+      "average_price": 0
+    },
+    {
+      "id": "natural_fabrics",
+      "fdev_id": 128049191,
+      "name": "Natural Fabrics",
+      "category": "Textiles",
+      "average_price": 439
+    },
+    {
+      "id": "synthetic_fabrics",
+      "fdev_id": 128049193,
+      "name": "Synthetic Fabrics",
+      "category": "Textiles",
+      "average_price": 281
+    },
+    {
+      "id": "biowaste",
+      "fdev_id": 128049244,
+      "name": "Biowaste",
+      "category": "Waste",
+      "average_price": 63
+    },
+    {
+      "id": "chemical_waste",
+      "fdev_id": 128049246,
+      "name": "Chemical Waste",
+      "category": "Waste",
+      "average_price": 131
+    },
+    {
+      "id": "scrap",
+      "fdev_id": 128049248,
+      "name": "Scrap",
+      "category": "Waste",
+      "average_price": 48
+    },
+    {
+      "id": "toxic_waste",
+      "fdev_id": 128049245,
+      "name": "Toxic Waste",
+      "category": "Waste",
+      "average_price": 287
+    },
+    {
+      "id": "battle_weapons",
+      "fdev_id": 128049234,
+      "name": "Battle Weapons",
+      "category": "Weapons",
+      "average_price": 7259
+    },
+    {
+      "id": "landmines",
+      "fdev_id": 128672312,
+      "name": "Landmines",
+      "category": "Weapons",
+      "average_price": 4560
+    },
+    {
+      "id": "non_lethal_weapons",
+      "fdev_id": 128049236,
+      "name": "Non-Lethal Weapons",
+      "category": "Weapons",
+      "average_price": 1837
+    },
+    {
+      "id": "personal_weapons",
+      "fdev_id": 128049233,
+      "name": "Personal Weapons",
+      "category": "Weapons",
+      "average_price": 4528
+    },
+    {
+      "id": "reactive_armour",
+      "fdev_id": 128049235,
+      "name": "Reactive Armour",
+      "category": "Weapons",
+      "average_price": 2199
+    }
   ]
 }

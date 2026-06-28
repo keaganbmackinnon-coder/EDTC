@@ -1,5 +1,5 @@
 {
-  "_source": "Frontier / community data",
+  "_source": "Community data / Inara / EDCD",
   "items": [
     {
       "id": "guardian_fsd_booster",
@@ -7,25 +7,818 @@
       "type": "Guardian",
       "cost_credits": 0,
       "materials": [
-        {"name": "Guardian Power Cell", "category": "Guardian", "amount": 10},
-        {"name": "Guardian Sentinel Weapon Parts", "category": "Guardian", "amount": 10},
-        {"name": "Guardian Technology Component", "category": "Guardian", "amount": 6},
-        {"name": "Focus Crystals", "category": "Manufactured", "amount": 8},
-        {"name": "HN Shock Mount", "category": "Manufactured", "amount": 10},
-        {"name": "Manganese", "category": "Raw", "amount": 10},
-        {"name": "Arsenic", "category": "Raw", "amount": 10}
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 10
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 10
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 6
+        },
+        {
+          "name": "Focus Crystals",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "HN Shock Mount",
+          "category": "Manufactured",
+          "amount": 10
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 10
+        },
+        {
+          "name": "Arsenic",
+          "category": "Raw",
+          "amount": 10
+        }
       ]
     },
     {
-      "id": "meta_alloy_hull_reinforcement",
+      "id": "guardian_module_reinf",
+      "name": "Guardian Module Reinforcement Package",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 15
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 5
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Mechanical Scrap",
+          "category": "Manufactured",
+          "amount": 9
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 10
+        },
+        {
+          "name": "Chromium",
+          "category": "Raw",
+          "amount": 6
+        }
+      ]
+    },
+    {
+      "id": "guardian_hull_reinf",
+      "name": "Guardian Hull Reinforcement Package",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 10
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 12
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 5
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 15
+        },
+        {
+          "name": "Molybdenum",
+          "category": "Raw",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "id": "guardian_shield_reinf",
+      "name": "Guardian Shield Reinforcement Package",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 10
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 8
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 6
+        },
+        {
+          "name": "Phase Alloys",
+          "category": "Manufactured",
+          "amount": 10
+        },
+        {
+          "name": "Tin",
+          "category": "Raw",
+          "amount": 10
+        }
+      ]
+    },
+    {
+      "id": "guardian_gauss_fixed_small",
+      "name": "Guardian Gauss Cannon (Fixed/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Focus Crystals",
+          "category": "Manufactured",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "id": "guardian_gauss_fixed_medium",
+      "name": "Guardian Gauss Cannon (Fixed/Medium)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 6
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Arsenic",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Focus Crystals",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "guardian_plasma_fixed_small",
+      "name": "Guardian Plasma Charger (Fixed/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 2
+        },
+        {
+          "name": "Chromium",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Heat Vanes",
+          "category": "Manufactured",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "id": "guardian_plasma_fixed_medium",
+      "name": "Guardian Plasma Charger (Fixed/Medium)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 6
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Selenium",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Heat Vanes",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "guardian_shard_fixed_small",
+      "name": "Guardian Shard Cannon (Fixed/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 2
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Mechanical Scrap",
+          "category": "Manufactured",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "id": "guardian_shard_fixed_medium",
+      "name": "Guardian Shard Cannon (Fixed/Medium)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 6
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "guardian_shard_turret_small",
+      "name": "Guardian Shard Cannon (Turret/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 5
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "guardian_plasma_turret_small",
+      "name": "Guardian Plasma Charger (Turret/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 5
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Chromium",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Heat Vanes",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "guardian_gauss_turret_small",
+      "name": "Guardian Gauss Cannon (Turret/Small)",
+      "type": "Guardian",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Guardian Power Cell",
+          "category": "Guardian",
+          "amount": 4
+        },
+        {
+          "name": "Guardian Sentinel Weapon Parts",
+          "category": "Guardian",
+          "amount": 5
+        },
+        {
+          "name": "Guardian Technology Component",
+          "category": "Guardian",
+          "amount": 3
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Focus Crystals",
+          "category": "Manufactured",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "meta_alloy_hull_reinf",
       "name": "Meta-Alloy Hull Reinforcement Package",
       "type": "Human",
       "cost_credits": 0,
       "materials": [
-        {"name": "Meta-Alloys", "category": "Commodity", "amount": 1},
-        {"name": "Reinforced Mounting Plate", "category": "Manufactured", "amount": 15},
-        {"name": "Compound Shielding", "category": "Manufactured", "amount": 10},
-        {"name": "Proprietary Composites", "category": "Manufactured", "amount": 10}
+        {
+          "name": "Meta-Alloys",
+          "category": "Commodity",
+          "amount": 1
+        },
+        {
+          "name": "Reinforced Mounting Plate",
+          "category": "Manufactured",
+          "amount": 15
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 10
+        },
+        {
+          "name": "Proprietary Composites",
+          "category": "Manufactured",
+          "amount": 10
+        }
+      ]
+    },
+    {
+      "id": "shock_cannon_fixed_small",
+      "name": "Shock Cannon (Fixed/Small)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 5
+        },
+        {
+          "name": "Tungsten",
+          "category": "Raw",
+          "amount": 5
+        },
+        {
+          "name": "Rhenium",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 5
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 5
+        }
+      ]
+    },
+    {
+      "id": "shock_cannon_fixed_medium",
+      "name": "Shock Cannon (Fixed/Medium)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 8
+        },
+        {
+          "name": "Tungsten",
+          "category": "Raw",
+          "amount": 8
+        },
+        {
+          "name": "Technetium",
+          "category": "Raw",
+          "amount": 4
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "id": "shock_cannon_fixed_large",
+      "name": "Shock Cannon (Fixed/Large)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 10
+        },
+        {
+          "name": "Tungsten",
+          "category": "Raw",
+          "amount": 10
+        },
+        {
+          "name": "Technetium",
+          "category": "Raw",
+          "amount": 5
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 10
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 10
+        }
+      ]
+    },
+    {
+      "id": "shock_cannon_turret_small",
+      "name": "Shock Cannon (Turret/Small)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 5
+        },
+        {
+          "name": "Tungsten",
+          "category": "Raw",
+          "amount": 5
+        },
+        {
+          "name": "Rhenium",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Mechanical Equipment",
+          "category": "Manufactured",
+          "amount": 5
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 5
+        }
+      ]
+    },
+    {
+      "id": "enzyme_missile_fixed_large",
+      "name": "Enzyme Missile Rack (Fixed/Large)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Thargoid Link",
+          "category": "Commodity",
+          "amount": 3
+        },
+        {
+          "name": "Thargoid Resin",
+          "category": "Commodity",
+          "amount": 12
+        },
+        {
+          "name": "Propulsion Elements",
+          "category": "Manufactured",
+          "amount": 12
+        },
+        {
+          "name": "Explosive Shielding",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Rhenium",
+          "category": "Raw",
+          "amount": 10
+        }
+      ]
+    },
+    {
+      "id": "remote_release_flak_fixed_medium",
+      "name": "Remote Release Flak Launcher (Fixed/Medium)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Thargoid Sensor",
+          "category": "Commodity",
+          "amount": 3
+        },
+        {
+          "name": "Thargoid Resin",
+          "category": "Commodity",
+          "amount": 10
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 9
+        },
+        {
+          "name": "Conductive Polymers",
+          "category": "Manufactured",
+          "amount": 7
+        },
+        {
+          "name": "Arsenic",
+          "category": "Raw",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "id": "caustic_sink_launcher_utility",
+      "name": "Caustic Sink Launcher (Utility)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Caustic Tissue Sample",
+          "category": "Commodity",
+          "amount": 5
+        },
+        {
+          "name": "Thargoid Resin",
+          "category": "Commodity",
+          "amount": 10
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Tin",
+          "category": "Raw",
+          "amount": 6
+        }
+      ]
+    },
+    {
+      "id": "xeno_scanner_utility",
+      "name": "Xeno Scanner (Utility)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Thargoid Sensor",
+          "category": "Commodity",
+          "amount": 4
+        },
+        {
+          "name": "Thargoid Biological Matter",
+          "category": "Commodity",
+          "amount": 8
+        },
+        {
+          "name": "Conductive Polymers",
+          "category": "Manufactured",
+          "amount": 6
+        },
+        {
+          "name": "Polo Ytterbium",
+          "category": "Raw",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "pulse_wave_xeno_scanner_utility",
+      "name": "Pulse Wave Xeno Scanner (Utility)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Thargoid Sensor",
+          "category": "Commodity",
+          "amount": 4
+        },
+        {
+          "name": "Thargoid Technology Samples",
+          "category": "Commodity",
+          "amount": 6
+        },
+        {
+          "name": "Conductive Polymers",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Yttrium",
+          "category": "Raw",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "id": "nanite_torpedo_pylon",
+      "name": "Nanite Torpedo Pylon",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Titan Tissue Sample",
+          "category": "Commodity",
+          "amount": 2
+        },
+        {
+          "name": "Titan Drive Component",
+          "category": "Commodity",
+          "amount": 2
+        },
+        {
+          "name": "Pharmaceutical Isolators",
+          "category": "Encoded",
+          "amount": 10
+        },
+        {
+          "name": "Conductive Polymers",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Antimony",
+          "category": "Raw",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "id": "thargoid_pulse_neutraliser",
+      "name": "Thargoid Pulse Neutraliser (Utility)",
+      "type": "Human",
+      "cost_credits": 0,
+      "materials": [
+        {
+          "name": "Titan Deep Tissue Sample",
+          "category": "Commodity",
+          "amount": 1
+        },
+        {
+          "name": "Caustic Tissue Sample",
+          "category": "Commodity",
+          "amount": 8
+        },
+        {
+          "name": "Compound Shielding",
+          "category": "Manufactured",
+          "amount": 8
+        },
+        {
+          "name": "Niobium",
+          "category": "Raw",
+          "amount": 6
+        }
       ]
     }
   ]

@@ -1,24 +1,385 @@
 {
-  "_source": "Frontier / community data",
+  "_source": "Community data / Elite Dangerous wiki",
   "synthesis": [
     {
       "id": "ammo_basic",
-      "name": "Basic Munitions",
+      "name": "Basic Munitions Reload",
       "category": "Ammunition",
       "grade": "Basic",
       "materials": [
-        {"name": "Nickel", "category": "Raw", "amount": 2},
-        {"name": "Sulphur", "category": "Raw", "amount": 1}
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "ammo_standard",
+      "name": "Standard Munitions Reload",
+      "category": "Ammunition",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Zinc",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "ammo_premium",
+      "name": "Premium Munitions Reload",
+      "category": "Ammunition",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Zinc",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Selenium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_ammo_basic",
+      "name": "SRV Ammo Restock (Basic)",
+      "category": "SRV",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_ammo_standard",
+      "name": "SRV Ammo Restock (Standard)",
+      "category": "SRV",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Arsenic",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_ammo_premium",
+      "name": "SRV Ammo Restock (Premium)",
+      "category": "SRV",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Molybdenum",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_fuel_basic",
+      "name": "SRV Refuel (Basic)",
+      "category": "SRV",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_fuel_standard",
+      "name": "SRV Refuel (Standard)",
+      "category": "SRV",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_fuel_premium",
+      "name": "SRV Refuel (Premium)",
+      "category": "SRV",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Mercury",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_repair_basic",
+      "name": "SRV Repair (Basic)",
+      "category": "SRV",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_repair_standard",
+      "name": "SRV Repair (Standard)",
+      "category": "SRV",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "srv_repair_premium",
+      "name": "SRV Repair (Premium)",
+      "category": "SRV",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Molybdenum",
+          "category": "Raw",
+          "amount": 1
+        }
       ]
     },
     {
       "id": "afmu_basic",
-      "name": "AFMU Repairs (Basic)",
-      "category": "Repair",
+      "name": "AFMU Ammo (Basic)",
+      "category": "AFMU",
       "grade": "Basic",
       "materials": [
-        {"name": "Nickel", "category": "Raw", "amount": 2},
-        {"name": "Vanadium", "category": "Raw", "amount": 1}
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "afmu_standard",
+      "name": "AFMU Ammo (Standard)",
+      "category": "AFMU",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Zirconium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "afmu_premium",
+      "name": "AFMU Ammo (Premium)",
+      "category": "AFMU",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Zirconium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Tin",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "fsd_basic",
+      "name": "FSD Injection (Basic)",
+      "category": "FSD",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 3
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "fsd_standard",
+      "name": "FSD Injection (Standard)",
+      "category": "FSD",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Germanium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Cadmium",
+          "category": "Raw",
+          "amount": 1
+        }
       ]
     },
     {
@@ -27,9 +388,504 @@
       "category": "FSD",
       "grade": "Premium",
       "materials": [
-        {"name": "Arsenic", "category": "Raw", "amount": 1},
-        {"name": "Niobium", "category": "Raw", "amount": 1},
-        {"name": "Yttrium", "category": "Raw", "amount": 1}
+        {
+          "name": "Arsenic",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Niobium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Yttrium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "heatsink_basic",
+      "name": "Heat Sink (Basic)",
+      "category": "Heat Sink",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Basic Conductors",
+          "category": "Manufactured",
+          "amount": 2
+        },
+        {
+          "name": "Heat Conduction Wiring",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "heatsink_standard",
+      "name": "Heat Sink (Standard)",
+      "category": "Heat Sink",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Heat Conduction Wiring",
+          "category": "Manufactured",
+          "amount": 2
+        },
+        {
+          "name": "Heat Dispersion Plate",
+          "category": "Manufactured",
+          "amount": 1
+        },
+        {
+          "name": "Mechanical Components",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "heatsink_premium",
+      "name": "Heat Sink (Premium)",
+      "category": "Heat Sink",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Heat Exchangers",
+          "category": "Manufactured",
+          "amount": 2
+        },
+        {
+          "name": "Heat Vanes",
+          "category": "Manufactured",
+          "amount": 1
+        },
+        {
+          "name": "Proprietary Composites",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "life_support_basic",
+      "name": "Life Support (Basic)",
+      "category": "Life Support",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "life_support_standard",
+      "name": "Life Support (Standard)",
+      "category": "Life Support",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Basic Conductors",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "life_support_premium",
+      "name": "Life Support (Premium)",
+      "category": "Life Support",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Basic Conductors",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "chaff_basic",
+      "name": "Chaff (Basic)",
+      "category": "Chaff",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Salvaged Alloys",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "chaff_standard",
+      "name": "Chaff (Standard)",
+      "category": "Chaff",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Zirconium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Worn Shield Emitters",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "chaff_premium",
+      "name": "Chaff (Premium)",
+      "category": "Chaff",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Niobium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Tin",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Shield Emitters",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "pd_basic",
+      "name": "Point Defence (Basic)",
+      "category": "Point Defence",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "pd_standard",
+      "name": "Point Defence (Standard)",
+      "category": "Point Defence",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Zinc",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Mechanical Scrap",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "pd_premium",
+      "name": "Point Defence (Premium)",
+      "category": "Point Defence",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Zirconium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Selenium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Mechanical Equipment",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "fuel_basic",
+      "name": "Fuel (Basic)",
+      "category": "Fuel",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "fuel_standard",
+      "name": "Fuel (Standard)",
+      "category": "Fuel",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "fuel_premium",
+      "name": "Fuel (Premium)",
+      "category": "Fuel",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Sulphur",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Carbon",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "repair_basic",
+      "name": "Repair (Basic)",
+      "category": "Repair",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "repair_standard",
+      "name": "Repair (Standard)",
+      "category": "Repair",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Manganese",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "repair_premium",
+      "name": "Repair (Premium)",
+      "category": "Repair",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Iron",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Vanadium",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Zirconium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "scb_basic",
+      "name": "Shield Cell Bank (Basic)",
+      "category": "Shield Cell Bank",
+      "grade": "Basic",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Worn Shield Emitters",
+          "category": "Manufactured",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "scb_standard",
+      "name": "Shield Cell Bank (Standard)",
+      "category": "Shield Cell Bank",
+      "grade": "Standard",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Shield Emitters",
+          "category": "Manufactured",
+          "amount": 1
+        },
+        {
+          "name": "Polonium",
+          "category": "Raw",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "scb_premium",
+      "name": "Shield Cell Bank (Premium)",
+      "category": "Shield Cell Bank",
+      "grade": "Premium",
+      "materials": [
+        {
+          "name": "Nickel",
+          "category": "Raw",
+          "amount": 2
+        },
+        {
+          "name": "Phosphorus",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Shielding Sensors",
+          "category": "Manufactured",
+          "amount": 1
+        },
+        {
+          "name": "Mercury",
+          "category": "Raw",
+          "amount": 1
+        },
+        {
+          "name": "Antimony",
+          "category": "Raw",
+          "amount": 1
+        }
       ]
     }
   ]
