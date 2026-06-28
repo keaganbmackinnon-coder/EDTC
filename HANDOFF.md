@@ -454,6 +454,8 @@ Terminal 2:  python main.py --dev
 | Per-overlay opacity slider (10–100%), persisted in prefs DB | DONE | `core/overlay.py`, `main.py`, `Overlays.jsx` |
 | Overlay black background fix — set body/html transparent in overlay mode | DONE | `frontend/src/App.jsx` |
 | **v0.1.0 alpha released** via GitHub Actions | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases |
+| Powerplay tab added to Galaxy page (My Power / System Lookup / Powers Reference) | DONE | `frontend/src/pages/Galaxy.jsx`, `main.py`, `api/edsm.py` |
+| README expanded with step-by-step end-user install instructions | DONE | `README.md` |
 
 ## Known issues / notes for next session
 
@@ -461,6 +463,7 @@ Terminal 2:  python main.py --dev
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
 - `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
 - pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled until pygame adds 3.14 support. CI builds use Python 3.12 so the .exe has audio.
+- Thargoid War tab not yet built (next candidate for Galaxy page).
 - Gather feedback from alpha users and triage bugs before v0.2.0.
 
 ---
@@ -519,3 +522,15 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 23:19:53*
+
+---
+*Session checkpoint: 2026-06-27 23:22:14*
+
+---
+*Session checkpoint: 2026-06-27 23:24:05*
+
+---
+*Session checkpoint: 2026-06-27 23:24:50*
+
+---
+*Session checkpoint: 2026-06-27 23:29:04*
