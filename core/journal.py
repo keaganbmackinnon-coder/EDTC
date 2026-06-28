@@ -18,6 +18,7 @@ WATCHED_EVENTS = {
     "ColonisationConstructionProgress",
     "CarrierStats", "CarrierJump", "CarrierJumpRequest",
     "CarrierJumpCancelled", "CarrierBuy", "CarrierDepositFuel",
+    "MaterialTrade", "EngineerCraft", "Synthesis",
 }
 
 

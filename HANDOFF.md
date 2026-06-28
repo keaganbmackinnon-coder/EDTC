@@ -176,7 +176,38 @@ Terminal 2:  python main.py --dev
 - **Carrier stats location**: `CarrierStats` event fires when you open Carrier Management in-game. Location updates on `CarrierJump` events.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt.
 
-*Last updated: Session 4 complete — Fleet Carriers page done*
+*Last updated: Session 5 complete — Engineering page done*
+
+---
+
+## Build status — Session 5 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `materials` DB table + `upsert_material`, `set_material_count`, `get_materials` | DONE | `core/database.py` |
+| `engineer_progress` DB table + `get_engineer_progress`, `upsert_engineer_progress` | DONE | `core/database.py` |
+| `MaterialTrade`, `EngineerCraft`, `Synthesis` added to WATCHED_EVENTS | DONE | `core/journal.py` |
+| `_handle_material_collected/discarded/trade/engineer_craft/synthesis_used` | DONE | `main.py` |
+| `_handle_engineer_progress` (single + array form) | DONE | `main.py` |
+| `get_materials`, `set_material_count` API methods | DONE | `main.py` |
+| `get_engineers`, `get_blueprints`, `get_synthesis_recipes`, `get_tech_broker_items` API methods | DONE | `main.py` |
+| `Engineering.jsx` — 5-tab UI (Engineers / Blueprints / Synthesis / Tech Broker / Materials) | DONE | `frontend/src/pages/Engineering.jsx` |
+| Engineers tab — specialty filter chips, unlock/rank badge from journal progress | DONE | `frontend/src/pages/Engineering.jsx` |
+| Blueprints tab — search, accordion per grade, material have/need cross-ref, craftable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
+| Synthesis tab — category filter, craftable check vs inventory, grade badge | DONE | `frontend/src/pages/Engineering.jsx` |
+| Tech Broker tab — Guardian/Human type filter, unlockable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
+| Materials tab — sub-tabs Raw/Manufactured/Encoded, inline count edit, bulk import, fill bar | DONE | `frontend/src/pages/Engineering.jsx` |
+
+## Known issues / notes for next session
+
+- `routes.active` column: if DB existed from before session 2, run: `ALTER TABLE routes ADD COLUMN active INTEGER DEFAULT 0;`
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- Exobiology: if final scan fires `ScanType == "Logged"` not `"Analysed"`, adjust `_handle_scan_organic()`.
+- **Data stubs**: `data/blueprints.json`, `data/engineers.json`, `data/synthesis.json`, `data/tech_brokers.json` are minimal stubs. Engineering page shows "No items found" until replaced with full EDCD datasets. EDCD links in README.
+- **Material names**: DB stores names lowercase. Blueprint/synthesis JSON material names should match (case-insensitive comparison applied in Engineering.jsx via `.toLowerCase()`).
+- **EngineerCraft category tracking**: Ingredients in the craft event don't include category. `upsert_material` retains existing category on delta updates; new materials inserted with empty category, corrected on next `MaterialCollected` event.
+- Remaining stub pages: Commander, Exploration, Galaxy, Guardian, Trading (all still "Coming Soon").
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt.
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -219,3 +250,9 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 19:49:21*
+
+---
+*Session checkpoint: 2026-06-27 20:07:45*
+
+---
+*Session checkpoint: 2026-06-27 20:19:11*

@@ -78,6 +78,20 @@ def init_db():
                 updated   TEXT DEFAULT (datetime('now'))
             );
 
+            CREATE TABLE IF NOT EXISTS materials (
+                name     TEXT PRIMARY KEY,
+                category TEXT NOT NULL DEFAULT '',
+                count    INTEGER DEFAULT 0,
+                updated  TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS engineer_progress (
+                engineer TEXT PRIMARY KEY,
+                status   TEXT DEFAULT '',
+                rank     INTEGER DEFAULT 0,
+                updated  TEXT DEFAULT (datetime('now'))
+            );
+
             CREATE TABLE IF NOT EXISTS carriers (
                 carrier_id   TEXT PRIMARY KEY,
                 name         TEXT DEFAULT '',
@@ -446,3 +460,62 @@ def upsert_carrier(data: dict) -> dict:
         d["space_usage"] = json.loads(d["space_usage"])
         d["services"] = json.loads(d["services"])
         return d
+
+
+# --- Materials ---
+
+def get_materials() -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT name, category, count FROM materials ORDER BY category, name"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def upsert_material(name: str, category: str, delta: int) -> None:
+    key = name.lower()
+    with _conn() as conn:
+        row = conn.execute("SELECT count FROM materials WHERE name=?", (key,)).fetchone()
+        if row:
+            new_count = max(0, row["count"] + delta)
+            conn.execute(
+                "UPDATE materials SET count=?, updated=datetime('now') WHERE name=?",
+                (new_count, key),
+            )
+        else:
+            new_count = max(0, delta)
+            conn.execute(
+                "INSERT INTO materials (name, category, count) VALUES (?,?,?)",
+                (key, category, new_count),
+            )
+
+
+def set_material_count(name: str, category: str, count: int) -> None:
+    key = name.lower()
+    with _conn() as conn:
+        conn.execute("""
+            INSERT INTO materials (name, category, count, updated)
+            VALUES (?, ?, ?, datetime('now'))
+            ON CONFLICT(name) DO UPDATE SET
+              count=excluded.count, category=excluded.category,
+              updated=excluded.updated
+        """, (key, category, max(0, count)))
+
+
+# --- Engineer Progress ---
+
+def get_engineer_progress() -> dict:
+    with _conn() as conn:
+        rows = conn.execute("SELECT * FROM engineer_progress").fetchall()
+        return {r["engineer"]: dict(r) for r in rows}
+
+
+def upsert_engineer_progress(engineer: str, status: str, rank: int) -> None:
+    with _conn() as conn:
+        conn.execute("""
+            INSERT INTO engineer_progress (engineer, status, rank, updated)
+            VALUES (?, ?, ?, datetime('now'))
+            ON CONFLICT(engineer) DO UPDATE SET
+              status=excluded.status, rank=excluded.rank,
+              updated=excluded.updated
+        """, (engineer, status, rank))

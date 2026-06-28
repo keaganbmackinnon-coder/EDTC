@@ -120,6 +120,18 @@ class API:
             self._handle_carrier_deposit_fuel(event)
         elif event_name == "CarrierBuy":
             self._handle_carrier_buy(event)
+        elif event_name == "MaterialCollected":
+            self._handle_material_collected(event)
+        elif event_name == "MaterialDiscarded":
+            self._handle_material_discarded(event)
+        elif event_name == "MaterialTrade":
+            self._handle_material_trade(event)
+        elif event_name == "EngineerCraft":
+            self._handle_engineer_craft(event)
+        elif event_name == "Synthesis":
+            self._handle_synthesis_used(event)
+        elif event_name == "EngineerProgress":
+            self._handle_engineer_progress(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -379,6 +391,76 @@ class API:
         })
         self._emit("carrier_update", {"carrier": carrier})
 
+    def _handle_material_collected(self, event: dict):
+        from core.database import upsert_material
+        name = event.get("Name_Localised") or event.get("Name", "")
+        cat = event.get("Category", "")
+        count = int(event.get("Count", 1))
+        if name:
+            upsert_material(name, cat, count)
+            self._emit("material_update", {"name": name, "category": cat, "delta": count})
+
+    def _handle_material_discarded(self, event: dict):
+        from core.database import upsert_material
+        name = event.get("Name_Localised") or event.get("Name", "")
+        cat = event.get("Category", "")
+        count = int(event.get("Count", 1))
+        if name:
+            upsert_material(name, cat, -count)
+            self._emit("material_update", {"name": name, "category": cat, "delta": -count})
+
+    def _handle_material_trade(self, event: dict):
+        from core.database import upsert_material
+        paid = event.get("Paid", {})
+        received = event.get("Received", {})
+        if paid:
+            name = paid.get("Material_Localised") or paid.get("Material", "")
+            cat = paid.get("Category", "")
+            qty = int(paid.get("Quantity", 0))
+            if name:
+                upsert_material(name, cat, -qty)
+        if received:
+            name = received.get("Material_Localised") or received.get("Material", "")
+            cat = received.get("Category", "")
+            qty = int(received.get("Quantity", 0))
+            if name:
+                upsert_material(name, cat, qty)
+        self._emit("materials_changed", {})
+
+    def _handle_engineer_craft(self, event: dict):
+        from core.database import upsert_material
+        for ing in event.get("Ingredients", []):
+            name = ing.get("Name_Localised") or ing.get("Name", "")
+            count = int(ing.get("Count", 1))
+            if name:
+                upsert_material(name, "", -count)
+        self._emit("materials_changed", {})
+
+    def _handle_synthesis_used(self, event: dict):
+        from core.database import upsert_material
+        for mat in event.get("Materials", []):
+            name = mat.get("Name_Localised") or mat.get("Name", "")
+            count = int(mat.get("Count", 1))
+            if name:
+                upsert_material(name, "", -count)
+        self._emit("materials_changed", {})
+
+    def _handle_engineer_progress(self, event: dict):
+        from core.database import upsert_engineer_progress
+        if "Engineer" in event and "Engineers" not in event:
+            upsert_engineer_progress(
+                event.get("Engineer", ""),
+                event.get("Progress", ""),
+                event.get("Rank", 0),
+            )
+        for eng in event.get("Engineers", []):
+            upsert_engineer_progress(
+                eng.get("Engineer", ""),
+                eng.get("Progress", ""),
+                eng.get("Rank", 0),
+            )
+        self._emit("engineer_progress_update", {})
+
     # --- Builds ---
 
     def get_builds(self) -> list:
@@ -578,6 +660,43 @@ class API:
             "key": self._auto_jump_key,
             "delay": self._auto_jump_delay,
         }
+
+    # --- Engineering (static data loaders) ---
+
+    def _load_json(self, filename: str) -> dict:
+        try:
+            import json
+            return json.loads((BASE_DIR / "data" / filename).read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+    def get_engineers(self) -> list:
+        from core.database import get_engineer_progress
+        progress = get_engineer_progress()
+        engineers = self._load_json("engineers.json").get("engineers", [])
+        for e in engineers:
+            p = progress.get(e.get("name", ""), {})
+            e["progress_status"] = p.get("status", "")
+            e["progress_rank"] = p.get("rank", 0)
+        return engineers
+
+    def get_blueprints(self) -> list:
+        return self._load_json("blueprints.json").get("blueprints", [])
+
+    def get_synthesis_recipes(self) -> list:
+        return self._load_json("synthesis.json").get("synthesis", [])
+
+    def get_tech_broker_items(self) -> list:
+        return self._load_json("tech_brokers.json").get("items", [])
+
+    def get_materials(self) -> list:
+        from core.database import get_materials
+        return get_materials()
+
+    def set_material_count(self, name: str, category: str, count: int) -> None:
+        from core.database import set_material_count
+        set_material_count(name, category, count)
+        self._emit("materials_changed", {})
 
     def search_commodity_markets(self, system: str, commodity: str) -> list:
         import asyncio
