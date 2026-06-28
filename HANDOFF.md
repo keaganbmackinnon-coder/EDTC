@@ -493,28 +493,44 @@ Terminal 2:  python main.py --dev
 *Session 15 complete — 2026-06-28*
 
 ---
-*Session checkpoint: 2026-06-28 10:37:34*
+
+## Build status — Session 16 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `NavRoute` + `NavRouteClear` added to `WATCHED_EVENTS` | DONE | `core/journal.py` |
+| `_handle_nav_route()` — reads galaxy-map route from journal, saves to DB, emits `route_update` | DONE | `main.py` |
+| `_handle_nav_route_clear()` — clears active route and notifies overlay + main window | DONE | `main.py` |
+| In-game galaxy-map routes now auto-populate the Route Following overlay | DONE | `main.py` |
+| `VERSION` file added at project root — bundled by PyInstaller via `--add-data "VERSION;."` | DONE | `VERSION`, `.github/workflows/build.yml` |
+| CI "Write version from tag" step: `echo "${GITHUB_REF_NAME#v}" > VERSION` before PyInstaller | DONE | `.github/workflows/build.yml` |
+| `APP_VERSION` read from bundled `VERSION` at Python startup; falls back to `"dev"` | DONE | `main.py` |
+| `get_version()` API method exposes `APP_VERSION` to React | DONE | `main.py` |
+| `App.jsx` version fetch waits for `pywebviewready` event before calling `get_version()` | DONE | `frontend/src/App.jsx` |
+| Sidebar now shows `v0.2.5` in the bottom-left corner | DONE | `frontend/src/App.jsx` |
+| v0.2.3 released — NavRoute tracking | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.3 |
+| v0.2.4 released — version number in sidebar | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.4 |
+| v0.2.5 released — fix pywebviewready timing (version was blank on first launch) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.5 |
+| Local install updated to v0.2.5 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+
+## Key notes from Session 16
+
+- **NavRoute**: when the player sets a route in the galaxy map, ED writes a `NavRoute` journal event with the full system list. EDTC reads it, saves it as the active route, and pushes it to the route overlay. `NavRouteClear` fires when the route is cancelled.
+- **Version file flow**: CI tag push → `echo "${GITHUB_REF_NAME#v}" > VERSION` → PyInstaller bundles VERSION → Python reads it at startup → `get_version()` API → React sidebar displays it.
+- **`pywebviewready` timing**: pywebview fires this DOM event when the Python bridge becomes callable. `App.jsx` must listen for it rather than calling the API immediately on mount, because the bridge isn't ready at React render time.
+- **`_user_enabled` default corrected**: changed from `True` to `False` so overlays start disabled until the user explicitly enables them. This was the root cause of "System Preview auto-shows on every jump."
+
+## Known issues / notes for next session
+
+- All previous known issues from Session 14 still apply.
+- `hide_after()` sets `_shown = False` but does NOT touch `_user_enabled` — overlays correctly re-appear on next trigger if user has them enabled.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
+- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev. CI builds use Python 3.12 so the .exe has audio.
+- Spansh nearest-service response field names are best-guess — verify in-game if results look wrong.
 
 ---
-*Session checkpoint: 2026-06-28 10:38:15*
+*Session 16 complete — 2026-06-28*
 
 ---
-*Session checkpoint: 2026-06-28 10:41:07*
-
----
-*Session checkpoint: 2026-06-28 11:10:40*
-
----
-*Session checkpoint: 2026-06-28 11:10:46*
-
----
-*Session checkpoint: 2026-06-28 11:28:23*
-
----
-*Session checkpoint: 2026-06-28 11:33:57*
-
----
-*Session checkpoint: 2026-06-28 11:35:38*
-
----
-*Session checkpoint: 2026-06-28 11:44:01*
+*Session checkpoint: 2026-06-28 12:34:59*
