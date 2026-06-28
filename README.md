@@ -21,7 +21,37 @@ A one-stop-shop Elite Dangerous companion app. Runs locally as a native desktop 
 
 ## For end users
 
-Download the latest release from the **Releases** page and run the `.exe` (Windows), app (macOS), or binary (Linux). No Python install required.
+### Windows
+
+1. Go to the [Releases](https://github.com/keaganbmackinnon-coder/EDTC/releases) page and download **EDTC.exe** from the latest release.
+2. Move it anywhere you like (Desktop, a dedicated folder, etc.).
+3. Double-click **EDTC.exe** to launch.
+   - Windows may show a "Windows protected your PC" SmartScreen warning the first time. Click **More info → Run anyway**. This happens because the app isn't code-signed yet.
+4. The EDTC window will open and an icon will appear in your system tray.
+
+**Requirements:** Nothing extra — Python, Node, and all libraries are bundled inside the .exe.
+
+> **Note:** EDTC reads your Elite Dangerous journal files automatically. Make sure Elite Dangerous is installed and has been launched at least once so the journal folder exists at:
+> `%USERPROFILE%\Saved Games\Frontier Developments\Elite Dangerous\`
+
+### macOS
+
+1. Download **EDTC** (no extension) from the [Releases](https://github.com/keaganbmackinnon-coder/EDTC/releases) page.
+2. Open Terminal and run:
+   ```
+   chmod +x ~/Downloads/EDTC
+   ~/Downloads/EDTC
+   ```
+3. macOS may block it on first launch. Go to **System Settings → Privacy & Security** and click **Open Anyway**.
+
+### Linux
+
+1. Download **EDTC** from the [Releases](https://github.com/keaganbmackinnon-coder/EDTC/releases) page.
+2. Make it executable and run:
+   ```
+   chmod +x ./EDTC
+   ./EDTC
+   ```
 
 ---
 
