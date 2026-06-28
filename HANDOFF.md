@@ -439,6 +439,17 @@ Terminal 2:  python main.py --dev
 - EDDN results have `distance: null` until the ref system's coords are seeded by a FSDJump/Location event
 - The local cache fills in real-time as players worldwide dock — more useful the longer EDTC runs
 
+## Build status — Session 14 continued (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `_seed_market_db()` — one-time background Spansh seed for all 159 commodities | DONE | `main.py` |
+| Trading.jsx — seed progress banner ("Seeding X/159 · CommodityName" in amber) | DONE | `frontend/src/pages/Trading.jsx` |
+| Trading.jsx — EDDN stats counter ("EDDN X stations · Y commodities"), refreshes every 15s | DONE | `frontend/src/pages/Trading.jsx` |
+| overlay.py — `_enabled` flag suppresses overlays during startup journal replay | DONE | `core/overlay.py` |
+| `webview.start(func=...)` — enables overlays only after webview is running | DONE | `main.py` |
+| All overlay components — `window.__edtc.on` → `window.__edtc?.on` (fixes crash on load) | DONE | `frontend/src/overlays/*.jsx` |
+
 ## Known issues / notes for next session
 
 - Spansh nearest-service response field names are best-guess — verify in-game if results look wrong.
@@ -447,4 +458,8 @@ Terminal 2:  python main.py --dev
 - pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled. CI builds use Python 3.12 so the .exe has audio.
 - Maelstrom system names are community-reported best-guess — verify on EDSM or Canonn if needed.
 - `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` — some affected systems may not appear.
+- Market seed runs once on first launch (pref key `market_seeded`). If seed needs to re-run, delete `edtc.db` or clear that pref from the DB.
 - Gather feedback from alpha users and triage bugs before v0.2.0.
+
+---
+*Session 14 complete — 2026-06-28*
