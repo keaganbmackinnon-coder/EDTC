@@ -1014,6 +1014,10 @@ class API:
         result = self._edsm_run(lambda e: e.get_stats())
         return result if isinstance(result, dict) else {}
 
+    def get_community_goals(self) -> list:
+        result = self._edsm_run(lambda e: e.get_community_goals())
+        return result if isinstance(result, list) else []
+
     # --- Clipboard ---
 
     def copy_to_clipboard(self, text: str) -> bool:

@@ -128,3 +128,7 @@ class EdsmAPI(BaseAPI):
 
     async def get_stats(self) -> dict:
         return await self.get("/api-v1/stats", {}) or {}
+
+    async def get_community_goals(self) -> list:
+        data = await self.get("/api-v1/community-goals", {})
+        return data if isinstance(data, list) else []

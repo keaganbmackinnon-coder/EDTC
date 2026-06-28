@@ -476,10 +476,201 @@ function GalaxyStatsTab() {
   )
 }
 
+// ---- Tab: Community Goals ----
+
+function CGProgressBar({ current, max, tier, maxTier }) {
+  const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
+  return (
+    <div>
+      <div className="flex justify-between text-xs font-mono mb-1">
+        <span className="text-ed-muted">Tier {tier ?? '?'} / {maxTier ?? '?'}</span>
+        <span className="text-ed-text">{pct}%</span>
+      </div>
+      <div className="h-2 bg-ed-dark rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full bg-ed-orange transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-xs font-mono text-ed-muted mt-0.5">
+        <span>{Number(current ?? 0).toLocaleString()}</span>
+        <span>{Number(max ?? 0).toLocaleString()}</span>
+      </div>
+    </div>
+  )
+}
+
+function CommunityGoalCard({ goal }) {
+  const [expanded, setExpanded] = useState(false)
+
+  const isCompleted = goal.isCompleted
+  const expiry = goal.expiry ? new Date(goal.expiry) : null
+  const now = new Date()
+  const msLeft = expiry ? expiry - now : null
+  const daysLeft = msLeft != null ? Math.ceil(msLeft / 86400000) : null
+  const isExpired = msLeft != null && msLeft <= 0
+
+  function timeLabel() {
+    if (isCompleted) return null
+    if (isExpired) return { text: 'Expired', color: 'text-ed-muted' }
+    if (daysLeft === 0) return { text: 'Ends today', color: 'text-ed-danger' }
+    if (daysLeft === 1) return { text: '1 day left', color: 'text-ed-danger' }
+    if (daysLeft <= 3) return { text: `${daysLeft} days left`, color: 'text-yellow-400' }
+    return { text: `${daysLeft} days left`, color: 'text-ed-muted' }
+  }
+  const tl = timeLabel()
+
+  const desc = (goal.description ?? '').replace(/<[^>]+>/g, '').trim()
+  const obj  = (goal.objective  ?? '').replace(/<[^>]+>/g, '').trim()
+
+  return (
+    <div className={`panel ${isCompleted ? 'opacity-60' : ''}`}>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-ed-text font-semibold font-ui">{goal.title ?? 'Community Goal'}</p>
+            {isCompleted && (
+              <span className="text-xs font-mono text-ed-success border border-ed-success/40 px-1.5 rounded">
+                Complete
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs font-mono text-ed-muted mt-0.5">
+            {goal.system   && <span>{goal.system}</span>}
+            {goal.station  && <span>· {goal.station}</span>}
+            {goal.commodity?.name && <span className="text-ed-orange">· {goal.commodity.name}</span>}
+          </div>
+        </div>
+        {tl && (
+          <span className={`text-xs font-mono shrink-0 ${tl.color}`}>{tl.text}</span>
+        )}
+      </div>
+
+      {obj && <p className="text-ed-muted text-sm mb-3">{obj}</p>}
+
+      {!isCompleted && goal.tierCapacity > 0 && (
+        <div className="mb-3">
+          <CGProgressBar
+            current={goal.tierProgress}
+            max={goal.tierCapacity}
+            tier={goal.currentTier}
+            maxTier={goal.maxTier}
+          />
+        </div>
+      )}
+
+      {desc && desc !== obj && (
+        <>
+          <button
+            className="text-xs font-mono text-ed-muted hover:text-ed-text"
+            onClick={() => setExpanded(v => !v)}
+          >
+            {expanded ? '▲ Hide details' : '▼ Show details'}
+          </button>
+          {expanded && (
+            <p className="text-ed-muted text-sm mt-2 pt-2 border-t border-ed-border whitespace-pre-line">
+              {desc}
+            </p>
+          )}
+        </>
+      )}
+
+      {goal.rewards && (
+        <p className="text-ed-gold text-xs font-mono mt-2">
+          Reward: {goal.rewards}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function CommunityGoalsTab() {
+  const [goals, setGoals] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [filter, setFilter] = useState('Active')
+
+  async function load() {
+    setLoading(true)
+    setError(null)
+    const r = await api()?.get_community_goals()
+    if (Array.isArray(r)) {
+      setGoals(r)
+    } else {
+      setError(r?.error ?? 'Failed to load community goals')
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  const filtered = goals.filter(g => {
+    if (filter === 'Active')    return !g.isCompleted
+    if (filter === 'Completed') return  g.isCompleted
+    return true
+  })
+
+  const activeCount    = goals.filter(g => !g.isCompleted).length
+  const completedCount = goals.filter(g =>  g.isCompleted).length
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-ed-muted text-sm">Live community goals data via EDSM.</p>
+        <button className="btn-ghost text-sm" onClick={load} disabled={loading}>
+          {loading ? 'Loading…' : 'Refresh'}
+        </button>
+      </div>
+
+      {loading && <LoadingState />}
+      {error && <ErrorState error={error} />}
+
+      {!loading && !error && (
+        <>
+          <div className="flex gap-1 mb-4">
+            {[
+              { label: `Active (${activeCount})`,       id: 'Active' },
+              { label: `Completed (${completedCount})`, id: 'Completed' },
+              { label: 'All',                           id: 'All' },
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`text-xs font-mono px-3 py-1 rounded border transition-colors ${
+                  filter === f.id
+                    ? 'border-ed-orange text-ed-orange'
+                    : 'border-ed-border text-ed-muted hover:border-ed-orange/50'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <EmptyState message={
+              goals.length === 0
+                ? 'No community goals data returned from EDSM.'
+                : `No ${filter.toLowerCase()} community goals.`
+            } />
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((g, i) => (
+                <CommunityGoalCard key={g.id ?? i} goal={g} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // ---- Main ----
 
 const TABS = [
   { id: 'galnet',  label: 'GalNet' },
+  { id: 'cg',      label: 'Community Goals' },
   { id: 'factions', label: 'Factions' },
   { id: 'traffic', label: 'Traffic' },
   { id: 'stats',   label: 'Galaxy Stats' },

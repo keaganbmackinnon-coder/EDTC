@@ -413,3 +413,46 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:53:40*
+
+---
+*Session checkpoint: 2026-06-27 20:54:05*
+
+---
+*Session checkpoint: 2026-06-27 20:54:34*
+
+---
+
+## Build status — Session 11 (INCOMPLETE — pick up here next session)
+
+**Community Goals tracker** was started but not finished. Backend is complete; frontend component is written but one render line is missing.
+
+### What's done:
+
+| Item | Status | File |
+|---|---|---|
+| `get_community_goals()` added to EdsmAPI | DONE | `api/edsm.py` |
+| `get_community_goals` API method added | DONE | `main.py` |
+| `CommunityGoalCard` + `CommunityGoalsTab` components written | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `{ id: 'cg', label: 'Community Goals' }` added to TABS array | DONE | `frontend/src/pages/Galaxy.jsx` |
+
+### FIRST THING next session — one missing line:
+
+In `frontend/src/pages/Galaxy.jsx`, inside the `Galaxy` component's return block, find this block (near bottom of file):
+
+```jsx
+      {tab === 'galnet'   && <GalNetTab />}
+      {tab === 'factions' && <FactionsTab currentSystem={currentSystem} />}
+```
+
+Add this line between `galnet` and `factions`:
+
+```jsx
+      {tab === 'cg'       && <CommunityGoalsTab />}
+```
+
+Then commit and push. That completes the Community Goals feature.
+
+### Notes on Community Goals data (EDSM `/api-v1/community-goals`):
+- Response: list of objects with `id`, `title`, `isCompleted`, `expiry`, `system`, `station`, `commodity.name`, `objective`, `description`, `tierProgress`, `tierCapacity`, `currentTier`, `maxTier`, `rewards`
+- Empty list = no active CGs right now, not a bug
+- HTML tags in `description`/`objective` are stripped with regex in the frontend
