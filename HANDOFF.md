@@ -422,11 +422,7 @@ Terminal 2:  python main.py --dev
 
 ---
 
-## Build status — Session 11 (INCOMPLETE — pick up here next session)
-
-**Community Goals tracker** was started but not finished. Backend is complete; frontend component is written but one render line is missing.
-
-### What's done:
+## Build status — Session 11 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -434,25 +430,20 @@ Terminal 2:  python main.py --dev
 | `get_community_goals` API method added | DONE | `main.py` |
 | `CommunityGoalCard` + `CommunityGoalsTab` components written | DONE | `frontend/src/pages/Galaxy.jsx` |
 | `{ id: 'cg', label: 'Community Goals' }` added to TABS array | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `{tab === 'cg' && <CommunityGoalsTab />}` render line added | DONE | `frontend/src/pages/Galaxy.jsx` |
 
-### FIRST THING next session — one missing line:
+## Known issues / notes for next session
 
-In `frontend/src/pages/Galaxy.jsx`, inside the `Galaxy` component's return block, find this block (near bottom of file):
+- EDSM Community Goals: empty list = no active CGs right now, not a bug. HTML in `description`/`objective` stripped with regex.
+- `data/commodities.json`, `data/blueprints.json`, `data/engineers.json`, `data/guardian_sites.json` are minimal stubs — replace with full EDCD/Canonn datasets.
+- Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
 
-```jsx
-      {tab === 'galnet'   && <GalNetTab />}
-      {tab === 'factions' && <FactionsTab currentSystem={currentSystem} />}
-```
+---
+*Session checkpoint: 2026-06-27 20:58:19*
 
-Add this line between `galnet` and `factions`:
+---
+*Session checkpoint: 2026-06-27 20:59:34*
 
-```jsx
-      {tab === 'cg'       && <CommunityGoalsTab />}
-```
-
-Then commit and push. That completes the Community Goals feature.
-
-### Notes on Community Goals data (EDSM `/api-v1/community-goals`):
-- Response: list of objects with `id`, `title`, `isCompleted`, `expiry`, `system`, `station`, `commodity.name`, `objective`, `description`, `tierProgress`, `tierCapacity`, `currentTier`, `maxTier`, `rewards`
-- Empty list = no active CGs right now, not a bug
-- HTML tags in `description`/`objective` are stripped with regex in the frontend
+---
+*Session checkpoint: 2026-06-27 21:00:14*

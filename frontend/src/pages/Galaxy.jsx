@@ -713,6 +713,7 @@ export default function Galaxy() {
       </div>
 
       {tab === 'galnet'   && <GalNetTab />}
+      {tab === 'cg'       && <CommunityGoalsTab />}
       {tab === 'factions' && <FactionsTab currentSystem={currentSystem} />}
       {tab === 'traffic'  && <TrafficTab currentSystem={currentSystem} />}
       {tab === 'stats'    && <GalaxyStatsTab />}
