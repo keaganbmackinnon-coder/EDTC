@@ -298,89 +298,33 @@ Terminal 2:  python main.py --dev
 - guardian_sites.json is a stub with 8 sites — replace with full Canonn dataset for complete coverage (link in source field).
 - Trading page is the last remaining "Coming Soon" stub.
 
----
-*Session checkpoint: 2026-06-23 00:39:02*
 
----
-*Session checkpoint: 2026-06-23 00:39:55*
 
----
-*Session checkpoint: 2026-06-23 00:40:17*
 
----
-*Session checkpoint: 2026-06-23 00:41:02*
 
----
-*Session checkpoint: 2026-06-23 00:42:08*
 
----
-*Session checkpoint: 2026-06-23 00:42:49*
 
----
-*Session checkpoint: 2026-06-23 00:44:19*
 
----
-*Session checkpoint: 2026-06-23 00:45:13*
 
----
-*Session checkpoint: 2026-06-23 00:56:25*
 
----
-*Session checkpoint: 2026-06-23 00:57:45*
 
----
-*Session checkpoint: 2026-06-23 00:59:29*
 
----
-*Session checkpoint: 2026-06-23 01:00:00*
 
----
-*Session checkpoint: 2026-06-27 19:48:39*
 
----
-*Session checkpoint: 2026-06-27 19:49:21*
 
----
-*Session checkpoint: 2026-06-27 20:07:45*
 
----
-*Session checkpoint: 2026-06-27 20:19:11*
 
----
-*Session checkpoint: 2026-06-27 20:19:39*
 
----
-*Session checkpoint: 2026-06-27 20:20:01*
 
----
-*Session checkpoint: 2026-06-27 20:25:10*
 
----
-*Session checkpoint: 2026-06-27 20:25:35*
 
----
-*Session checkpoint: 2026-06-27 20:30:10*
 
----
-*Session checkpoint: 2026-06-27 20:31:36*
 
----
-*Session checkpoint: 2026-06-27 20:35:03*
 
----
-*Session checkpoint: 2026-06-27 20:35:31*
 
----
-*Session checkpoint: 2026-06-27 20:39:45*
 
----
-*Session checkpoint: 2026-06-27 20:40:46*
 
----
-*Session checkpoint: 2026-06-27 20:43:45*
 
----
-*Session checkpoint: 2026-06-27 20:46:46*
 
 ---
 
@@ -408,17 +352,9 @@ Terminal 2:  python main.py --dev
 - Trade History profit field is from the journal `Profit` key (net profit after accounting for buy price). If 0, journal may not include it; sell total minus buy total gives a rough manual alternative.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
 
----
-*Session checkpoint: 2026-06-27*
 
----
-*Session checkpoint: 2026-06-27 20:53:40*
 
----
-*Session checkpoint: 2026-06-27 20:54:05*
 
----
-*Session checkpoint: 2026-06-27 20:54:34*
 
 ---
 
@@ -467,163 +403,48 @@ Terminal 2:  python main.py --dev
 | `main.py` — `BASE_DIR` uses `sys._MEIPASS` when frozen (fixes bundled file resolution) | DONE | `main.py` |
 | `main.jsx` — `BrowserRouter` → `HashRouter` (fixes file-not-found crash on nav click) | DONE | `frontend/src/main.jsx` |
 | `main.py` — `_create_desktop_shortcut()` auto-creates `.lnk` on first frozen launch | DONE | `main.py` |
+| `core/journal.py` — `_replay_startup()` replays latest journal on launch to seed current system | DONE | `core/journal.py` |
+| `api/spansh.py` — `commodity_markets()` switched to POST with JSON body (fixes 400 errors) | DONE | `api/spansh.py` |
 | `api/edsm.py` — `get_system_thargoid()` with `showFactions=1&showThargoids=1` | DONE | `api/edsm.py` |
 | `main.py` — `get_thargoid_system`, `get_thargoid_nearby` API methods | DONE | `main.py` |
 | `Galaxy.jsx` — Thargoid War tab (System Status / Maelstroms / Nearby Threat) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `Trading.jsx` — sort chips (distance/buy/sell/supply/demand), alphabetical commodity datalist | DONE | `frontend/src/pages/Trading.jsx` |
+
+---
+
+## Build status — Session 14 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `markets` + `system_coords` tables added to `init_db()` schema | DONE | `core/database.py` |
+| `upsert_market_data()` — stores EDDN commodity v3 messages to SQLite | DONE | `core/database.py` |
+| `upsert_system_coords()` — stores system 3D coords from FSDJump/Location events | DONE | `core/database.py` |
+| `search_local_markets()` — queries local cache with 3D distance calc, returns `source: "eddn"` | DONE | `core/database.py` |
+| `get_market_stats()` — returns station/commodity/system counts in local DB | DONE | `core/database.py` |
+| `_handle_fsd_jump()` — now extracts `StarPos` and calls `upsert_system_coords()` | DONE | `main.py` |
+| `Location` handler — also stores `StarPos` coords | DONE | `main.py` |
+| `_handle_eddn_message()` — parses commodity schema v3, routes to `upsert_market_data()` | DONE | `main.py` |
+| `get_market_stats()` API method | DONE | `main.py` |
+| `search_commodity_markets()` — queries local EDDN cache first, merges with Spansh (deduped by system+station) | DONE | `main.py` |
+| `_eddn_listener()` — ZMQ daemon thread connecting to `tcp://eddn.edcd.io:9500`, auto-reconnects | DONE | `main.py` |
+| `Trading.jsx` — EDDN source badge (green), null-safe distance sort, fixed `has_large_pad === false` check | DONE | `frontend/src/pages/Trading.jsx` |
+| `pyzmq>=27.0` added to `requirements.txt` | DONE | `requirements.txt` |
+
+## Key EDDN notes
+
+- EDDN ZMQ endpoint: `tcp://eddn.edcd.io:9500` — messages are zlib-compressed JSON
+- The WebSocket relay at `wss://eddn.edcd.io:4430/subscribe` returns **404** — do not use it
+- Commodity names in EDDN messages are **lowercase** (e.g. `"battleweapons"`, `"gold"`) — stored as-is, queried case-insensitively
+- EDDN results show with a green **EDDN** badge in Trading; Spansh results have no badge
+- EDDN results have `distance: null` until the ref system's coords are seeded by a FSDJump/Location event
+- The local cache fills in real-time as players worldwide dock — more useful the longer EDTC runs
 
 ## Known issues / notes for next session
 
-- Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
+- Spansh nearest-service response field names are best-guess — verify in-game if results look wrong.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
 - `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
-- pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled until pygame adds 3.14 support. CI builds use Python 3.12 so the .exe has audio.
+- pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled. CI builds use Python 3.12 so the .exe has audio.
 - Maelstrom system names are community-reported best-guess — verify on EDSM or Canonn if needed.
-- `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` — coverage varies; some affected systems may not appear.
+- `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` — some affected systems may not appear.
 - Gather feedback from alpha users and triage bugs before v0.2.0.
-
----
-*Session checkpoint: 2026-06-27 20:58:19*
-
----
-*Session checkpoint: 2026-06-27 20:59:34*
-
----
-*Session checkpoint: 2026-06-27 21:00:14*
-
----
-*Session checkpoint: 2026-06-27 21:01:18*
-
----
-*Session checkpoint: 2026-06-27 21:02:02*
-
----
-*Session checkpoint: 2026-06-27 21:15:05*
-
----
-*Session checkpoint: 2026-06-27 21:18:10*
-
----
-*Session checkpoint: 2026-06-27 21:21:50*
-
----
-*Session checkpoint: 2026-06-27 21:22:42*
-
----
-*Session checkpoint: 2026-06-27 21:23:18*
-
----
-*Session checkpoint: 2026-06-27 22:58:47*
-
----
-*Session checkpoint: 2026-06-27 23:01:10*
-
----
-*Session checkpoint: 2026-06-27 23:02:15*
-
----
-*Session checkpoint: 2026-06-27 23:05:09*
-
----
-*Session checkpoint: 2026-06-27 23:07:15*
-
----
-*Session checkpoint: 2026-06-27 23:07:50*
-
----
-*Session checkpoint: 2026-06-27 23:08:47*
-
----
-*Session checkpoint: 2026-06-27 23:18:42*
-
----
-*Session checkpoint: 2026-06-27 23:19:53*
-
----
-*Session checkpoint: 2026-06-27 23:22:14*
-
----
-*Session checkpoint: 2026-06-27 23:24:05*
-
----
-*Session checkpoint: 2026-06-27 23:24:50*
-
----
-*Session checkpoint: 2026-06-27 23:29:04*
-
----
-*Session checkpoint: 2026-06-27 23:30:07*
-
----
-*Session checkpoint: 2026-06-28 01:33:31*
-
----
-*Session checkpoint: 2026-06-28 01:35:37*
-
----
-*Session checkpoint: 2026-06-28 01:36:37*
-
----
-*Session checkpoint: 2026-06-28 01:38:18*
-
----
-*Session checkpoint: 2026-06-28 01:40:37*
-
----
-*Session checkpoint: 2026-06-28 01:42:26*
-
----
-*Session checkpoint: 2026-06-28 01:43:20*
-
----
-*Session checkpoint: 2026-06-28 01:46:31*
-
----
-*Session checkpoint: 2026-06-28 01:47:58*
-
----
-*Session checkpoint: 2026-06-28 01:48:15*
-
----
-*Session checkpoint: 2026-06-28 01:48:43*
-
----
-*Session checkpoint: 2026-06-28 01:49:19*
-
----
-*Session checkpoint: 2026-06-28 01:49:54*
-
----
-*Session checkpoint: 2026-06-28 01:50:12*
-
----
-*Session checkpoint: 2026-06-28 01:53:50*
-
----
-*Session checkpoint: 2026-06-28 01:54:40*
-
----
-*Session checkpoint: 2026-06-28 01:57:04*
-
----
-*Session checkpoint: 2026-06-28 01:57:34*
-
----
-*Session checkpoint: 2026-06-28 01:57:48*
-
----
-*Session checkpoint: 2026-06-28 01:58:46*
-
----
-*Session checkpoint: 2026-06-28 02:00:28*
-
----
-*Session checkpoint: 2026-06-28 02:02:06*
-
----
-*Session checkpoint: 2026-06-28 02:08:06*
-
----
-*Session checkpoint: 2026-06-28 02:09:00*
-
----
-*Session checkpoint: 2026-06-28 02:12:05*
