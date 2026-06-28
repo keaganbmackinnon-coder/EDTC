@@ -42,7 +42,15 @@ const NAV_ITEMS = [
 export default function App() {
   const [version, setVersion] = useState('')
   useEffect(() => {
-    window?.pywebview?.api?.get_version().then(v => setVersion(v ?? ''))
+    function fetchVersion() {
+      window?.pywebview?.api?.get_version?.().then(v => setVersion(v ?? ''))
+    }
+    if (window.pywebview?.api) {
+      fetchVersion()
+    } else {
+      window.addEventListener('pywebviewready', fetchVersion)
+      return () => window.removeEventListener('pywebviewready', fetchVersion)
+    }
   }, [])
 
   const overlayKey = new URLSearchParams(window.location.search).get('overlay')
