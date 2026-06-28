@@ -457,6 +457,17 @@ Terminal 2:  python main.py --dev
 | Powerplay tab added to Galaxy page (My Power / System Lookup / Powers Reference) | DONE | `frontend/src/pages/Galaxy.jsx`, `main.py`, `api/edsm.py` |
 | README expanded with step-by-step end-user install instructions | DONE | `README.md` |
 
+## Build status — Session 13 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `build_local.bat` — one-click local build + desktop shortcut creator | DONE | `build_local.bat` |
+| `frontend/public/icon.ico` — purple ED-style diamond icon (256px, generated with Pillow) | DONE | `frontend/public/icon.ico` |
+| `vite.config.js` — `base: './'` so asset paths are relative (fixes `file://` blank page) | DONE | `frontend/vite.config.js` |
+| `main.py` — `BASE_DIR` uses `sys._MEIPASS` when frozen (fixes bundled file resolution) | DONE | `main.py` |
+| `main.jsx` — `BrowserRouter` → `HashRouter` (fixes file-not-found crash on nav click) | DONE | `frontend/src/main.jsx` |
+| Desktop shortcut `EDTC.lnk` pointing to `dist\EDTC.exe` | DONE | Desktop |
+
 ## Known issues / notes for next session
 
 - Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
@@ -465,6 +476,7 @@ Terminal 2:  python main.py --dev
 - pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled until pygame adds 3.14 support. CI builds use Python 3.12 so the .exe has audio.
 - Thargoid War tab not yet built (next candidate for Galaxy page).
 - Gather feedback from alpha users and triage bugs before v0.2.0.
+- `build_local.bat` has `pause` calls that block headless execution — fine for double-click use, just be aware if scripting it.
 
 ---
 *Session checkpoint: 2026-06-27 20:58:19*
@@ -534,3 +546,57 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 23:29:04*
+
+---
+*Session checkpoint: 2026-06-27 23:30:07*
+
+---
+*Session checkpoint: 2026-06-28 01:33:31*
+
+---
+*Session checkpoint: 2026-06-28 01:35:37*
+
+---
+*Session checkpoint: 2026-06-28 01:36:37*
+
+---
+*Session checkpoint: 2026-06-28 01:38:18*
+
+---
+*Session checkpoint: 2026-06-28 01:40:37*
+
+---
+*Session checkpoint: 2026-06-28 01:42:26*
+
+---
+*Session checkpoint: 2026-06-28 01:43:20*
+
+---
+*Session checkpoint: 2026-06-28 01:46:31*
+
+---
+*Session checkpoint: 2026-06-28 01:47:58*
+
+---
+*Session checkpoint: 2026-06-28 01:48:15*
+
+---
+*Session checkpoint: 2026-06-28 01:48:43*
+
+---
+*Session checkpoint: 2026-06-28 01:49:19*
+
+---
+*Session checkpoint: 2026-06-28 01:49:54*
+
+---
+*Session checkpoint: 2026-06-28 01:50:12*
+
+---
+*Session checkpoint: 2026-06-28 01:53:50*
+
+---
+*Session checkpoint: 2026-06-28 01:54:40*
+
+---
+*Session checkpoint: 2026-06-28 01:57:04*

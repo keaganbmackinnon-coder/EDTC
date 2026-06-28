@@ -1,16 +1,30 @@
 import json
+import logging
 import sys
 import threading
+import traceback
 from pathlib import Path
 
 import webview
+
+logging.basicConfig(
+    filename=Path.home() / "edtc_debug.log",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+
+def _log_exception(exc_type, exc_value, exc_tb):
+    logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_tb))
+    sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+sys.excepthook = _log_exception
 
 from core.database import init_db
 from core.journal import JournalWatcher
 from core.overlay import OverlayManager
 from core.tray import TrayIcon
 
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(sys._MEIPASS) if getattr(sys, "frozen", False) else Path(__file__).parent
 FRONTEND_DIST = BASE_DIR / "frontend" / "dist" / "index.html"
 DEV_URL = "http://localhost:5173"
 
