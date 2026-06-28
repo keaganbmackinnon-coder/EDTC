@@ -435,9 +435,33 @@ Terminal 2:  python main.py --dev
 ## Known issues / notes for next session
 
 - EDSM Community Goals: empty list = no active CGs right now, not a bug. HTML in `description`/`objective` stripped with regex.
-- `data/commodities.json`, `data/blueprints.json`, `data/engineers.json`, `data/guardian_sites.json` are minimal stubs — replace with full EDCD/Canonn datasets.
 - Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
+
+---
+
+## Build status — Session 12 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `data/blueprints.json` — 240 real blueprints from EDEngineer | DONE | `data/blueprints.json` |
+| `data/commodities.json` — 159 tradeable commodities from EDCD/FDevIDs | DONE | `data/commodities.json` |
+| `data/engineers.json` — all 23 engineers with full unlock/invite/system data | DONE | `data/engineers.json` |
+| `data/synthesis.json` — 39 synthesis recipes | DONE | `data/synthesis.json` |
+| `data/tech_brokers.json` — 25 Guardian + Human tech broker items | DONE | `data/tech_brokers.json` |
+| `scripts/build_data.py` — reproducible fetch+transform script | DONE | `scripts/build_data.py` |
+| Overlay toggle fix — track shown state internally (pywebview `window.shown` unreliable) | DONE | `core/overlay.py` |
+| Per-overlay opacity slider (10–100%), persisted in prefs DB | DONE | `core/overlay.py`, `main.py`, `Overlays.jsx` |
+| Overlay black background fix — set body/html transparent in overlay mode | DONE | `frontend/src/App.jsx` |
+| **v0.1.0 alpha released** via GitHub Actions | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases |
+
+## Known issues / notes for next session
+
+- Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
+- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled until pygame adds 3.14 support. CI builds use Python 3.12 so the .exe has audio.
+- Gather feedback from alpha users and triage bugs before v0.2.0.
 
 ---
 *Session checkpoint: 2026-06-27 20:58:19*
@@ -447,3 +471,51 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 21:00:14*
+
+---
+*Session checkpoint: 2026-06-27 21:01:18*
+
+---
+*Session checkpoint: 2026-06-27 21:02:02*
+
+---
+*Session checkpoint: 2026-06-27 21:15:05*
+
+---
+*Session checkpoint: 2026-06-27 21:18:10*
+
+---
+*Session checkpoint: 2026-06-27 21:21:50*
+
+---
+*Session checkpoint: 2026-06-27 21:22:42*
+
+---
+*Session checkpoint: 2026-06-27 21:23:18*
+
+---
+*Session checkpoint: 2026-06-27 22:58:47*
+
+---
+*Session checkpoint: 2026-06-27 23:01:10*
+
+---
+*Session checkpoint: 2026-06-27 23:02:15*
+
+---
+*Session checkpoint: 2026-06-27 23:05:09*
+
+---
+*Session checkpoint: 2026-06-27 23:07:15*
+
+---
+*Session checkpoint: 2026-06-27 23:07:50*
+
+---
+*Session checkpoint: 2026-06-27 23:08:47*
+
+---
+*Session checkpoint: 2026-06-27 23:18:42*
+
+---
+*Session checkpoint: 2026-06-27 23:19:53*
