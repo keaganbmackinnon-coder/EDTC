@@ -533,4 +533,46 @@ Terminal 2:  python main.py --dev
 *Session 16 complete — 2026-06-28*
 
 ---
+
+## Build status — Session 17 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| Orange top-down Sidewinder icon generated with Pillow (256/128/64/48/32/16px multi-size ICO) | DONE | `frontend/public/icon.ico` |
+| `<link rel="icon">` added to index.html so webview uses the sidewinder as favicon | DONE | `frontend/index.html` |
+| `--icon "frontend/public/icon.ico"` added to Windows PyInstaller step — icon now embedded in .exe | DONE | `.github/workflows/build.yml` |
+| Windows icon cache cleared (`iconcache*.db` deleted, Explorer restarted) to flush stale floppy icon | DONE | — |
+| v0.2.6 released — sidewinder icon baked into .exe permanently | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.6 |
+| Local install updated to v0.2.6 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+
+## Key notes from Session 17
+
+- **Why it kept reverting**: v0.2.1–v0.2.5 had no `--icon` flag, so PyInstaller used its default floppy-disk icon every build. Adding `--icon` is permanent — all future CI builds embed the sidewinder.
+- **Icon cache**: Windows caches `.exe` icons in `%LOCALAPPDATA%\Microsoft\Windows\Explorer\iconcache*.db`. When a new .exe replaces an old one, the floppy can persist until the cache is flushed. Cleared once manually; will not recur since the icon is now stable across builds.
+- **Desktop shortcut**: `_create_desktop_shortcut()` already sets `IconLocation = exe,0`, so it always reads the icon from the .exe itself — no separate shortcut icon management needed.
+- **macOS/Linux**: `--icon` not added to those CI steps (macOS needs `.icns`, Linux has no native support). Windows is the primary target; revisit if macOS packaging becomes a priority.
+
+## Known issues / notes for next session
+
+- All previous known issues from Session 16 still apply.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
+- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+
+---
+*Session 17 complete — 2026-06-28*
+
+---
 *Session checkpoint: 2026-06-28 12:34:59*
+
+---
+*Session checkpoint: 2026-06-28 12:35:26*
+
+---
+*Session checkpoint: 2026-06-28 12:35:33*
+
+---
+*Session checkpoint: 2026-06-28 12:44:10*
+
+---
+*Session checkpoint: 2026-06-28 12:46:46*
