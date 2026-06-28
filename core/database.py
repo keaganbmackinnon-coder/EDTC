@@ -106,6 +106,19 @@ def init_db():
                 updated      TEXT DEFAULT (datetime('now'))
             );
 
+            CREATE TABLE IF NOT EXISTS trade_log (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                type      TEXT NOT NULL,
+                commodity TEXT NOT NULL,
+                quantity  INTEGER DEFAULT 0,
+                price     INTEGER DEFAULT 0,
+                total     INTEGER DEFAULT 0,
+                profit    INTEGER DEFAULT 0,
+                station   TEXT DEFAULT '',
+                system    TEXT DEFAULT '',
+                timestamp TEXT DEFAULT (datetime('now'))
+            );
+
             CREATE TABLE IF NOT EXISTS guardian_visits (
                 site_id          TEXT PRIMARY KEY,
                 visited          INTEGER DEFAULT 0,
@@ -606,6 +619,34 @@ def get_guardian_visits() -> dict:
     with _conn() as conn:
         rows = conn.execute("SELECT * FROM guardian_visits").fetchall()
         return {r["site_id"]: dict(r) for r in rows}
+
+
+def add_trade_entry(
+    type_: str, commodity: str, quantity: int, price: int,
+    total: int, profit: int, station: str, system: str
+) -> dict:
+    with _conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO trade_log (type, commodity, quantity, price, total, profit, station, system) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (type_, commodity, quantity, price, total, profit, station, system),
+        )
+        row = conn.execute("SELECT * FROM trade_log WHERE id=?", (cur.lastrowid,)).fetchone()
+        return dict(row)
+
+
+def get_trade_log(limit: int = 200) -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM trade_log ORDER BY timestamp DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def clear_trade_log() -> bool:
+    with _conn() as conn:
+        conn.execute("DELETE FROM trade_log")
+    return True
 
 
 def set_guardian_visit(site_id: str, visited: bool, data_collected: bool, notes: str) -> None:

@@ -372,3 +372,41 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:39:45*
+
+---
+*Session checkpoint: 2026-06-27 20:40:46*
+
+---
+*Session checkpoint: 2026-06-27 20:43:45*
+
+---
+*Session checkpoint: 2026-06-27 20:46:46*
+
+---
+
+## Build status — Session 10 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `trade_log` DB table + `add_trade_entry`, `get_trade_log`, `clear_trade_log` | DONE | `core/database.py` |
+| `_current_station` state tracking | DONE | `main.py` |
+| `Docked`, `MarketBuy`, `MarketSell` added to journal dispatcher | DONE | `main.py` |
+| `_handle_market_buy`, `_handle_market_sell` handlers + `trade_log_update` event | DONE | `main.py` |
+| `get_trade_log`, `clear_trade_log`, `find_nearest_service`, `get_commodities` API methods | DONE | `main.py` |
+| `data/commodities.json` stub (8 commodities with average prices + categories) | DONE | `data/commodities.json` |
+| `Trading.jsx` — 4-tab UI (Commodity Search / Nearest Service / Trade History / Commodity Prices) | DONE | `frontend/src/pages/Trading.jsx` |
+| Commodity Search tab — autocomplete from commodities.json, Spansh search, buy/sell/supply display | DONE | `frontend/src/pages/Trading.jsx` |
+| Nearest Service tab — 12 service type chips, system input → Spansh nearest station | DONE | `frontend/src/pages/Trading.jsx` |
+| Trade History tab — live journal-tracked buys/sells, spent/earned/profit totals, buy/sell filter | DONE | `frontend/src/pages/Trading.jsx` |
+| Commodity Prices tab — reference browse with category filter, price bar chart | DONE | `frontend/src/pages/Trading.jsx` |
+
+## Known issues / notes for next session
+
+- All 10 main pages are now COMPLETE. No more "Coming Soon" stubs.
+- `data/commodities.json` is a minimal stub with 8 entries. Replace with the full EDCD commodity list for complete autocomplete coverage.
+- Spansh `nearest_with_service` response shape is best-guess — verify field names if results look wrong.
+- Trade History profit field is from the journal `Profit` key (net profit after accounting for buy price). If 0, journal may not include it; sell total minus buy total gives a rough manual alternative.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
+
+---
+*Session checkpoint: 2026-06-27*

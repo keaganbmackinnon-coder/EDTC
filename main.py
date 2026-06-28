@@ -66,6 +66,7 @@ class API:
         self._exo_state: dict[tuple, int] = {}
         self._fss_bodies: list[dict] = []
         # auto-jump state
+        self._current_station: str = ""
         self._auto_jump_active: bool = False
         self._auto_jump_key: str = "j"
         self._auto_jump_delay: int = 10
@@ -143,6 +144,13 @@ class API:
             self._handle_progress(event)
         elif event_name == "Statistics":
             self._handle_statistics(event)
+        elif event_name == "Docked":
+            self._current_station = event.get("StationName", "")
+            self._current_system = event.get("StarSystem", self._current_system)
+        elif event_name == "MarketBuy":
+            self._handle_market_buy(event)
+        elif event_name == "MarketSell":
+            self._handle_market_sell(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -474,6 +482,27 @@ class API:
                 eng.get("Rank", 0),
             )
         self._emit("engineer_progress_update", {})
+
+    def _handle_market_buy(self, event: dict):
+        commodity = event.get("Type_Localised") or event.get("Type", "")
+        quantity = int(event.get("Count", 0))
+        price = int(event.get("BuyPrice", 0))
+        total = int(event.get("TotalCost", price * quantity))
+        from core.database import add_trade_entry
+        entry = add_trade_entry("buy", commodity, quantity, price, total, 0,
+                                self._current_station, self._current_system)
+        self._emit("trade_log_update", {"entry": entry})
+
+    def _handle_market_sell(self, event: dict):
+        commodity = event.get("Type_Localised") or event.get("Type", "")
+        quantity = int(event.get("Count", 0))
+        price = int(event.get("SellPrice", 0))
+        total = int(event.get("TotalSale", price * quantity))
+        profit = int(event.get("Profit", 0))
+        from core.database import add_trade_entry
+        entry = add_trade_entry("sell", commodity, quantity, price, total, profit,
+                                self._current_station, self._current_system)
+        self._emit("trade_log_update", {"entry": entry})
 
     def _handle_commander(self, event: dict):
         from core.database import set_cmdr_stat
@@ -904,6 +933,34 @@ class API:
             return True
         except Exception:
             return False
+
+    # --- Trading ---
+
+    def get_trade_log(self) -> list:
+        from core.database import get_trade_log
+        return get_trade_log()
+
+    def clear_trade_log(self) -> bool:
+        from core.database import clear_trade_log
+        return clear_trade_log()
+
+    def find_nearest_service(self, system: str, service: str) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                return await spansh.nearest_with_service(system, service)
+            finally:
+                await spansh.close()
+        try:
+            result = asyncio.run(_run())
+            return result or {"error": "No result found"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_commodities(self) -> list:
+        return self._load_json("commodities.json").get("commodities", [])
 
     # --- Guardian ---
 
