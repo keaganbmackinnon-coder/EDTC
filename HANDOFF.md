@@ -466,7 +466,10 @@ Terminal 2:  python main.py --dev
 | `vite.config.js` — `base: './'` so asset paths are relative (fixes `file://` blank page) | DONE | `frontend/vite.config.js` |
 | `main.py` — `BASE_DIR` uses `sys._MEIPASS` when frozen (fixes bundled file resolution) | DONE | `main.py` |
 | `main.jsx` — `BrowserRouter` → `HashRouter` (fixes file-not-found crash on nav click) | DONE | `frontend/src/main.jsx` |
-| Desktop shortcut `EDTC.lnk` pointing to `dist\EDTC.exe` | DONE | Desktop |
+| `main.py` — `_create_desktop_shortcut()` auto-creates `.lnk` on first frozen launch | DONE | `main.py` |
+| `api/edsm.py` — `get_system_thargoid()` with `showFactions=1&showThargoids=1` | DONE | `api/edsm.py` |
+| `main.py` — `get_thargoid_system`, `get_thargoid_nearby` API methods | DONE | `main.py` |
+| `Galaxy.jsx` — Thargoid War tab (System Status / Maelstroms / Nearby Threat) | DONE | `frontend/src/pages/Galaxy.jsx` |
 
 ## Known issues / notes for next session
 
@@ -474,9 +477,9 @@ Terminal 2:  python main.py --dev
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
 - `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
 - pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled until pygame adds 3.14 support. CI builds use Python 3.12 so the .exe has audio.
-- Thargoid War tab not yet built (next candidate for Galaxy page).
+- Maelstrom system names are community-reported best-guess — verify on EDSM or Canonn if needed.
+- `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` — coverage varies; some affected systems may not appear.
 - Gather feedback from alpha users and triage bugs before v0.2.0.
-- `build_local.bat` has `pause` calls that block headless execution — fine for double-click use, just be aware if scripting it.
 
 ---
 *Session checkpoint: 2026-06-27 20:58:19*
@@ -621,3 +624,6 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-28 02:09:00*
+
+---
+*Session checkpoint: 2026-06-28 02:12:05*
