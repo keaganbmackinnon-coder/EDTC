@@ -277,7 +277,26 @@ Terminal 2:  python main.py --dev
 - GalNet content may contain HTML entities — stripped with regex but complex HTML may show raw.
 - EDSM faction/traffic data freshness depends on player submissions; some systems may be stale.
 - `get_factions` state fields: `activeStates` entries may be objects `{state}` or plain strings — handled defensively in Galaxy.jsx.
-- Remaining stub pages: Guardian, Trading (all still "Coming Soon").
+- Remaining stub pages: Trading (still "Coming Soon").
+
+---
+
+## Build status — Session 9 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `guardian_visits` DB table + `get_guardian_visits`, `set_guardian_visit` | DONE | `core/database.py` |
+| `get_guardian_sites`, `set_guardian_visit` API methods | DONE | `main.py` |
+| `data/guardian_sites.json` expanded to 8 known sites | DONE | `data/guardian_sites.json` |
+| `Guardian.jsx` — 3-tab UI (Sites / Materials / Landmarks) | DONE | `frontend/src/pages/Guardian.jsx` |
+| Sites tab — ruins/structure browser with type filter, visit+data checkboxes, personal notes, SQLite-backed | DONE | `frontend/src/pages/Guardian.jsx` |
+| Materials tab — Guardian material farming reference (15 materials), Tech Broker Guardian items cross-ref | DONE | `frontend/src/pages/Guardian.jsx` |
+| Landmarks tab — 10 curated ED landmarks with coordinates, distances from Sol, tag filter, copy-system | DONE | `frontend/src/pages/Guardian.jsx` |
+
+## Known issues / notes for next session
+
+- guardian_sites.json is a stub with 8 sites — replace with full Canonn dataset for complete coverage (link in source field).
+- Trading page is the last remaining "Coming Soon" stub.
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -347,3 +366,9 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:35:03*
+
+---
+*Session checkpoint: 2026-06-27 20:35:31*
+
+---
+*Session checkpoint: 2026-06-27 20:39:45*

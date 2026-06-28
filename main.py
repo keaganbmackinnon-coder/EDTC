@@ -905,6 +905,28 @@ class API:
         except Exception:
             return False
 
+    # --- Guardian ---
+
+    def get_guardian_sites(self) -> dict:
+        from core.database import get_guardian_visits
+        visits = get_guardian_visits()
+        data = self._load_json("guardian_sites.json")
+        ruins = data.get("ruins", [])
+        structures = data.get("structures", [])
+        for site in ruins + structures:
+            v = visits.get(site["id"], {})
+            site["visited"] = bool(v.get("visited", 0))
+            site["data_collected"] = bool(v.get("data_collected", 0))
+            site["notes"] = v.get("notes", "")
+        return {"ruins": ruins, "structures": structures}
+
+    def set_guardian_visit(
+        self, site_id: str, visited: bool, data_collected: bool, notes: str = ""
+    ) -> bool:
+        from core.database import set_guardian_visit
+        set_guardian_visit(site_id, visited, data_collected, notes)
+        return True
+
     # --- Galaxy ---
 
     def _edsm_run(self, coro_factory):

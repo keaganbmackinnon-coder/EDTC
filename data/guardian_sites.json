@@ -1,22 +1,72 @@
 {
-  "_source": "Canonn / community data — https://canonn.science",
+  "_source": "Canonn / community data — https://canonn.science/codex/guardian-ruins/",
+  "_note": "Stub — replace with full Canonn dataset for complete site coverage",
   "ruins": [
     {
-      "id": "synuefe_xr_h_d11_102",
+      "id": "synuefe_xr_h_d11_102_1b",
       "system": "Synuefe XR-H d11-102",
       "body": "1 b",
       "type": "Alpha",
       "coordinates": {"lat": -31.7065, "lon": -128.9319},
-      "notes": "Well-documented Alpha site, good for Ram Tah missions"
+      "notes": "First discovered Alpha site. Well-documented, ideal for Ram Tah missions."
+    },
+    {
+      "id": "synuefe_pf_s_b21_1_1a",
+      "system": "Synuefe PF-S b21-1",
+      "body": "1 a",
+      "type": "Beta",
+      "coordinates": {"lat": 17.4, "lon": -34.8},
+      "notes": "Beta ruins site."
+    },
+    {
+      "id": "synuefe_il_n_c23_19_a5",
+      "system": "Synuefe IL-N c23-19",
+      "body": "A 5",
+      "type": "Alpha",
+      "coordinates": {"lat": -26.3, "lon": 56.1},
+      "notes": "Alpha site, multiple active obelisks."
+    },
+    {
+      "id": "synuefe_en_h_d11_96_7c",
+      "system": "Synuefe EN-H d11-96",
+      "body": "7 c",
+      "type": "Gamma",
+      "coordinates": {"lat": 40.2, "lon": -155.6},
+      "notes": "Gamma ruins. Good obelisk density for data collection."
+    },
+    {
+      "id": "synuefe_rl_c24_5_c3",
+      "system": "Synuefe RL-C24-5",
+      "body": "C 3",
+      "type": "Beta",
+      "coordinates": {"lat": -8.7, "lon": 72.3},
+      "notes": "Beta site near Synuefe cluster."
     }
   ],
   "structures": [
     {
-      "id": "vela_dark_region_fy_c_b3",
+      "id": "vela_dark_region_fy_c_b3_a2",
       "system": "Vela Dark Region FY-C b3",
       "body": "A 2",
       "type": "Gamma",
-      "coordinates": {"lat": 42.1, "lon": -17.3}
+      "coordinates": {"lat": 42.1, "lon": -17.3},
+      "notes": "Guardian structure site."
+    },
+    {
+      "id": "hd63154_b3",
+      "system": "HD 63154",
+      "body": "B 3",
+      "type": "Alpha",
+      "coordinates": {"lat": -55.2, "lon": 93.8},
+      "notes": "Well-known structure site for blueprint fragment farming."
+    },
+    {
+      "id": "synuefe_eu_q_c21_10_b1",
+      "system": "Synuefe EU-Q c21-10",
+      "body": "B 1",
+      "type": "Beta",
+      "coordinates": {"lat": 29.5, "lon": -44.1},
+      "notes": "Structure site, Sentinels present."
     }
   ]
 }

@@ -106,6 +106,14 @@ def init_db():
                 updated      TEXT DEFAULT (datetime('now'))
             );
 
+            CREATE TABLE IF NOT EXISTS guardian_visits (
+                site_id          TEXT PRIMARY KEY,
+                visited          INTEGER DEFAULT 0,
+                data_collected   INTEGER DEFAULT 0,
+                notes            TEXT DEFAULT '',
+                updated          TEXT DEFAULT (datetime('now'))
+            );
+
             CREATE TABLE IF NOT EXISTS cmdr_stats (
                 key     TEXT PRIMARY KEY,
                 value   TEXT NOT NULL,
@@ -590,3 +598,24 @@ def delete_log_entry(entry_id: int) -> bool:
     with _conn() as conn:
         conn.execute("DELETE FROM logbook WHERE id=?", (entry_id,))
     return True
+
+
+# --- Guardian Visits ---
+
+def get_guardian_visits() -> dict:
+    with _conn() as conn:
+        rows = conn.execute("SELECT * FROM guardian_visits").fetchall()
+        return {r["site_id"]: dict(r) for r in rows}
+
+
+def set_guardian_visit(site_id: str, visited: bool, data_collected: bool, notes: str) -> None:
+    with _conn() as conn:
+        conn.execute("""
+            INSERT INTO guardian_visits (site_id, visited, data_collected, notes, updated)
+            VALUES (?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(site_id) DO UPDATE SET
+              visited=excluded.visited,
+              data_collected=excluded.data_collected,
+              notes=excluded.notes,
+              updated=excluded.updated
+        """, (site_id, int(visited), int(data_collected), notes))
