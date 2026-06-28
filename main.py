@@ -65,6 +65,11 @@ class API:
         # exo state: (system, body, species) -> scan_count
         self._exo_state: dict[tuple, int] = {}
         self._fss_bodies: list[dict] = []
+        # auto-jump state
+        self._auto_jump_active: bool = False
+        self._auto_jump_key: str = "j"
+        self._auto_jump_delay: int = 10
+        self._auto_jump_timer: threading.Timer | None = None
 
     def set_window(self, window):
         self._window = window
@@ -103,6 +108,18 @@ class API:
             self._handle_construction_depot(event)
         elif event_name == "CargoTransfer":
             self._handle_cargo_transfer(event)
+        elif event_name == "CarrierStats":
+            self._handle_carrier_stats(event)
+        elif event_name == "CarrierJump":
+            self._handle_carrier_jump(event)
+        elif event_name == "CarrierJumpRequest":
+            self._handle_carrier_jump_request(event)
+        elif event_name == "CarrierJumpCancelled":
+            self._handle_carrier_jump_cancelled(event)
+        elif event_name == "CarrierDepositFuel":
+            self._handle_carrier_deposit_fuel(event)
+        elif event_name == "CarrierBuy":
+            self._handle_carrier_buy(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -182,6 +199,47 @@ class API:
         self._overlay_manager.show("system_preview")
         self._overlay_manager.emit_to_overlay("system_preview", "system_jumped", preview_payload)
         self._overlay_manager.hide_after("system_preview", 15)
+
+        if self._auto_jump_active:
+            self._schedule_next_jump()
+
+    def _schedule_next_jump(self):
+        if self._auto_jump_timer:
+            self._auto_jump_timer.cancel()
+            self._auto_jump_timer = None
+
+        if not self._active_route:
+            self.stop_auto_jump()
+            return
+
+        systems = self._active_route.get("systems", [])
+        current = self._active_route.get("current", 0)
+        if current >= len(systems) - 1:
+            self.stop_auto_jump()
+            self._emit("auto_jump_complete", {})
+            return
+
+        next_system = systems[current + 1] if current + 1 < len(systems) else ""
+        self._emit("auto_jump_countdown", {
+            "seconds": self._auto_jump_delay,
+            "next_system": next_system,
+            "current": current,
+            "total": len(systems),
+        })
+
+        def _fire():
+            if not self._auto_jump_active:
+                return
+            try:
+                import keyboard as kb
+                kb.send(self._auto_jump_key)
+                self._emit("auto_jump_fired", {"key": self._auto_jump_key, "next_system": next_system})
+            except Exception as e:
+                self._emit("auto_jump_error", {"error": str(e)})
+
+        self._auto_jump_timer = threading.Timer(self._auto_jump_delay, _fire)
+        self._auto_jump_timer.daemon = True
+        self._auto_jump_timer.start()
 
     def _handle_fss_discovery(self, event: dict):
         payload = {
@@ -273,6 +331,53 @@ class API:
         from core.database import update_fc_cargo_transfer
         updated = update_fc_cargo_transfer(transfers)
         self._emit("fc_cargo_update", {"cargo": updated})
+
+    def _handle_carrier_stats(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier(event)
+        self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_carrier_jump(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID"),
+            "location": event.get("StarSystem", ""),
+            "pending_jump": "",
+        })
+        self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_carrier_jump_request(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID"),
+            "pending_jump": event.get("SystemName", ""),
+        })
+        self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_carrier_jump_cancelled(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID"),
+            "pending_jump": "",
+        })
+        self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_carrier_deposit_fuel(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID"),
+            "FuelLevel": event.get("Total", 0),
+        })
+        self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_carrier_buy(self, event: dict):
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID") or event.get("BoughtAtMarket"),
+            "Callsign": event.get("Callsign", ""),
+            "location": event.get("Location", ""),
+        })
+        self._emit("carrier_update", {"carrier": carrier})
 
     # --- Builds ---
 
@@ -421,6 +526,58 @@ class API:
         set_fc_cargo_items([])
         self._emit("fc_cargo_update", {"cargo": []})
         return True
+
+    # --- Fleet Carriers ---
+
+    def get_carriers(self) -> list:
+        from core.database import get_carriers
+        return get_carriers()
+
+    def plan_fc_route(self, origin: str, destination: str) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                jumps = await spansh.fleet_carrier_route(origin, destination)
+                total_dist = sum(j.get("distance_jumped", j.get("distance", 0)) for j in jumps)
+                return {
+                    "jumps": jumps,
+                    "total_jumps": len(jumps),
+                    "total_distance": round(total_dist, 1),
+                }
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "jumps": [], "total_jumps": 0, "total_distance": 0}
+
+    # --- Auto-Jump ---
+
+    def start_auto_jump(self, key: str = "j", delay: int = 10) -> dict:
+        self._auto_jump_active = True
+        self._auto_jump_key = key
+        self._auto_jump_delay = max(3, int(delay))
+        status = {"active": True, "key": key, "delay": self._auto_jump_delay}
+        self._emit("auto_jump_status", status)
+        return status
+
+    def stop_auto_jump(self) -> dict:
+        self._auto_jump_active = False
+        if self._auto_jump_timer:
+            self._auto_jump_timer.cancel()
+            self._auto_jump_timer = None
+        status = {"active": False}
+        self._emit("auto_jump_status", status)
+        return status
+
+    def get_auto_jump_status(self) -> dict:
+        return {
+            "active": self._auto_jump_active,
+            "key": self._auto_jump_key,
+            "delay": self._auto_jump_delay,
+        }
 
     def search_commodity_markets(self, system: str, commodity: str) -> list:
         import asyncio

@@ -77,6 +77,20 @@ def init_db():
                 count     INTEGER DEFAULT 0,
                 updated   TEXT DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS carriers (
+                carrier_id   TEXT PRIMARY KEY,
+                name         TEXT DEFAULT '',
+                callsign     TEXT DEFAULT '',
+                location     TEXT DEFAULT '',
+                fuel         INTEGER DEFAULT 0,
+                jump_range   INTEGER DEFAULT 500,
+                finance      TEXT DEFAULT '{}',
+                space_usage  TEXT DEFAULT '{}',
+                services     TEXT DEFAULT '[]',
+                pending_jump TEXT DEFAULT '',
+                updated      TEXT DEFAULT (datetime('now'))
+            );
         """)
 
 
@@ -372,3 +386,63 @@ def update_fc_cargo_transfer(transfers: list) -> list:
                 )
         conn.execute("DELETE FROM fc_cargo WHERE count <= 0")
     return get_fc_cargo()
+
+
+# --- Carriers ---
+
+def get_carriers() -> list:
+    with _conn() as conn:
+        rows = conn.execute("SELECT * FROM carriers ORDER BY updated DESC").fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["finance"] = json.loads(d["finance"])
+            d["space_usage"] = json.loads(d["space_usage"])
+            d["services"] = json.loads(d["services"])
+            result.append(d)
+        return result
+
+
+def upsert_carrier(data: dict) -> dict:
+    carrier_id = str(data.get("CarrierID") or data.get("carrier_id", ""))
+    if not carrier_id:
+        return {}
+    with _conn() as conn:
+        existing = conn.execute(
+            "SELECT * FROM carriers WHERE carrier_id=?", (carrier_id,)
+        ).fetchone()
+        base = dict(existing) if existing else {}
+
+        name = data.get("Name", base.get("name", ""))
+        callsign = data.get("Callsign", base.get("callsign", ""))
+        location = data.get("location", base.get("location", ""))
+        fuel = data.get("FuelLevel", base.get("fuel", 0))
+        jump_range = data.get("JumpRangeCurr", base.get("jump_range", 500))
+        finance = json.dumps(data.get("Finance", json.loads(base.get("finance", "{}"))))
+        space_usage = json.dumps(data.get("SpaceUsage", json.loads(base.get("space_usage", "{}"))))
+        services = json.dumps([
+            {"role": c.get("CrewRole", ""), "active": c.get("Activated", False)}
+            for c in data.get("Crew", json.loads(base.get("services", "[]")))
+        ] if "Crew" in data else json.loads(base.get("services", "[]")))
+        pending_jump = data.get("pending_jump", base.get("pending_jump", ""))
+
+        conn.execute("""
+            INSERT INTO carriers
+                (carrier_id, name, callsign, location, fuel, jump_range,
+                 finance, space_usage, services, pending_jump, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(carrier_id) DO UPDATE SET
+                name=excluded.name, callsign=excluded.callsign,
+                location=excluded.location, fuel=excluded.fuel,
+                jump_range=excluded.jump_range, finance=excluded.finance,
+                space_usage=excluded.space_usage, services=excluded.services,
+                pending_jump=excluded.pending_jump, updated=excluded.updated
+        """, (carrier_id, name, callsign, location, fuel, jump_range,
+              finance, space_usage, services, pending_jump))
+
+        row = conn.execute("SELECT * FROM carriers WHERE carrier_id=?", (carrier_id,)).fetchone()
+        d = dict(row)
+        d["finance"] = json.loads(d["finance"])
+        d["space_usage"] = json.loads(d["space_usage"])
+        d["services"] = json.loads(d["services"])
+        return d

@@ -16,6 +16,8 @@ WATCHED_EVENTS = {
     "EngineerProgress", "LoadGame", "Commander", "Fileheader",
     "ColonisationContribution", "ColonisationConstructionDepot",
     "ColonisationConstructionProgress",
+    "CarrierStats", "CarrierJump", "CarrierJumpRequest",
+    "CarrierJumpCancelled", "CarrierBuy", "CarrierDepositFuel",
 }
 
 
