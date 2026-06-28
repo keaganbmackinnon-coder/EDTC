@@ -608,3 +608,9 @@ Focus: Navigation page — making it work as well as possible end-to-end.
 
 ---
 *Session 18 complete — 2026-06-28*
+
+---
+*Session checkpoint: 2026-06-28 16:17:11*
+
+---
+*Session checkpoint: 2026-06-28 17:24:53*
