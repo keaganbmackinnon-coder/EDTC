@@ -68,7 +68,7 @@ export default function App() {
     }
   }, [])
 
-  const overlayKey = new URLSearchParams(window.location.hash.slice(1)).get('overlay')
+  const overlayKey = new URLSearchParams(window.location.hash.replace(/^#\/?/, '')).get('overlay')
   const OverlayComponent = overlayKey ? OVERLAY_MAP[overlayKey] : null
 
   if (OverlayComponent) {

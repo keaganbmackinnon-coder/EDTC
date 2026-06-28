@@ -20,6 +20,13 @@ window.__edtc = {
   },
 }
 
+// Set transparent background before React mounts so overlay windows never flash white
+const _overlayKey = new URLSearchParams(window.location.hash.replace(/^#\/?/, '')).get('overlay')
+if (_overlayKey) {
+  document.body.style.background = 'transparent'
+  document.documentElement.style.background = 'transparent'
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HashRouter>
