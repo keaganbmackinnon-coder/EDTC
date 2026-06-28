@@ -256,7 +256,28 @@ Terminal 2:  python main.py --dev
 - Road to Riches Spansh job takes ~10-30s; Promise blocks until done — normal.
 - EDSM body data only available for systems that have been visited and submitted by players.
 - Exobiology tab uses `get_exo_scans()` which returns in-progress (incomplete) scans only. Completed scans are cleared from the active list but remain in DB; no history view yet.
-- Remaining stub pages: Galaxy, Guardian, Trading (all still "Coming Soon").
+- Remaining stub pages: Guardian, Trading (all still "Coming Soon").
+
+---
+
+## Build status — Session 8 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `get_news`, `get_factions`, `get_stats` added to EdsmAPI | DONE | `api/edsm.py` |
+| `_edsm_run` helper + `get_galnet`, `get_system_factions`, `get_system_traffic`, `get_galaxy_stats` API methods | DONE | `main.py` |
+| `Galaxy.jsx` — 4-tab UI (GalNet / Factions / Traffic / Galaxy Stats) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| GalNet tab — live EDSM news, expandable articles with HTML stripped | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Factions tab — system search, influence bars, allegiance colors, state chips (active + pending) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Traffic tab — system traffic totals (total/week/day) + ship breakdown bars | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Galaxy Stats tab — EDSM universe stats: commanders, systems, bodies, stations, logs | DONE | `frontend/src/pages/Galaxy.jsx` |
+
+## Known issues / notes for next session
+
+- GalNet content may contain HTML entities — stripped with regex but complex HTML may show raw.
+- EDSM faction/traffic data freshness depends on player submissions; some systems may be stale.
+- `get_factions` state fields: `activeStates` entries may be objects `{state}` or plain strings — handled defensively in Galaxy.jsx.
+- Remaining stub pages: Guardian, Trading (all still "Coming Soon").
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -320,3 +341,9 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:30:10*
+
+---
+*Session checkpoint: 2026-06-27 20:31:36*
+
+---
+*Session checkpoint: 2026-06-27 20:35:03*

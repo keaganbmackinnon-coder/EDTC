@@ -116,3 +116,15 @@ class EdsmAPI(BaseAPI):
 
     async def get_traffic(self, system_name: str) -> dict:
         return await self.get("/api-system-v0/traffic", {"systemName": system_name})
+
+    # --- Galaxy ---
+
+    async def get_news(self) -> list:
+        data = await self.get("/api-v1/news", {})
+        return data if isinstance(data, list) else []
+
+    async def get_factions(self, system_name: str) -> dict:
+        return await self.get("/api-system-v1/factions", {"systemName": system_name}) or {}
+
+    async def get_stats(self) -> dict:
+        return await self.get("/api-v1/stats", {}) or {}

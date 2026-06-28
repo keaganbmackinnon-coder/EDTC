@@ -905,6 +905,36 @@ class API:
         except Exception:
             return False
 
+    # --- Galaxy ---
+
+    def _edsm_run(self, coro_factory):
+        import asyncio
+        from api.edsm import EdsmAPI
+        async def _run():
+            edsm = EdsmAPI()
+            try:
+                return await coro_factory(edsm)
+            finally:
+                await edsm.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_galnet(self) -> list:
+        result = self._edsm_run(lambda e: e.get_news())
+        return result if isinstance(result, list) else []
+
+    def get_system_factions(self, system_name: str) -> dict:
+        return self._edsm_run(lambda e: e.get_factions(system_name))
+
+    def get_system_traffic(self, system_name: str) -> dict:
+        return self._edsm_run(lambda e: e.get_traffic(system_name))
+
+    def get_galaxy_stats(self) -> dict:
+        result = self._edsm_run(lambda e: e.get_stats())
+        return result if isinstance(result, dict) else {}
+
     # --- Clipboard ---
 
     def copy_to_clipboard(self, text: str) -> bool:
