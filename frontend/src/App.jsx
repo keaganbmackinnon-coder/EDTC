@@ -43,6 +43,8 @@ export default function App() {
   const OverlayComponent = overlayKey ? OVERLAY_MAP[overlayKey] : null
 
   if (OverlayComponent) {
+    document.body.style.background = 'transparent'
+    document.documentElement.style.background = 'transparent'
     return <OverlayComponent />
   }
 
