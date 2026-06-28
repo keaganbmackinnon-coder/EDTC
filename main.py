@@ -1200,33 +1200,32 @@ class API:
 
 
 def _eddn_listener(api: API):
-    import asyncio
+    import time
     import zlib
-    import websockets
+    import zmq
 
-    async def _run():
-        uri = "wss://eddn.edcd.io:4430/subscribe"
-        while True:
-            try:
-                async with websockets.connect(uri, ping_interval=30, open_timeout=30) as ws:
-                    logging.info("EDDN connected")
-                    async for raw in ws:
-                        try:
-                            if isinstance(raw, bytes):
-                                data = zlib.decompress(raw)
-                            else:
-                                data = raw.encode() if isinstance(raw, str) else raw
-                            msg = json.loads(data)
-                            api._handle_eddn_message(msg)
-                        except Exception:
-                            pass
-            except Exception as e:
-                logging.warning(f"EDDN disconnected: {e}")
-                await asyncio.sleep(10)
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(_run())
+    context = zmq.Context()
+    while True:
+        sub = context.socket(zmq.SUB)
+        sub.setsockopt(zmq.RCVTIMEO, 60000)
+        sub.setsockopt_string(zmq.SUBSCRIBE, "")
+        try:
+            sub.connect("tcp://eddn.edcd.io:9500")
+            logging.info("EDDN ZMQ connected")
+            while True:
+                raw = sub.recv()
+                try:
+                    msg = json.loads(zlib.decompress(raw))
+                    api._handle_eddn_message(msg)
+                except Exception:
+                    pass
+        except zmq.error.Again:
+            logging.warning("EDDN ZMQ timeout, reconnecting")
+        except Exception as e:
+            logging.warning(f"EDDN ZMQ error: {e}")
+        finally:
+            sub.close()
+        time.sleep(5)
 
 
 def _setup_hotkeys(api: API):
