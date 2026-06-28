@@ -564,22 +564,47 @@ Terminal 2:  python main.py --dev
 *Session 17 complete — 2026-06-28*
 
 ---
-*Session checkpoint: 2026-06-28 12:34:59*
+
+## Build status — Session 18 (COMPLETE)
+
+Focus: Navigation page — making it work as well as possible end-to-end.
+
+| Item | Status | File |
+|---|---|---|
+| `Loadout` added to `STARTUP_EVENTS` so ship info seeds on replay | DONE | `core/journal.py` |
+| `_latest_journal()` fixed to sort by `mtime` not alphabetically — critical bug (old `Journal.22...` filenames sorted after new `Journal.2026...`) | DONE | `core/journal.py` |
+| `_current_ship` dict added to API state | DONE | `main.py` |
+| `_handle_loadout()` — extracts ship type/name/ident, MaxJumpRange, UnladenMass, FuelCapacity, CargoCapacity, and Guardian FSD Booster bonus | DONE | `main.py` |
+| `_GUARDIAN_BOOSTER_BONUS` — flat bonus lookup by module size (size5=10.5 ly, etc.) — booster doesn't scale with mass | DONE | `main.py` |
+| `get_ship_info()` — reads Status.json for live fuel+cargo, computes current jump range with correct formula | DONE | `main.py` |
+| Current jump range formula: `fsd_base = max_range − guardian_bonus`, `current = fsd_base × (unladen/mass) + guardian_bonus` | DONE | `main.py` |
+| `get_ship_info()` self-heal: if `_current_ship` empty, scans latest journal directly (fixes race condition with replay thread) | DONE | `main.py` |
+| `_push_startup()` thread: 1.5s after webview ready, re-emits `ship_changed` + `system_changed` (fixes race condition) | DONE | `main.py` |
+| `Spansh.neutron_route()` field fix: `distance_to_destination` → `distance_left` | DONE | `api/spansh.py` |
+| `Navigation.jsx` — full rewrite: 3-tab UI (Route Planner / Paste Route / Saved Routes) | DONE | `frontend/src/pages/Navigation.jsx` |
+| Ship info card: ship name, type, callsign, current jump range (prominent), max range (smaller), fuel, cargo | DONE | `frontend/src/pages/Navigation.jsx` |
+| Jump range input auto-fills from `current_jump_range ?? max_jump_range`; labelled "auto-filled from game" | DONE | `frontend/src/pages/Navigation.jsx` |
+| Neutron route planner: from/to system inputs, efficiency buttons (Balanced/Fast/Maximum), Plan Route button | DONE | `frontend/src/pages/Navigation.jsx` |
+| Route result display: waypoint list with neutron star indicator (⚡), jumps/distance totals, Save & Activate | DONE | `frontend/src/pages/Navigation.jsx` |
+| `ErrorBoundary` component wraps `<Routes>` to surface React render errors in-app instead of blank screen | DONE | `frontend/src/App.jsx` |
+
+## Key technical notes from Session 18
+
+- **Journal filename sort bug**: Old journals use `Journal.YYMMDDHHMMSS.NN.log` (e.g. `Journal.221003...`), new journals use `Journal.YYYY-MM-DDTHHMMSS.NN.log` (e.g. `Journal.2026-06-28T...`). Alphabetical sort puts old filenames AFTER new ones because `"22" > "20"`. Fix: sort by `mtime` (`key=lambda p: p.stat().st_mtime, reverse=True`).
+- **Guardian FSD Booster is a flat bonus**: `MaxJumpRange` in the Loadout event includes the booster. The booster (e.g. size 5 = +10.5 ly) doesn't scale with mass. Formula: strip the bonus, scale the FSD-only range linearly, add the bonus back. Scaling the full `MaxJumpRange` with `sqrt(unladen/mass)` was wrong.
+- **FSD range scales linearly with mass**: `range = OptMass/mass × constant` — so `currentRange = fsdBase × (unladen/current_mass)`. The exponent is 1 (not 0.5).
+- **`MaxJumpRange` at unladen mass**: The Loadout value is calculated at the ship's unladen mass (no fuel, no cargo).
+- **Status.json fuel cap**: FuelMain in Status.json can show fleet carrier tritium as FuelMain when docked on a carrier. Cap at `FuelCapacity.Main` from Loadout to avoid inflated values.
+- **`window.__edtc.on` signature**: two args `(eventType, handler)` — handler receives `payload` directly. Cleanup function returned. Pattern: `const off = window.__edtc?.on('ship_changed', payload => { ... })`.
+- **Never test in dev mode** (`python main.py --dev`): consistently shows blank screen in this environment. Always build (`npm run build`) and run production.
+
+## Known issues / notes for next session
+
+- Jump range is within 0.1 ly of game display (23.93 vs 24.04). The tiny residual is rounding in live fuel/cargo values read from Status.json — acceptable.
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
+- `data/guardian_sites.json` still only 8 sites.
+- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session checkpoint: 2026-06-28 12:35:26*
-
----
-*Session checkpoint: 2026-06-28 12:35:33*
-
----
-*Session checkpoint: 2026-06-28 12:44:10*
-
----
-*Session checkpoint: 2026-06-28 12:46:46*
-
----
-*Session checkpoint: 2026-06-28 12:47:40*
-
----
-*Session checkpoint: 2026-06-28 12:48:31*
+*Session 18 complete — 2026-06-28*

@@ -1,4 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Component } from 'react'
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(e) { return { error: e } }
+  render() {
+    if (this.state.error) return (
+      <div className="p-8 text-red-400 font-mono text-sm">
+        <div className="text-ed-orange font-semibold mb-2">Page error</div>
+        <pre className="whitespace-pre-wrap">{this.state.error?.message}</pre>
+        <button className="mt-4 btn-ghost text-xs" onClick={() => this.setState({ error: null })}>Dismiss</button>
+      </div>
+    )
+    return this.props.children
+  }
+}
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import Navigation from './pages/Navigation'
 import Trading from './pages/Trading'
@@ -94,6 +109,7 @@ export default function App() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-ed-dark">
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Navigate to="/navigation" replace />} />
           <Route path="/navigation"   element={<Navigation />} />
@@ -107,6 +123,7 @@ export default function App() {
           <Route path="/commander"    element={<Commander />} />
           <Route path="/overlays"     element={<Overlays />} />
         </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   )

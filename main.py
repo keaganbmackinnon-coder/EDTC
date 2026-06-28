@@ -91,6 +91,7 @@ class API:
         self._auto_jump_key: str = "j"
         self._auto_jump_delay: int = 10
         self._auto_jump_timer: threading.Timer | None = None
+        self._current_ship: dict = {}
 
     def set_window(self, window):
         self._window = window
@@ -181,6 +182,8 @@ class API:
             self._handle_nav_route(event)
         elif event_name == "NavRouteClear":
             self._handle_nav_route_clear()
+        elif event_name == "Loadout":
+            self._handle_loadout(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -567,6 +570,37 @@ class API:
                                 self._current_station, self._current_system)
         self._emit("trade_log_update", {"entry": entry})
 
+    # Guardian FSD Booster adds a flat range bonus (ly) that doesn't scale with mass.
+    _GUARDIAN_BOOSTER_BONUS = {1: 4.0, 2: 6.0, 3: 7.75, 4: 9.25, 5: 10.5}
+
+    def _handle_loadout(self, event: dict):
+        ship_type = event.get("Ship_Localised") or event.get("Ship", "")
+        fuel = event.get("FuelCapacity", {})
+
+        guardian_bonus = 0.0
+        for module in (event.get("Modules") or []):
+            item = module.get("Item", "").lower()
+            if "guardianfsdbooster" in item:
+                for part in item.split("_"):
+                    if part.startswith("size"):
+                        try:
+                            guardian_bonus = self._GUARDIAN_BOOSTER_BONUS.get(int(part[4:]), 0.0)
+                        except ValueError:
+                            pass
+                break
+
+        self._current_ship = {
+            "ship": ship_type,
+            "ship_name": event.get("ShipName", ""),
+            "ship_ident": event.get("ShipIdent", ""),
+            "max_jump_range": event.get("MaxJumpRange"),
+            "unladen_mass": event.get("UnladenMass"),
+            "fuel_capacity": fuel.get("Main") if isinstance(fuel, dict) else fuel,
+            "cargo_capacity": event.get("CargoCapacity"),
+            "guardian_booster_bonus": guardian_bonus,
+        }
+        self._emit("ship_changed", self.get_ship_info())
+
     def _handle_commander(self, event: dict):
         from core.database import set_cmdr_stat
         name = event.get("Name", "")
@@ -813,6 +847,36 @@ class API:
         from core.database import get_carriers
         return get_carriers()
 
+    def plan_neutron_route(self, origin: str, destination: str, range_ly: float, efficiency: int = 60) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                systems = await spansh.neutron_route(origin, destination, range_ly, efficiency)
+                total_jumps = sum(s.jumps for s in systems)
+                total_dist = sum(s.distance_jumped for s in systems)
+                return {
+                    "systems": [
+                        {
+                            "system": s.system,
+                            "distance_jumped": round(s.distance_jumped, 2),
+                            "distance_remaining": round(s.distance, 2),
+                            "jumps": s.jumps,
+                            "neutron_star": s.neutron_star,
+                        }
+                        for s in systems
+                    ],
+                    "total_jumps": total_jumps,
+                    "total_distance": round(total_dist, 1),
+                }
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "systems": [], "total_jumps": 0, "total_distance": 0}
+
     def plan_fc_route(self, origin: str, destination: str) -> dict:
         import asyncio
         from api.spansh import SpanshAPI
@@ -1047,6 +1111,54 @@ class API:
 
     def get_current_system(self) -> str:
         return self._current_system
+
+    def get_ship_info(self) -> dict:
+        if not self._current_ship:
+            # Replay thread hasn't run yet — scan the journal directly
+            try:
+                import json as _j
+                from core.journal import journal_path
+                journals = sorted(journal_path().glob("Journal.*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if journals:
+                    with open(journals[0], encoding="utf-8", errors="replace") as f:
+                        for line in f:
+                            try:
+                                ev = _j.loads(line.strip())
+                                if ev.get("event") == "Loadout":
+                                    self._handle_loadout(ev)
+                            except Exception:
+                                pass
+            except Exception:
+                pass
+        info = dict(self._current_ship)
+        if not info:
+            return info
+        try:
+            import json as _json
+            from core.journal import journal_path
+            status_file = journal_path() / "Status.json"
+            if status_file.exists():
+                with open(status_file, "r", encoding="utf-8") as f:
+                    status = _json.load(f)
+                raw_fuel = status.get("Fuel", {}).get("FuelMain", 0) or 0
+                cargo = status.get("Cargo", 0) or 0
+                # Cap fuel at ship's actual tank capacity — Status.json reports
+                # fleet carrier tritium as FuelMain when docked on a carrier
+                fuel_cap = info.get("fuel_capacity") or raw_fuel
+                fuel = min(raw_fuel, fuel_cap)
+                info["fuel_main"] = round(fuel, 2)
+                info["cargo"] = cargo
+                unladen = info.get("unladen_mass") or 0
+                max_range = info.get("max_jump_range") or 0
+                if unladen > 0 and max_range > 0:
+                    current_mass = unladen + fuel + cargo
+                    guardian_bonus = info.get("guardian_booster_bonus", 0.0)
+                    fsd_base = max_range - guardian_bonus
+                    current_fsd = fsd_base * (unladen / current_mass)
+                    info["current_jump_range"] = round(current_fsd + guardian_bonus, 2)
+        except Exception:
+            pass
+        return info
 
     def get_logbook(self) -> list:
         from core.database import get_logbook
@@ -1404,7 +1516,21 @@ def main():
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
     threading.Thread(target=_seed_market_db, args=(api,), daemon=True).start()
 
-    webview.start(debug=DEV_MODE, func=lambda: api._overlay_manager.enable())
+    def _on_ready():
+        api._overlay_manager.enable()
+        # Re-emit startup state after window is confirmed ready.
+        # Journal replay runs in a background thread and may not have finished
+        # by the time the frontend's first get_ship_info() call lands.
+        def _push_startup():
+            import time
+            time.sleep(1.5)
+            if api._current_ship:
+                api._emit("ship_changed", api.get_ship_info())
+            if api._current_system:
+                api._emit("system_changed", {"system": api._current_system})
+        threading.Thread(target=_push_startup, daemon=True).start()
+
+    webview.start(debug=DEV_MODE, func=_on_ready)
 
 
 if __name__ == "__main__":

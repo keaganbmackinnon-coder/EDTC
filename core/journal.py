@@ -20,7 +20,7 @@ WATCHED_EVENTS = {
     "CarrierJumpCancelled", "CarrierBuy", "CarrierDepositFuel",
     "MaterialTrade", "EngineerCraft", "Synthesis",
     "Rank", "Progress", "Statistics", "Reputation",
-    "Powerplay", "NavRoute", "NavRouteClear",
+    "Powerplay", "NavRoute", "NavRouteClear", "Loadout",
 }
 
 
@@ -35,7 +35,7 @@ def journal_path() -> Path:
 
 
 def _latest_journal(directory: Path) -> Path | None:
-    journals = sorted(directory.glob("Journal.*.log"), reverse=True)
+    journals = sorted(directory.glob("Journal.*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
     return journals[0] if journals else None
 
 
@@ -52,7 +52,7 @@ class JournalWatcher:
         if not self._current_file:
             return
         STARTUP_EVENTS = {"Location", "FSDJump", "LoadGame", "Commander",
-                          "Rank", "Progress", "Statistics", "Powerplay"}
+                          "Rank", "Progress", "Statistics", "Powerplay", "Loadout"}
         seen = {}
         try:
             with open(self._current_file, "r", encoding="utf-8", errors="replace") as f:

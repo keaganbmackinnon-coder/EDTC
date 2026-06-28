@@ -55,7 +55,7 @@ class SpanshAPI(BaseAPI):
         return [
             RouteSystem(
                 system=s.get("system", ""),
-                distance=s.get("distance_to_destination", 0),
+                distance=s.get("distance_left", 0),
                 distance_jumped=s.get("distance_jumped", 0),
                 jumps=s.get("jumps", 1),
                 neutron_star=s.get("neutron_star", False),
