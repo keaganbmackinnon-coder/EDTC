@@ -23,6 +23,7 @@
 | Repo visibility | Public — https://github.com/keaganbmackinnon-coder/EDTC |
 | Overlay URL scheme | `?overlay=<key>` query param — works for both dev (localhost:5173) and prod (file://) |
 | Route clipboard hotkey | Ctrl+Shift+C (global, via `keyboard` lib) |
+| **Feature freeze** | **No new features until everything that exists works correctly. Fix before build.** |
 
 ---
 
@@ -579,3 +580,6 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-28 12:47:40*
+
+---
+*Session checkpoint: 2026-06-28 12:48:31*
