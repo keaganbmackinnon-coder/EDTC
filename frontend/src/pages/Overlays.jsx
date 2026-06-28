@@ -199,7 +199,7 @@ export default function OverlaysPage() {
     api()?.toggle_overlay(id)
     setStates(prev => ({
       ...prev,
-      [id]: { ...prev[id], shown: !prev[id]?.shown },
+      [id]: { ...prev[id], auto_enabled: !prev[id]?.auto_enabled },
     }))
   }
 
@@ -222,7 +222,7 @@ export default function OverlaysPage() {
 
       <div className="grid grid-cols-1 gap-3">
         {OVERLAYS.map(({ id, label, badge, desc }) => {
-          const shown = states[id]?.shown ?? false
+          const enabled = states[id]?.auto_enabled ?? true
           const opacity = states[id]?.opacity ?? 1.0
           return (
             <div key={id} className="panel">
@@ -231,15 +231,15 @@ export default function OverlaysPage() {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-ed-text font-semibold">{label}</span>
                     <span className="badge bg-ed-orange text-black">{badge}</span>
-                    {shown && <span className="text-xs font-mono text-ed-success">● ON</span>}
+                    {enabled && <span className="text-xs font-mono text-ed-success">● ON</span>}
                   </div>
                   <p className="text-ed-muted text-sm">{desc}</p>
                 </div>
                 <button
-                  className={`btn-ghost shrink-0 ${shown ? 'border-ed-success/50 text-ed-success' : ''}`}
+                  className={`btn-ghost shrink-0 ${enabled ? 'border-ed-success/50 text-ed-success' : ''}`}
                   onClick={() => toggle(id)}
                 >
-                  {shown ? 'Hide' : 'Show'}
+                  {enabled ? 'Disable' : 'Enable'}
                 </button>
               </div>
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-ed-border/40">

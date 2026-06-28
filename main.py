@@ -254,9 +254,10 @@ class API:
             "population": event.get("Population", 0),
             "body_count": None,
         }
-        self._overlay_manager.show("system_preview")
-        self._overlay_manager.emit_to_overlay("system_preview", "system_jumped", preview_payload)
-        self._overlay_manager.hide_after("system_preview", 15)
+        if self._overlay_manager.is_user_enabled("system_preview"):
+            self._overlay_manager.show("system_preview")
+            self._overlay_manager.emit_to_overlay("system_preview", "system_jumped", preview_payload)
+            self._overlay_manager.hide_after("system_preview", 15)
 
         if self._auto_jump_active:
             self._schedule_next_jump()
@@ -681,6 +682,8 @@ class API:
                 self._overlay_manager.load_opacity(name, float(val))
             except Exception:
                 pass
+            enabled = get_pref(f"overlay_auto_{name}", True)
+            self._overlay_manager.load_user_enabled(name, bool(enabled))
 
     def show_overlay(self, name: str):
         self._overlay_manager.show(name)
@@ -689,7 +692,9 @@ class API:
         self._overlay_manager.hide(name)
 
     def toggle_overlay(self, name: str):
-        self._overlay_manager.toggle(name)
+        from core.database import set_pref
+        new_state = self._overlay_manager.toggle(name)
+        set_pref(f"overlay_auto_{name}", new_state)
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref
@@ -697,6 +702,7 @@ class API:
         return {
             name: {
                 "shown": self._overlay_manager.is_shown(name),
+                "auto_enabled": self._overlay_manager.is_user_enabled(name),
                 "opacity": float(get_pref(f"overlay_opacity_{name}", 1.0)),
             }
             for name in names

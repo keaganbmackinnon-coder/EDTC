@@ -50,6 +50,7 @@ class OverlayManager:
     def __init__(self, dev_mode: bool = False, dist_path: Path | None = None):
         self._windows: dict[str, webview.Window] = {}
         self._shown: dict[str, bool] = {}
+        self._user_enabled: dict[str, bool] = {}  # persistent per-overlay on/off preference
         self._opacity: dict[str, float] = {}
         self._dev_mode = dev_mode
         self._dist_path = dist_path
@@ -113,11 +114,20 @@ class OverlayManager:
             self._windows[name].hide()
             self._shown[name] = False
 
-    def toggle(self, name: str):
-        if self._shown.get(name, False):
-            self.hide(name)
-        else:
+    def load_user_enabled(self, name: str, value: bool):
+        self._user_enabled[name] = value
+
+    def is_user_enabled(self, name: str) -> bool:
+        return self._user_enabled.get(name, True)
+
+    def toggle(self, name: str) -> bool:
+        new_state = not self._user_enabled.get(name, True)
+        self._user_enabled[name] = new_state
+        if new_state:
             self.show(name)
+        else:
+            self.hide(name)
+        return new_state
 
     def set_opacity(self, name: str, value: float):
         self._opacity[name] = max(0.1, min(1.0, value))
