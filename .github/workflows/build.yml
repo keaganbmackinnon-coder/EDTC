@@ -43,7 +43,7 @@ jobs:
 
       - name: Write version from tag
         shell: bash
-        run: echo "${GITHUB_REF_NAME}" > VERSION
+        run: echo "${GITHUB_REF_NAME#v}" > VERSION
 
       - name: Build frontend
         working-directory: frontend
