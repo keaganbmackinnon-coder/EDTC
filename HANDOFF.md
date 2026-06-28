@@ -151,7 +151,32 @@ Terminal 2:  python main.py --dev
 
 ---
 
-*Last updated: Session 3 complete — Colonisation module implemented, GitHub repo live*
+## Build status — Session 4 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `FleetCarriers.jsx` — 3-tab implementation (Stats / Route Planner / Auto-Jump) | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Carrier Stats tab — fuel bar, cargo space, credits, services, pending jump | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Route Planner tab — Spansh FC route, jump list, tritium estimate + stock check | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Auto-Jump tab — ToS gate, keyboard automation, configurable key + delay, countdown | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| `carriers` DB table + `upsert_carrier`, `get_carriers` | DONE | `core/database.py` |
+| CarrierStats / CarrierJump / CarrierJumpRequest / CarrierJumpCancelled / CarrierDepositFuel / CarrierBuy added to WATCHED_EVENTS | DONE | `core/journal.py` |
+| `_handle_carrier_*` handlers + `_schedule_next_jump()` auto-jump timer | DONE | `main.py` |
+| `plan_fc_route`, `start_auto_jump`, `stop_auto_jump`, `get_auto_jump_status` API methods | DONE | `main.py` |
+
+## Known issues / notes for next session
+
+- `routes.active` column: if DB existed from before session 2, run: `ALTER TABLE routes ADD COLUMN active INTEGER DEFAULT 0;`
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early. Fix: cancel pending timer before scheduling new one.
+- Exobiology: if final scan fires `ScanType == "Logged"` not `"Analysed"`, adjust `_handle_scan_organic()`.
+- **Spansh commodity search** (`/api/stations/search`): response field names are best-guess — verify and adjust if needed.
+- **FC cargo auto-tracking**: only tracks your own CargoTransfer events. Pre-existing FC cargo needs manual entry.
+- **Tritium estimate**: defaults to 50T/jump — actual cost varies by distance; let user adjust in UI.
+- **Auto-jump**: fires a keypress to the active window — game must be in focus. Key defaults to `j` (standard FSD bind).
+- **Carrier stats location**: `CarrierStats` event fires when you open Carrier Management in-game. Location updates on `CarrierJump` events.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt.
+
+*Last updated: Session 4 complete — Fleet Carriers page done*
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -188,3 +213,9 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-23 01:00:00*
+
+---
+*Session checkpoint: 2026-06-27 19:48:39*
+
+---
+*Session checkpoint: 2026-06-27 19:49:21*
