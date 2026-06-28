@@ -152,6 +152,8 @@ class API:
             self._handle_market_buy(event)
         elif event_name == "MarketSell":
             self._handle_market_sell(event)
+        elif event_name == "Powerplay":
+            self._handle_powerplay(event)
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -550,6 +552,21 @@ class API:
         if stats:
             set_cmdr_stat("statistics", stats)
         self._emit("cmdr_stats_update", {})
+
+    def _handle_powerplay(self, event: dict):
+        from core.database import set_pref
+        set_pref("pp_power",   event.get("Power", ""))
+        set_pref("pp_rank",    event.get("Rank", 0))
+        set_pref("pp_merits",  event.get("Merits", 0))
+        set_pref("pp_votes",   event.get("Votes", 0))
+        set_pref("pp_updated", event.get("timestamp", ""))
+        self._emit("powerplay_update", {
+            "power":   event.get("Power", ""),
+            "rank":    event.get("Rank", 0),
+            "merits":  event.get("Merits", 0),
+            "votes":   event.get("Votes", 0),
+            "updated": event.get("timestamp", ""),
+        })
 
     # --- Builds ---
 
@@ -1044,6 +1061,19 @@ class API:
     def get_community_goals(self) -> list:
         result = self._edsm_run(lambda e: e.get_community_goals())
         return result if isinstance(result, list) else []
+
+    def get_powerplay_status(self) -> dict:
+        from core.database import get_pref
+        return {
+            "power":   get_pref("pp_power", ""),
+            "rank":    get_pref("pp_rank", 0),
+            "merits":  get_pref("pp_merits", 0),
+            "votes":   get_pref("pp_votes", 0),
+            "updated": get_pref("pp_updated", ""),
+        }
+
+    def get_system_power(self, system_name: str) -> dict:
+        return self._edsm_run(lambda e: e.get_system_power(system_name)) or {}
 
     # --- Clipboard ---
 

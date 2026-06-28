@@ -20,6 +20,7 @@ WATCHED_EVENTS = {
     "CarrierJumpCancelled", "CarrierBuy", "CarrierDepositFuel",
     "MaterialTrade", "EngineerCraft", "Synthesis",
     "Rank", "Progress", "Statistics", "Reputation",
+    "Powerplay",
 }
 
 

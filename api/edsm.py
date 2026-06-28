@@ -132,3 +132,19 @@ class EdsmAPI(BaseAPI):
     async def get_community_goals(self) -> list:
         data = await self.get("/api-v1/community-goals", {})
         return data if isinstance(data, list) else []
+
+    async def get_system_power(self, system_name: str) -> dict:
+        data = await self.get("/api-v1/system", {
+            "systemName": system_name,
+            "showPowerplay": 1,
+            "showInformation": 1,
+        })
+        if not data:
+            return {}
+        return {
+            "name": data.get("name", system_name),
+            "power": data.get("power", ""),
+            "powerState": data.get("powerState", ""),
+            "allegiance": data.get("information", {}).get("allegiance", ""),
+            "government": data.get("information", {}).get("government", ""),
+        }

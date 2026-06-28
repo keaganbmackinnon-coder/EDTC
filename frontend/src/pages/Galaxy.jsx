@@ -500,6 +500,165 @@ function CGProgressBar({ current, max, tier, maxTier }) {
   )
 }
 
+// ---- Tab: Powerplay ----
+
+const POWERS = [
+  { name: 'Aisling Duval',         allegiance: 'Empire',      home: 'Cubeo',         ethos: 'Patronage', perk: 'Prismatic Shield Generator' },
+  { name: 'Archon Delaine',        allegiance: 'Independent', home: 'Harma',         ethos: 'Anarchy',   perk: 'Enforcer Cannon' },
+  { name: 'Arissa Lavigny-Duval',  allegiance: 'Empire',      home: 'Kamadhenu',     ethos: 'Law',       perk: 'Pacifier Frag-Cannon' },
+  { name: 'Denton Patreus',        allegiance: 'Empire',      home: 'Eotienses',     ethos: 'Military',  perk: 'Incendiary Rounds (laser mod)' },
+  { name: 'Edmund Mahon',          allegiance: 'Alliance',    home: 'Gateway',       ethos: 'Trade',     perk: 'Trade bonus in controlled systems' },
+  { name: 'Felicia Winters',       allegiance: 'Federation',  home: 'Rhea',          ethos: 'Welfare',   perk: 'Manifest Scanner' },
+  { name: 'Li Yong-Rui',          allegiance: 'Independent', home: 'Lembava',       ethos: 'Corporate', perk: 'Discounted outfitting in SiriusGov systems' },
+  { name: 'Pranav Antal',          allegiance: 'Independent', home: 'Polevnic',      ethos: 'Utopian',   perk: 'Enforcer Cannon' },
+  { name: 'Yuri Grom',             allegiance: 'Independent', home: 'Clayakarma',    ethos: 'Military',  perk: 'Pacifier Frag-Cannon' },
+  { name: 'Zachary Hudson',        allegiance: 'Federation',  home: 'Nanoman',       ethos: 'Security',  perk: 'Prismatic Shield Generator' },
+  { name: 'Zemina Torval',         allegiance: 'Empire',      home: 'Synteini',      ethos: 'Corporate', perk: 'Mining Lance Beam Laser' },
+]
+
+const ALLEGIANCE_COLOR = {
+  Empire:      'text-blue-400',
+  Federation:  'text-red-400',
+  Alliance:    'text-green-400',
+  Independent: 'text-yellow-400',
+}
+
+const RANK_LABELS = ['', 'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5']
+
+function PowerplayTab() {
+  const [status, setStatus] = useState(null)
+  const [system, setSystem] = useState('')
+  const [systemResult, setSystemResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    api()?.get_powerplay_status().then(r => setStatus(r ?? {}))
+  }, [])
+
+  useEffect(() => {
+    return window.__edtc?.on('powerplay_update', e => setStatus(e?.payload ?? {}))
+  }, [])
+
+  async function lookupSystem() {
+    if (!system.trim()) return
+    setLoading(true)
+    setError(null)
+    setSystemResult(null)
+    const r = await api()?.get_system_power(system.trim())
+    if (r?.error) setError(r.error)
+    else if (!r?.name) setError('System not found')
+    else setSystemResult(r)
+    setLoading(false)
+  }
+
+  const pledgedPower = POWERS.find(p => p.name === status?.power)
+
+  return (
+    <div className="space-y-6">
+
+      {/* My Power */}
+      <div className="panel">
+        <h2 className="text-ed-text font-semibold mb-3">My Power</h2>
+        {!status?.power ? (
+          <p className="text-ed-muted text-sm font-mono">Not pledged to any power. Log in to Elite Dangerous with EDTC running to detect your status.</p>
+        ) : (
+          <div>
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <p className={`text-lg font-semibold font-ui ${ALLEGIANCE_COLOR[pledgedPower?.allegiance] ?? 'text-ed-orange'}`}>
+                  {status.power}
+                </p>
+                {pledgedPower && (
+                  <p className="text-ed-muted text-xs font-mono mt-0.5">
+                    {pledgedPower.allegiance} · {pledgedPower.ethos} · {pledgedPower.home}
+                  </p>
+                )}
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-ed-orange font-mono text-sm">{RANK_LABELS[status.rank] ?? `Rank ${status.rank}`}</p>
+                {status.updated && <p className="text-ed-muted text-xs font-mono mt-0.5">Updated {new Date(status.updated).toLocaleString()}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-ed-dark rounded p-3">
+                <p className="text-ed-muted text-xs font-mono mb-1">Merits</p>
+                <p className="text-ed-text font-mono text-lg">{Number(status.merits ?? 0).toLocaleString()}</p>
+              </div>
+              <div className="bg-ed-dark rounded p-3">
+                <p className="text-ed-muted text-xs font-mono mb-1">Votes</p>
+                <p className="text-ed-text font-mono text-lg">{Number(status.votes ?? 0).toLocaleString()}</p>
+              </div>
+            </div>
+            {pledgedPower && (
+              <p className="text-ed-muted text-xs font-mono mt-3">
+                <span className="text-ed-gold">Power perk: </span>{pledgedPower.perk}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* System Power Lookup */}
+      <div className="panel">
+        <h2 className="text-ed-text font-semibold mb-3">System Power State</h2>
+        <div className="flex gap-2 mb-3">
+          <input
+            className="input"
+            placeholder="System name…"
+            value={system}
+            onChange={e => setSystem(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && lookupSystem()}
+          />
+          <button className="btn-primary shrink-0" onClick={lookupSystem} disabled={loading}>
+            {loading ? '…' : 'Look up'}
+          </button>
+        </div>
+        {error && <p className="text-ed-danger text-sm font-mono">{error}</p>}
+        {systemResult && (
+          <div className="bg-ed-dark rounded p-3 space-y-1">
+            <p className="text-ed-text font-semibold">{systemResult.name}</p>
+            <p className="text-ed-muted text-sm font-mono">
+              <span className="text-ed-gold">Power: </span>
+              {systemResult.power || 'None'}
+            </p>
+            <p className="text-ed-muted text-sm font-mono">
+              <span className="text-ed-gold">State: </span>
+              {systemResult.powerState || 'Unoccupied'}
+            </p>
+            {systemResult.allegiance && (
+              <p className="text-ed-muted text-sm font-mono">
+                <span className="text-ed-gold">Allegiance: </span>
+                {systemResult.allegiance}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Powers Reference */}
+      <div className="panel">
+        <h2 className="text-ed-text font-semibold mb-3">Powers Reference</h2>
+        <div className="space-y-2">
+          {POWERS.map(p => (
+            <div key={p.name} className={`flex items-start gap-3 py-2 border-b border-ed-border/40 last:border-0 ${status?.power === p.name ? 'opacity-100' : 'opacity-70'}`}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`font-semibold text-sm ${ALLEGIANCE_COLOR[p.allegiance] ?? 'text-ed-text'}`}>{p.name}</span>
+                  {status?.power === p.name && <span className="text-[10px] font-mono text-ed-orange border border-ed-orange/40 px-1 rounded">PLEDGED</span>}
+                </div>
+                <p className="text-ed-muted text-xs font-mono">{p.allegiance} · {p.ethos} · {p.home}</p>
+                <p className="text-ed-muted text-xs font-mono mt-0.5"><span className="text-ed-gold">Perk: </span>{p.perk}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
 function CommunityGoalCard({ goal }) {
   const [expanded, setExpanded] = useState(false)
 
@@ -669,11 +828,12 @@ function CommunityGoalsTab() {
 // ---- Main ----
 
 const TABS = [
-  { id: 'galnet',  label: 'GalNet' },
-  { id: 'cg',      label: 'Community Goals' },
-  { id: 'factions', label: 'Factions' },
-  { id: 'traffic', label: 'Traffic' },
-  { id: 'stats',   label: 'Galaxy Stats' },
+  { id: 'galnet',    label: 'GalNet' },
+  { id: 'cg',        label: 'Community Goals' },
+  { id: 'powerplay', label: 'Powerplay' },
+  { id: 'factions',  label: 'Factions' },
+  { id: 'traffic',   label: 'Traffic' },
+  { id: 'stats',     label: 'Galaxy Stats' },
 ]
 
 export default function Galaxy() {
@@ -712,9 +872,10 @@ export default function Galaxy() {
         ))}
       </div>
 
-      {tab === 'galnet'   && <GalNetTab />}
-      {tab === 'cg'       && <CommunityGoalsTab />}
-      {tab === 'factions' && <FactionsTab currentSystem={currentSystem} />}
+      {tab === 'galnet'    && <GalNetTab />}
+      {tab === 'cg'        && <CommunityGoalsTab />}
+      {tab === 'powerplay' && <PowerplayTab />}
+      {tab === 'factions'  && <FactionsTab currentSystem={currentSystem} />}
       {tab === 'traffic'  && <TrafficTab currentSystem={currentSystem} />}
       {tab === 'stats'    && <GalaxyStatsTab />}
     </div>
