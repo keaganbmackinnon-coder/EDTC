@@ -133,6 +133,14 @@ class EdsmAPI(BaseAPI):
         data = await self.get("/api-v1/community-goals", {})
         return data if isinstance(data, list) else []
 
+    async def get_system_thargoid(self, system_name: str) -> dict:
+        return await self.get("/api-v1/system", {
+            "systemName": system_name,
+            "showInformation": 1,
+            "showFactions": 1,
+            "showThargoids": 1,
+        }) or {}
+
     async def get_system_power(self, system_name: str) -> dict:
         data = await self.get("/api-v1/system", {
             "systemName": system_name,

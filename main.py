@@ -1089,6 +1089,32 @@ class API:
     def get_system_power(self, system_name: str) -> dict:
         return self._edsm_run(lambda e: e.get_system_power(system_name)) or {}
 
+    # --- Thargoid War ---
+
+    def get_thargoid_system(self, system_name: str) -> dict:
+        return self._edsm_run(lambda e: e.get_system_thargoid(system_name)) or {}
+
+    def get_thargoid_nearby(self, system_name: str, radius: int = 50) -> list:
+        async def _run():
+            edsm = self._edsm
+            systems = await edsm.get_systems_in_sphere(system_name, radius) or []
+            result = []
+            for s in systems:
+                info = s.get("information") or {}
+                state = (info.get("factionState") or "").lower()
+                allegiance = (info.get("allegiance") or "").lower()
+                if "thargoid" in state or "thargoid" in allegiance:
+                    result.append({
+                        "name": s.get("name", ""),
+                        "distance": s.get("distance", 0),
+                        "state": info.get("factionState", ""),
+                        "allegiance": info.get("allegiance", ""),
+                        "population": info.get("population", 0),
+                        "coords": s.get("coords", {}),
+                    })
+            return sorted(result, key=lambda x: x.get("distance", 0))
+        return self._edsm_run(_run)
+
     # --- Clipboard ---
 
     def copy_to_clipboard(self, text: str) -> bool:
@@ -1120,8 +1146,34 @@ def _setup_hotkeys(api: API):
         pass
 
 
+def _create_desktop_shortcut():
+    if not getattr(sys, "frozen", False):
+        return
+    import os, subprocess
+    exe = sys.executable
+    marker = Path(exe).parent / ".shortcut_created"
+    if marker.exists():
+        return
+    ps = (
+        "$ws = New-Object -ComObject WScript.Shell;"
+        f"$sc = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') + '\\\\EDTC.lnk');"
+        f"$sc.TargetPath = '{exe}';"
+        f"$sc.WorkingDirectory = '{os.path.dirname(exe)}';"
+        f"$sc.IconLocation = '{exe},0';"
+        "$sc.Description = 'Elite Dangerous Tools & Companion';"
+        "$sc.Save()"
+    )
+    try:
+        subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                       capture_output=True, timeout=10)
+        marker.touch()
+    except Exception:
+        pass
+
+
 def main():
     init_db()
+    _create_desktop_shortcut()
 
     api = API()
 

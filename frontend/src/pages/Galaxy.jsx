@@ -825,12 +825,316 @@ function CommunityGoalsTab() {
   )
 }
 
+// ---- Tab: Thargoid War ----
+
+const MAELSTROMS = [
+  { name: 'Taranis', system: 'HIP 30377',                    region: 'Pleiades',       origin: 'Celtic' },
+  { name: 'Leigong', system: 'HIP 20567',                    region: 'Pleiades',       origin: 'Chinese' },
+  { name: 'Indra',   system: 'HIP 20818',                    region: 'Pleiades',       origin: 'Hindu' },
+  { name: 'Hadad',   system: 'Col 285 Sector BA-A a15-6',    region: 'Pleiades',       origin: 'Mesopotamian' },
+  { name: 'Cocijo',  system: 'CPD-51 3323',                  region: 'Perseus',        origin: 'Zapotec' },
+  { name: 'Raijin',  system: 'Hyades Sector FB-N b7-6',      region: 'Hyades',         origin: 'Japanese' },
+  { name: 'Oya',     system: 'Witch Head Sector HW-W c1-7',  region: 'Witch Head',     origin: 'Yoruba' },
+  { name: 'Thor',    system: 'Col 285 Sector SZ-O b6-0',     region: 'Col 285',        origin: 'Norse' },
+]
+
+const WAR_STATE_COLOUR = {
+  'thargoid war': 'text-red-400',
+  'thargoid controlled': 'text-red-500',
+  'thargoid invasion': 'text-orange-400',
+  'thargoid alert': 'text-yellow-400',
+  'recovery': 'text-green-400',
+}
+
+function warStateColour(state) {
+  return WAR_STATE_COLOUR[(state || '').toLowerCase()] ?? 'text-ed-muted'
+}
+
+function ThargoidSystemStatus() {
+  const [query, setQuery]   = useState('')
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]   = useState(null)
+
+  async function search() {
+    if (!query.trim()) return
+    setLoading(true); setError(null); setResult(null)
+    const r = await api()?.get_thargoid_system(query.trim())
+    if (!r || Object.keys(r).length === 0) {
+      setError('System not found or no data available.')
+    } else {
+      setResult(r)
+    }
+    setLoading(false)
+  }
+
+  const info     = result?.information ?? {}
+  const factions = result?.factions    ?? []
+  const thargoids = result?.thargoids  ?? {}
+
+  const thargoidFactions = factions.filter(f =>
+    (f.allegiance || '').toLowerCase() === 'thargoid' ||
+    (f.activeStates || []).some(s => (typeof s === 'string' ? s : s.state || '').toLowerCase().includes('thargoid')) ||
+    (f.pendingStates || []).some(s => (typeof s === 'string' ? s : s.state || '').toLowerCase().includes('thargoid'))
+  )
+
+  const warFactions = factions.filter(f =>
+    (f.activeStates || []).some(s => (typeof s === 'string' ? s : s.state || '').toLowerCase().includes('thargoid')) ||
+    (f.pendingStates || []).some(s => (typeof s === 'string' ? s : s.state || '').toLowerCase().includes('thargoid'))
+  )
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4">
+        <input
+          className="input flex-1"
+          placeholder="System name…"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && search()}
+        />
+        <button className="btn-primary" onClick={search} disabled={loading}>
+          {loading ? 'Searching…' : 'Check'}
+        </button>
+      </div>
+
+      {error && <ErrorState error={error} />}
+
+      {result && (
+        <div className="space-y-4">
+          <div className="panel">
+            <h3 className="font-ui font-semibold text-ed-orange mb-3">{result.name}</h3>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+              <span className="text-ed-muted">Allegiance</span>
+              <span className={`font-mono ${(info.allegiance || '').toLowerCase() === 'thargoid' ? 'text-red-400' : 'text-ed-text'}`}>
+                {info.allegiance || '—'}
+              </span>
+              <span className="text-ed-muted">System State</span>
+              <span className={`font-mono ${warStateColour(info.factionState)}`}>
+                {info.factionState || 'None'}
+              </span>
+              <span className="text-ed-muted">Security</span>
+              <span className="font-mono text-ed-text">{info.security || '—'}</span>
+              <span className="text-ed-muted">Population</span>
+              <span className="font-mono text-ed-text">{fmtNum(info.population)}</span>
+            </div>
+          </div>
+
+          {thargoids && Object.keys(thargoids).length > 0 && (
+            <div className="panel">
+              <h4 className="text-xs font-mono text-ed-muted uppercase tracking-wider mb-2">Thargoid Presence</h4>
+              <pre className="text-xs text-ed-text font-mono whitespace-pre-wrap">
+                {JSON.stringify(thargoids, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {warFactions.length > 0 && (
+            <div className="panel">
+              <h4 className="text-xs font-mono text-ed-muted uppercase tracking-wider mb-3">Factions in Thargoid War State</h4>
+              <div className="space-y-2">
+                {warFactions.map((f, i) => {
+                  const activeStates = (f.activeStates || []).map(s => typeof s === 'string' ? s : s.state || '')
+                  const pendingStates = (f.pendingStates || []).map(s => typeof s === 'string' ? s : s.state || '')
+                  return (
+                    <div key={i} className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="text-ed-text">{f.name}</span>
+                      <span className="text-ed-muted text-xs">{(f.influence * 100).toFixed(1)}%</span>
+                      {activeStates.filter(s => s.toLowerCase().includes('thargoid')).map((s, j) => (
+                        <span key={j} className={`text-xs font-mono px-2 py-0.5 rounded border border-current ${warStateColour(s)}`}>{s}</span>
+                      ))}
+                      {pendingStates.filter(s => s.toLowerCase().includes('thargoid')).map((s, j) => (
+                        <span key={j} className="text-xs font-mono px-2 py-0.5 rounded border border-yellow-600 text-yellow-500">Pending: {s}</span>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {warFactions.length === 0 && thargoidFactions.length === 0 && (
+            <div className="panel">
+              <p className="text-ed-muted text-sm">No Thargoid war activity detected in this system.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ThargoidMaelstroms() {
+  const [copied, setCopied] = useState(null)
+
+  function copy(text, key) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(key)
+      setTimeout(() => setCopied(null), 1500)
+    })
+  }
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-4">
+        The 8 Thargoid Titans — Maelstrom locations are community-reported. Verify coords on EDSM or Canonn.
+      </p>
+      <div className="panel overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-ed-muted text-xs font-mono uppercase tracking-wider border-b border-ed-border">
+              <th className="text-left pb-2 pr-4">Titan</th>
+              <th className="text-left pb-2 pr-4">System</th>
+              <th className="text-left pb-2 pr-4">Region</th>
+              <th className="text-left pb-2">Origin</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-ed-border/40">
+            {MAELSTROMS.map(m => (
+              <tr key={m.name} className="hover:bg-ed-surface/40 transition-colors">
+                <td className="py-2 pr-4 font-ui font-semibold text-red-400">{m.name}</td>
+                <td className="py-2 pr-4 font-mono text-ed-text">
+                  <button
+                    onClick={() => copy(m.system, m.name)}
+                    className="hover:text-ed-orange transition-colors text-left"
+                    title="Copy system name"
+                  >
+                    {m.system}
+                    <span className="ml-2 text-xs text-ed-muted">
+                      {copied === m.name ? '✓' : '⧉'}
+                    </span>
+                  </button>
+                </td>
+                <td className="py-2 pr-4 text-ed-muted">{m.region}</td>
+                <td className="py-2 text-ed-muted">{m.origin}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function ThargoidNearby({ currentSystem }) {
+  const [system, setSystem]   = useState('')
+  const [radius, setRadius]   = useState(100)
+  const [results, setResults] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState(null)
+
+  useEffect(() => {
+    if (currentSystem) setSystem(currentSystem)
+  }, [currentSystem])
+
+  async function search() {
+    const s = system.trim()
+    if (!s) return
+    setLoading(true); setError(null); setResults(null)
+    const r = await api()?.get_thargoid_nearby(s, radius)
+    if (Array.isArray(r)) {
+      setResults(r)
+    } else {
+      setError(r?.error ?? 'Search failed')
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <input
+          className="input flex-1 min-w-40"
+          placeholder="Reference system…"
+          value={system}
+          onChange={e => setSystem(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && search()}
+        />
+        <select
+          className="input w-32"
+          value={radius}
+          onChange={e => setRadius(Number(e.target.value))}
+        >
+          {[50, 100, 200, 500].map(r => (
+            <option key={r} value={r}>{r} ly</option>
+          ))}
+        </select>
+        <button className="btn-primary" onClick={search} disabled={loading}>
+          {loading ? 'Scanning…' : 'Scan'}
+        </button>
+      </div>
+
+      {error && <ErrorState error={error} />}
+
+      {results && results.length === 0 && (
+        <EmptyState message="No Thargoid activity detected within range. EDSM data may not reflect current war state for all systems." />
+      )}
+
+      {results && results.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-ed-muted text-xs font-mono mb-3">{results.length} system{results.length !== 1 ? 's' : ''} with Thargoid activity</p>
+          {results.map((s, i) => (
+            <div key={i} className="panel flex items-center justify-between gap-4">
+              <div>
+                <span className="font-ui text-ed-text">{s.name}</span>
+                {s.allegiance?.toLowerCase() === 'thargoid' && (
+                  <span className="ml-2 text-xs font-mono text-red-400">CONTROLLED</span>
+                )}
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <span className={`font-mono text-xs ${warStateColour(s.state)}`}>{s.state || '—'}</span>
+                <span className="text-ed-muted text-xs font-mono">{s.distance?.toFixed(1)} ly</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {results === null && !loading && (
+        <EmptyState message="Enter a system name to scan for nearby Thargoid activity." />
+      )}
+    </div>
+  )
+}
+
+function ThargoidTab({ currentSystem }) {
+  const [sub, setSub] = useState('status')
+  const SUBS = [
+    { id: 'status',     label: 'System Status' },
+    { id: 'maelstroms', label: 'Maelstroms' },
+    { id: 'nearby',     label: 'Nearby Threat' },
+  ]
+  return (
+    <div>
+      <div className="flex gap-1 mb-5 border-b border-ed-border/50">
+        {SUBS.map(s => (
+          <button
+            key={s.id}
+            onClick={() => setSub(s.id)}
+            className={`px-3 py-1.5 text-xs font-mono uppercase tracking-wider border-b-2 -mb-px transition-colors ${
+              sub === s.id
+                ? 'border-red-400 text-red-400'
+                : 'border-transparent text-ed-muted hover:text-ed-text'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      {sub === 'status'     && <ThargoidSystemStatus />}
+      {sub === 'maelstroms' && <ThargoidMaelstroms />}
+      {sub === 'nearby'     && <ThargoidNearby currentSystem={currentSystem} />}
+    </div>
+  )
+}
+
 // ---- Main ----
 
 const TABS = [
   { id: 'galnet',    label: 'GalNet' },
   { id: 'cg',        label: 'Community Goals' },
   { id: 'powerplay', label: 'Powerplay' },
+  { id: 'thargoid',  label: 'Thargoid War' },
   { id: 'factions',  label: 'Factions' },
   { id: 'traffic',   label: 'Traffic' },
   { id: 'stats',     label: 'Galaxy Stats' },
@@ -875,9 +1179,10 @@ export default function Galaxy() {
       {tab === 'galnet'    && <GalNetTab />}
       {tab === 'cg'        && <CommunityGoalsTab />}
       {tab === 'powerplay' && <PowerplayTab />}
+      {tab === 'thargoid'  && <ThargoidTab currentSystem={currentSystem} />}
       {tab === 'factions'  && <FactionsTab currentSystem={currentSystem} />}
-      {tab === 'traffic'  && <TrafficTab currentSystem={currentSystem} />}
-      {tab === 'stats'    && <GalaxyStatsTab />}
+      {tab === 'traffic'   && <TrafficTab currentSystem={currentSystem} />}
+      {tab === 'stats'     && <GalaxyStatsTab />}
     </div>
   )
 }
