@@ -233,7 +233,30 @@ Terminal 2:  python main.py --dev
 - Stats only populate after logging into Elite Dangerous with EDTC running (Rank/Progress/Statistics/Commander/LoadGame events fire on game start).
 - EDSM CMDR lookup requires the searched CMDR to have opted in to sharing position publicly.
 - `open_file` and `open_screenshots_folder` use `os.startfile()` — Windows only.
-- Remaining stub pages: Exploration, Galaxy, Guardian, Trading (all still "Coming Soon").
+- Remaining stub pages: Galaxy, Guardian, Trading (all still "Coming Soon").
+
+---
+
+## Build status — Session 7 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `scan_update` emitted to main window from `_handle_scan` | DONE | `main.py` |
+| `exo_scan` emitted to main window from `_handle_scan_organic` | DONE | `main.py` |
+| `system_changed` emitted on FSDJump and Location events | DONE | `main.py` |
+| `get_fss_bodies`, `lookup_system`, `road_to_riches` API methods | DONE | `main.py` |
+| `Exploration.jsx` — 4-tab UI (System Lookup / Road to Riches / Exobiology / Session Scanner) | DONE | `frontend/src/pages/Exploration.jsx` |
+| System Lookup tab — EDSM search: system info card + collapsible body list | DONE | `frontend/src/pages/Exploration.jsx` |
+| Road to Riches tab — Spansh route with per-system body value breakdown | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exobiology tab — DB-backed scan tracker, grouped by system, clear per system | DONE | `frontend/src/pages/Exploration.jsx` |
+| Session Scanner tab — live FSS scan log, resets on jump, total value estimate | DONE | `frontend/src/pages/Exploration.jsx` |
+
+## Known issues / notes for next session
+
+- Road to Riches Spansh job takes ~10-30s; Promise blocks until done — normal.
+- EDSM body data only available for systems that have been visited and submitted by players.
+- Exobiology tab uses `get_exo_scans()` which returns in-progress (incomplete) scans only. Completed scans are cleared from the active list but remain in DB; no history view yet.
+- Remaining stub pages: Galaxy, Guardian, Trading (all still "Coming Soon").
 
 ---
 *Session checkpoint: 2026-06-23 00:39:02*
@@ -291,3 +314,9 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session checkpoint: 2026-06-27 20:25:10*
+
+---
+*Session checkpoint: 2026-06-27 20:25:35*
+
+---
+*Session checkpoint: 2026-06-27 20:30:10*

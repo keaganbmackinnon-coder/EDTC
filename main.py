@@ -96,6 +96,7 @@ class API:
         elif event_name == "Location":
             self._current_system = event.get("StarSystem", "")
             self._fss_bodies = []
+            self._emit("system_changed", {"system": self._current_system})
         elif event_name == "FSSDiscoveryScan":
             self._handle_fss_discovery(event)
         elif event_name == "Scan":
@@ -191,6 +192,7 @@ class API:
         system = event.get("StarSystem", "")
         self._current_system = system
         self._fss_bodies = []
+        self._emit("system_changed", {"system": system})
 
         # Advance active route
         if self._active_route:
@@ -292,6 +294,7 @@ class API:
             "body": body,
             "all_bodies": self._fss_bodies,
         })
+        self._emit("scan_update", {"body": body, "all_bodies": self._fss_bodies})
 
     def _handle_scan_organic(self, event: dict):
         scan_type = event.get("ScanType", "")
@@ -322,6 +325,7 @@ class API:
             "completed": current_count >= 3,
             "scan_type": scan_type,
         }
+        self._emit("exo_scan", payload)
         self._overlay_manager.show("exo_tracker")
         self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
 
@@ -767,6 +771,68 @@ class API:
             return asyncio.run(_run())
         except Exception:
             return []
+
+    # --- Exploration ---
+
+    def get_fss_bodies(self) -> list:
+        return self._fss_bodies
+
+    def lookup_system(self, name: str) -> dict:
+        import asyncio
+        from api.edsm import EdsmAPI
+        async def _run():
+            edsm = EdsmAPI()
+            try:
+                system = await edsm.get_system(name)
+                bodies = await edsm.get_bodies(name)
+                return {
+                    "system": {
+                        "name": system.name,
+                        "coords": system.coords,
+                        "id64": system.id64,
+                        "allegiance": system.allegiance,
+                        "government": system.government,
+                        "economy": system.economy,
+                        "population": system.population,
+                        "security": system.security,
+                    } if system else None,
+                    "bodies": [
+                        {
+                            "name": b.name,
+                            "type": b.type,
+                            "sub_type": b.sub_type,
+                            "distance": b.distance_to_arrival,
+                            "is_main_star": b.is_main_star,
+                            "spectral_class": b.spectral_class,
+                            "earth_masses": b.earth_masses,
+                            "radius": b.radius,
+                        }
+                        for b in bodies
+                    ],
+                }
+            finally:
+                await edsm.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "system": None, "bodies": []}
+
+    def road_to_riches(
+        self, origin: str, destination: str, range_ly: float, max_systems: int = 100
+    ) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                systems = await spansh.road_to_riches(origin, destination, range_ly, max_systems)
+                return {"systems": systems}
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "systems": []}
 
     # --- Commander ---
 
