@@ -222,7 +222,7 @@ export default function OverlaysPage() {
 
       <div className="grid grid-cols-1 gap-3">
         {OVERLAYS.map(({ id, label, badge, desc }) => {
-          const enabled = states[id]?.auto_enabled ?? true
+          const enabled = states[id]?.auto_enabled ?? false
           const opacity = states[id]?.opacity ?? 1.0
           return (
             <div key={id} className="panel">

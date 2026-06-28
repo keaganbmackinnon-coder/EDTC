@@ -118,10 +118,10 @@ class OverlayManager:
         self._user_enabled[name] = value
 
     def is_user_enabled(self, name: str) -> bool:
-        return self._user_enabled.get(name, True)
+        return self._user_enabled.get(name, False)
 
     def toggle(self, name: str) -> bool:
-        new_state = not self._user_enabled.get(name, True)
+        new_state = not self._user_enabled.get(name, False)
         self._user_enabled[name] = new_state
         if new_state:
             self.show(name)

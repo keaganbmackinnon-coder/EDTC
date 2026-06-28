@@ -172,6 +172,10 @@ class API:
             self._handle_market_sell(event)
         elif event_name == "Powerplay":
             self._handle_powerplay(event)
+        elif event_name == "NavRoute":
+            self._handle_nav_route(event)
+        elif event_name == "NavRouteClear":
+            self._handle_nav_route_clear()
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -261,6 +265,33 @@ class API:
 
         if self._auto_jump_active:
             self._schedule_next_jump()
+
+    def _handle_nav_route(self, event: dict):
+        raw = event.get("Route", [])
+        if not raw:
+            return
+        systems = [s["StarSystem"] for s in raw if "StarSystem" in s]
+        if not systems:
+            return
+        route = {"systems": systems, "current": 0, "name": f"In-game route → {systems[-1]}"}
+        from core.database import save_route
+        save_route(route)
+        self._active_route = route
+        if self._overlay_manager.is_user_enabled("route"):
+            self._overlay_manager.show("route")
+        self._overlay_manager.emit_to_overlay("route", "route_update", {
+            "route": route,
+            "current_system": self._current_system,
+        })
+        self._emit("route_update", {"route": route, "current_system": self._current_system})
+
+    def _handle_nav_route_clear(self):
+        self._active_route = None
+        self._overlay_manager.emit_to_overlay("route", "route_update", {
+            "route": None,
+            "current_system": self._current_system,
+        })
+        self._emit("route_update", {"route": None, "current_system": self._current_system})
 
     def _schedule_next_jump(self):
         if self._auto_jump_timer:
@@ -682,7 +713,7 @@ class API:
                 self._overlay_manager.load_opacity(name, float(val))
             except Exception:
                 pass
-            enabled = get_pref(f"overlay_auto_{name}", True)
+            enabled = get_pref(f"overlay_auto_{name}", False)
             self._overlay_manager.load_user_enabled(name, bool(enabled))
 
     def show_overlay(self, name: str):
