@@ -128,17 +128,14 @@ class SpanshAPI(BaseAPI):
 
     # --- Commodity market search ---
 
-    async def commodity_markets(
-        self, system: str, commodity: str, radius: float = 50.0
-    ) -> list[dict]:
+    async def commodity_markets(self, system: str, commodity: str) -> list[dict]:
         await self._limiter.wait()
         client = await self._get_client()
-        resp = await client.get("/stations/search", params=[
-            ("reference_system", system),
-            ("reference_radius", radius),
-            ("market[name][]", commodity),
-            ("sort", "distance"),
-            ("size", "10"),
-        ])
+        resp = await client.post("/stations/search", json={
+            "reference_system": system,
+            "market": [{"name": commodity}],
+            "sort": "distance",
+            "size": 50,
+        })
         resp.raise_for_status()
         return resp.json().get("results", [])

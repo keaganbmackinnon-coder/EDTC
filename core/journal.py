@@ -47,12 +47,38 @@ class JournalWatcher:
         self._file_pos = 0
         self._observer = Observer()
 
+    def _replay_startup(self):
+        """Scan the latest journal from the start to seed initial state (system, cmdr, etc.)."""
+        if not self._current_file:
+            return
+        STARTUP_EVENTS = {"Location", "FSDJump", "LoadGame", "Commander",
+                          "Rank", "Progress", "Statistics", "Powerplay"}
+        seen = {}
+        try:
+            with open(self._current_file, "r", encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        event = json.loads(line)
+                        kind = event.get("event")
+                        if kind in STARTUP_EVENTS:
+                            seen[kind] = event
+                    except json.JSONDecodeError:
+                        pass
+        except OSError:
+            return
+        for event in seen.values():
+            self._on_event(event)
+
     def run(self):
         if not self._path.exists():
             return
 
         self._current_file = _latest_journal(self._path)
         if self._current_file:
+            self._replay_startup()
             self._file_pos = self._current_file.stat().st_size
 
         handler = _JournalHandler(self)

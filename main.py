@@ -113,6 +113,10 @@ class API:
             self._current_system = event.get("StarSystem", "")
             self._fss_bodies = []
             self._emit("system_changed", {"system": self._current_system})
+            coords = event.get("StarPos")
+            if coords and len(coords) == 3:
+                from core.database import upsert_system_coords
+                upsert_system_coords(self._current_system, coords[0], coords[1], coords[2])
         elif event_name == "FSSDiscoveryScan":
             self._handle_fss_discovery(event)
         elif event_name == "Scan":
@@ -218,6 +222,11 @@ class API:
         self._current_system = system
         self._fss_bodies = []
         self._emit("system_changed", {"system": system})
+
+        coords = event.get("StarPos")
+        if coords and len(coords) == 3:
+            from core.database import upsert_system_coords
+            upsert_system_coords(system, coords[0], coords[1], coords[2])
 
         # Advance active route
         if self._active_route:
@@ -845,19 +854,71 @@ class API:
         set_material_count(name, category, count)
         self._emit("materials_changed", {})
 
+    def _handle_eddn_message(self, msg: dict):
+        schema = msg.get("$schemaRef", "")
+        if "commodity" not in schema:
+            return
+        message = msg.get("message", {})
+        system = message.get("systemName", "")
+        station = message.get("stationName", "")
+        timestamp = message.get("timestamp", "")
+        commodities = message.get("commodities", [])
+        if system and station and commodities:
+            from core.database import upsert_market_data
+            upsert_market_data(system, station, timestamp, commodities)
+
+    def get_market_stats(self) -> dict:
+        from core.database import get_market_stats
+        return get_market_stats()
+
     def search_commodity_markets(self, system: str, commodity: str) -> list:
         import asyncio
-        from api.spansh import SpanshAPI
-        async def _run():
+        from core.database import search_local_markets
+
+        local = search_local_markets(commodity, system)
+        local_keys = {(r["system"].lower(), r["station"].lower()) for r in local}
+
+        async def _run_spansh():
+            from api.spansh import SpanshAPI
             spansh = SpanshAPI()
             try:
-                return await spansh.commodity_markets(system, commodity)
+                raw = await spansh.commodity_markets(system, commodity)
             finally:
                 await spansh.close()
+            results = []
+            needle = commodity.lower()
+            for s in raw:
+                market_entry = next(
+                    (m for m in (s.get("market") or []) if m.get("commodity", "").lower() == needle),
+                    None,
+                )
+                results.append({
+                    "station":             s.get("name", ""),
+                    "system":              s.get("system_name", ""),
+                    "distance":            round(s.get("distance", 0), 1),
+                    "distance_to_arrival": round(s.get("distance_to_arrival") or 0),
+                    "has_large_pad":       s.get("has_large_pad", False),
+                    "is_planetary":        s.get("is_planetary", False),
+                    "updated_at":          s.get("market_updated_at", ""),
+                    "buy_price":           market_entry.get("buy_price", 0) if market_entry else 0,
+                    "sell_price":          market_entry.get("sell_price", 0) if market_entry else 0,
+                    "supply":              market_entry.get("supply", 0) if market_entry else 0,
+                    "demand":              market_entry.get("demand", 0) if market_entry else 0,
+                    "source":              "spansh",
+                })
+            return results
+
         try:
-            return asyncio.run(_run())
+            spansh_results = asyncio.run(_run_spansh())
         except Exception:
-            return []
+            spansh_results = []
+
+        merged = list(local)
+        for r in spansh_results:
+            key = (r["system"].lower(), r["station"].lower())
+            if key not in local_keys:
+                merged.append(r)
+        return merged
 
     # --- Exploration ---
 
@@ -1138,6 +1199,36 @@ class API:
         }
 
 
+def _eddn_listener(api: API):
+    import asyncio
+    import zlib
+    import websockets
+
+    async def _run():
+        uri = "wss://eddn.edcd.io:4430/subscribe"
+        while True:
+            try:
+                async with websockets.connect(uri, ping_interval=30, open_timeout=30) as ws:
+                    logging.info("EDDN connected")
+                    async for raw in ws:
+                        try:
+                            if isinstance(raw, bytes):
+                                data = zlib.decompress(raw)
+                            else:
+                                data = raw.encode() if isinstance(raw, str) else raw
+                            msg = json.loads(data)
+                            api._handle_eddn_message(msg)
+                        except Exception:
+                            pass
+            except Exception as e:
+                logging.warning(f"EDDN disconnected: {e}")
+                await asyncio.sleep(10)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(_run())
+
+
 def _setup_hotkeys(api: API):
     try:
         import keyboard
@@ -1200,6 +1291,7 @@ def main():
     threading.Thread(target=tray.run, daemon=True).start()
 
     threading.Thread(target=_setup_hotkeys, args=(api,), daemon=True).start()
+    threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
 
     webview.start(debug=DEV_MODE)
 

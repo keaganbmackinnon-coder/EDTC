@@ -141,6 +141,25 @@ def init_db():
                 created TEXT DEFAULT (datetime('now')),
                 updated TEXT DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS markets (
+                system      TEXT NOT NULL,
+                station     TEXT NOT NULL,
+                commodity   TEXT NOT NULL,
+                buy_price   INTEGER DEFAULT 0,
+                sell_price  INTEGER DEFAULT 0,
+                supply      INTEGER DEFAULT 0,
+                demand      INTEGER DEFAULT 0,
+                updated_at  TEXT NOT NULL,
+                PRIMARY KEY (system, station, commodity)
+            );
+
+            CREATE TABLE IF NOT EXISTS system_coords (
+                system TEXT PRIMARY KEY,
+                x      REAL NOT NULL,
+                y      REAL NOT NULL,
+                z      REAL NOT NULL
+            );
         """)
 
 
@@ -648,6 +667,94 @@ def clear_trade_log() -> bool:
         conn.execute("DELETE FROM trade_log")
     return True
 
+
+# --- EDDN Market Cache ---
+
+def upsert_market_data(system: str, station: str, timestamp: str, commodities: list) -> None:
+    with _conn() as conn:
+        for c in commodities:
+            name = (c.get("name") or "").lower()
+            if not name:
+                continue
+            conn.execute("""
+                INSERT INTO markets (system, station, commodity, buy_price, sell_price, supply, demand, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(system, station, commodity) DO UPDATE SET
+                    buy_price=excluded.buy_price,
+                    sell_price=excluded.sell_price,
+                    supply=excluded.supply,
+                    demand=excluded.demand,
+                    updated_at=excluded.updated_at
+            """, (
+                system, station, name,
+                c.get("buyPrice", 0), c.get("sellPrice", 0),
+                c.get("stock", 0), c.get("demand", 0),
+                timestamp,
+            ))
+
+
+def upsert_system_coords(system: str, x: float, y: float, z: float) -> None:
+    with _conn() as conn:
+        conn.execute("""
+            INSERT INTO system_coords (system, x, y, z) VALUES (?, ?, ?, ?)
+            ON CONFLICT(system) DO UPDATE SET x=excluded.x, y=excluded.y, z=excluded.z
+        """, (system, x, y, z))
+
+
+def search_local_markets(commodity: str, ref_system: str | None = None) -> list[dict]:
+    import math
+    with _conn() as conn:
+        rows = conn.execute("""
+            SELECT m.system, m.station, m.buy_price, m.sell_price,
+                   m.supply, m.demand, m.updated_at,
+                   sc.x, sc.y, sc.z
+            FROM markets m
+            LEFT JOIN system_coords sc ON sc.system = m.system
+            WHERE LOWER(m.commodity) = LOWER(?)
+              AND (m.buy_price > 0 OR m.sell_price > 0)
+            ORDER BY m.updated_at DESC
+        """, (commodity,)).fetchall()
+
+        ref_coords = None
+        if ref_system:
+            r = conn.execute(
+                "SELECT x, y, z FROM system_coords WHERE system = ?", (ref_system,)
+            ).fetchone()
+            if r:
+                ref_coords = (r["x"], r["y"], r["z"])
+
+        results = []
+        for r in rows:
+            dist = None
+            if ref_coords and r["x"] is not None:
+                dx, dy, dz = r["x"] - ref_coords[0], r["y"] - ref_coords[1], r["z"] - ref_coords[2]
+                dist = round(math.sqrt(dx*dx + dy*dy + dz*dz), 1)
+            results.append({
+                "station":             r["station"],
+                "system":              r["system"],
+                "distance":            dist,
+                "distance_to_arrival": 0,
+                "has_large_pad":       None,
+                "is_planetary":        None,
+                "updated_at":          r["updated_at"],
+                "buy_price":           r["buy_price"],
+                "sell_price":          r["sell_price"],
+                "supply":              r["supply"],
+                "demand":              r["demand"],
+                "source":              "eddn",
+            })
+        return results
+
+
+def get_market_stats() -> dict:
+    with _conn() as conn:
+        stations = conn.execute("SELECT COUNT(DISTINCT system || '/' || station) FROM markets").fetchone()[0]
+        commodities = conn.execute("SELECT COUNT(DISTINCT commodity) FROM markets").fetchone()[0]
+        systems = conn.execute("SELECT COUNT(*) FROM system_coords").fetchone()[0]
+        return {"stations": stations, "commodities": commodities, "systems_with_coords": systems}
+
+
+# --- Guardian ---
 
 def set_guardian_visit(site_id: str, visited: bool, data_collected: bool, notes: str) -> None:
     with _conn() as conn:

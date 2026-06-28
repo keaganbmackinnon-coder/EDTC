@@ -35,12 +35,28 @@ function ErrorBanner({ error }) {
 
 // ---- Tab: Commodity Search ----
 
+const SORT_OPTIONS = [
+  { id: 'distance',   label: 'Closest first', fn: (a, b) => {
+    if (a.distance == null && b.distance == null) return 0
+    if (a.distance == null) return 1
+    if (b.distance == null) return -1
+    return a.distance - b.distance
+  }},
+  { id: 'buy_asc',    label: 'Buy ↑',      fn: (a, b) => a.buy_price - b.buy_price },
+  { id: 'buy_desc',   label: 'Buy ↓',      fn: (a, b) => b.buy_price - a.buy_price },
+  { id: 'sell_asc',   label: 'Sell ↑',     fn: (a, b) => a.sell_price - b.sell_price },
+  { id: 'sell_desc',  label: 'Sell ↓',     fn: (a, b) => b.sell_price - a.sell_price },
+  { id: 'supply',     label: 'Supply ↓',   fn: (a, b) => b.supply - a.supply },
+  { id: 'demand',     label: 'Demand ↓',   fn: (a, b) => b.demand - a.demand },
+]
+
 function CommoditySearchTab({ currentSystem, commodities }) {
   const [query, setQuery] = useState('')
   const [system, setSystem] = useState(currentSystem ?? '')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
+  const [sortId, setSortId] = useState('distance')
 
   useEffect(() => {
     if (currentSystem && !system) setSystem(currentSystem)
@@ -69,7 +85,7 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   return (
     <div>
       <p className="text-ed-muted text-sm mb-4">
-        Find stations buying or selling a commodity near a system. Data via Spansh.
+        Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide). Distance from your reference system.
       </p>
 
       <div className="flex flex-col gap-2 mb-4">
@@ -83,7 +99,7 @@ function CommoditySearchTab({ currentSystem, commodities }) {
             list="commodity-list"
           />
           <datalist id="commodity-list">
-            {commodities.map(c => <option key={c.id} value={c.name} />)}
+            {[...commodities].sort((a, b) => a.name.localeCompare(b.name)).map(c => <option key={c.id} value={c.name} />)}
           </datalist>
         </div>
         <div className="flex gap-2">
@@ -126,55 +142,65 @@ function CommoditySearchTab({ currentSystem, commodities }) {
       {error && <ErrorBanner error={error} />}
 
       {results && results.length === 0 && (
-        <EmptyState message="No stations found near that system carrying this commodity." />
+        <EmptyState message="No stations found carrying this commodity. Try a different name or check spelling." />
       )}
 
       {results && results.length > 0 && (
         <div className="space-y-2">
-          <p className="text-ed-muted text-xs font-mono mb-1">{results.length} stations found</p>
-          {results.map((r, i) => {
-            const market = (r.market ?? r.markets ?? [r]).find?.(m =>
-              m?.name?.toLowerCase() === query.toLowerCase() || true
-            ) ?? {}
-            const buyPrice  = r.buy_price  ?? market.buy_price  ?? r.buyPrice  ?? 0
-            const sellPrice = r.sell_price ?? market.sell_price ?? r.sellPrice ?? 0
-            const supply    = r.supply     ?? market.supply     ?? r.Supply    ?? 0
-            const demand    = r.demand     ?? market.demand     ?? r.Demand    ?? 0
-            const distance  = r.distance   ?? r.distance_to_star ?? 0
-            const sysName   = r.system?.name ?? r.systemName ?? r.system ?? '—'
-            const stnName   = r.name ?? r.stationName ?? '—'
-            return (
-              <div key={i} className="panel">
-                <div className="flex items-start justify-between gap-3 mb-1">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-ed-text font-semibold font-ui truncate">{stnName}</p>
-                    <p className="text-ed-muted text-xs font-mono">{sysName}</p>
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <span className="text-ed-muted text-xs font-mono">{results.length} stations · Sort:</span>
+            {SORT_OPTIONS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setSortId(s.id)}
+                className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
+                  sortId === s.id
+                    ? 'border-ed-orange text-ed-orange'
+                    : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-text'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          {[...results].sort(SORT_OPTIONS.find(s => s.id === sortId)?.fn).map((r, i) => (
+            <div key={i} className="panel">
+              <div className="flex items-start justify-between gap-3 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-ed-text font-semibold font-ui truncate">{r.station}</p>
+                    {r.source === 'eddn' && <span className="text-xs font-mono text-ed-success border border-ed-success/30 rounded px-1">EDDN</span>}
+                    {r.is_planetary && <span className="text-xs font-mono text-ed-muted border border-ed-border rounded px-1">Planetary</span>}
+                    {r.has_large_pad === false && <span className="text-xs font-mono text-yellow-500 border border-yellow-500/30 rounded px-1">No Large Pad</span>}
                   </div>
-                  {distance > 0 && (
-                    <p className="text-ed-muted text-xs font-mono shrink-0">
-                      {Math.round(distance).toLocaleString()} ls
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-4 text-xs font-mono">
-                  {buyPrice > 0 && (
-                    <span>
-                      <span className="text-ed-muted">Buy </span>
-                      <span className="text-ed-success">{fmtCr(buyPrice)} Cr</span>
-                      {supply > 0 && <span className="text-ed-muted ml-1">({fmtNum(supply)}T)</span>}
-                    </span>
-                  )}
-                  {sellPrice > 0 && (
-                    <span>
-                      <span className="text-ed-muted">Sell </span>
-                      <span className="text-ed-orange">{fmtCr(sellPrice)} Cr</span>
-                      {demand > 0 && <span className="text-ed-muted ml-1">({fmtNum(demand)} demand)</span>}
-                    </span>
-                  )}
+                  <p className="text-ed-muted text-xs font-mono">
+                    {r.system}
+                    {r.distance != null ? ` · ${r.distance} ly` : ''}
+                    {r.distance_to_arrival > 0 ? ` · ${r.distance_to_arrival.toLocaleString()} ls` : ''}
+                  </p>
                 </div>
               </div>
-            )
-          })}
+              <div className="flex gap-4 text-xs font-mono flex-wrap">
+                {r.buy_price > 0 && (
+                  <span>
+                    <span className="text-ed-muted">Buy </span>
+                    <span className="text-ed-success">{fmtCr(r.buy_price)} Cr</span>
+                    {r.supply > 0 && <span className="text-ed-muted ml-1">({fmtNum(r.supply)}T)</span>}
+                  </span>
+                )}
+                {r.sell_price > 0 && (
+                  <span>
+                    <span className="text-ed-muted">Sell </span>
+                    <span className="text-ed-orange">{fmtCr(r.sell_price)} Cr</span>
+                    {r.demand > 0 && <span className="text-ed-muted ml-1">({fmtNum(r.demand)} demand)</span>}
+                  </span>
+                )}
+                {r.updated_at && (
+                  <span className="text-ed-muted ml-auto">Updated {new Date(r.updated_at).toLocaleDateString()}</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
