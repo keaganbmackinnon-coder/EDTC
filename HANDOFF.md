@@ -464,32 +464,57 @@ Terminal 2:  python main.py --dev
 ---
 *Session 14 complete — 2026-06-28*
 
-## Session 15 start checklist
+---
 
-1. Read this file top-to-bottom.
-2. Run the app: `dist\EDTC.exe` (or `python main.py` for dev mode).
-3. Check logs — EDDN ZMQ should say "EDDN ZMQ connected"; DB should be accumulating market rows.
-4. On first launch after new build, watch for "Seeding X/159" banner in Trading tab (~2-3 min).
-5. Triage any user-reported bugs from alpha testing before adding new features.
+## Build status — Session 15 (COMPLETE)
 
-## What was verified working at end of Session 14
+| Item | Status | File |
+|---|---|---|
+| CI fix: added `shell: bash` to Windows PyInstaller step (backslash line continuation fails in PowerShell) | DONE | `.github/workflows/build.yml` |
+| v0.2.1 released — first successful 3-platform build (Windows .exe, macOS, Linux) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.1 |
+| Overlay enable/disable preference persisted to DB (`overlay_auto_{name}`) | DONE | `core/overlay.py`, `main.py` |
+| `OverlayManager._user_enabled` dict — tracks per-overlay user preference separate from transient shown state | DONE | `core/overlay.py` |
+| `toggle()` now flips `_user_enabled` and returns new state; `toggle_overlay()` saves to DB | DONE | `core/overlay.py`, `main.py` |
+| FSD jump handler gates System Preview auto-show on `is_user_enabled("system_preview")` | DONE | `main.py` |
+| `get_overlay_states()` now returns `auto_enabled` field in addition to `shown` | DONE | `main.py` |
+| `Overlays.jsx` toggle button driven by `auto_enabled` (not transient `shown`); button label changed to Enable/Disable | DONE | `frontend/src/pages/Overlays.jsx` |
+| v0.2.2 released — overlay fix shipped | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.2 |
 
-- EDDN ZMQ listener: connects at `tcp://eddn.edcd.io:9500`, decompresses zlib JSON, persists commodity market data to SQLite.
-- Trading tab: searches local EDDN cache first, merges with Spansh, shows green "EDDN" badge on live results.
-- EDDN stats counter in Trading tab refreshes every 15s.
-- Spansh market seed (one-time background job on first launch, all 159 commodities).
-- Overlay `_enabled` flag prevents blank/error windows during startup journal replay.
-- All overlay components use `window.__edtc?.on(...)` — no more crashes on load.
-- App launched from .exe without errors.
+## Known issues / notes for next session
+
+- All previous known issues from Session 14 still apply.
+- `_user_enabled` defaults to `True` for all overlays. Existing users upgrading from v0.2.1 will see all overlays enabled (same as before) — no migration needed.
+- `hide_after()` sets `_shown = False` but does NOT touch `_user_enabled`, so the overlay correctly re-appears on the next jump if the user hasn't disabled it.
+- System Preview is the only overlay that auto-triggers on a game event (FSDJump). If other overlays gain auto-trigger behaviour in future, add the same `is_user_enabled()` gate.
+- Spansh nearest-service response field names are still best-guess — verify in-game if results look wrong.
+- System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
 
 ---
-*Session 14 fully closed — 2026-06-28*
+*Session 15 complete — 2026-06-28*
 
 ---
-*Session checkpoint: 2026-06-28 03:16:54*
+*Session checkpoint: 2026-06-28 10:37:34*
 
 ---
-*Session checkpoint: 2026-06-28 10:32:03*
+*Session checkpoint: 2026-06-28 10:38:15*
 
 ---
-*Session checkpoint: 2026-06-28 10:32:24*
+*Session checkpoint: 2026-06-28 10:41:07*
+
+---
+*Session checkpoint: 2026-06-28 11:10:40*
+
+---
+*Session checkpoint: 2026-06-28 11:10:46*
+
+---
+*Session checkpoint: 2026-06-28 11:28:23*
+
+---
+*Session checkpoint: 2026-06-28 11:33:57*
+
+---
+*Session checkpoint: 2026-06-28 11:35:38*
+
+---
+*Session checkpoint: 2026-06-28 11:44:01*
