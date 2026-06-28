@@ -463,3 +463,24 @@ Terminal 2:  python main.py --dev
 
 ---
 *Session 14 complete — 2026-06-28*
+
+## Session 15 start checklist
+
+1. Read this file top-to-bottom.
+2. Run the app: `dist\EDTC.exe` (or `python main.py` for dev mode).
+3. Check logs — EDDN ZMQ should say "EDDN ZMQ connected"; DB should be accumulating market rows.
+4. On first launch after new build, watch for "Seeding X/159" banner in Trading tab (~2-3 min).
+5. Triage any user-reported bugs from alpha testing before adding new features.
+
+## What was verified working at end of Session 14
+
+- EDDN ZMQ listener: connects at `tcp://eddn.edcd.io:9500`, decompresses zlib JSON, persists commodity market data to SQLite.
+- Trading tab: searches local EDDN cache first, merges with Spansh, shows green "EDDN" badge on live results.
+- EDDN stats counter in Trading tab refreshes every 15s.
+- Spansh market seed (one-time background job on first launch, all 159 commodities).
+- Overlay `_enabled` flag prevents blank/error windows during startup journal replay.
+- All overlay components use `window.__edtc?.on(...)` — no more crashes on load.
+- App launched from .exe without errors.
+
+---
+*Session 14 fully closed — 2026-06-28*
