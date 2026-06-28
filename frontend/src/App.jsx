@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import Navigation from './pages/Navigation'
 import Trading from './pages/Trading'
@@ -39,6 +40,11 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
+  const [version, setVersion] = useState('')
+  useEffect(() => {
+    window?.pywebview?.api?.get_version().then(v => setVersion(v ?? ''))
+  }, [])
+
   const overlayKey = new URLSearchParams(window.location.search).get('overlay')
   const OverlayComponent = overlayKey ? OVERLAY_MAP[overlayKey] : null
 
@@ -74,7 +80,7 @@ export default function App() {
           ))}
         </nav>
         <div className="p-3 border-t border-ed-border text-ed-muted text-xs font-mono">
-          v0.1.0
+          {version ? `v${version}` : ''}
         </div>
       </aside>
 

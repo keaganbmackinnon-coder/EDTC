@@ -30,6 +30,11 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
+try:
+    APP_VERSION = (BASE_DIR / "VERSION").read_text(encoding="utf-8").strip()
+except Exception:
+    APP_VERSION = "dev"
+
 # Approximate scan values by planet class (first-discovery estimates in Cr)
 _SCAN_VALUES = {
     "Earthlike body": 1_500_000,
@@ -1226,11 +1231,11 @@ class API:
     # --- App ---
 
     def get_version(self) -> str:
-        return "0.1.0"
+        return APP_VERSION
 
     def get_app_info(self) -> dict:
         return {
-            "version": "0.1.0",
+            "version": APP_VERSION,
             "name": "EDTC",
             "dev_mode": DEV_MODE,
         }

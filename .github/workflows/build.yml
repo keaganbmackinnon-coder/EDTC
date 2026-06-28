@@ -41,6 +41,10 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Write version from tag
+        shell: bash
+        run: echo "${GITHUB_REF_NAME}" > VERSION
+
       - name: Build frontend
         working-directory: frontend
         run: |
@@ -54,6 +58,7 @@ jobs:
           pyinstaller --onefile --windowed --name EDTC \
             --add-data "frontend/dist;frontend/dist" \
             --add-data "data;data" \
+            --add-data "VERSION;." \
             main.py
 
       - name: Build with PyInstaller (macOS / Linux)
@@ -62,6 +67,7 @@ jobs:
           pyinstaller --onefile --windowed --name EDTC \
             --add-data "frontend/dist:frontend/dist" \
             --add-data "data:data" \
+            --add-data "VERSION:." \
             main.py
 
       - name: Upload artifact
