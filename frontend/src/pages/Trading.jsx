@@ -57,10 +57,33 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
   const [sortId, setSortId] = useState('distance')
+  const [eddnStats, setEddnStats] = useState(null)
+  const [seedStatus, setSeedStatus] = useState(null)
 
   useEffect(() => {
     if (currentSystem && !system) setSystem(currentSystem)
   }, [currentSystem])
+
+  useEffect(() => {
+    const refresh = () => api()?.get_market_stats().then(s => setEddnStats(s ?? null))
+    refresh()
+    const t = setInterval(refresh, 15000)
+    return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    const off = window.__edtc?.on('market_seed_status', e => {
+      const s = e?.payload
+      if (!s) return
+      if (s.status === 'done' || s.status === 'error') {
+        setSeedStatus(null)
+        api()?.get_market_stats().then(st => setEddnStats(st ?? null))
+      } else {
+        setSeedStatus(s)
+      }
+    })
+    return () => off?.()
+  }, [])
 
   const suggestions = commodities.filter(c =>
     query.length >= 2 && c.name.toLowerCase().includes(query.toLowerCase())
@@ -84,9 +107,20 @@ function CommoditySearchTab({ currentSystem, commodities }) {
 
   return (
     <div>
-      <p className="text-ed-muted text-sm mb-4">
-        Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide). Distance from your reference system.
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-ed-muted text-sm">
+          Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide). Distance from your reference system.
+        </p>
+        <span className="text-xs font-mono text-ed-muted shrink-0 ml-4 whitespace-nowrap text-right">
+          {seedStatus ? (
+            <span className="text-ed-gold">
+              Seeding {seedStatus.done}/{seedStatus.total} · {seedStatus.current}
+            </span>
+          ) : eddnStats ? (
+            <><span className="text-ed-success">EDDN</span> {eddnStats.stations} stations · {eddnStats.commodities} commodities</>
+          ) : null}
+        </span>
+      </div>
 
       <div className="flex flex-col gap-2 mb-4">
         <div className="relative">

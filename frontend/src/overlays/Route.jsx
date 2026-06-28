@@ -10,7 +10,7 @@ export default function RouteOverlay() {
       if (r) setState({ route: r, current_system: '' })
     })
 
-    const off = window.__edtc.on('route_update', (payload) => {
+    const off = window.__edtc?.on('route_update', (payload) => {
       setState(payload)
     })
     return off

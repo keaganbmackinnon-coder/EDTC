@@ -22,11 +22,11 @@ export default function SystemPreview() {
   const [system, setSystem] = useState(null)
 
   useEffect(() => {
-    const offJump = window.__edtc.on('system_jumped', (payload) => {
+    const offJump = window.__edtc?.on('system_jumped', (payload) => {
       setSystem({ ...payload, body_count: null })
     })
 
-    const offFss = window.__edtc.on('fss_discovery', (payload) => {
+    const offFss = window.__edtc?.on('fss_discovery', (payload) => {
       setSystem(prev => prev
         ? { ...prev, body_count: payload.body_count }
         : null

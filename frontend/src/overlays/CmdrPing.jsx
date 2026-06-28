@@ -5,7 +5,7 @@ export default function CmdrPing() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const off = window.__edtc.on('cmdr_detected', (payload) => {
+    const off = window.__edtc?.on('cmdr_detected', (payload) => {
       setPing(payload)
       setVisible(true)
     })

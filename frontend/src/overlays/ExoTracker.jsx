@@ -6,7 +6,7 @@ export default function ExoTracker() {
   const [scans, setScans] = useState([])
 
   useEffect(() => {
-    const off = window.__edtc.on('exo_scan', (payload) => {
+    const off = window.__edtc?.on('exo_scan', (payload) => {
       setScans(prev => {
         const key = `${payload.body}::${payload.species}`
         const existing = prev.find(s => s.key === key)
@@ -19,7 +19,7 @@ export default function ExoTracker() {
     })
 
     // Reset on new system
-    const offJump = window.__edtc.on('system_jumped', () => setScans([]))
+    const offJump = window.__edtc?.on('system_jumped', () => setScans([]))
     return () => { off(); offJump() }
   }, [])
 

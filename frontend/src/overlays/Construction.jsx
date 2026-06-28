@@ -10,7 +10,7 @@ export default function Construction() {
       if (projects?.length > 0) setProject(projects[0])
     })
 
-    const off = window.__edtc.on('construction_update', (payload) => {
+    const off = window.__edtc?.on('construction_update', (payload) => {
       setProject(payload)
     })
     return off

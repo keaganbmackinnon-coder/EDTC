@@ -1236,6 +1236,75 @@ def _setup_hotkeys(api: API):
         pass
 
 
+def _seed_market_db(api: API):
+    """One-time background seed: query Spansh for every commodity and cache results."""
+    from core.database import get_pref, set_pref, upsert_market_data
+    if get_pref("market_seeded"):
+        return
+
+    try:
+        commodities = api._load_json("commodities.json").get("commodities", [])
+    except Exception:
+        return
+    if not commodities:
+        return
+
+    import asyncio
+
+    async def _run():
+        from api.spansh import SpanshAPI
+        spansh = SpanshAPI()
+        total = len(commodities)
+        try:
+            for i, c in enumerate(commodities):
+                name = c.get("name", "")
+                if not name:
+                    continue
+                try:
+                    raw = await spansh.commodity_markets("Sol", name)
+                    needle = name.lower()
+                    for s in raw:
+                        system = s.get("system_name", "")
+                        station = s.get("name", "")
+                        timestamp = s.get("market_updated_at", "")
+                        entry = next(
+                            (m for m in (s.get("market") or []) if m.get("commodity", "").lower() == needle),
+                            None,
+                        )
+                        if system and station and entry:
+                            upsert_market_data(system, station, timestamp, [{
+                                "name": needle,
+                                "buyPrice": entry.get("buy_price", 0),
+                                "sellPrice": entry.get("sell_price", 0),
+                                "stock": entry.get("supply", 0),
+                                "demand": entry.get("demand", 0),
+                            }])
+                except Exception:
+                    pass
+                api._emit("market_seed_status", {
+                    "status": "seeding",
+                    "done": i + 1,
+                    "total": total,
+                    "current": name,
+                })
+                await asyncio.sleep(0.4)
+        finally:
+            await spansh.close()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(_run())
+        set_pref("market_seeded", True)
+        api._emit("market_seed_status", {"status": "done"})
+        logging.info("Spansh market seed complete")
+    except Exception as e:
+        logging.warning(f"Spansh market seed failed: {e}")
+        api._emit("market_seed_status", {"status": "error"})
+    finally:
+        loop.close()
+
+
 def _create_desktop_shortcut():
     if not getattr(sys, "frozen", False):
         return
@@ -1291,8 +1360,9 @@ def main():
 
     threading.Thread(target=_setup_hotkeys, args=(api,), daemon=True).start()
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
+    threading.Thread(target=_seed_market_db, args=(api,), daemon=True).start()
 
-    webview.start(debug=DEV_MODE)
+    webview.start(debug=DEV_MODE, func=lambda: api._overlay_manager.enable())
 
 
 if __name__ == "__main__":

@@ -20,12 +20,12 @@ export default function FssValues() {
   const [bodies, setBodies] = useState([])
 
   useEffect(() => {
-    const off = window.__edtc.on('body_scanned', (payload) => {
+    const off = window.__edtc?.on('body_scanned', (payload) => {
       setBodies(payload.all_bodies ?? [])
     })
 
     // Clear on new system
-    const offJump = window.__edtc.on('system_jumped', () => setBodies([]))
+    const offJump = window.__edtc?.on('system_jumped', () => setBodies([]))
 
     return () => { off(); offJump() }
   }, [])

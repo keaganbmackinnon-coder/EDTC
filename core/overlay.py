@@ -53,6 +53,10 @@ class OverlayManager:
         self._opacity: dict[str, float] = {}
         self._dev_mode = dev_mode
         self._dist_path = dist_path
+        self._enabled = False  # suppressed until webview is running
+
+    def enable(self):
+        self._enabled = True
 
     def _url(self, key: str) -> str:
         if self._dev_mode:
@@ -71,6 +75,8 @@ class OverlayManager:
             pass
 
     def show(self, name: str):
+        if not self._enabled:
+            return
         if name in self._windows:
             self._windows[name].show()
             self._shown[name] = True
