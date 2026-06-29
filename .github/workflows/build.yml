@@ -55,7 +55,6 @@ jobs:
             --icon "frontend/public/icon.ico" \
             --add-data "frontend/dist;frontend/dist" \
             --add-data "data;data" \
-            --add-data "VERSION;." \
             main.py
 
       - name: Build with PyInstaller (macOS / Linux)
@@ -64,7 +63,6 @@ jobs:
           pyinstaller --onefile --windowed --name EDTC \
             --add-data "frontend/dist:frontend/dist" \
             --add-data "data:data" \
-            --add-data "VERSION:." \
             main.py
 
       - name: Upload artifact

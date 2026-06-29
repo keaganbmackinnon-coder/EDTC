@@ -30,10 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-try:
-    APP_VERSION = (BASE_DIR / "VERSION").read_text(encoding="utf-8").strip()
-except Exception:
-    APP_VERSION = "dev"
+APP_VERSION = "0.3.8"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
