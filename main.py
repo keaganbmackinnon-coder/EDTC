@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.15"  # bump this with every release
+APP_VERSION = "0.3.16"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -183,6 +183,43 @@ class API:
             self._handle_nav_route_clear()
         elif event_name == "Loadout":
             self._handle_loadout(event)
+        elif event_name == "Market":
+            self._import_market_json()
+
+    def _import_market_json(self):
+        from core.journal import journal_path
+        market_file = journal_path() / "Market.json"
+        if not market_file.exists():
+            return
+        try:
+            data = json.loads(market_file.read_text(encoding="utf-8"))
+            system = data.get("StarSystem", "")
+            station = data.get("StationName", "")
+            timestamp = data.get("timestamp", "")
+            items = data.get("Items", [])
+            if not (system and station and items):
+                return
+            commodities = []
+            for item in items:
+                if item.get("Rare", False):
+                    continue
+                raw = item.get("Name", "")
+                name = raw.lstrip("$").split("_name;")[0] if raw else ""
+                if not name:
+                    continue
+                commodities.append({
+                    "name": name,
+                    "buyPrice": item.get("BuyPrice", 0),
+                    "sellPrice": item.get("SellPrice", 0),
+                    "stock": item.get("Stock", 0),
+                    "demand": item.get("Demand", 0),
+                })
+            if commodities:
+                from core.database import upsert_market_data
+                upsert_market_data(system, station, timestamp, commodities)
+                logging.info(f"Market.json: {len(commodities)} commodities from {station} / {system}")
+        except Exception as e:
+            logging.warning(f"Market.json import error: {e}")
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -1570,6 +1607,7 @@ def main():
         def _push_startup():
             import time
             time.sleep(1.5)
+            api._import_market_json()
             if api._current_ship:
                 api._emit("ship_changed", api.get_ship_info())
             if api._current_system:
