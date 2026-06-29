@@ -1,8 +1,12 @@
 import json
 import sqlite3
+import sys
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "edtc.db"
+if getattr(sys, "frozen", False):
+    DB_PATH = Path(sys.executable).parent / "edtc.db"
+else:
+    DB_PATH = Path(__file__).parent.parent / "edtc.db"
 
 
 def _conn() -> sqlite3.Connection:

@@ -1691,7 +1691,6 @@ def main():
 
     threading.Thread(target=_setup_hotkeys, args=(api,), daemon=True).start()
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
-    threading.Thread(target=_seed_from_spansh_dump, args=(api,), daemon=True).start()
 
     def _on_ready():
         api._overlay_manager.enable()
@@ -1706,6 +1705,7 @@ def main():
             if api._current_system:
                 api._emit("system_changed", {"system": api._current_system})
         threading.Thread(target=_push_startup, daemon=True).start()
+        threading.Thread(target=_seed_from_spansh_dump, args=(api,), daemon=True).start()
 
     webview.start(debug=DEV_MODE, func=_on_ready)
 
