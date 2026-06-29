@@ -544,7 +544,7 @@ Terminal 2:  python main.py --dev
 | `--icon "frontend/public/icon.ico"` added to Windows PyInstaller step — icon now embedded in .exe | DONE | `.github/workflows/build.yml` |
 | Windows icon cache cleared (`iconcache*.db` deleted, Explorer restarted) to flush stale floppy icon | DONE | — |
 | v0.2.6 released — sidewinder icon baked into .exe permanently | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.6 |
-| Local install updated to v0.2.6 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+| Local install updated to v0.2.9 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
 
 ## Key notes from Session 17
 
@@ -610,6 +610,84 @@ Focus: Navigation page — making it work as well as possible end-to-end.
 *Session 18 complete — 2026-06-28*
 
 ---
+
+## Build status — Session 19 (COMPLETE)
+
+Focus: In-app auto-updater + install sync.
+
+| Item | Status | File |
+|---|---|---|
+| Verified local install vs GitHub releases on session start | DONE | — |
+| Downloaded and installed v0.2.9 manually (was on v0.2.6) | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
+| `check_for_update()` API method — hits GitHub releases API, compares semver, returns `{current, latest, update_available, download_url}` | DONE | `main.py` |
+| `_version_gt()` helper — tuple-based semver comparison | DONE | `main.py` |
+| `download_and_install_update(download_url)` API method — starts background download thread, returns immediately | DONE | `main.py` |
+| `_do_update()` background thread — streams download in 64KB chunks, emits `update_progress` events with `{pct, downloaded, total}`, writes `edtc_update.bat`, launches it detached, calls `webview.destroy()` | DONE | `main.py` |
+| `edtc_update.bat` pattern — waits 2s, `copy /y` new exe over old, relaunches EDTC, self-deletes | DONE | `main.py` |
+| `App.jsx` — `check_for_update()` called after version fetch on startup | DONE | `frontend/src/App.jsx` |
+| `App.jsx` — `update_progress` event listener drives download progress state | DONE | `frontend/src/App.jsx` |
+| Sidebar update UI — amber `↑ vX.X.X available` link when update detected | DONE | `frontend/src/App.jsx` |
+| Sidebar download progress — percentage label + animated progress bar while downloading | DONE | `frontend/src/App.jsx` |
+| Sidebar error state — shows truncated error message if download/install fails | DONE | `frontend/src/App.jsx` |
+| v0.3.0 released | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.0 |
+| Local install updated to v0.3.0 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+
+## Key technical notes from Session 19
+
+- **Self-replacing exe on Windows**: a running `.exe` cannot be overwritten while it's open. Pattern: download to `%TEMP%\EDTC_update.exe`, write `edtc_update.bat` that waits 2s (for the app to fully exit), copies the new file over the old path, relaunches, then self-deletes. Launch the bat with `CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS` so it survives the parent process dying.
+- **Update check is dev-mode safe**: `download_and_install_update()` returns early with an error string if `sys.frozen` is not set — won't try to overwrite `python.exe` in dev.
+- **GitHub API for latest release**: `GET https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest` — `tag_name` field holds the version, `assets[].browser_download_url` where `name == "EDTC.exe"` is the Windows download link.
+- **WebFetch has a 15-minute cache** — when polling GitHub Actions for CI status, the actions list page can return stale "in progress" even after the build completes. Use the GitHub API (`/actions/runs?per_page=1`) to bypass cache and get live status.
+
+## Known issues / notes for next session
+
+- Update check runs on every app launch (one HTTPS request, 5s timeout) — acceptable overhead.
+- Updater does not verify the downloaded exe (no checksum) — fine for a personal tool, revisit if distributing more widely.
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
+- `data/guardian_sites.json` still only 8 sites.
+- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
+
+---
+*Session 19 complete — 2026-06-29*
+
+---
+
+## Build status — Session 20 (COMPLETE)
+
+Focus: Exobiology route planner + updater bug fix.
+
+| Item | Status | File |
+|---|---|---|
+| `exobiology_route()` added to SpanshAPI — form POST to `/exobiology/route`, polls job, returns systems array | DONE | `api/spansh.py` |
+| `plan_exobiology_route()` API method | DONE | `main.py` |
+| Exploration page — new **Exo Planner** tab (between Road to Riches and Exobiology) | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exo Planner: origin (auto-fills current system), jump range (auto-fills from ship), search radius, max systems inputs | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exo Planner: results show each system with jump count, species count, total value; expandable to bodies → species + per-sample value | DONE | `frontend/src/pages/Exploration.jsx` |
+| v0.3.1 released — Exo Planner | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.1 |
+| Updater bug fix: `webview.destroy()` → `self._window.destroy()` (pywebview has no module-level destroy) | DONE | `main.py` |
+| v0.3.2 released — updater fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.2 |
+| Local install updated to v0.3.2 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+| v0.3.3 released — HANDOFF update / updater smoke-test target | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.3 |
+
+## Key technical notes from Session 20
+
+- **Spansh exobiology API**: `POST https://spansh.co.uk/api/exobiology/route` with form-encoded body (`from`, `range`, `radius`, `max_results`). Returns a job ID (202), poll `/api/results/:job_id` until `status == "ok"`. Result is an array of systems, each with `bodies[]` → `landmarks[]` (species `subtype`, `value` per sample, `count`).
+- **Updater bootstrapping problem**: v0.3.0 had `webview.destroy()` which doesn't exist → updater always failed. v0.3.1 also had the bug (fix wasn't in yet). v0.3.2 has the correct `self._window.destroy()`. Had to manually install v0.3.2; from v0.3.2 onward the in-app updater works correctly.
+- **GitHub API vs expanded_assets for CI status**: Use `/api/repos/.../actions/runs?per_page=1` to check build status — the `expanded_assets` page only shows compiled binaries once CI uploads them, so it's useful as a "is the exe ready?" check.
+
+## Known issues / notes for next session
+
+- Updater does not verify the downloaded exe (no checksum) — fine for a personal tool.
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
+- `data/guardian_sites.json` still only 8 sites.
+- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
+
+---
+*Session 20 complete — 2026-06-29*
+
+---
 *Session checkpoint: 2026-06-28 16:17:11*
 
 ---
@@ -665,3 +743,81 @@ Focus: Navigation page — making it work as well as possible end-to-end.
 
 ---
 *Session checkpoint: 2026-06-28 17:51:32*
+
+---
+*Session checkpoint: 2026-06-28 17:53:54*
+
+---
+*Session checkpoint: 2026-06-28 17:57:05*
+
+---
+*Session checkpoint: 2026-06-28 17:57:34*
+
+---
+*Session checkpoint: 2026-06-28 18:01:39*
+
+---
+*Session checkpoint: 2026-06-28 18:04:55*
+
+---
+*Session checkpoint: 2026-06-28 18:05:39*
+
+---
+*Session checkpoint: 2026-06-28 18:06:03*
+
+---
+*Session checkpoint: 2026-06-28 18:08:04*
+
+---
+*Session checkpoint: 2026-06-28 18:08:25*
+
+---
+*Session checkpoint: 2026-06-28 19:45:55*
+
+---
+*Session checkpoint: 2026-06-28 19:47:55*
+
+---
+*Session checkpoint: 2026-06-28 20:00:41*
+
+---
+*Session checkpoint: 2026-06-28 20:08:13*
+
+---
+*Session checkpoint: 2026-06-28 20:15:45*
+
+---
+*Session checkpoint: 2026-06-28 20:19:44*
+
+---
+*Session checkpoint: 2026-06-28 20:24:24*
+
+---
+*Session checkpoint: 2026-06-28 20:24:40*
+
+---
+*Session checkpoint: 2026-06-28 20:26:36*
+
+---
+*Session checkpoint: 2026-06-28 20:28:56*
+
+---
+*Session checkpoint: 2026-06-28 20:31:41*
+
+---
+*Session checkpoint: 2026-06-28 20:39:15*
+
+---
+*Session checkpoint: 2026-06-28 20:45:35*
+
+---
+*Session checkpoint: 2026-06-28 20:47:57*
+
+---
+*Session checkpoint: 2026-06-28 20:51:03*
+
+---
+*Session checkpoint: 2026-06-28 20:53:45*
+
+---
+*Session checkpoint: 2026-06-28 20:54:00*
