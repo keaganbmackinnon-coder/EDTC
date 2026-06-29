@@ -1432,8 +1432,10 @@ class API:
                 f"@echo off\r\n"
                 f"timeout /t 3 /nobreak > nul\r\n"
                 f"taskkill /f /im EDTC.exe >nul 2>&1\r\n"
+                f"timeout /t 2 /nobreak > nul\r\n"
+                f'copy /y "{tmp}" "{exe_path}" >> "%TEMP%\\edtc_copy.log" 2>&1\r\n'
+                f"if %errorlevel% neq 0 exit /b 1\r\n"
                 f"timeout /t 1 /nobreak > nul\r\n"
-                f'copy /y "{tmp}" "{exe_path}"\r\n'
                 f'start "" "{exe_path}"\r\n'
                 f"del \"%~f0\"\r\n",
                 encoding="utf-8",
