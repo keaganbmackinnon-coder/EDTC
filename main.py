@@ -1634,8 +1634,6 @@ def _seed_from_spansh_dump(api: API):
             tmp_gz.unlink(missing_ok=True)
         except Exception:
             pass
-    finally:
-        loop.close()
 
 
 def _create_desktop_shortcut():
