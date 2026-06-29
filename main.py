@@ -35,6 +35,8 @@ try:
 except Exception:
     APP_VERSION = "dev"
 
+logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
+
 # Approximate scan values by planet class (first-discovery estimates in Cr)
 _SCAN_VALUES = {
     "Earthlike body": 1_500_000,
