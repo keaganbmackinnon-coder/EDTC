@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.12"  # bump this with every release
+APP_VERSION = "0.3.13"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1450,8 +1450,9 @@ class API:
                 f"timeout /t 2 /nobreak > nul\r\n"
                 f'copy /y "{tmp}" "{exe_path}" >> "%TEMP%\\edtc_copy.log" 2>&1\r\n'
                 f"if %errorlevel% neq 0 exit /b 1\r\n"
+                f'powershell -Command "Unblock-File -LiteralPath \'{exe_path}\'"\r\n'
                 f"timeout /t 1 /nobreak > nul\r\n"
-                f'start "" "{exe_path}"\r\n'
+                f'powershell -Command "Start-Process -FilePath \'{exe_path}\'"\r\n'
                 f"del \"%~f0\"\r\n",
                 encoding="utf-8",
             )
