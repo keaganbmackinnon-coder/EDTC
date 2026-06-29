@@ -1430,7 +1430,9 @@ class API:
             bat = Path(tempfile.gettempdir()) / "edtc_update.bat"
             bat.write_text(
                 f"@echo off\r\n"
-                f"timeout /t 2 /nobreak > nul\r\n"
+                f"timeout /t 3 /nobreak > nul\r\n"
+                f"taskkill /f /im EDTC.exe >nul 2>&1\r\n"
+                f"timeout /t 1 /nobreak > nul\r\n"
                 f'copy /y "{tmp}" "{exe_path}"\r\n'
                 f'start "" "{exe_path}"\r\n'
                 f"del \"%~f0\"\r\n",
