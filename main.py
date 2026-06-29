@@ -1412,6 +1412,22 @@ class API:
             tmp = Path(tempfile.gettempdir()) / "EDTC_update.exe"
             exe_path = Path(sys.executable)
 
+            # Always re-fetch the latest release URL so we never download a stale version
+            try:
+                url = "https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest"
+                req0 = urllib.request.Request(url, headers={"User-Agent": "EDTC"})
+                with urllib.request.urlopen(req0, timeout=10) as r0:
+                    data = json.loads(r0.read())
+                fresh_url = next(
+                    (a["browser_download_url"] for a in data.get("assets", []) if a["name"] == "EDTC.exe"),
+                    None,
+                )
+                if fresh_url:
+                    download_url = fresh_url
+                    logging.info(f"Update: using fresh URL for {data.get('tag_name')}")
+            except Exception as e:
+                logging.warning(f"Update: could not re-fetch latest URL, using cached: {e}")
+
             req = urllib.request.Request(download_url, headers={"User-Agent": "EDTC"})
             with urllib.request.urlopen(req, timeout=120) as resp:
                 total = int(resp.headers.get("Content-Length", 0) or 0)
