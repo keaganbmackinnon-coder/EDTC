@@ -58,8 +58,6 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   const [error, setError] = useState(null)
   const [sortId, setSortId] = useState('distance')
   const [eddnStats, setEddnStats] = useState(null)
-  const [seedStatus, setSeedStatus] = useState(null)
-
   useEffect(() => {
     if (currentSystem && !system) setSystem(currentSystem)
   }, [currentSystem])
@@ -69,20 +67,6 @@ function CommoditySearchTab({ currentSystem, commodities }) {
     refresh()
     const t = setInterval(refresh, 15000)
     return () => clearInterval(t)
-  }, [])
-
-  useEffect(() => {
-    const off = window.__edtc?.on('market_seed_status', e => {
-      const s = e?.payload
-      if (!s) return
-      if (s.status === 'done' || s.status === 'error') {
-        setSeedStatus(null)
-        api()?.get_market_stats().then(st => setEddnStats(st ?? null))
-      } else {
-        setSeedStatus(s)
-      }
-    })
-    return () => off?.()
   }, [])
 
   const suggestions = commodities.filter(c =>
@@ -112,15 +96,7 @@ function CommoditySearchTab({ currentSystem, commodities }) {
           Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide). Distance from your reference system.
         </p>
         <span className="text-xs font-mono text-ed-muted shrink-0 ml-4 whitespace-nowrap text-right">
-          {seedStatus ? (
-            <span className="text-ed-gold">
-              {seedStatus.status === 'downloading'
-                ? `Downloading station dump · ${seedStatus.pct ?? 0}%`
-                : seedStatus.total > 0
-                  ? `Seeding ${seedStatus.done}/${seedStatus.total} · ${seedStatus.current}`
-                  : `Seeding ${(seedStatus.done ?? 0).toLocaleString()} stations · ${seedStatus.current}`}
-            </span>
-          ) : eddnStats ? (
+          {eddnStats ? (
             <><span className="text-ed-success">EDDN</span> {eddnStats.stations} stations · {eddnStats.commodities} commodities</>
           ) : null}
         </span>

@@ -161,7 +161,7 @@ class SpanshAPI(BaseAPI):
             "reference_system": system,
             "market": [{"name": commodity}],
             "sort": "distance",
-            "size": 50,
+            "size": 100,
         })
         resp.raise_for_status()
         return resp.json().get("results", [])
