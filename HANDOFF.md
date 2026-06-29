@@ -1,4 +1,4 @@
-# EDTC — Session Handoff
+﻿# EDTC â€” Session Handoff
 
 > **New session? Read this file first, then read the project brief.**
 > Brief location: `C:\Users\Keagan\OneDrive\Desktop\EDT\elite-companion-claude-code-brief.md`
@@ -10,7 +10,7 @@
 
 `.claude/settings.json` is checked in and pre-configures Claude Code to auto-approve
 git, Python, file reads/edits/writes, and GitHub API calls without prompting each time.
-This is intentional — do not remove it. If Claude Code prompts you for a tool that
+This is intentional â€” do not remove it. If Claude Code prompts you for a tool that
 should be auto-approved, check that `.claude/settings.json` is present in the repo root.
 
 ---
@@ -20,7 +20,7 @@ should be auto-approved, check that `.claude/settings.json` is present in the re
 - **App name:** EDTC (Elite Dangerous Tools & Companion)
 - **Project root:** `C:\Users\Keagan\OneDrive\Desktop\EDT\EDT\`
 - **Stack:** Python + pywebview + React + Vite + Tailwind + SQLite
-- **Distribution:** PyInstaller → single .exe, released via GitHub Releases
+- **Distribution:** PyInstaller â†’ single .exe, released via GitHub Releases
 
 ## Decisions locked in
 
@@ -28,15 +28,15 @@ should be auto-approved, check that `.claude/settings.json` is present in the re
 |---|---|
 | App name | EDTC |
 | Auto-jump / autopilot | Implemented with prominent Frontier ToS warning modal in FleetCarriers.jsx |
-| Frontier CAPI / OAuth | Deferred — later phase |
-| Repo visibility | Public — https://github.com/keaganbmackinnon-coder/EDTC |
-| Overlay URL scheme | `?overlay=<key>` query param — works for both dev (localhost:5173) and prod (file://) |
+| Frontier CAPI / OAuth | Deferred â€” later phase |
+| Repo visibility | Public â€” https://github.com/keaganbmackinnon-coder/EDTC |
+| Overlay URL scheme | `?overlay=<key>` query param â€” works for both dev (localhost:5173) and prod (file://) |
 | Route clipboard hotkey | Ctrl+Shift+C (global, via `keyboard` lib) |
 | **Feature freeze** | **No new features until everything that exists works correctly. Fix before build.** |
 
 ---
 
-## Build status — Session 1 (COMPLETE)
+## Build status â€” Session 1 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -63,44 +63,44 @@ should be auto-approved, check that `.claude/settings.json` is present in the re
 
 ---
 
-## Build status — Session 2 (COMPLETE)
+## Build status â€” Session 2 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `core/audio.py` — pygame.mixer synthesised beep | DONE | `core/audio.py` |
+| `core/audio.py` â€” pygame.mixer synthesised beep | DONE | `core/audio.py` |
 | CMDR Ping overlay (audio + auto-dismiss popup + watchlist) | DONE | `overlays/CmdrPing.jsx` |
 | Route Following overlay (FSDJump tracking, progress bar, clipboard hotkey) | DONE | `overlays/Route.jsx` |
 | FSS Values overlay (body scan value estimates) | DONE | `overlays/FssValues.jsx` |
 | System Preview overlay (auto-hides 15s after jump) | DONE | `overlays/SystemPreview.jsx` |
 | Exobiology Tracker overlay (1/3 2/3 3/3 scan dots per species) | DONE | `overlays/ExoTracker.jsx` |
 | Construction Materials overlay (commodity progress bars) | DONE | `overlays/Construction.jsx` |
-| `Navigation.jsx` — route paste UI + active route status panel | DONE | `pages/Navigation.jsx` |
-| `Overlays.jsx` — toggle panel + watchlist manager + construction project manager | DONE | `pages/Overlays.jsx` |
-| `App.jsx` — overlay mode via `?overlay=<key>` query param | DONE | `App.jsx` |
-| `database.py` — exo_scans, construction_projects tables; watchlist CRUD; routes.active column | DONE | `core/database.py` |
-| `journal.py` — ColonisationContribution, ColonisationConstructionDepot events | DONE | `core/journal.py` |
-| `overlay.py` — emit_to_overlay(), hide_after(), prod URL support, exo_tracker config | DONE | `core/overlay.py` |
-| `main.py` — full event routing for all 6 overlays, all API methods, keyboard hotkey | DONE | `main.py` |
+| `Navigation.jsx` â€” route paste UI + active route status panel | DONE | `pages/Navigation.jsx` |
+| `Overlays.jsx` â€” toggle panel + watchlist manager + construction project manager | DONE | `pages/Overlays.jsx` |
+| `App.jsx` â€” overlay mode via `?overlay=<key>` query param | DONE | `App.jsx` |
+| `database.py` â€” exo_scans, construction_projects tables; watchlist CRUD; routes.active column | DONE | `core/database.py` |
+| `journal.py` â€” ColonisationContribution, ColonisationConstructionDepot events | DONE | `core/journal.py` |
+| `overlay.py` â€” emit_to_overlay(), hide_after(), prod URL support, exo_tracker config | DONE | `core/overlay.py` |
+| `main.py` â€” full event routing for all 6 overlays, all API methods, keyboard hotkey | DONE | `main.py` |
 
 ---
 
 ## Key architecture notes
 
 - pywebview serves React from `frontend/dist/` (prod) or `localhost:5173` (dev mode: `python main.py --dev`)
-- Python↔JS bridge: `window.pywebview.api.methodName()` → returns a Promise
-- JS←Python events: backend calls `window.__edtc.onEvent({type, payload})` — listener set up in `frontend/src/main.jsx`
+- Pythonâ†”JS bridge: `window.pywebview.api.methodName()` â†’ returns a Promise
+- JSâ†Python events: backend calls `window.__edtc.onEvent({type, payload})` â€” listener set up in `frontend/src/main.jsx`
 - Overlays = separate pywebview windows (`transparent=True`, `on_top=True`) managed in `core/overlay.py`
-- **Overlay URL scheme:** `?overlay=<key>` — App.jsx reads the query param and renders only the overlay component (no sidebar)
+- **Overlay URL scheme:** `?overlay=<key>` â€” App.jsx reads the query param and renders only the overlay component (no sidebar)
 - **Overlay event push:** `overlay_manager.emit_to_overlay(name, event_type, payload)` calls `evaluate_js` on the overlay window
 - 6 overlays configured in `core/overlay.py`: `cmdr_ping`, `route`, `fss`, `system_preview`, `exo_tracker`, `construction`
 - **CMDR ping logic:** pings everyone when watchlist is empty; pings only watchlist members when entries exist
-- **Exo scans:** count `ScanOrganic.ScanType == "Analysed"` events per (system, body, species) — 3 = complete. Also persisted in SQLite `exo_scans` table.
+- **Exo scans:** count `ScanOrganic.ScanType == "Analysed"` events per (system, body, species) â€” 3 = complete. Also persisted in SQLite `exo_scans` table.
 - **Construction:** user enters commodity requirements manually in Overlays page; `ColonisationContribution` journal events auto-decrement remaining counts
 - **System preview:** auto-hides after 15 seconds; updates body count when `FSSDiscoveryScan` fires
-- **Ctrl+Shift+C** global hotkey → copies next route destination to clipboard (set up in `_setup_hotkeys()` in main.py)
-- Static data in `data/*.json` — minimal stubs, replace with full EDCD datasets (links in README)
+- **Ctrl+Shift+C** global hotkey â†’ copies next route destination to clipboard (set up in `_setup_hotkeys()` in main.py)
+- Static data in `data/*.json` â€” minimal stubs, replace with full EDCD datasets (links in README)
 - Journal path (Windows): `%USERPROFILE%\Saved Games\Frontier Developments\Elite Dangerous\`
-- Auto-jump: ToS warning UI in `FleetCarriers.jsx` — backend logic not yet implemented
+- Auto-jump: ToS warning UI in `FleetCarriers.jsx` â€” backend logic not yet implemented
 
 ---
 
@@ -113,11 +113,11 @@ should be auto-approved, check that `.claude/settings.json` is present in the re
 
 ---
 
-## Build status — Session 3 (COMPLETE)
+## Build status â€” Session 3 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| Colonisation.jsx — full tabbed UI (replaces all "Coming Soon" stubs) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Colonisation.jsx â€” full tabbed UI (replaces all "Coming Soon" stubs) | DONE | `frontend/src/pages/Colonisation.jsx` |
 | Tab 1: Build Progress Tracker (project cards + per-commodity progress bars) | DONE | `frontend/src/pages/Colonisation.jsx` |
 | Tab 2: Aggregated Shopping List (net remaining across active projects) | DONE | `frontend/src/pages/Colonisation.jsx` |
 | Tab 3: FC Cargo (auto-tracked via CargoTransfer + manual override) | DONE | `frontend/src/pages/Colonisation.jsx` |
@@ -138,9 +138,9 @@ should be auto-approved, check that `.claude/settings.json` is present in the re
 - CMDR ping `hide_after(8s)`: if a second ping arrives within 8 seconds, the first timer will hide the new ping early. Fix: track and cancel pending timers.
 - Exobiology: if the game fires `ScanOrganic.ScanType == "Logged"` as the final event (rather than a third `Analysed`), adjust `_handle_scan_organic()` in `main.py` accordingly.
 - `keyboard` hotkey: may need elevated privileges on Linux. Works without admin on Windows.
-- **Spansh commodity search**: `/api/stations/search` with `market[name][]` param — verify this works in-game. Response field names (`distance_to_arrival`, `market[].sell_price`, `market[].supply`) are best-guess from Spansh API conventions; may need adjusting if response shape differs.
+- **Spansh commodity search**: `/api/stations/search` with `market[name][]` param â€” verify this works in-game. Response field names (`distance_to_arrival`, `market[].sell_price`, `market[].supply`) are best-guess from Spansh API conventions; may need adjusting if response shape differs.
 - **FC cargo tracking**: `CargoTransfer` only fires when YOU personally move cargo to/from your FC. Cargo sold by your market, loaded by NPCs, or present before EDTC started won't be tracked. "Edit Manually" on the FC Cargo tab handles this.
-- System Planner + Economy Simulator and Nexus Building Planner are still unbuilt (need authoritative game data for building types/costs/economy contributions — suggest sourcing from EDCD or community wikis).
+- System Planner + Economy Simulator and Nexus Building Planner are still unbuilt (need authoritative game data for building types/costs/economy contributions â€” suggest sourcing from EDCD or community wikis).
 
 ---
 
@@ -161,14 +161,14 @@ Terminal 2:  python main.py --dev
 
 ---
 
-## Build status — Session 4 (COMPLETE)
+## Build status â€” Session 4 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `FleetCarriers.jsx` — 3-tab implementation (Stats / Route Planner / Auto-Jump) | DONE | `frontend/src/pages/FleetCarriers.jsx` |
-| Carrier Stats tab — fuel bar, cargo space, credits, services, pending jump | DONE | `frontend/src/pages/FleetCarriers.jsx` |
-| Route Planner tab — Spansh FC route, jump list, tritium estimate + stock check | DONE | `frontend/src/pages/FleetCarriers.jsx` |
-| Auto-Jump tab — ToS gate, keyboard automation, configurable key + delay, countdown | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| `FleetCarriers.jsx` â€” 3-tab implementation (Stats / Route Planner / Auto-Jump) | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Carrier Stats tab â€” fuel bar, cargo space, credits, services, pending jump | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Route Planner tab â€” Spansh FC route, jump list, tritium estimate + stock check | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Auto-Jump tab â€” ToS gate, keyboard automation, configurable key + delay, countdown | DONE | `frontend/src/pages/FleetCarriers.jsx` |
 | `carriers` DB table + `upsert_carrier`, `get_carriers` | DONE | `core/database.py` |
 | CarrierStats / CarrierJump / CarrierJumpRequest / CarrierJumpCancelled / CarrierDepositFuel / CarrierBuy added to WATCHED_EVENTS | DONE | `core/journal.py` |
 | `_handle_carrier_*` handlers + `_schedule_next_jump()` auto-jump timer | DONE | `main.py` |
@@ -179,18 +179,18 @@ Terminal 2:  python main.py --dev
 - `routes.active` column: if DB existed from before session 2, run: `ALTER TABLE routes ADD COLUMN active INTEGER DEFAULT 0;`
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early. Fix: cancel pending timer before scheduling new one.
 - Exobiology: if final scan fires `ScanType == "Logged"` not `"Analysed"`, adjust `_handle_scan_organic()`.
-- **Spansh commodity search** (`/api/stations/search`): response field names are best-guess — verify and adjust if needed.
+- **Spansh commodity search** (`/api/stations/search`): response field names are best-guess â€” verify and adjust if needed.
 - **FC cargo auto-tracking**: only tracks your own CargoTransfer events. Pre-existing FC cargo needs manual entry.
-- **Tritium estimate**: defaults to 50T/jump — actual cost varies by distance; let user adjust in UI.
-- **Auto-jump**: fires a keypress to the active window — game must be in focus. Key defaults to `j` (standard FSD bind).
+- **Tritium estimate**: defaults to 50T/jump â€” actual cost varies by distance; let user adjust in UI.
+- **Auto-jump**: fires a keypress to the active window â€” game must be in focus. Key defaults to `j` (standard FSD bind).
 - **Carrier stats location**: `CarrierStats` event fires when you open Carrier Management in-game. Location updates on `CarrierJump` events.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt.
 
-*Last updated: Session 5 complete — Engineering page done*
+*Last updated: Session 5 complete â€” Engineering page done*
 
 ---
 
-## Build status — Session 5 (COMPLETE)
+## Build status â€” Session 5 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -201,12 +201,12 @@ Terminal 2:  python main.py --dev
 | `_handle_engineer_progress` (single + array form) | DONE | `main.py` |
 | `get_materials`, `set_material_count` API methods | DONE | `main.py` |
 | `get_engineers`, `get_blueprints`, `get_synthesis_recipes`, `get_tech_broker_items` API methods | DONE | `main.py` |
-| `Engineering.jsx` — 5-tab UI (Engineers / Blueprints / Synthesis / Tech Broker / Materials) | DONE | `frontend/src/pages/Engineering.jsx` |
-| Engineers tab — specialty filter chips, unlock/rank badge from journal progress | DONE | `frontend/src/pages/Engineering.jsx` |
-| Blueprints tab — search, accordion per grade, material have/need cross-ref, craftable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
-| Synthesis tab — category filter, craftable check vs inventory, grade badge | DONE | `frontend/src/pages/Engineering.jsx` |
-| Tech Broker tab — Guardian/Human type filter, unlockable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
-| Materials tab — sub-tabs Raw/Manufactured/Encoded, inline count edit, bulk import, fill bar | DONE | `frontend/src/pages/Engineering.jsx` |
+| `Engineering.jsx` â€” 5-tab UI (Engineers / Blueprints / Synthesis / Tech Broker / Materials) | DONE | `frontend/src/pages/Engineering.jsx` |
+| Engineers tab â€” specialty filter chips, unlock/rank badge from journal progress | DONE | `frontend/src/pages/Engineering.jsx` |
+| Blueprints tab â€” search, accordion per grade, material have/need cross-ref, craftable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
+| Synthesis tab â€” category filter, craftable check vs inventory, grade badge | DONE | `frontend/src/pages/Engineering.jsx` |
+| Tech Broker tab â€” Guardian/Human type filter, unlockable indicator | DONE | `frontend/src/pages/Engineering.jsx` |
+| Materials tab â€” sub-tabs Raw/Manufactured/Encoded, inline count edit, bulk import, fill bar | DONE | `frontend/src/pages/Engineering.jsx` |
 
 ## Known issues / notes for next session
 
@@ -221,7 +221,7 @@ Terminal 2:  python main.py --dev
 
 ---
 
-## Build status — Session 6 (COMPLETE)
+## Build status â€” Session 6 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -232,22 +232,22 @@ Terminal 2:  python main.py --dev
 | `lookup_commander`, `get_cmdr_stats`, `get_current_system` API methods | DONE | `main.py` |
 | `get_logbook`, `save_log_entry`, `delete_log_entry` API methods | DONE | `main.py` |
 | `get_screenshots`, `open_file`, `open_screenshots_folder` API methods | DONE | `main.py` |
-| `Commander.jsx` — 4-tab UI (CMDR Lookup / My Stats / Logbook / Screenshots) | DONE | `frontend/src/pages/Commander.jsx` |
-| CMDR Lookup tab — EDSM search by name, shows last system + date + coords | DONE | `frontend/src/pages/Commander.jsx` |
-| My Stats tab — journal-tracked ranks with progress bars, credits, ship info, statistics groups | DONE | `frontend/src/pages/Commander.jsx` |
-| Logbook tab — SQLite-backed personal notes with title/system/body, create/edit/delete | DONE | `frontend/src/pages/Commander.jsx` |
-| Screenshots tab — lists files from ED screenshot folder, Open + Open Folder buttons | DONE | `frontend/src/pages/Commander.jsx` |
+| `Commander.jsx` â€” 4-tab UI (CMDR Lookup / My Stats / Logbook / Screenshots) | DONE | `frontend/src/pages/Commander.jsx` |
+| CMDR Lookup tab â€” EDSM search by name, shows last system + date + coords | DONE | `frontend/src/pages/Commander.jsx` |
+| My Stats tab â€” journal-tracked ranks with progress bars, credits, ship info, statistics groups | DONE | `frontend/src/pages/Commander.jsx` |
+| Logbook tab â€” SQLite-backed personal notes with title/system/body, create/edit/delete | DONE | `frontend/src/pages/Commander.jsx` |
+| Screenshots tab â€” lists files from ED screenshot folder, Open + Open Folder buttons | DONE | `frontend/src/pages/Commander.jsx` |
 
 ## Known issues / notes for next session
 
 - Stats only populate after logging into Elite Dangerous with EDTC running (Rank/Progress/Statistics/Commander/LoadGame events fire on game start).
 - EDSM CMDR lookup requires the searched CMDR to have opted in to sharing position publicly.
-- `open_file` and `open_screenshots_folder` use `os.startfile()` — Windows only.
+- `open_file` and `open_screenshots_folder` use `os.startfile()` â€” Windows only.
 - Remaining stub pages: Galaxy, Guardian, Trading (all still "Coming Soon").
 
 ---
 
-## Build status — Session 7 (COMPLETE)
+## Build status â€” Session 7 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -255,57 +255,57 @@ Terminal 2:  python main.py --dev
 | `exo_scan` emitted to main window from `_handle_scan_organic` | DONE | `main.py` |
 | `system_changed` emitted on FSDJump and Location events | DONE | `main.py` |
 | `get_fss_bodies`, `lookup_system`, `road_to_riches` API methods | DONE | `main.py` |
-| `Exploration.jsx` — 4-tab UI (System Lookup / Road to Riches / Exobiology / Session Scanner) | DONE | `frontend/src/pages/Exploration.jsx` |
-| System Lookup tab — EDSM search: system info card + collapsible body list | DONE | `frontend/src/pages/Exploration.jsx` |
-| Road to Riches tab — Spansh route with per-system body value breakdown | DONE | `frontend/src/pages/Exploration.jsx` |
-| Exobiology tab — DB-backed scan tracker, grouped by system, clear per system | DONE | `frontend/src/pages/Exploration.jsx` |
-| Session Scanner tab — live FSS scan log, resets on jump, total value estimate | DONE | `frontend/src/pages/Exploration.jsx` |
+| `Exploration.jsx` â€” 4-tab UI (System Lookup / Road to Riches / Exobiology / Session Scanner) | DONE | `frontend/src/pages/Exploration.jsx` |
+| System Lookup tab â€” EDSM search: system info card + collapsible body list | DONE | `frontend/src/pages/Exploration.jsx` |
+| Road to Riches tab â€” Spansh route with per-system body value breakdown | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exobiology tab â€” DB-backed scan tracker, grouped by system, clear per system | DONE | `frontend/src/pages/Exploration.jsx` |
+| Session Scanner tab â€” live FSS scan log, resets on jump, total value estimate | DONE | `frontend/src/pages/Exploration.jsx` |
 
 ## Known issues / notes for next session
 
-- Road to Riches Spansh job takes ~10-30s; Promise blocks until done — normal.
+- Road to Riches Spansh job takes ~10-30s; Promise blocks until done â€” normal.
 - EDSM body data only available for systems that have been visited and submitted by players.
 - Exobiology tab uses `get_exo_scans()` which returns in-progress (incomplete) scans only. Completed scans are cleared from the active list but remain in DB; no history view yet.
 - Remaining stub pages: Guardian, Trading (all still "Coming Soon").
 
 ---
 
-## Build status — Session 8 (COMPLETE)
+## Build status â€” Session 8 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | `get_news`, `get_factions`, `get_stats` added to EdsmAPI | DONE | `api/edsm.py` |
 | `_edsm_run` helper + `get_galnet`, `get_system_factions`, `get_system_traffic`, `get_galaxy_stats` API methods | DONE | `main.py` |
-| `Galaxy.jsx` — 4-tab UI (GalNet / Factions / Traffic / Galaxy Stats) | DONE | `frontend/src/pages/Galaxy.jsx` |
-| GalNet tab — live EDSM news, expandable articles with HTML stripped | DONE | `frontend/src/pages/Galaxy.jsx` |
-| Factions tab — system search, influence bars, allegiance colors, state chips (active + pending) | DONE | `frontend/src/pages/Galaxy.jsx` |
-| Traffic tab — system traffic totals (total/week/day) + ship breakdown bars | DONE | `frontend/src/pages/Galaxy.jsx` |
-| Galaxy Stats tab — EDSM universe stats: commanders, systems, bodies, stations, logs | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `Galaxy.jsx` â€” 4-tab UI (GalNet / Factions / Traffic / Galaxy Stats) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| GalNet tab â€” live EDSM news, expandable articles with HTML stripped | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Factions tab â€” system search, influence bars, allegiance colors, state chips (active + pending) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Traffic tab â€” system traffic totals (total/week/day) + ship breakdown bars | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Galaxy Stats tab â€” EDSM universe stats: commanders, systems, bodies, stations, logs | DONE | `frontend/src/pages/Galaxy.jsx` |
 
 ## Known issues / notes for next session
 
-- GalNet content may contain HTML entities — stripped with regex but complex HTML may show raw.
+- GalNet content may contain HTML entities â€” stripped with regex but complex HTML may show raw.
 - EDSM faction/traffic data freshness depends on player submissions; some systems may be stale.
-- `get_factions` state fields: `activeStates` entries may be objects `{state}` or plain strings — handled defensively in Galaxy.jsx.
+- `get_factions` state fields: `activeStates` entries may be objects `{state}` or plain strings â€” handled defensively in Galaxy.jsx.
 - Remaining stub pages: Trading (still "Coming Soon").
 
 ---
 
-## Build status — Session 9 (COMPLETE)
+## Build status â€” Session 9 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | `guardian_visits` DB table + `get_guardian_visits`, `set_guardian_visit` | DONE | `core/database.py` |
 | `get_guardian_sites`, `set_guardian_visit` API methods | DONE | `main.py` |
 | `data/guardian_sites.json` expanded to 8 known sites | DONE | `data/guardian_sites.json` |
-| `Guardian.jsx` — 3-tab UI (Sites / Materials / Landmarks) | DONE | `frontend/src/pages/Guardian.jsx` |
-| Sites tab — ruins/structure browser with type filter, visit+data checkboxes, personal notes, SQLite-backed | DONE | `frontend/src/pages/Guardian.jsx` |
-| Materials tab — Guardian material farming reference (15 materials), Tech Broker Guardian items cross-ref | DONE | `frontend/src/pages/Guardian.jsx` |
-| Landmarks tab — 10 curated ED landmarks with coordinates, distances from Sol, tag filter, copy-system | DONE | `frontend/src/pages/Guardian.jsx` |
+| `Guardian.jsx` â€” 3-tab UI (Sites / Materials / Landmarks) | DONE | `frontend/src/pages/Guardian.jsx` |
+| Sites tab â€” ruins/structure browser with type filter, visit+data checkboxes, personal notes, SQLite-backed | DONE | `frontend/src/pages/Guardian.jsx` |
+| Materials tab â€” Guardian material farming reference (15 materials), Tech Broker Guardian items cross-ref | DONE | `frontend/src/pages/Guardian.jsx` |
+| Landmarks tab â€” 10 curated ED landmarks with coordinates, distances from Sol, tag filter, copy-system | DONE | `frontend/src/pages/Guardian.jsx` |
 
 ## Known issues / notes for next session
 
-- guardian_sites.json is a stub with 8 sites — replace with full Canonn dataset for complete coverage (link in source field).
+- guardian_sites.json is a stub with 8 sites â€” replace with full Canonn dataset for complete coverage (link in source field).
 - Trading page is the last remaining "Coming Soon" stub.
 
 
@@ -338,7 +338,7 @@ Terminal 2:  python main.py --dev
 
 ---
 
-## Build status — Session 10 (COMPLETE)
+## Build status â€” Session 10 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -348,17 +348,17 @@ Terminal 2:  python main.py --dev
 | `_handle_market_buy`, `_handle_market_sell` handlers + `trade_log_update` event | DONE | `main.py` |
 | `get_trade_log`, `clear_trade_log`, `find_nearest_service`, `get_commodities` API methods | DONE | `main.py` |
 | `data/commodities.json` stub (8 commodities with average prices + categories) | DONE | `data/commodities.json` |
-| `Trading.jsx` — 4-tab UI (Commodity Search / Nearest Service / Trade History / Commodity Prices) | DONE | `frontend/src/pages/Trading.jsx` |
-| Commodity Search tab — autocomplete from commodities.json, Spansh search, buy/sell/supply display | DONE | `frontend/src/pages/Trading.jsx` |
-| Nearest Service tab — 12 service type chips, system input → Spansh nearest station | DONE | `frontend/src/pages/Trading.jsx` |
-| Trade History tab — live journal-tracked buys/sells, spent/earned/profit totals, buy/sell filter | DONE | `frontend/src/pages/Trading.jsx` |
-| Commodity Prices tab — reference browse with category filter, price bar chart | DONE | `frontend/src/pages/Trading.jsx` |
+| `Trading.jsx` â€” 4-tab UI (Commodity Search / Nearest Service / Trade History / Commodity Prices) | DONE | `frontend/src/pages/Trading.jsx` |
+| Commodity Search tab â€” autocomplete from commodities.json, Spansh search, buy/sell/supply display | DONE | `frontend/src/pages/Trading.jsx` |
+| Nearest Service tab â€” 12 service type chips, system input â†’ Spansh nearest station | DONE | `frontend/src/pages/Trading.jsx` |
+| Trade History tab â€” live journal-tracked buys/sells, spent/earned/profit totals, buy/sell filter | DONE | `frontend/src/pages/Trading.jsx` |
+| Commodity Prices tab â€” reference browse with category filter, price bar chart | DONE | `frontend/src/pages/Trading.jsx` |
 
 ## Known issues / notes for next session
 
 - All 10 main pages are now COMPLETE. No more "Coming Soon" stubs.
 - `data/commodities.json` is a minimal stub with 8 entries. Replace with the full EDCD commodity list for complete autocomplete coverage.
-- Spansh `nearest_with_service` response shape is best-guess — verify field names if results look wrong.
+- Spansh `nearest_with_service` response shape is best-guess â€” verify field names if results look wrong.
 - Trade History profit field is from the journal `Profit` key (net profit after accounting for buy price). If 0, journal may not include it; sell total minus buy total gives a rough manual alternative.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
 
@@ -368,7 +368,7 @@ Terminal 2:  python main.py --dev
 
 ---
 
-## Build status — Session 11 (COMPLETE)
+## Build status â€” Session 11 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
@@ -381,384 +381,384 @@ Terminal 2:  python main.py --dev
 ## Known issues / notes for next session
 
 - EDSM Community Goals: empty list = no active CGs right now, not a bug. HTML in `description`/`objective` stripped with regex.
-- Spansh commodity search and nearest-service response field names are best-guess — verify in-game.
+- Spansh commodity search and nearest-service response field names are best-guess â€” verify in-game.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred, needs authoritative game data).
 
 ---
 
-## Build status — Session 12 (COMPLETE)
+## Build status â€” Session 12 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `data/blueprints.json` — 240 real blueprints from EDEngineer | DONE | `data/blueprints.json` |
-| `data/commodities.json` — 159 tradeable commodities from EDCD/FDevIDs | DONE | `data/commodities.json` |
-| `data/engineers.json` — all 23 engineers with full unlock/invite/system data | DONE | `data/engineers.json` |
-| `data/synthesis.json` — 39 synthesis recipes | DONE | `data/synthesis.json` |
-| `data/tech_brokers.json` — 25 Guardian + Human tech broker items | DONE | `data/tech_brokers.json` |
-| `scripts/build_data.py` — reproducible fetch+transform script | DONE | `scripts/build_data.py` |
-| Overlay toggle fix — track shown state internally (pywebview `window.shown` unreliable) | DONE | `core/overlay.py` |
-| Per-overlay opacity slider (10–100%), persisted in prefs DB | DONE | `core/overlay.py`, `main.py`, `Overlays.jsx` |
-| Overlay black background fix — set body/html transparent in overlay mode | DONE | `frontend/src/App.jsx` |
+| `data/blueprints.json` â€” 240 real blueprints from EDEngineer | DONE | `data/blueprints.json` |
+| `data/commodities.json` â€” 159 tradeable commodities from EDCD/FDevIDs | DONE | `data/commodities.json` |
+| `data/engineers.json` â€” all 23 engineers with full unlock/invite/system data | DONE | `data/engineers.json` |
+| `data/synthesis.json` â€” 39 synthesis recipes | DONE | `data/synthesis.json` |
+| `data/tech_brokers.json` â€” 25 Guardian + Human tech broker items | DONE | `data/tech_brokers.json` |
+| `scripts/build_data.py` â€” reproducible fetch+transform script | DONE | `scripts/build_data.py` |
+| Overlay toggle fix â€” track shown state internally (pywebview `window.shown` unreliable) | DONE | `core/overlay.py` |
+| Per-overlay opacity slider (10â€“100%), persisted in prefs DB | DONE | `core/overlay.py`, `main.py`, `Overlays.jsx` |
+| Overlay black background fix â€” set body/html transparent in overlay mode | DONE | `frontend/src/App.jsx` |
 | **v0.1.0 alpha released** via GitHub Actions | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases |
 | Powerplay tab added to Galaxy page (My Power / System Lookup / Powers Reference) | DONE | `frontend/src/pages/Galaxy.jsx`, `main.py`, `api/edsm.py` |
 | README expanded with step-by-step end-user install instructions | DONE | `README.md` |
 
-## Build status — Session 13 (COMPLETE)
+## Build status â€” Session 13 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `build_local.bat` — one-click local build + desktop shortcut creator | DONE | `build_local.bat` |
-| `frontend/public/icon.ico` — purple ED-style diamond icon (256px, generated with Pillow) | DONE | `frontend/public/icon.ico` |
-| `vite.config.js` — `base: './'` so asset paths are relative (fixes `file://` blank page) | DONE | `frontend/vite.config.js` |
-| `main.py` — `BASE_DIR` uses `sys._MEIPASS` when frozen (fixes bundled file resolution) | DONE | `main.py` |
-| `main.jsx` — `BrowserRouter` → `HashRouter` (fixes file-not-found crash on nav click) | DONE | `frontend/src/main.jsx` |
-| `main.py` — `_create_desktop_shortcut()` auto-creates `.lnk` on first frozen launch | DONE | `main.py` |
-| `core/journal.py` — `_replay_startup()` replays latest journal on launch to seed current system | DONE | `core/journal.py` |
-| `api/spansh.py` — `commodity_markets()` switched to POST with JSON body (fixes 400 errors) | DONE | `api/spansh.py` |
-| `api/edsm.py` — `get_system_thargoid()` with `showFactions=1&showThargoids=1` | DONE | `api/edsm.py` |
-| `main.py` — `get_thargoid_system`, `get_thargoid_nearby` API methods | DONE | `main.py` |
-| `Galaxy.jsx` — Thargoid War tab (System Status / Maelstroms / Nearby Threat) | DONE | `frontend/src/pages/Galaxy.jsx` |
-| `Trading.jsx` — sort chips (distance/buy/sell/supply/demand), alphabetical commodity datalist | DONE | `frontend/src/pages/Trading.jsx` |
+| `build_local.bat` â€” one-click local build + desktop shortcut creator | DONE | `build_local.bat` |
+| `frontend/public/icon.ico` â€” purple ED-style diamond icon (256px, generated with Pillow) | DONE | `frontend/public/icon.ico` |
+| `vite.config.js` â€” `base: './'` so asset paths are relative (fixes `file://` blank page) | DONE | `frontend/vite.config.js` |
+| `main.py` â€” `BASE_DIR` uses `sys._MEIPASS` when frozen (fixes bundled file resolution) | DONE | `main.py` |
+| `main.jsx` â€” `BrowserRouter` â†’ `HashRouter` (fixes file-not-found crash on nav click) | DONE | `frontend/src/main.jsx` |
+| `main.py` â€” `_create_desktop_shortcut()` auto-creates `.lnk` on first frozen launch | DONE | `main.py` |
+| `core/journal.py` â€” `_replay_startup()` replays latest journal on launch to seed current system | DONE | `core/journal.py` |
+| `api/spansh.py` â€” `commodity_markets()` switched to POST with JSON body (fixes 400 errors) | DONE | `api/spansh.py` |
+| `api/edsm.py` â€” `get_system_thargoid()` with `showFactions=1&showThargoids=1` | DONE | `api/edsm.py` |
+| `main.py` â€” `get_thargoid_system`, `get_thargoid_nearby` API methods | DONE | `main.py` |
+| `Galaxy.jsx` â€” Thargoid War tab (System Status / Maelstroms / Nearby Threat) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `Trading.jsx` â€” sort chips (distance/buy/sell/supply/demand), alphabetical commodity datalist | DONE | `frontend/src/pages/Trading.jsx` |
 
 ---
 
-## Build status — Session 14 (COMPLETE)
+## Build status â€” Session 14 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | `markets` + `system_coords` tables added to `init_db()` schema | DONE | `core/database.py` |
-| `upsert_market_data()` — stores EDDN commodity v3 messages to SQLite | DONE | `core/database.py` |
-| `upsert_system_coords()` — stores system 3D coords from FSDJump/Location events | DONE | `core/database.py` |
-| `search_local_markets()` — queries local cache with 3D distance calc, returns `source: "eddn"` | DONE | `core/database.py` |
-| `get_market_stats()` — returns station/commodity/system counts in local DB | DONE | `core/database.py` |
-| `_handle_fsd_jump()` — now extracts `StarPos` and calls `upsert_system_coords()` | DONE | `main.py` |
-| `Location` handler — also stores `StarPos` coords | DONE | `main.py` |
-| `_handle_eddn_message()` — parses commodity schema v3, routes to `upsert_market_data()` | DONE | `main.py` |
+| `upsert_market_data()` â€” stores EDDN commodity v3 messages to SQLite | DONE | `core/database.py` |
+| `upsert_system_coords()` â€” stores system 3D coords from FSDJump/Location events | DONE | `core/database.py` |
+| `search_local_markets()` â€” queries local cache with 3D distance calc, returns `source: "eddn"` | DONE | `core/database.py` |
+| `get_market_stats()` â€” returns station/commodity/system counts in local DB | DONE | `core/database.py` |
+| `_handle_fsd_jump()` â€” now extracts `StarPos` and calls `upsert_system_coords()` | DONE | `main.py` |
+| `Location` handler â€” also stores `StarPos` coords | DONE | `main.py` |
+| `_handle_eddn_message()` â€” parses commodity schema v3, routes to `upsert_market_data()` | DONE | `main.py` |
 | `get_market_stats()` API method | DONE | `main.py` |
-| `search_commodity_markets()` — queries local EDDN cache first, merges with Spansh (deduped by system+station) | DONE | `main.py` |
-| `_eddn_listener()` — ZMQ daemon thread connecting to `tcp://eddn.edcd.io:9500`, auto-reconnects | DONE | `main.py` |
-| `Trading.jsx` — EDDN source badge (green), null-safe distance sort, fixed `has_large_pad === false` check | DONE | `frontend/src/pages/Trading.jsx` |
+| `search_commodity_markets()` â€” queries local EDDN cache first, merges with Spansh (deduped by system+station) | DONE | `main.py` |
+| `_eddn_listener()` â€” ZMQ daemon thread connecting to `tcp://eddn.edcd.io:9500`, auto-reconnects | DONE | `main.py` |
+| `Trading.jsx` â€” EDDN source badge (green), null-safe distance sort, fixed `has_large_pad === false` check | DONE | `frontend/src/pages/Trading.jsx` |
 | `pyzmq>=27.0` added to `requirements.txt` | DONE | `requirements.txt` |
 
 ## Key EDDN notes
 
-- EDDN ZMQ endpoint: `tcp://eddn.edcd.io:9500` — messages are zlib-compressed JSON
-- The WebSocket relay at `wss://eddn.edcd.io:4430/subscribe` returns **404** — do not use it
-- Commodity names in EDDN messages are **lowercase** (e.g. `"battleweapons"`, `"gold"`) — stored as-is, queried case-insensitively
+- EDDN ZMQ endpoint: `tcp://eddn.edcd.io:9500` â€” messages are zlib-compressed JSON
+- The WebSocket relay at `wss://eddn.edcd.io:4430/subscribe` returns **404** â€” do not use it
+- Commodity names in EDDN messages are **lowercase** (e.g. `"battleweapons"`, `"gold"`) â€” stored as-is, queried case-insensitively
 - EDDN results show with a green **EDDN** badge in Trading; Spansh results have no badge
 - EDDN results have `distance: null` until the ref system's coords are seeded by a FSDJump/Location event
-- The local cache fills in real-time as players worldwide dock — more useful the longer EDTC runs
+- The local cache fills in real-time as players worldwide dock â€” more useful the longer EDTC runs
 
-## Build status — Session 14 continued (COMPLETE)
+## Build status â€” Session 14 continued (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `_seed_market_db()` — one-time background Spansh seed for all 159 commodities | DONE | `main.py` |
-| Trading.jsx — seed progress banner ("Seeding X/159 · CommodityName" in amber) | DONE | `frontend/src/pages/Trading.jsx` |
-| Trading.jsx — EDDN stats counter ("EDDN X stations · Y commodities"), refreshes every 15s | DONE | `frontend/src/pages/Trading.jsx` |
-| overlay.py — `_enabled` flag suppresses overlays during startup journal replay | DONE | `core/overlay.py` |
-| `webview.start(func=...)` — enables overlays only after webview is running | DONE | `main.py` |
-| All overlay components — `window.__edtc.on` → `window.__edtc?.on` (fixes crash on load) | DONE | `frontend/src/overlays/*.jsx` |
+| `_seed_market_db()` â€” one-time background Spansh seed for all 159 commodities | DONE | `main.py` |
+| Trading.jsx â€” seed progress banner ("Seeding X/159 Â· CommodityName" in amber) | DONE | `frontend/src/pages/Trading.jsx` |
+| Trading.jsx â€” EDDN stats counter ("EDDN X stations Â· Y commodities"), refreshes every 15s | DONE | `frontend/src/pages/Trading.jsx` |
+| overlay.py â€” `_enabled` flag suppresses overlays during startup journal replay | DONE | `core/overlay.py` |
+| `webview.start(func=...)` â€” enables overlays only after webview is running | DONE | `main.py` |
+| All overlay components â€” `window.__edtc.on` â†’ `window.__edtc?.on` (fixes crash on load) | DONE | `frontend/src/overlays/*.jsx` |
 
 ## Known issues / notes for next session
 
-- Spansh nearest-service response field names are best-guess — verify in-game if results look wrong.
+- Spansh nearest-service response field names are best-guess â€” verify in-game if results look wrong.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
-- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
-- pygame not installable on Python 3.14 (no prebuilt wheel yet) — CMDR ping audio silently disabled. CI builds use Python 3.12 so the .exe has audio.
-- Maelstrom system names are community-reported best-guess — verify on EDSM or Canonn if needed.
-- `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` — some affected systems may not appear.
+- `data/guardian_sites.json` still only 8 sites â€” replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 (no prebuilt wheel yet) â€” CMDR ping audio silently disabled. CI builds use Python 3.12 so the .exe has audio.
+- Maelstrom system names are community-reported best-guess â€” verify on EDSM or Canonn if needed.
+- `get_thargoid_nearby` filters EDSM sphere results by `factionState`/`allegiance` â€” some affected systems may not appear.
 - Market seed runs once on first launch (pref key `market_seeded`). If seed needs to re-run, delete `edtc.db` or clear that pref from the DB.
 - Gather feedback from alpha users and triage bugs before v0.2.0.
 
 ---
-*Session 14 complete — 2026-06-28*
+*Session 14 complete â€” 2026-06-28*
 
 ---
 
-## Build status — Session 15 (COMPLETE)
+## Build status â€” Session 15 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | CI fix: added `shell: bash` to Windows PyInstaller step (backslash line continuation fails in PowerShell) | DONE | `.github/workflows/build.yml` |
-| v0.2.1 released — first successful 3-platform build (Windows .exe, macOS, Linux) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.1 |
+| v0.2.1 released â€” first successful 3-platform build (Windows .exe, macOS, Linux) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.1 |
 | Overlay enable/disable preference persisted to DB (`overlay_auto_{name}`) | DONE | `core/overlay.py`, `main.py` |
-| `OverlayManager._user_enabled` dict — tracks per-overlay user preference separate from transient shown state | DONE | `core/overlay.py` |
+| `OverlayManager._user_enabled` dict â€” tracks per-overlay user preference separate from transient shown state | DONE | `core/overlay.py` |
 | `toggle()` now flips `_user_enabled` and returns new state; `toggle_overlay()` saves to DB | DONE | `core/overlay.py`, `main.py` |
 | FSD jump handler gates System Preview auto-show on `is_user_enabled("system_preview")` | DONE | `main.py` |
 | `get_overlay_states()` now returns `auto_enabled` field in addition to `shown` | DONE | `main.py` |
 | `Overlays.jsx` toggle button driven by `auto_enabled` (not transient `shown`); button label changed to Enable/Disable | DONE | `frontend/src/pages/Overlays.jsx` |
-| v0.2.2 released — overlay fix shipped | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.2 |
+| v0.2.2 released â€” overlay fix shipped | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.2 |
 
 ## Known issues / notes for next session
 
 - All previous known issues from Session 14 still apply.
-- `_user_enabled` defaults to `True` for all overlays. Existing users upgrading from v0.2.1 will see all overlays enabled (same as before) — no migration needed.
+- `_user_enabled` defaults to `True` for all overlays. Existing users upgrading from v0.2.1 will see all overlays enabled (same as before) â€” no migration needed.
 - `hide_after()` sets `_shown = False` but does NOT touch `_user_enabled`, so the overlay correctly re-appears on the next jump if the user hasn't disabled it.
 - System Preview is the only overlay that auto-triggers on a game event (FSDJump). If other overlays gain auto-trigger behaviour in future, add the same `is_user_enabled()` gate.
-- Spansh nearest-service response field names are still best-guess — verify in-game if results look wrong.
+- Spansh nearest-service response field names are still best-guess â€” verify in-game if results look wrong.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
 
 ---
-*Session 15 complete — 2026-06-28*
+*Session 15 complete â€” 2026-06-28*
 
 ---
 
-## Build status — Session 16 (COMPLETE)
+## Build status â€” Session 16 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | `NavRoute` + `NavRouteClear` added to `WATCHED_EVENTS` | DONE | `core/journal.py` |
-| `_handle_nav_route()` — reads galaxy-map route from journal, saves to DB, emits `route_update` | DONE | `main.py` |
-| `_handle_nav_route_clear()` — clears active route and notifies overlay + main window | DONE | `main.py` |
+| `_handle_nav_route()` â€” reads galaxy-map route from journal, saves to DB, emits `route_update` | DONE | `main.py` |
+| `_handle_nav_route_clear()` â€” clears active route and notifies overlay + main window | DONE | `main.py` |
 | In-game galaxy-map routes now auto-populate the Route Following overlay | DONE | `main.py` |
-| `VERSION` file added at project root — bundled by PyInstaller via `--add-data "VERSION;."` | DONE | `VERSION`, `.github/workflows/build.yml` |
+| `VERSION` file added at project root â€” bundled by PyInstaller via `--add-data "VERSION;."` | DONE | `VERSION`, `.github/workflows/build.yml` |
 | CI "Write version from tag" step: `echo "${GITHUB_REF_NAME#v}" > VERSION` before PyInstaller | DONE | `.github/workflows/build.yml` |
 | `APP_VERSION` read from bundled `VERSION` at Python startup; falls back to `"dev"` | DONE | `main.py` |
 | `get_version()` API method exposes `APP_VERSION` to React | DONE | `main.py` |
 | `App.jsx` version fetch waits for `pywebviewready` event before calling `get_version()` | DONE | `frontend/src/App.jsx` |
 | Sidebar now shows `v0.2.5` in the bottom-left corner | DONE | `frontend/src/App.jsx` |
-| v0.2.3 released — NavRoute tracking | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.3 |
-| v0.2.4 released — version number in sidebar | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.4 |
-| v0.2.5 released — fix pywebviewready timing (version was blank on first launch) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.5 |
-| Local install updated to v0.2.5 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+| v0.2.3 released â€” NavRoute tracking | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.3 |
+| v0.2.4 released â€” version number in sidebar | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.4 |
+| v0.2.5 released â€” fix pywebviewready timing (version was blank on first launch) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.5 |
+| Local install updated to v0.2.5 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | â€” |
 
 ## Key notes from Session 16
 
 - **NavRoute**: when the player sets a route in the galaxy map, ED writes a `NavRoute` journal event with the full system list. EDTC reads it, saves it as the active route, and pushes it to the route overlay. `NavRouteClear` fires when the route is cancelled.
-- **Version file flow**: CI tag push → `echo "${GITHUB_REF_NAME#v}" > VERSION` → PyInstaller bundles VERSION → Python reads it at startup → `get_version()` API → React sidebar displays it.
+- **Version file flow**: CI tag push â†’ `echo "${GITHUB_REF_NAME#v}" > VERSION` â†’ PyInstaller bundles VERSION â†’ Python reads it at startup â†’ `get_version()` API â†’ React sidebar displays it.
 - **`pywebviewready` timing**: pywebview fires this DOM event when the Python bridge becomes callable. `App.jsx` must listen for it rather than calling the API immediately on mount, because the bridge isn't ready at React render time.
 - **`_user_enabled` default corrected**: changed from `True` to `False` so overlays start disabled until the user explicitly enables them. This was the root cause of "System Preview auto-shows on every jump."
 
 ## Known issues / notes for next session
 
 - All previous known issues from Session 14 still apply.
-- `hide_after()` sets `_shown = False` but does NOT touch `_user_enabled` — overlays correctly re-appear on next trigger if user has them enabled.
+- `hide_after()` sets `_shown = False` but does NOT touch `_user_enabled` â€” overlays correctly re-appear on next trigger if user has them enabled.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
-- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
-- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev. CI builds use Python 3.12 so the .exe has audio.
-- Spansh nearest-service response field names are best-guess — verify in-game if results look wrong.
+- `data/guardian_sites.json` still only 8 sites â€” replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 â€” CMDR ping audio silently disabled in dev. CI builds use Python 3.12 so the .exe has audio.
+- Spansh nearest-service response field names are best-guess â€” verify in-game if results look wrong.
 
 ---
-*Session 16 complete — 2026-06-28*
+*Session 16 complete â€” 2026-06-28*
 
 ---
 
-## Build status — Session 17 (COMPLETE)
+## Build status â€” Session 17 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
 | Orange top-down Sidewinder icon generated with Pillow (256/128/64/48/32/16px multi-size ICO) | DONE | `frontend/public/icon.ico` |
 | `<link rel="icon">` added to index.html so webview uses the sidewinder as favicon | DONE | `frontend/index.html` |
-| `--icon "frontend/public/icon.ico"` added to Windows PyInstaller step — icon now embedded in .exe | DONE | `.github/workflows/build.yml` |
-| Windows icon cache cleared (`iconcache*.db` deleted, Explorer restarted) to flush stale floppy icon | DONE | — |
-| v0.2.6 released — sidewinder icon baked into .exe permanently | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.6 |
-| Local install updated to v0.2.9 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+| `--icon "frontend/public/icon.ico"` added to Windows PyInstaller step â€” icon now embedded in .exe | DONE | `.github/workflows/build.yml` |
+| Windows icon cache cleared (`iconcache*.db` deleted, Explorer restarted) to flush stale floppy icon | DONE | â€” |
+| v0.2.6 released â€” sidewinder icon baked into .exe permanently | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.2.6 |
+| Local install updated to v0.2.9 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | â€” |
 
 ## Key notes from Session 17
 
-- **Why it kept reverting**: v0.2.1–v0.2.5 had no `--icon` flag, so PyInstaller used its default floppy-disk icon every build. Adding `--icon` is permanent — all future CI builds embed the sidewinder.
+- **Why it kept reverting**: v0.2.1â€“v0.2.5 had no `--icon` flag, so PyInstaller used its default floppy-disk icon every build. Adding `--icon` is permanent â€” all future CI builds embed the sidewinder.
 - **Icon cache**: Windows caches `.exe` icons in `%LOCALAPPDATA%\Microsoft\Windows\Explorer\iconcache*.db`. When a new .exe replaces an old one, the floppy can persist until the cache is flushed. Cleared once manually; will not recur since the icon is now stable across builds.
-- **Desktop shortcut**: `_create_desktop_shortcut()` already sets `IconLocation = exe,0`, so it always reads the icon from the .exe itself — no separate shortcut icon management needed.
+- **Desktop shortcut**: `_create_desktop_shortcut()` already sets `IconLocation = exe,0`, so it always reads the icon from the .exe itself â€” no separate shortcut icon management needed.
 - **macOS/Linux**: `--icon` not added to those CI steps (macOS needs `.icns`, Linux has no native support). Windows is the primary target; revisit if macOS packaging becomes a priority.
 
 ## Known issues / notes for next session
 
 - All previous known issues from Session 16 still apply.
 - System Planner + Economy Simulator and Nexus Building Planner still unbuilt (deferred).
-- `data/guardian_sites.json` still only 8 sites — replace with full Canonn dataset when needed.
-- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- `data/guardian_sites.json` still only 8 sites â€” replace with full Canonn dataset when needed.
+- pygame not installable on Python 3.14 â€” CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
 
 ---
-*Session 17 complete — 2026-06-28*
+*Session 17 complete â€” 2026-06-28*
 
 ---
 
-## Build status — Session 18 (COMPLETE)
+## Build status â€” Session 18 (COMPLETE)
 
-Focus: Navigation page — making it work as well as possible end-to-end.
+Focus: Navigation page â€” making it work as well as possible end-to-end.
 
 | Item | Status | File |
 |---|---|---|
 | `Loadout` added to `STARTUP_EVENTS` so ship info seeds on replay | DONE | `core/journal.py` |
-| `_latest_journal()` fixed to sort by `mtime` not alphabetically — critical bug (old `Journal.22...` filenames sorted after new `Journal.2026...`) | DONE | `core/journal.py` |
+| `_latest_journal()` fixed to sort by `mtime` not alphabetically â€” critical bug (old `Journal.22...` filenames sorted after new `Journal.2026...`) | DONE | `core/journal.py` |
 | `_current_ship` dict added to API state | DONE | `main.py` |
-| `_handle_loadout()` — extracts ship type/name/ident, MaxJumpRange, UnladenMass, FuelCapacity, CargoCapacity, and Guardian FSD Booster bonus | DONE | `main.py` |
-| `_GUARDIAN_BOOSTER_BONUS` — flat bonus lookup by module size (size5=10.5 ly, etc.) — booster doesn't scale with mass | DONE | `main.py` |
-| `get_ship_info()` — reads Status.json for live fuel+cargo, computes current jump range with correct formula | DONE | `main.py` |
-| Current jump range formula: `fsd_base = max_range − guardian_bonus`, `current = fsd_base × (unladen/mass) + guardian_bonus` | DONE | `main.py` |
+| `_handle_loadout()` â€” extracts ship type/name/ident, MaxJumpRange, UnladenMass, FuelCapacity, CargoCapacity, and Guardian FSD Booster bonus | DONE | `main.py` |
+| `_GUARDIAN_BOOSTER_BONUS` â€” flat bonus lookup by module size (size5=10.5 ly, etc.) â€” booster doesn't scale with mass | DONE | `main.py` |
+| `get_ship_info()` â€” reads Status.json for live fuel+cargo, computes current jump range with correct formula | DONE | `main.py` |
+| Current jump range formula: `fsd_base = max_range âˆ’ guardian_bonus`, `current = fsd_base Ã— (unladen/mass) + guardian_bonus` | DONE | `main.py` |
 | `get_ship_info()` self-heal: if `_current_ship` empty, scans latest journal directly (fixes race condition with replay thread) | DONE | `main.py` |
 | `_push_startup()` thread: 1.5s after webview ready, re-emits `ship_changed` + `system_changed` (fixes race condition) | DONE | `main.py` |
-| `Spansh.neutron_route()` field fix: `distance_to_destination` → `distance_left` | DONE | `api/spansh.py` |
-| `Navigation.jsx` — full rewrite: 3-tab UI (Route Planner / Paste Route / Saved Routes) | DONE | `frontend/src/pages/Navigation.jsx` |
+| `Spansh.neutron_route()` field fix: `distance_to_destination` â†’ `distance_left` | DONE | `api/spansh.py` |
+| `Navigation.jsx` â€” full rewrite: 3-tab UI (Route Planner / Paste Route / Saved Routes) | DONE | `frontend/src/pages/Navigation.jsx` |
 | Ship info card: ship name, type, callsign, current jump range (prominent), max range (smaller), fuel, cargo | DONE | `frontend/src/pages/Navigation.jsx` |
 | Jump range input auto-fills from `current_jump_range ?? max_jump_range`; labelled "auto-filled from game" | DONE | `frontend/src/pages/Navigation.jsx` |
 | Neutron route planner: from/to system inputs, efficiency buttons (Balanced/Fast/Maximum), Plan Route button | DONE | `frontend/src/pages/Navigation.jsx` |
-| Route result display: waypoint list with neutron star indicator (⚡), jumps/distance totals, Save & Activate | DONE | `frontend/src/pages/Navigation.jsx` |
+| Route result display: waypoint list with neutron star indicator (âš¡), jumps/distance totals, Save & Activate | DONE | `frontend/src/pages/Navigation.jsx` |
 | `ErrorBoundary` component wraps `<Routes>` to surface React render errors in-app instead of blank screen | DONE | `frontend/src/App.jsx` |
 
 ## Key technical notes from Session 18
 
 - **Journal filename sort bug**: Old journals use `Journal.YYMMDDHHMMSS.NN.log` (e.g. `Journal.221003...`), new journals use `Journal.YYYY-MM-DDTHHMMSS.NN.log` (e.g. `Journal.2026-06-28T...`). Alphabetical sort puts old filenames AFTER new ones because `"22" > "20"`. Fix: sort by `mtime` (`key=lambda p: p.stat().st_mtime, reverse=True`).
 - **Guardian FSD Booster is a flat bonus**: `MaxJumpRange` in the Loadout event includes the booster. The booster (e.g. size 5 = +10.5 ly) doesn't scale with mass. Formula: strip the bonus, scale the FSD-only range linearly, add the bonus back. Scaling the full `MaxJumpRange` with `sqrt(unladen/mass)` was wrong.
-- **FSD range scales linearly with mass**: `range = OptMass/mass × constant` — so `currentRange = fsdBase × (unladen/current_mass)`. The exponent is 1 (not 0.5).
+- **FSD range scales linearly with mass**: `range = OptMass/mass Ã— constant` â€” so `currentRange = fsdBase Ã— (unladen/current_mass)`. The exponent is 1 (not 0.5).
 - **`MaxJumpRange` at unladen mass**: The Loadout value is calculated at the ship's unladen mass (no fuel, no cargo).
 - **Status.json fuel cap**: FuelMain in Status.json can show fleet carrier tritium as FuelMain when docked on a carrier. Cap at `FuelCapacity.Main` from Loadout to avoid inflated values.
-- **`window.__edtc.on` signature**: two args `(eventType, handler)` — handler receives `payload` directly. Cleanup function returned. Pattern: `const off = window.__edtc?.on('ship_changed', payload => { ... })`.
+- **`window.__edtc.on` signature**: two args `(eventType, handler)` â€” handler receives `payload` directly. Cleanup function returned. Pattern: `const off = window.__edtc?.on('ship_changed', payload => { ... })`.
 - **Never test in dev mode** (`python main.py --dev`): consistently shows blank screen in this environment. Always build (`npm run build`) and run production.
 
 ## Known issues / notes for next session
 
-- Jump range is within 0.1 ly of game display (23.93 vs 24.04). The tiny residual is rounding in live fuel/cargo values read from Status.json — acceptable.
+- Jump range is within 0.1 ly of game display (23.93 vs 24.04). The tiny residual is rounding in live fuel/cargo values read from Status.json â€” acceptable.
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
 - `data/guardian_sites.json` still only 8 sites.
-- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- pygame not installable on Python 3.14 â€” CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
 - **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session 18 complete — 2026-06-28*
+*Session 18 complete â€” 2026-06-28*
 
 ---
 
-## Build status — Session 19 (COMPLETE)
+## Build status â€” Session 19 (COMPLETE)
 
 Focus: In-app auto-updater + install sync.
 
 | Item | Status | File |
 |---|---|---|
-| Verified local install vs GitHub releases on session start | DONE | — |
+| Verified local install vs GitHub releases on session start | DONE | â€” |
 | Downloaded and installed v0.2.9 manually (was on v0.2.6) | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
-| `check_for_update()` API method — hits GitHub releases API, compares semver, returns `{current, latest, update_available, download_url}` | DONE | `main.py` |
-| `_version_gt()` helper — tuple-based semver comparison | DONE | `main.py` |
-| `download_and_install_update(download_url)` API method — starts background download thread, returns immediately | DONE | `main.py` |
-| `_do_update()` background thread — streams download in 64KB chunks, emits `update_progress` events with `{pct, downloaded, total}`, writes `edtc_update.bat`, launches it detached, calls `webview.destroy()` | DONE | `main.py` |
-| `edtc_update.bat` pattern — waits 2s, `copy /y` new exe over old, relaunches EDTC, self-deletes | DONE | `main.py` |
-| `App.jsx` — `check_for_update()` called after version fetch on startup | DONE | `frontend/src/App.jsx` |
-| `App.jsx` — `update_progress` event listener drives download progress state | DONE | `frontend/src/App.jsx` |
-| Sidebar update UI — amber `↑ vX.X.X available` link when update detected | DONE | `frontend/src/App.jsx` |
-| Sidebar download progress — percentage label + animated progress bar while downloading | DONE | `frontend/src/App.jsx` |
-| Sidebar error state — shows truncated error message if download/install fails | DONE | `frontend/src/App.jsx` |
+| `check_for_update()` API method â€” hits GitHub releases API, compares semver, returns `{current, latest, update_available, download_url}` | DONE | `main.py` |
+| `_version_gt()` helper â€” tuple-based semver comparison | DONE | `main.py` |
+| `download_and_install_update(download_url)` API method â€” starts background download thread, returns immediately | DONE | `main.py` |
+| `_do_update()` background thread â€” streams download in 64KB chunks, emits `update_progress` events with `{pct, downloaded, total}`, writes `edtc_update.bat`, launches it detached, calls `webview.destroy()` | DONE | `main.py` |
+| `edtc_update.bat` pattern â€” waits 2s, `copy /y` new exe over old, relaunches EDTC, self-deletes | DONE | `main.py` |
+| `App.jsx` â€” `check_for_update()` called after version fetch on startup | DONE | `frontend/src/App.jsx` |
+| `App.jsx` â€” `update_progress` event listener drives download progress state | DONE | `frontend/src/App.jsx` |
+| Sidebar update UI â€” amber `â†‘ vX.X.X available` link when update detected | DONE | `frontend/src/App.jsx` |
+| Sidebar download progress â€” percentage label + animated progress bar while downloading | DONE | `frontend/src/App.jsx` |
+| Sidebar error state â€” shows truncated error message if download/install fails | DONE | `frontend/src/App.jsx` |
 | v0.3.0 released | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.0 |
-| Local install updated to v0.3.0 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
+| Local install updated to v0.3.0 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | â€” |
 
 ## Key technical notes from Session 19
 
 - **Self-replacing exe on Windows**: a running `.exe` cannot be overwritten while it's open. Pattern: download to `%TEMP%\EDTC_update.exe`, write `edtc_update.bat` that waits 2s (for the app to fully exit), copies the new file over the old path, relaunches, then self-deletes. Launch the bat with `CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS` so it survives the parent process dying.
-- **Update check is dev-mode safe**: `download_and_install_update()` returns early with an error string if `sys.frozen` is not set — won't try to overwrite `python.exe` in dev.
-- **GitHub API for latest release**: `GET https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest` — `tag_name` field holds the version, `assets[].browser_download_url` where `name == "EDTC.exe"` is the Windows download link.
-- **WebFetch has a 15-minute cache** — when polling GitHub Actions for CI status, the actions list page can return stale "in progress" even after the build completes. Use the GitHub API (`/actions/runs?per_page=1`) to bypass cache and get live status.
+- **Update check is dev-mode safe**: `download_and_install_update()` returns early with an error string if `sys.frozen` is not set â€” won't try to overwrite `python.exe` in dev.
+- **GitHub API for latest release**: `GET https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest` â€” `tag_name` field holds the version, `assets[].browser_download_url` where `name == "EDTC.exe"` is the Windows download link.
+- **WebFetch has a 15-minute cache** â€” when polling GitHub Actions for CI status, the actions list page can return stale "in progress" even after the build completes. Use the GitHub API (`/actions/runs?per_page=1`) to bypass cache and get live status.
 
 ## Known issues / notes for next session
 
-- Update check runs on every app launch (one HTTPS request, 5s timeout) — acceptable overhead.
-- Updater does not verify the downloaded exe (no checksum) — fine for a personal tool, revisit if distributing more widely.
+- Update check runs on every app launch (one HTTPS request, 5s timeout) â€” acceptable overhead.
+- Updater does not verify the downloaded exe (no checksum) â€” fine for a personal tool, revisit if distributing more widely.
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
 - `data/guardian_sites.json` still only 8 sites.
-- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- pygame not installable on Python 3.14 â€” CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
 - **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session 19 complete — 2026-06-29*
+*Session 19 complete â€” 2026-06-29*
 
 ---
 
-## Build status — Session 20 (COMPLETE)
+## Build status â€” Session 20 (COMPLETE)
 
 Focus: Exobiology route planner + updater bug fix.
 
 | Item | Status | File |
 |---|---|---|
-| `exobiology_route()` added to SpanshAPI — form POST to `/exobiology/route`, polls job, returns systems array | DONE | `api/spansh.py` |
+| `exobiology_route()` added to SpanshAPI â€” form POST to `/exobiology/route`, polls job, returns systems array | DONE | `api/spansh.py` |
 | `plan_exobiology_route()` API method | DONE | `main.py` |
-| Exploration page — new **Exo Planner** tab (between Road to Riches and Exobiology) | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exploration page â€” new **Exo Planner** tab (between Road to Riches and Exobiology) | DONE | `frontend/src/pages/Exploration.jsx` |
 | Exo Planner: origin (auto-fills current system), jump range (auto-fills from ship), search radius, max systems inputs | DONE | `frontend/src/pages/Exploration.jsx` |
-| Exo Planner: results show each system with jump count, species count, total value; expandable to bodies → species + per-sample value | DONE | `frontend/src/pages/Exploration.jsx` |
-| v0.3.1 released — Exo Planner | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.1 |
-| Updater bug fix: `webview.destroy()` → `self._window.destroy()` (pywebview has no module-level destroy) | DONE | `main.py` |
-| v0.3.2 released — updater fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.2 |
-| Local install updated to v0.3.2 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | — |
-| v0.3.3 released — HANDOFF update / updater smoke-test target | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.3 |
+| Exo Planner: results show each system with jump count, species count, total value; expandable to bodies â†’ species + per-sample value | DONE | `frontend/src/pages/Exploration.jsx` |
+| v0.3.1 released â€” Exo Planner | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.1 |
+| Updater bug fix: `webview.destroy()` â†’ `self._window.destroy()` (pywebview has no module-level destroy) | DONE | `main.py` |
+| v0.3.2 released â€” updater fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.2 |
+| Local install updated to v0.3.2 at `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` | DONE | â€” |
+| v0.3.3 released â€” HANDOFF update / updater smoke-test target | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.3 |
 
 ## Key technical notes from Session 20
 
-- **Spansh exobiology API**: `POST https://spansh.co.uk/api/exobiology/route` with form-encoded body (`from`, `range`, `radius`, `max_results`). Returns a job ID (202), poll `/api/results/:job_id` until `status == "ok"`. Result is an array of systems, each with `bodies[]` → `landmarks[]` (species `subtype`, `value` per sample, `count`).
-- **Updater bootstrapping problem**: v0.3.0 had `webview.destroy()` which doesn't exist → updater always failed. v0.3.1 also had the bug (fix wasn't in yet). v0.3.2 has the correct `self._window.destroy()`. Had to manually install v0.3.2; from v0.3.2 onward the in-app updater works correctly.
-- **GitHub API vs expanded_assets for CI status**: Use `/api/repos/.../actions/runs?per_page=1` to check build status — the `expanded_assets` page only shows compiled binaries once CI uploads them, so it's useful as a "is the exe ready?" check.
+- **Spansh exobiology API**: `POST https://spansh.co.uk/api/exobiology/route` with form-encoded body (`from`, `range`, `radius`, `max_results`). Returns a job ID (202), poll `/api/results/:job_id` until `status == "ok"`. Result is an array of systems, each with `bodies[]` â†’ `landmarks[]` (species `subtype`, `value` per sample, `count`).
+- **Updater bootstrapping problem**: v0.3.0 had `webview.destroy()` which doesn't exist â†’ updater always failed. v0.3.1 also had the bug (fix wasn't in yet). v0.3.2 has the correct `self._window.destroy()`. Had to manually install v0.3.2; from v0.3.2 onward the in-app updater works correctly.
+- **GitHub API vs expanded_assets for CI status**: Use `/api/repos/.../actions/runs?per_page=1` to check build status â€” the `expanded_assets` page only shows compiled binaries once CI uploads them, so it's useful as a "is the exe ready?" check.
 
 ## Known issues / notes for next session
 
-- Updater does not verify the downloaded exe (no checksum) — fine for a personal tool.
+- Updater does not verify the downloaded exe (no checksum) â€” fine for a personal tool.
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early (timer cancel not implemented).
 - `data/guardian_sites.json` still only 8 sites.
-- pygame not installable on Python 3.14 — CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
+- pygame not installable on Python 3.14 â€” CMDR ping audio silently disabled in dev; CI builds use 3.12 so .exe has audio.
 - **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session 20 complete — 2026-06-29*
+*Session 20 complete â€” 2026-06-29*
 
 ---
 
-## Build status — Session 21 (COMPLETE)
+## Build status â€” Session 21 (COMPLETE)
 
-Focus: In-app auto-updater — fixing version reporting and stale download URL bugs.
+Focus: In-app auto-updater â€” fixing version reporting and stale download URL bugs.
 
 | Item | Status | File |
 |---|---|---|
 | `taskkill /f /im EDTC.exe` added to update bat before copy (releases exe file lock) | DONE | `main.py` |
-| v0.3.4 released — taskkill fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.4 |
+| v0.3.4 released â€” taskkill fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.4 |
 | Removed CI "Write version from tag" step (was silently writing wrong version to VERSION file) | DONE | `.github/workflows/build.yml` |
-| Startup version log line added: `EDTC starting — version X.X.X` in `edtc_debug.log` | DONE | `main.py` |
-| `APP_VERSION` changed from file-read to hardcoded constant in source — eliminates stale VERSION file bundling bug entirely | DONE | `main.py` |
-| `--add-data "VERSION;."` removed from PyInstaller steps — no longer needed | DONE | `.github/workflows/build.yml` |
-| `_do_update()` now re-fetches latest GitHub release URL right before downloading — prevents stale cached URL from downloading wrong version | DONE | `main.py` |
+| Startup version log line added: `EDTC starting â€” version X.X.X` in `edtc_debug.log` | DONE | `main.py` |
+| `APP_VERSION` changed from file-read to hardcoded constant in source â€” eliminates stale VERSION file bundling bug entirely | DONE | `main.py` |
+| `--add-data "VERSION;."` removed from PyInstaller steps â€” no longer needed | DONE | `.github/workflows/build.yml` |
+| `_do_update()` now re-fetches latest GitHub release URL right before downloading â€” prevents stale cached URL from downloading wrong version | DONE | `main.py` |
 | Bat improved: `timeout /t 2` after taskkill, copy result logged to `%TEMP%\edtc_copy.log`, `exit /b 1` on copy failure | DONE | `main.py` |
-| v0.3.5–v0.3.8 released (incremental fixes) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.8 |
-| Local install at v0.3.8 — **updater confirmed working end-to-end** | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
+| v0.3.5â€“v0.3.8 released (incremental fixes) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.8 |
+| Local install at v0.3.8 â€” **updater confirmed working end-to-end** | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
 
 ## Key technical notes from Session 21
 
 - **VERSION file bundling bug**: PyInstaller's `--add-data "VERSION;."` was picking up a stale copy of the VERSION file during CI builds, always bundling the previous version's value. Root cause was never pinpointed (possibly CI workspace caching between matrix jobs). Fixed by removing the file entirely and hardcoding `APP_VERSION = "0.3.8"` directly in `main.py`. To bump the version, just change this constant.
 - **Stale download URL bug**: `check_for_update()` runs at app startup. If a new release is published while EDTC is already open, the stored `download_url` points to the old version. Fixed in `_do_update()` by re-fetching `/releases/latest` from GitHub right before the download starts, ignoring the cached URL.
 - **Bootstrapping pattern**: every updater bug fix requires one manual install to get the fix running, because the running exe contains the old (broken) updater code. After that, all subsequent updates work in-app.
-- **Updater flow**: download v(N+1) to `%TEMP%\EDTC_update.exe` → write `edtc_update.bat` → launch bat detached → `self._window.destroy()` closes app → bat: `taskkill`, `copy /y`, `start "" "exe_path"`, self-deletes.
+- **Updater flow**: download v(N+1) to `%TEMP%\EDTC_update.exe` â†’ write `edtc_update.bat` â†’ launch bat detached â†’ `self._window.destroy()` closes app â†’ bat: `taskkill`, `copy /y`, `start "" "exe_path"`, self-deletes.
 
 ## Known issues / notes for next session
 
 - Updater does not verify the downloaded exe (no checksum).
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
 - `data/guardian_sites.json` still only 8 sites.
-- pygame not installable on Python 3.14 — audio disabled in dev; CI uses 3.12.
+- pygame not installable on Python 3.14 â€” audio disabled in dev; CI uses 3.12.
 - **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session 21 complete — 2026-06-29*
+*Session 21 complete â€” 2026-06-29*
 
 ---
 
-## Build status — Session 22 (COMPLETE)
+## Build status â€” Session 22 (COMPLETE)
 
 Focus: Updater reliability, database persistence, Spansh dump replacement, CI hardening.
 
 | Item | Status | Notes |
 |---|---|---|
-| Database path fixed — was writing to `_MEI*` temp dir (wiped each launch) | DONE | `core/database.py` — now `Path(sys.executable).parent / "edtc.db"` when frozen |
-| Seed thread moved to `_on_ready` — ensures webview is ready before emitting status events | DONE | `main.py` |
-| Updater bat fixed — replaced `start ""` (blocked by Windows Zone.Identifier) with `Unblock-File` + `Start-Process` via PowerShell | DONE | `main.py` |
-| Spansh dump seeding removed — dump grew to 4 GB, not feasible in-app | DONE | `main.py` — functions deleted entirely |
-| Spansh API results increased 50→100 per query | DONE | `api/spansh.py` |
+| Database path fixed â€” was writing to `_MEI*` temp dir (wiped each launch) | DONE | `core/database.py` â€” now `Path(sys.executable).parent / "edtc.db"` when frozen |
+| Seed thread moved to `_on_ready` â€” ensures webview is ready before emitting status events | DONE | `main.py` |
+| Updater bat fixed â€” replaced `start ""` (blocked by Windows Zone.Identifier) with `Unblock-File` + `Start-Process` via PowerShell | DONE | `main.py` |
+| Spansh dump seeding removed â€” dump grew to 4 GB, not feasible in-app | DONE | `main.py` â€” functions deleted entirely |
+| Spansh API results increased 50â†’100 per query | DONE | `api/spansh.py` |
 | Seed status UI removed from Trading page | DONE | `frontend/src/pages/Trading.jsx` |
-| CI: version-tag match check added — fails build if `APP_VERSION` in `main.py` doesn't match git tag | DONE | `.github/workflows/build.yml` |
-| CI: syntax check added — `python -m py_compile main.py core/database.py` | DONE | `.github/workflows/build.yml` |
-| `.claude/settings.json` added — auto-approves git/file/API tool calls for this project | DONE | `.claude/settings.json` |
-| v0.3.9–v0.3.14 released (incremental fixes) | DONE | Latest: https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.14 |
-| Local install at v0.3.14 — updater + database persistence confirmed working | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
+| CI: version-tag match check added â€” fails build if `APP_VERSION` in `main.py` doesn't match git tag | DONE | `.github/workflows/build.yml` |
+| CI: syntax check added â€” `python -m py_compile main.py core/database.py` | DONE | `.github/workflows/build.yml` |
+| `.claude/settings.json` added â€” auto-approves git/file/API tool calls for this project | DONE | `.claude/settings.json` |
+| v0.3.9â€“v0.3.14 released (incremental fixes) | DONE | Latest: https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.14 |
+| Local install at v0.3.14 â€” updater + database persistence confirmed working | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
 
 ## Key technical notes from Session 22
 
 - **Database was never persistent**: `Path(__file__).parent.parent` in a PyInstaller `--onefile` bundle resolves to `sys._MEIPASS` (the temp extraction dir), not the exe dir. Every launch created a fresh DB. Fixed by checking `sys.frozen` and using `Path(sys.executable).parent` instead.
 - **Updater `start ""` blocked by MOTW**: Files downloaded from GitHub carry a Zone.Identifier alternate data stream (internet zone mark). CMD's `start` goes through the Windows shell which enforces this. `Unblock-File` removes the ADS; `Start-Process` via PowerShell uses CreateProcess directly. Both added to the bat.
 - **Infinite update loop**: The v0.3.11 tag was pushed without bumping `APP_VERSION` in `main.py`. Every installed binary reported `0.3.10`, always saw `v0.3.11` as newer, and immediately offered the same update again. CI version-tag check now catches this before the build runs.
-- **Spansh dump URL changed**: `spansh.co.uk/dumps/` now serves HTML (Ember SPA). The download server moved to `downloads.spansh.co.uk` but the dump grew to ~4 GB compressed — not viable for in-app download. Removed seeding; rely on live Spansh API queries instead.
+- **Spansh dump URL changed**: `spansh.co.uk/dumps/` now serves HTML (Ember SPA). The download server moved to `downloads.spansh.co.uk` but the dump grew to ~4 GB compressed â€” not viable for in-app download. Removed seeding; rely on live Spansh API queries instead.
 ## Known issues / notes for next session
 
 - Updater does not verify downloaded exe (no checksum).
@@ -766,316 +766,54 @@ Focus: Updater reliability, database persistence, Spansh dump replacement, CI ha
 - **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Galaxy, Commander, Overlays) and make each work correctly. Guardian is done.
 
 ---
-*Session 22 complete — 2026-06-29*
+*Session 22 complete â€” 2026-06-29*
 
 ---
 
-## Build status — Session 23 (COMPLETE)
+## Build status â€” Session 23 (COMPLETE)
 
 | Item | Status | File |
 |---|---|---|
-| `api/eddn.py` deleted — dead websocket code (404'd, never imported; replaced by ZMQ in Session 14) | DONE | deleted |
-| EDDN known-issue note removed from HANDOFF — EDDN ZMQ is working (96k+ market rows in DB) | DONE | `HANDOFF.md` |
+| `api/eddn.py` deleted â€” dead websocket code (404'd, never imported; replaced by ZMQ in Session 14) | DONE | deleted |
 | `guardian_sites.json` expanded: 5 new ruins added from Canonn page data (13 total: 10 ruins + 3 structures) | DONE | `data/guardian_sites.json` |
-| `Guardian.jsx` TYPE_COLORS updated: all 10 Canonn shape names (Fistbump/Bear/Hammerbot/Lacrosse/Crossroads/Turtle/Bowl/Squid/Stickyhand/Robolobster) now have distinct colors | DONE | `frontend/src/pages/Guardian.jsx` |
+| `Guardian.jsx` TYPE_COLORS updated: all 10 Canonn shape names now have distinct colors | DONE | `frontend/src/pages/Guardian.jsx` |
+| `Market` added to `WATCHED_EVENTS` | DONE | `core/journal.py` |
+| `_import_market_json()` â€” reads `Market.json` from ED save dir, upserts to local market DB | DONE | `main.py` |
+| `_push_startup()` calls `_import_market_json()` on every app launch | DONE | `main.py` |
+| v0.3.16 released â€” Market.json import (own docked station now always appears in commodity search) | DONE | â€” |
 
-## Key notes from Session 23
+---
 
-- **EDDN ZMQ was already working**: The "HTTP 404" note in the HANDOFF referred to the old websocket code (`api/eddn.py`) from early development. The ZMQ listener in `main.py` connects successfully and has accumulated 96k+ market rows.
-- **Canonn API is down** (`api.canonn.tech` ECONNREFUSED): The full 209-ruins dataset couldn't be fetched. The 5 new ruins added are from the Canonn web page sample. Ruins now use Canonn shape-type names (Fistbump, Bear, etc.); existing 5 stubs keep their Alpha/Beta/Gamma in-game classification.
-- **Canonn ruins type naming**: Canonn uses community shape names (Fistbump, Bear, Hammerbot, Lacrosse, Crossroads, Turtle, Bowl, Squid, Stickyhand, Robolobster). In-game classification is Alpha/Beta/Gamma. Both systems coexist in the JSON.
+## Build status â€” Session 24 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `api/inara.py` â€” InaraAPI class with `getCommoditiesStations` event | DONE | `api/inara.py` |
+| `core/database.py` â€” `get_system_coords()` helper added | DONE | `core/database.py` |
+| `main.py` â€” `get_inara_key()`, `set_inara_key()`, `test_inara_key()` API methods | DONE | `main.py` |
+| `main.py` â€” `search_commodity_markets()` now runs Spansh + Inara concurrently via `asyncio.gather` | DONE | `main.py` |
+| `main.py` â€” Inara `_run_inara()` falls back to EDSM for ref system coords when not in local DB | DONE | `main.py` |
+| `Trading.jsx` â€” `âš™ API Keys` settings panel with key input, Test button, Save/Clear | DONE | `frontend/src/pages/Trading.jsx` |
+| `Trading.jsx` â€” blue **Inara** badge on Inara-sourced results | DONE | `frontend/src/pages/Trading.jsx` |
+| Updater fixed: now sorts all releases by semver, not publish time (prevents lower version blocking update) | DONE | `main.py` â€” `_fetch_highest_release()` |
+| v0.3.17â€“v0.3.21 released | DONE | Latest: https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.21 |
+
+## Key notes from Session 24
+
+- **Inara API blocked**: Inara's API returns `400 "This application has no access allowed"` because EDTC is not a registered app with Inara. The user's API key is valid but the app name "EDTC" isn't whitelisted. Inara integration is wired up and falls back silently â€” when/if EDTC gets registered with Inara, it will work automatically. To register: contact Inara dev via their forum/Discord and request app access.
+- **Updater publish-order bug**: GitHub `/releases/latest` returns the most recently *published* release, not the highest version. When two builds finish seconds apart (e.g. a re-tagged rebuild), the lower version can become "latest". Fixed by fetching `/releases?per_page=20` and picking the max semver.
+- **Tag-before-version-bump bug**: Several releases (v0.3.18, v0.3.19) failed CI because the tag was pushed before `APP_VERSION` was bumped in the same commit. CI checks `tag == APP_VERSION`. Fix: always bump version and tag in one commit.
+- **Market.json import**: When the player opens the commodities screen at any station, ED writes `Market.json` to the save dir. EDTC reads this on startup AND on the `Market` journal event â€” ensures the docked station always appears in commodity search even if it's a new colonisation station not in any global DB.
 
 ## Known issues / notes for next session
 
 - Updater does not verify downloaded exe (no checksum).
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
-- `data/guardian_sites.json` has 13 sites — Canonn API was down. When `api.canonn.tech` is back online, fetch full dataset via `GET https://api.canonn.tech/guardianruins?_limit=500` and `guardianstructures?_limit=500`.
-- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Galaxy, Commander, Overlays) and make each work correctly.
+- `data/guardian_sites.json` has 13 sites â€” Canonn API was down. When `api.canonn.tech` is back, fetch full dataset via `GET https://api.canonn.tech/guardianruins?_limit=500`.
+- **Inara integration**: wired but blocked pending app registration with Inara. Falls back silently to EDDN + Spansh.
+- **Next priority**: go through remaining pages (Exploration, Engineering, Colonisation, Fleet Carriers, Galaxy, Commander, Overlays) and make each work correctly.
 
 ---
-*Session 23 complete — 2026-06-29*
+*Session 24 complete â€” 2026-06-29*
 
 ---
-*Session checkpoint: 2026-06-28 16:17:11*
-
----
-*Session checkpoint: 2026-06-28 17:24:53*
-
----
-*Session checkpoint: 2026-06-28 17:26:38*
-
----
-*Session checkpoint: 2026-06-28 17:27:08*
-
----
-*Session checkpoint: 2026-06-28 17:27:48*
-
----
-*Session checkpoint: 2026-06-28 17:28:39*
-
----
-*Session checkpoint: 2026-06-28 17:30:51*
-
----
-*Session checkpoint: 2026-06-28 17:31:30*
-
----
-*Session checkpoint: 2026-06-28 17:33:00*
-
----
-*Session checkpoint: 2026-06-28 17:33:36*
-
----
-*Session checkpoint: 2026-06-28 17:34:33*
-
----
-*Session checkpoint: 2026-06-28 17:37:07*
-
----
-*Session checkpoint: 2026-06-28 17:39:32*
-
----
-*Session checkpoint: 2026-06-28 17:41:03*
-
----
-*Session checkpoint: 2026-06-28 17:41:39*
-
----
-*Session checkpoint: 2026-06-28 17:43:49*
-
----
-*Session checkpoint: 2026-06-28 17:45:37*
-
----
-*Session checkpoint: 2026-06-28 17:49:05*
-
----
-*Session checkpoint: 2026-06-28 17:51:32*
-
----
-*Session checkpoint: 2026-06-28 17:53:54*
-
----
-*Session checkpoint: 2026-06-28 17:57:05*
-
----
-*Session checkpoint: 2026-06-28 17:57:34*
-
----
-*Session checkpoint: 2026-06-28 18:01:39*
-
----
-*Session checkpoint: 2026-06-28 18:04:55*
-
----
-*Session checkpoint: 2026-06-28 18:05:39*
-
----
-*Session checkpoint: 2026-06-28 18:06:03*
-
----
-*Session checkpoint: 2026-06-28 18:08:04*
-
----
-*Session checkpoint: 2026-06-28 18:08:25*
-
----
-*Session checkpoint: 2026-06-28 19:45:55*
-
----
-*Session checkpoint: 2026-06-28 19:47:55*
-
----
-*Session checkpoint: 2026-06-28 20:00:41*
-
----
-*Session checkpoint: 2026-06-28 20:08:13*
-
----
-*Session checkpoint: 2026-06-28 20:15:45*
-
----
-*Session checkpoint: 2026-06-28 20:19:44*
-
----
-*Session checkpoint: 2026-06-28 20:24:24*
-
----
-*Session checkpoint: 2026-06-28 20:24:40*
-
----
-*Session checkpoint: 2026-06-28 20:26:36*
-
----
-*Session checkpoint: 2026-06-28 20:28:56*
-
----
-*Session checkpoint: 2026-06-28 20:31:41*
-
----
-*Session checkpoint: 2026-06-28 20:39:15*
-
----
-*Session checkpoint: 2026-06-28 20:45:35*
-
----
-*Session checkpoint: 2026-06-28 20:47:57*
-
----
-*Session checkpoint: 2026-06-28 20:51:03*
-
----
-*Session checkpoint: 2026-06-28 20:53:45*
-
----
-*Session checkpoint: 2026-06-28 20:54:00*
-
----
-*Session checkpoint: 2026-06-28 20:58:24*
-
----
-*Session checkpoint: 2026-06-28 20:59:21*
-
----
-*Session checkpoint: 2026-06-28 21:00:37*
-
----
-*Session checkpoint: 2026-06-28 21:03:43*
-
----
-*Session checkpoint: 2026-06-28 21:14:47*
-
----
-*Session checkpoint: 2026-06-28 21:15:41*
-
----
-*Session checkpoint: 2026-06-28 21:18:21*
-
----
-*Session checkpoint: 2026-06-28 21:18:49*
-
----
-*Session checkpoint: 2026-06-28 22:59:43*
-
----
-*Session checkpoint: 2026-06-28 23:09:23*
-
----
-*Session checkpoint: 2026-06-28 23:10:12*
-
----
-*Session checkpoint: 2026-06-28 23:11:28*
-
----
-*Session checkpoint: 2026-06-28 23:11:33*
-
----
-*Session checkpoint: 2026-06-28 23:19:29*
-
----
-*Session checkpoint: 2026-06-28 23:19:50*
-
----
-*Session checkpoint: 2026-06-28 23:21:57*
-
----
-*Session checkpoint: 2026-06-28 23:28:19*
-
----
-*Session checkpoint: 2026-06-28 23:30:48*
-
----
-*Session checkpoint: 2026-06-28 23:36:41*
-
----
-*Session checkpoint: 2026-06-28 23:44:55*
-
----
-*Session checkpoint: 2026-06-28 23:49:39*
-
----
-*Session checkpoint: 2026-06-28 23:56:59*
-
----
-*Session checkpoint: 2026-06-28 23:57:09*
-
----
-*Session checkpoint: 2026-06-29 00:03:48*
-
----
-*Session checkpoint: 2026-06-29 00:33:01*
-
----
-*Session checkpoint: 2026-06-29 00:34:08*
-
----
-*Session checkpoint: 2026-06-29 00:39:22*
-
----
-*Session checkpoint: 2026-06-29 00:43:07*
-
----
-*Session checkpoint: 2026-06-29 00:43:32*
-
----
-*Session checkpoint: 2026-06-29 00:43:54*
-
----
-*Session checkpoint: 2026-06-29 00:50:28*
-
----
-*Session checkpoint: 2026-06-29 00:50:44*
-
----
-*Session checkpoint: 2026-06-29 00:55:06*
-
----
-*Session checkpoint: 2026-06-29 00:56:36*
-
----
-*Session checkpoint: 2026-06-29 00:58:17*
-
----
-*Session checkpoint: 2026-06-29 01:13:44*
-
----
-*Session checkpoint: 2026-06-29 01:21:59*
-
----
-*Session checkpoint: 2026-06-29 01:23:51*
-
----
-*Session checkpoint: 2026-06-29 01:24:46*
-
----
-*Session checkpoint: 2026-06-29 01:25:59*
-
----
-*Session checkpoint: 2026-06-29 01:26:27*
-
----
-*Session checkpoint: 2026-06-29 01:35:00*
-
----
-*Session checkpoint: 2026-06-29 01:36:50*
-
----
-*Session checkpoint: 2026-06-29 01:37:17*
-
----
-*Session checkpoint: 2026-06-29 01:39:32*
-
----
-*Session checkpoint: 2026-06-29 01:41:16*
-
----
-*Session checkpoint: 2026-06-29 16:01:29*
-
----
-*Session checkpoint: 2026-06-29 16:05:44*
-
----
-*Session checkpoint: 2026-06-29 16:07:35*
-
----
-*Session checkpoint: 2026-06-29 16:09:16*
