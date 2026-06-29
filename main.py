@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.20"  # bump this with every release
+APP_VERSION = "0.3.21"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1034,8 +1034,10 @@ class API:
             return raw
         try:
             result = asyncio.run(_test())
-            if isinstance(result, list):
+            if isinstance(result, list) and len(result) > 0:
                 return {"ok": True}
+            if isinstance(result, list) and len(result) == 0:
+                return {"ok": False, "error": "Key accepted but returned no data — key may be invalid or Inara API may be down"}
             return {"ok": False, "error": "Unexpected response"}
         except Exception as e:
             msg = str(e)
@@ -1084,11 +1086,31 @@ class API:
             return results
 
         async def _run_inara():
-            if not inara_key or not ref_coords:
+            if not inara_key:
+                return []
+            coords = ref_coords
+            if not coords:
+                # Coords missing from local DB — look up via EDSM and cache them
+                from api.edsm import EdsmAPI
+                edsm = EdsmAPI()
+                try:
+                    sys_info = await edsm.get_system(system)
+                    if sys_info and sys_info.coords:
+                        c = sys_info.coords
+                        coords = (c.get("x", 0.0), c.get("y", 0.0), c.get("z", 0.0))
+                        from core.database import upsert_system_coords
+                        upsert_system_coords(system, coords[0], coords[1], coords[2])
+                        logging.info(f"Inara: fetched coords for {system} from EDSM")
+                except Exception as e:
+                    logging.warning(f"Inara: EDSM coord lookup failed for {system}: {e}")
+                finally:
+                    await edsm.close()
+            if not coords:
+                logging.warning(f"Inara: no coords for {system}, skipping")
                 return []
             from api.inara import InaraAPI
             inara = InaraAPI(inara_key, APP_VERSION)
-            raw = await inara.commodity_markets(commodity, ref_coords[0], ref_coords[1], ref_coords[2])
+            raw = await inara.commodity_markets(commodity, coords[0], coords[1], coords[2])
             return [InaraAPI.format_result(e) for e in raw]
 
         async def _run_all():
