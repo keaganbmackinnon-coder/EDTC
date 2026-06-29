@@ -1443,7 +1443,7 @@ class API:
             )
             import time as _time
             _time.sleep(1)
-            webview.destroy()
+            self._window.destroy()
         except Exception as e:
             logging.error(f"Update install failed: {e}")
             self._emit("update_progress", {"error": str(e)})
