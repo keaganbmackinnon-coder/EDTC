@@ -500,6 +500,189 @@ function ExobiologyTab() {
   )
 }
 
+// ---- Tab: Exo Planner ----
+
+function fmtLandmarkValue(v) {
+  if (!v) return '—'
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)}M Cr`
+  if (v >= 1_000)     return `${(v / 1_000).toFixed(0)}K Cr`
+  return `${v} Cr`
+}
+
+function ExoPlannerTab({ currentSystem }) {
+  const [origin, setOrigin]     = useState('')
+  const [range, setRange]       = useState('30')
+  const [radius, setRadius]     = useState('10000')
+  const [maxSys, setMaxSys]     = useState('20')
+  const [loading, setLoading]   = useState(false)
+  const [result, setResult]     = useState(null)
+  const [expanded, setExpanded] = useState(null)
+
+  useEffect(() => {
+    if (currentSystem && !origin) setOrigin(currentSystem)
+  }, [currentSystem])
+
+  useEffect(() => {
+    api()?.get_ship_info?.().then(info => {
+      if (info?.current_jump_range) setRange(info.current_jump_range.toFixed(1))
+      else if (info?.max_jump_range) setRange(info.max_jump_range.toFixed(1))
+    })
+  }, [])
+
+  async function doRoute() {
+    const r = parseFloat(range)
+    const rad = parseFloat(radius)
+    const n = parseInt(maxSys, 10)
+    if (!origin.trim() || isNaN(r) || isNaN(rad) || isNaN(n)) return
+    setLoading(true)
+    setResult(null)
+    setExpanded(null)
+    const res = await api()?.plan_exobiology_route(origin.trim(), r, rad, n)
+    setResult(res ?? { error: 'No response' })
+    setLoading(false)
+  }
+
+  const systems = (result?.systems ?? []).filter(s => s.bodies?.length > 0)
+  const totalValue = systems.reduce((sum, s) =>
+    sum + (s.bodies ?? []).reduce((bs, b) => bs + (b.landmark_value ?? 0), 0), 0)
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-4">
+        Plots a multi-system route through bodies with biological signals near your origin. Powered by Spansh.
+      </p>
+
+      <div className="panel mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Origin System</label>
+            <input
+              className="input font-mono text-sm w-full"
+              value={origin}
+              onChange={e => setOrigin(e.target.value)}
+              placeholder="Sol"
+            />
+          </div>
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Jump Range (ly)</label>
+            <input
+              className="input font-mono text-sm w-full"
+              type="number" min="5" max="100"
+              value={range}
+              onChange={e => setRange(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Search Radius (ly)</label>
+            <input
+              className="input font-mono text-sm w-full"
+              type="number" min="100" max="50000"
+              value={radius}
+              onChange={e => setRadius(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Max Systems</label>
+            <input
+              className="input font-mono text-sm w-full"
+              type="number" min="5" max="100"
+              value={maxSys}
+              onChange={e => setMaxSys(e.target.value)}
+            />
+          </div>
+        </div>
+        <button
+          className="btn-primary text-sm disabled:opacity-40"
+          onClick={doRoute}
+          disabled={loading || !origin.trim()}
+        >
+          {loading ? 'Planning route (may take ~30s)…' : 'Plan Exo Route'}
+        </button>
+      </div>
+
+      {result?.error && (
+        <div className="panel border border-ed-danger/30 mb-3">
+          <p className="text-ed-danger text-sm font-mono">{result.error}</p>
+        </div>
+      )}
+
+      {systems.length > 0 && (
+        <>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-ed-muted text-sm font-mono">{systems.length} systems with bio signals</p>
+            <p className="text-ed-gold font-mono font-semibold">{fmtCredits(totalValue)} total</p>
+          </div>
+
+          <div className="space-y-1">
+            {systems.map((s, i) => {
+              const isOpen = expanded === i
+              const sysValue = (s.bodies ?? []).reduce((sum, b) => sum + (b.landmark_value ?? 0), 0)
+              const speciesCount = (s.bodies ?? []).reduce((sum, b) => sum + (b.landmarks ?? []).length, 0)
+
+              return (
+                <div key={i} className="panel">
+                  <button
+                    className="w-full flex items-center justify-between gap-3 text-left"
+                    onClick={() => setExpanded(isOpen ? null : i)}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{i + 1}</span>
+                      <span className="text-ed-text font-ui font-semibold truncate">{s.name}</span>
+                      <span className="text-ed-muted text-xs font-mono shrink-0">
+                        {s.jumps} {s.jumps === 1 ? 'jump' : 'jumps'}
+                      </span>
+                      <span className="text-xs font-mono text-green-400 border border-green-500/30 px-1 rounded shrink-0">
+                        {speciesCount} species
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-ed-gold font-mono text-sm font-semibold">
+                        {fmtCredits(sysValue)}
+                      </span>
+                      <span className="text-ed-muted text-xs">{isOpen ? '▲' : '▼'}</span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="mt-3 border-t border-ed-border pt-3 space-y-3">
+                      {(s.bodies ?? []).map((b, j) => (
+                        <div key={j}>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-ed-orange text-xs font-semibold font-ui">{b.name}</span>
+                            <span className="text-ed-muted text-xs font-mono">{b.subtype}</span>
+                            <span className="text-ed-muted text-xs font-mono ml-auto">{fmtDist(b.distance_to_arrival)}</span>
+                          </div>
+                          <div className="space-y-1 pl-2">
+                            {(b.landmarks ?? []).map((lm, k) => (
+                              <div key={k} className="flex items-center gap-2 text-xs font-mono">
+                                <span className="text-green-400 shrink-0">●</span>
+                                <span className="text-ed-text flex-1 truncate">{lm.subtype}</span>
+                                <span className="text-ed-muted shrink-0">{lm.count}×</span>
+                                <span className="text-ed-gold shrink-0">{fmtLandmarkValue(lm.value)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="text-right text-xs font-mono text-ed-muted mt-1">
+                            Body total: <span className="text-ed-gold">{fmtCredits(b.landmark_value)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {!result && !loading && (
+        <EmptyState message="Set your origin and jump range, then click Plan Exo Route." />
+      )}
+    </div>
+  )
+}
+
 // ---- Tab: Session Scanner ----
 
 const CLASS_COLORS = {
@@ -582,10 +765,11 @@ function SessionScannerTab({ currentSystem }) {
 // ---- Main ----
 
 const TABS = [
-  { id: 'system',   label: 'System Lookup' },
-  { id: 'r2r',      label: 'Road to Riches' },
-  { id: 'exo',      label: 'Exobiology' },
-  { id: 'scanner',  label: 'Session Scanner' },
+  { id: 'system',      label: 'System Lookup' },
+  { id: 'r2r',         label: 'Road to Riches' },
+  { id: 'exo-planner', label: 'Exo Planner' },
+  { id: 'exo',         label: 'Exobiology' },
+  { id: 'scanner',     label: 'Session Scanner' },
 ]
 
 export default function Exploration() {
@@ -624,10 +808,11 @@ export default function Exploration() {
         ))}
       </div>
 
-      {tab === 'system'  && <SystemLookupTab currentSystem={currentSystem} />}
-      {tab === 'r2r'     && <R2RTab currentSystem={currentSystem} />}
-      {tab === 'exo'     && <ExobiologyTab />}
-      {tab === 'scanner' && <SessionScannerTab currentSystem={currentSystem} />}
+      {tab === 'system'      && <SystemLookupTab currentSystem={currentSystem} />}
+      {tab === 'r2r'         && <R2RTab currentSystem={currentSystem} />}
+      {tab === 'exo-planner' && <ExoPlannerTab currentSystem={currentSystem} />}
+      {tab === 'exo'         && <ExobiologyTab />}
+      {tab === 'scanner'     && <SessionScannerTab currentSystem={currentSystem} />}
     </div>
   )
 }

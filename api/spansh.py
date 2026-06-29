@@ -126,6 +126,32 @@ class SpanshAPI(BaseAPI):
         data = await self.get("/nearest", {"system": system, "service": service})
         return data.get("system")
 
+    # --- Exobiology route ---
+
+    async def exobiology_route(
+        self,
+        origin: str,
+        range_ly: float,
+        radius: float = 10000,
+        max_results: int = 20,
+    ) -> list[dict]:
+        client = await self._get_client()
+        await self._limiter.wait()
+        resp = await client.post(
+            "/exobiology/route",
+            data={
+                "from": origin,
+                "range": range_ly,
+                "radius": radius,
+                "max_results": max_results,
+            },
+        )
+        resp.raise_for_status()
+        job_id = resp.json().get("job")
+        if not job_id:
+            return []
+        return await self._poll_job(job_id)
+
     # --- Commodity market search ---
 
     async def commodity_markets(self, system: str, commodity: str) -> list[dict]:

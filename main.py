@@ -1074,6 +1074,23 @@ class API:
         except Exception as e:
             return {"error": str(e), "system": None, "bodies": []}
 
+    def plan_exobiology_route(
+        self, origin: str, range_ly: float, radius: float = 10000, max_results: int = 20
+    ) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                systems = await spansh.exobiology_route(origin, range_ly, radius, max_results)
+                return {"systems": systems}
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "systems": []}
+
     def road_to_riches(
         self, origin: str, destination: str, range_ly: float, max_systems: int = 100
     ) -> dict:
