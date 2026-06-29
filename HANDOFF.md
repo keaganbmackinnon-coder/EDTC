@@ -688,6 +688,43 @@ Focus: Exobiology route planner + updater bug fix.
 *Session 20 complete — 2026-06-29*
 
 ---
+
+## Build status — Session 21 (COMPLETE)
+
+Focus: In-app auto-updater — fixing version reporting and stale download URL bugs.
+
+| Item | Status | File |
+|---|---|---|
+| `taskkill /f /im EDTC.exe` added to update bat before copy (releases exe file lock) | DONE | `main.py` |
+| v0.3.4 released — taskkill fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.4 |
+| Removed CI "Write version from tag" step (was silently writing wrong version to VERSION file) | DONE | `.github/workflows/build.yml` |
+| Startup version log line added: `EDTC starting — version X.X.X` in `edtc_debug.log` | DONE | `main.py` |
+| `APP_VERSION` changed from file-read to hardcoded constant in source — eliminates stale VERSION file bundling bug entirely | DONE | `main.py` |
+| `--add-data "VERSION;."` removed from PyInstaller steps — no longer needed | DONE | `.github/workflows/build.yml` |
+| `_do_update()` now re-fetches latest GitHub release URL right before downloading — prevents stale cached URL from downloading wrong version | DONE | `main.py` |
+| Bat improved: `timeout /t 2` after taskkill, copy result logged to `%TEMP%\edtc_copy.log`, `exit /b 1` on copy failure | DONE | `main.py` |
+| v0.3.5–v0.3.8 released (incremental fixes) | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.8 |
+| Local install at v0.3.8 — **updater confirmed working end-to-end** | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
+
+## Key technical notes from Session 21
+
+- **VERSION file bundling bug**: PyInstaller's `--add-data "VERSION;."` was picking up a stale copy of the VERSION file during CI builds, always bundling the previous version's value. Root cause was never pinpointed (possibly CI workspace caching between matrix jobs). Fixed by removing the file entirely and hardcoding `APP_VERSION = "0.3.8"` directly in `main.py`. To bump the version, just change this constant.
+- **Stale download URL bug**: `check_for_update()` runs at app startup. If a new release is published while EDTC is already open, the stored `download_url` points to the old version. Fixed in `_do_update()` by re-fetching `/releases/latest` from GitHub right before the download starts, ignoring the cached URL.
+- **Bootstrapping pattern**: every updater bug fix requires one manual install to get the fix running, because the running exe contains the old (broken) updater code. After that, all subsequent updates work in-app.
+- **Updater flow**: download v(N+1) to `%TEMP%\EDTC_update.exe` → write `edtc_update.bat` → launch bat detached → `self._window.destroy()` closes app → bat: `taskkill`, `copy /y`, `start "" "exe_path"`, self-deletes.
+
+## Known issues / notes for next session
+
+- Updater does not verify the downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` still only 8 sites.
+- pygame not installable on Python 3.14 — audio disabled in dev; CI uses 3.12.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
+
+---
+*Session 21 complete — 2026-06-29*
+
+---
 *Session checkpoint: 2026-06-28 16:17:11*
 
 ---
@@ -821,3 +858,60 @@ Focus: Exobiology route planner + updater bug fix.
 
 ---
 *Session checkpoint: 2026-06-28 20:54:00*
+
+---
+*Session checkpoint: 2026-06-28 20:58:24*
+
+---
+*Session checkpoint: 2026-06-28 20:59:21*
+
+---
+*Session checkpoint: 2026-06-28 21:00:37*
+
+---
+*Session checkpoint: 2026-06-28 21:03:43*
+
+---
+*Session checkpoint: 2026-06-28 21:14:47*
+
+---
+*Session checkpoint: 2026-06-28 21:15:41*
+
+---
+*Session checkpoint: 2026-06-28 21:18:21*
+
+---
+*Session checkpoint: 2026-06-28 21:18:49*
+
+---
+*Session checkpoint: 2026-06-28 22:59:43*
+
+---
+*Session checkpoint: 2026-06-28 23:09:23*
+
+---
+*Session checkpoint: 2026-06-28 23:10:12*
+
+---
+*Session checkpoint: 2026-06-28 23:11:28*
+
+---
+*Session checkpoint: 2026-06-28 23:11:33*
+
+---
+*Session checkpoint: 2026-06-28 23:19:29*
+
+---
+*Session checkpoint: 2026-06-28 23:19:50*
+
+---
+*Session checkpoint: 2026-06-28 23:21:57*
+
+---
+*Session checkpoint: 2026-06-28 23:28:19*
+
+---
+*Session checkpoint: 2026-06-28 23:30:48*
+
+---
+*Session checkpoint: 2026-06-28 23:36:41*
