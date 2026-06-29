@@ -117,10 +117,9 @@ function CommoditySearchTab({ currentSystem, commodities }) {
           )}
           <button
             onClick={() => setShowSettings(v => !v)}
-            className="text-xs font-mono text-ed-muted hover:text-ed-text transition-colors"
-            title="API Settings"
+            className="text-xs font-mono px-2 py-0.5 rounded border border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-text transition-colors"
           >
-            {showSettings ? '✕' : '⚙'}
+            {showSettings ? '✕ Close' : '⚙ API Keys'}
           </button>
         </div>
       </div>
