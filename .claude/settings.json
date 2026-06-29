@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(python *)",
+      "PowerShell(git *)",
+      "PowerShell(python *)",
+      "PowerShell(cd *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Get-Item *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Invoke-RestMethod *)",
+      "PowerShell(Invoke-WebRequest *)",
+      "PowerShell(Start-Sleep *)",
+      "PowerShell(Start-Process *)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell(Write-Output *)",
+      "PowerShell(Select-Object *)",
+      "PowerShell(ForEach-Object *)",
+      "PowerShell(Where-Object *)",
+      "PowerShell(Get-WinEvent *)",
+      "PowerShell(Get-MpThreatDetection *)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ]
+  }
+}

@@ -6,6 +6,15 @@
 
 ---
 
+## Permissions (auto-approved for this project)
+
+`.claude/settings.json` is checked in and pre-configures Claude Code to auto-approve
+git, Python, file reads/edits/writes, and GitHub API calls without prompting each time.
+This is intentional — do not remove it. If Claude Code prompts you for a tool that
+should be auto-approved, check that `.claude/settings.json` is present in the repo root.
+
+---
+
 ## Project snapshot
 
 - **App name:** EDTC (Elite Dangerous Tools & Companion)
@@ -915,3 +924,78 @@ Focus: In-app auto-updater — fixing version reporting and stale download URL b
 
 ---
 *Session checkpoint: 2026-06-28 23:36:41*
+
+---
+*Session checkpoint: 2026-06-28 23:44:55*
+
+---
+*Session checkpoint: 2026-06-28 23:49:39*
+
+---
+*Session checkpoint: 2026-06-28 23:56:59*
+
+---
+*Session checkpoint: 2026-06-28 23:57:09*
+
+---
+*Session checkpoint: 2026-06-29 00:03:48*
+
+---
+*Session checkpoint: 2026-06-29 00:33:01*
+
+---
+*Session checkpoint: 2026-06-29 00:34:08*
+
+---
+*Session checkpoint: 2026-06-29 00:39:22*
+
+---
+*Session checkpoint: 2026-06-29 00:43:07*
+
+---
+*Session checkpoint: 2026-06-29 00:43:32*
+
+---
+*Session checkpoint: 2026-06-29 00:43:54*
+
+---
+*Session checkpoint: 2026-06-29 00:50:28*
+
+---
+*Session checkpoint: 2026-06-29 00:50:44*
+
+---
+*Session checkpoint: 2026-06-29 00:55:06*
+
+---
+*Session checkpoint: 2026-06-29 00:56:36*
+
+---
+*Session checkpoint: 2026-06-29 00:58:17*
+
+---
+*Session checkpoint: 2026-06-29 01:13:44*
+
+---
+*Session checkpoint: 2026-06-29 01:21:59*
+
+---
+*Session checkpoint: 2026-06-29 01:23:51*
+
+---
+*Session checkpoint: 2026-06-29 01:24:46*
+
+---
+*Session checkpoint: 2026-06-29 01:25:59*
+
+---
+*Session checkpoint: 2026-06-29 01:26:27*
+
+---
+*Session checkpoint: 2026-06-29 01:35:00*
+
+---
+*Session checkpoint: 2026-06-29 01:36:50*
+
+---
+*Session checkpoint: 2026-06-29 01:37:17*
