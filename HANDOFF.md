@@ -734,6 +734,45 @@ Focus: In-app auto-updater — fixing version reporting and stale download URL b
 *Session 21 complete — 2026-06-29*
 
 ---
+
+## Build status — Session 22 (COMPLETE)
+
+Focus: Updater reliability, database persistence, Spansh dump replacement, CI hardening.
+
+| Item | Status | Notes |
+|---|---|---|
+| Database path fixed — was writing to `_MEI*` temp dir (wiped each launch) | DONE | `core/database.py` — now `Path(sys.executable).parent / "edtc.db"` when frozen |
+| Seed thread moved to `_on_ready` — ensures webview is ready before emitting status events | DONE | `main.py` |
+| Updater bat fixed — replaced `start ""` (blocked by Windows Zone.Identifier) with `Unblock-File` + `Start-Process` via PowerShell | DONE | `main.py` |
+| Spansh dump seeding removed — dump grew to 4 GB, not feasible in-app | DONE | `main.py` — functions deleted entirely |
+| Spansh API results increased 50→100 per query | DONE | `api/spansh.py` |
+| Seed status UI removed from Trading page | DONE | `frontend/src/pages/Trading.jsx` |
+| CI: version-tag match check added — fails build if `APP_VERSION` in `main.py` doesn't match git tag | DONE | `.github/workflows/build.yml` |
+| CI: syntax check added — `python -m py_compile main.py core/database.py` | DONE | `.github/workflows/build.yml` |
+| `.claude/settings.json` added — auto-approves git/file/API tool calls for this project | DONE | `.claude/settings.json` |
+| v0.3.9–v0.3.14 released (incremental fixes) | DONE | Latest: https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.14 |
+| Local install at v0.3.14 — updater + database persistence confirmed working | DONE | `C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe` |
+
+## Key technical notes from Session 22
+
+- **Database was never persistent**: `Path(__file__).parent.parent` in a PyInstaller `--onefile` bundle resolves to `sys._MEIPASS` (the temp extraction dir), not the exe dir. Every launch created a fresh DB. Fixed by checking `sys.frozen` and using `Path(sys.executable).parent` instead.
+- **Updater `start ""` blocked by MOTW**: Files downloaded from GitHub carry a Zone.Identifier alternate data stream (internet zone mark). CMD's `start` goes through the Windows shell which enforces this. `Unblock-File` removes the ADS; `Start-Process` via PowerShell uses CreateProcess directly. Both added to the bat.
+- **Infinite update loop**: The v0.3.11 tag was pushed without bumping `APP_VERSION` in `main.py`. Every installed binary reported `0.3.10`, always saw `v0.3.11` as newer, and immediately offered the same update again. CI version-tag check now catches this before the build runs.
+- **Spansh dump URL changed**: `spansh.co.uk/dumps/` now serves HTML (Ember SPA). The download server moved to `downloads.spansh.co.uk` but the dump grew to ~4 GB compressed — not viable for in-app download. Removed seeding; rely on live Spansh API queries instead.
+- **EDDN websocket**: Still logging `HTTP 404` on ZMQ connection — not yet fixed, carry forward.
+
+## Known issues / notes for next session
+
+- EDDN WebSocket connection fails with HTTP 404 — ZMQ endpoint may have changed.
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` still only 8 sites.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
+
+---
+*Session 22 complete — 2026-06-29*
+
+---
 *Session checkpoint: 2026-06-28 16:17:11*
 
 ---
@@ -999,3 +1038,6 @@ Focus: In-app auto-updater — fixing version reporting and stale download URL b
 
 ---
 *Session checkpoint: 2026-06-29 01:37:17*
+
+---
+*Session checkpoint: 2026-06-29 01:39:32*
