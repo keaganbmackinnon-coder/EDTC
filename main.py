@@ -1355,6 +1355,82 @@ class API:
             "dev_mode": DEV_MODE,
         }
 
+    def check_for_update(self) -> dict:
+        import urllib.request
+        try:
+            url = "https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest"
+            req = urllib.request.Request(url, headers={"User-Agent": "EDTC"})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read())
+            latest = data.get("tag_name", "").lstrip("v")
+            download_url = next(
+                (a["browser_download_url"] for a in data.get("assets", []) if a["name"] == "EDTC.exe"),
+                None,
+            )
+            update_available = self._version_gt(latest, APP_VERSION)
+            return {"current": APP_VERSION, "latest": latest, "update_available": update_available, "download_url": download_url}
+        except Exception as e:
+            logging.warning(f"Update check failed: {e}")
+            return {"current": APP_VERSION, "latest": None, "update_available": False, "download_url": None}
+
+    def _version_gt(self, a: str, b: str) -> bool:
+        try:
+            return tuple(int(x) for x in a.split(".")) > tuple(int(x) for x in b.split("."))
+        except Exception:
+            return False
+
+    def download_and_install_update(self, download_url: str) -> dict:
+        if not getattr(sys, "frozen", False):
+            return {"error": "Update only works in the installed .exe — not in dev mode."}
+        threading.Thread(target=self._do_update, args=(download_url,), daemon=True).start()
+        return {"ok": True}
+
+    def _do_update(self, download_url: str):
+        import subprocess
+        import tempfile
+        import urllib.request
+        try:
+            tmp = Path(tempfile.gettempdir()) / "EDTC_update.exe"
+            exe_path = Path(sys.executable)
+
+            req = urllib.request.Request(download_url, headers={"User-Agent": "EDTC"})
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                total = int(resp.headers.get("Content-Length", 0) or 0)
+                downloaded = 0
+                chunks = []
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    downloaded += len(chunk)
+                    pct = int(downloaded / total * 100) if total else 0
+                    self._emit("update_progress", {"pct": pct, "downloaded": downloaded, "total": total})
+
+            tmp.write_bytes(b"".join(chunks))
+            self._emit("update_progress", {"pct": 100, "status": "installing"})
+
+            bat = Path(tempfile.gettempdir()) / "edtc_update.bat"
+            bat.write_text(
+                f"@echo off\r\n"
+                f"timeout /t 2 /nobreak > nul\r\n"
+                f'copy /y "{tmp}" "{exe_path}"\r\n'
+                f'start "" "{exe_path}"\r\n'
+                f"del \"%~f0\"\r\n",
+                encoding="utf-8",
+            )
+            subprocess.Popen(
+                ["cmd.exe", "/c", str(bat)],
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+                close_fds=True,
+            )
+            import time as _time
+            _time.sleep(1)
+            webview.destroy()
+        except Exception as e:
+            logging.error(f"Update install failed: {e}")
+            self._emit("update_progress", {"error": str(e)})
+
 
 def _eddn_listener(api: API):
     import time

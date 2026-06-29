@@ -56,17 +56,44 @@ const NAV_ITEMS = [
 
 export default function App() {
   const [version, setVersion] = useState('')
+  const [updateInfo, setUpdateInfo] = useState(null)   // {latest, download_url}
+  const [updateState, setUpdateState] = useState(null) // null | 'downloading' | {pct, downloaded, total} | 'installing' | {error}
+
   useEffect(() => {
-    function fetchVersion() {
-      window?.pywebview?.api?.get_version?.().then(v => setVersion(v ?? ''))
+    function init() {
+      window?.pywebview?.api?.get_version?.().then(v => {
+        setVersion(v ?? '')
+        window?.pywebview?.api?.check_for_update?.().then(info => {
+          if (info?.update_available) setUpdateInfo({ latest: info.latest, download_url: info.download_url })
+        })
+      })
     }
     if (window.pywebview?.api) {
-      fetchVersion()
+      init()
     } else {
-      window.addEventListener('pywebviewready', fetchVersion)
-      return () => window.removeEventListener('pywebviewready', fetchVersion)
+      window.addEventListener('pywebviewready', init)
+      return () => window.removeEventListener('pywebviewready', init)
     }
   }, [])
+
+  useEffect(() => {
+    const off = window.__edtc?.on('update_progress', payload => {
+      if (payload.error) {
+        setUpdateState({ error: payload.error })
+      } else if (payload.status === 'installing') {
+        setUpdateState('installing')
+      } else {
+        setUpdateState({ pct: payload.pct, downloaded: payload.downloaded, total: payload.total })
+      }
+    })
+    return () => off?.()
+  }, [])
+
+  function startUpdate() {
+    if (!updateInfo?.download_url) return
+    setUpdateState('downloading')
+    window?.pywebview?.api?.download_and_install_update?.(updateInfo.download_url)
+  }
 
   const overlayKey = new URLSearchParams(window.location.hash.replace(/^#\/?/, '')).get('overlay')
   const OverlayComponent = overlayKey ? OVERLAY_MAP[overlayKey] : null
@@ -102,8 +129,36 @@ export default function App() {
             </NavLink>
           ))}
         </nav>
-        <div className="p-3 border-t border-ed-border text-ed-muted text-xs font-mono">
-          {version ? `v${version}` : ''}
+        <div className="p-3 border-t border-ed-border text-xs font-mono">
+          {updateInfo && updateState === null ? (
+            <div>
+              <div className="text-ed-muted mb-1">{version ? `v${version}` : ''}</div>
+              <button
+                onClick={startUpdate}
+                className="w-full text-left text-amber-400 hover:text-amber-300 transition-colors"
+              >
+                ↑ v{updateInfo.latest} available
+              </button>
+            </div>
+          ) : updateState === 'downloading' ? (
+            <div className="text-ed-muted">Downloading…</div>
+          ) : updateState && typeof updateState === 'object' && updateState.pct !== undefined ? (
+            <div>
+              <div className="text-ed-muted mb-1">Downloading… {updateState.pct}%</div>
+              <div className="w-full bg-ed-border rounded-full h-1">
+                <div className="bg-amber-400 h-1 rounded-full transition-all" style={{ width: `${updateState.pct}%` }} />
+              </div>
+            </div>
+          ) : updateState === 'installing' ? (
+            <div className="text-amber-400">Installing… restarting</div>
+          ) : updateState?.error ? (
+            <div>
+              <div className="text-red-400 mb-1">Update failed</div>
+              <div className="text-ed-muted truncate" title={updateState.error}>{updateState.error}</div>
+            </div>
+          ) : (
+            <div className="text-ed-muted">{version ? `v${version}` : ''}</div>
+          )}
         </div>
       </aside>
 
