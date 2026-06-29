@@ -1024,6 +1024,25 @@ class API:
         from core.database import set_pref
         set_pref("inara_api_key", key.strip())
 
+    def test_inara_key(self, key: str) -> dict:
+        import asyncio
+        from api.inara import InaraAPI
+        async def _test():
+            inara = InaraAPI(key.strip(), APP_VERSION)
+            # Quick test: search for Gold near Sol — always has results if key is valid
+            raw = await inara.commodity_markets("Gold", 0.0, 0.0, 0.0, limit=1)
+            return raw
+        try:
+            result = asyncio.run(_test())
+            if isinstance(result, list):
+                return {"ok": True}
+            return {"ok": False, "error": "Unexpected response"}
+        except Exception as e:
+            msg = str(e)
+            if "401" in msg or "403" in msg or "invalid" in msg.lower():
+                return {"ok": False, "error": "Invalid API key"}
+            return {"ok": False, "error": f"Connection error: {msg}"}
+
     def search_commodity_markets(self, system: str, commodity: str) -> list:
         import asyncio
         from core.database import search_local_markets, get_pref, get_system_coords

@@ -61,6 +61,8 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   const [showSettings, setShowSettings] = useState(false)
   const [inaraKey, setInaraKey] = useState('')
   const [inaraSaved, setInaraSaved] = useState(false)
+  const [inaraTest, setInaraTest] = useState(null) // null | 'testing' | 'ok' | 'error'
+  const [inaraTestMsg, setInaraTestMsg] = useState('')
 
   useEffect(() => {
     if (currentSystem && !system) setSystem(currentSystem)
@@ -81,6 +83,20 @@ function CommoditySearchTab({ currentSystem, commodities }) {
     await api()?.set_inara_key(inaraKey)
     setInaraSaved(true)
     setTimeout(() => setInaraSaved(false), 2000)
+  }
+
+  async function testInaraKey() {
+    if (!inaraKey.trim()) return
+    setInaraTest('testing')
+    setInaraTestMsg('')
+    const r = await api()?.test_inara_key(inaraKey)
+    if (r?.ok) {
+      setInaraTest('ok')
+      setInaraTestMsg('Key is valid!')
+    } else {
+      setInaraTest('error')
+      setInaraTestMsg(r?.error ?? 'Test failed')
+    }
   }
 
   const suggestions = commodities.filter(c =>
@@ -130,24 +146,33 @@ function CommoditySearchTab({ currentSystem, commodities }) {
             Inara API key — adds Inara market data to commodity searches.
             Get your key from <span className="text-ed-text">inara.cz → CMDR profile → API key</span>.
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             <input
               type="password"
               className="input font-mono text-xs flex-1"
               placeholder="Paste your Inara API key…"
               value={inaraKey}
-              onChange={e => setInaraKey(e.target.value)}
+              onChange={e => { setInaraKey(e.target.value); setInaraTest(null) }}
               onKeyDown={e => e.key === 'Enter' && saveInaraKey()}
             />
-            <button className="btn-primary text-xs" onClick={saveInaraKey}>
+            <button className="btn-ghost text-xs" onClick={testInaraKey} disabled={!inaraKey.trim() || inaraTest === 'testing'}>
+              {inaraTest === 'testing' ? 'Testing…' : 'Test'}
+            </button>
+            <button className="btn-primary text-xs" onClick={saveInaraKey} disabled={!inaraKey.trim()}>
               {inaraSaved ? 'Saved!' : 'Save'}
             </button>
             {inaraKey && (
-              <button className="btn-ghost text-xs text-ed-danger" onClick={() => { setInaraKey(''); api()?.set_inara_key('') }}>
+              <button className="btn-ghost text-xs text-ed-danger" onClick={() => { setInaraKey(''); setInaraTest(null); api()?.set_inara_key('') }}>
                 Clear
               </button>
             )}
           </div>
+          {inaraTest === 'ok' && (
+            <p className="text-xs font-mono text-ed-success">{inaraTestMsg}</p>
+          )}
+          {inaraTest === 'error' && (
+            <p className="text-xs font-mono text-ed-danger">{inaraTestMsg}</p>
+          )}
         </div>
       )}
 
