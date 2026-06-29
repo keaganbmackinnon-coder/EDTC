@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.16"  # bump this with every release
+APP_VERSION = "0.3.17"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1016,12 +1016,23 @@ class API:
         from core.database import get_market_stats
         return get_market_stats()
 
+    def get_inara_key(self) -> str:
+        from core.database import get_pref
+        return get_pref("inara_api_key", "") or ""
+
+    def set_inara_key(self, key: str) -> None:
+        from core.database import set_pref
+        set_pref("inara_api_key", key.strip())
+
     def search_commodity_markets(self, system: str, commodity: str) -> list:
         import asyncio
-        from core.database import search_local_markets
+        from core.database import search_local_markets, get_pref, get_system_coords
 
         local = search_local_markets(commodity, system)
-        local_keys = {(r["system"].lower(), r["station"].lower()) for r in local}
+        seen = {(r["system"].lower(), r["station"].lower()) for r in local}
+
+        inara_key = get_pref("inara_api_key", "") or ""
+        ref_coords = get_system_coords(system) if inara_key else None
 
         async def _run_spansh():
             from api.spansh import SpanshAPI
@@ -1030,8 +1041,8 @@ class API:
                 raw = await spansh.commodity_markets(system, commodity)
             finally:
                 await spansh.close()
-            results = []
             needle = commodity.lower()
+            results = []
             for s in raw:
                 market_entry = next(
                     (m for m in (s.get("market") or []) if m.get("commodity", "").lower() == needle),
@@ -1053,16 +1064,35 @@ class API:
                 })
             return results
 
+        async def _run_inara():
+            if not inara_key or not ref_coords:
+                return []
+            from api.inara import InaraAPI
+            inara = InaraAPI(inara_key, APP_VERSION)
+            raw = await inara.commodity_markets(commodity, ref_coords[0], ref_coords[1], ref_coords[2])
+            return [InaraAPI.format_result(e) for e in raw]
+
+        async def _run_all():
+            return await asyncio.gather(_run_spansh(), _run_inara(), return_exceptions=True)
+
         try:
-            spansh_results = asyncio.run(_run_spansh())
+            raw_results = asyncio.run(_run_all())
+            spansh_results = raw_results[0] if not isinstance(raw_results[0], Exception) else []
+            inara_results  = raw_results[1] if not isinstance(raw_results[1], Exception) else []
         except Exception:
-            spansh_results = []
+            spansh_results, inara_results = [], []
 
         merged = list(local)
         for r in spansh_results:
             key = (r["system"].lower(), r["station"].lower())
-            if key not in local_keys:
+            if key not in seen:
                 merged.append(r)
+                seen.add(key)
+        for r in inara_results:
+            key = (r["system"].lower(), r["station"].lower())
+            if key not in seen:
+                merged.append(r)
+                seen.add(key)
         return merged
 
     # --- Exploration ---

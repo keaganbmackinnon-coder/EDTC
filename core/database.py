@@ -716,6 +716,14 @@ def upsert_system_coords(system: str, x: float, y: float, z: float) -> None:
         """, (system, x, y, z))
 
 
+def get_system_coords(system: str) -> tuple[float, float, float] | None:
+    with _conn() as conn:
+        r = conn.execute(
+            "SELECT x, y, z FROM system_coords WHERE LOWER(system) = LOWER(?)", (system,)
+        ).fetchone()
+        return (r["x"], r["y"], r["z"]) if r else None
+
+
 def bulk_upsert_spansh_dump(rows: list[tuple]) -> None:
     """rows: (system, station, commodity, buy_price, sell_price, supply, demand, updated_at, has_large_pad)"""
     with _conn() as conn:

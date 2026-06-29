@@ -58,6 +58,10 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   const [error, setError] = useState(null)
   const [sortId, setSortId] = useState('distance')
   const [eddnStats, setEddnStats] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [inaraKey, setInaraKey] = useState('')
+  const [inaraSaved, setInaraSaved] = useState(false)
+
   useEffect(() => {
     if (currentSystem && !system) setSystem(currentSystem)
   }, [currentSystem])
@@ -68,6 +72,16 @@ function CommoditySearchTab({ currentSystem, commodities }) {
     const t = setInterval(refresh, 15000)
     return () => clearInterval(t)
   }, [])
+
+  useEffect(() => {
+    api()?.get_inara_key().then(k => setInaraKey(k ?? ''))
+  }, [])
+
+  async function saveInaraKey() {
+    await api()?.set_inara_key(inaraKey)
+    setInaraSaved(true)
+    setTimeout(() => setInaraSaved(false), 2000)
+  }
 
   const suggestions = commodities.filter(c =>
     query.length >= 2 && c.name.toLowerCase().includes(query.toLowerCase())
@@ -91,16 +105,52 @@ function CommoditySearchTab({ currentSystem, commodities }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <p className="text-ed-muted text-sm">
-          Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide). Distance from your reference system.
+          Find stations buying or selling a commodity. Live data from EDDN (real-time) merged with Spansh (galaxy-wide){inaraKey ? ' and Inara' : ''}. Distance from your reference system.
         </p>
-        <span className="text-xs font-mono text-ed-muted shrink-0 ml-4 whitespace-nowrap text-right">
-          {eddnStats ? (
-            <><span className="text-ed-success">EDDN</span> {eddnStats.stations} stations · {eddnStats.commodities} commodities</>
-          ) : null}
-        </span>
+        <div className="flex items-center gap-3 ml-4 shrink-0">
+          {eddnStats && (
+            <span className="text-xs font-mono text-ed-muted whitespace-nowrap">
+              <span className="text-ed-success">EDDN</span> {eddnStats.stations} stations · {eddnStats.commodities} commodities
+            </span>
+          )}
+          <button
+            onClick={() => setShowSettings(v => !v)}
+            className="text-xs font-mono text-ed-muted hover:text-ed-text transition-colors"
+            title="API Settings"
+          >
+            {showSettings ? '✕' : '⚙'}
+          </button>
+        </div>
       </div>
+
+      {showSettings && (
+        <div className="panel mb-4">
+          <p className="text-xs font-mono text-ed-muted mb-2">
+            Inara API key — adds Inara market data to commodity searches.
+            Get your key from <span className="text-ed-text">inara.cz → CMDR profile → API key</span>.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              className="input font-mono text-xs flex-1"
+              placeholder="Paste your Inara API key…"
+              value={inaraKey}
+              onChange={e => setInaraKey(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveInaraKey()}
+            />
+            <button className="btn-primary text-xs" onClick={saveInaraKey}>
+              {inaraSaved ? 'Saved!' : 'Save'}
+            </button>
+            {inaraKey && (
+              <button className="btn-ghost text-xs text-ed-danger" onClick={() => { setInaraKey(''); api()?.set_inara_key('') }}>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2 mb-4">
         <div className="relative">
@@ -183,7 +233,8 @@ function CommoditySearchTab({ currentSystem, commodities }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-ed-text font-semibold font-ui truncate">{r.station}</p>
-                    {r.source === 'eddn' && <span className="text-xs font-mono text-ed-success border border-ed-success/30 rounded px-1">EDDN</span>}
+                    {r.source === 'eddn'  && <span className="text-xs font-mono text-ed-success border border-ed-success/30 rounded px-1">EDDN</span>}
+                    {r.source === 'inara' && <span className="text-xs font-mono text-blue-400 border border-blue-400/30 rounded px-1">Inara</span>}
                     {r.is_planetary && <span className="text-xs font-mono text-ed-muted border border-ed-border rounded px-1">Planetary</span>}
                     {r.has_large_pad === false && <span className="text-xs font-mono text-yellow-500 border border-yellow-500/30 rounded px-1">No Large Pad</span>}
                   </div>
