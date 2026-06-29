@@ -759,18 +759,41 @@ Focus: Updater reliability, database persistence, Spansh dump replacement, CI ha
 - **Updater `start ""` blocked by MOTW**: Files downloaded from GitHub carry a Zone.Identifier alternate data stream (internet zone mark). CMD's `start` goes through the Windows shell which enforces this. `Unblock-File` removes the ADS; `Start-Process` via PowerShell uses CreateProcess directly. Both added to the bat.
 - **Infinite update loop**: The v0.3.11 tag was pushed without bumping `APP_VERSION` in `main.py`. Every installed binary reported `0.3.10`, always saw `v0.3.11` as newer, and immediately offered the same update again. CI version-tag check now catches this before the build runs.
 - **Spansh dump URL changed**: `spansh.co.uk/dumps/` now serves HTML (Ember SPA). The download server moved to `downloads.spansh.co.uk` but the dump grew to ~4 GB compressed — not viable for in-app download. Removed seeding; rely on live Spansh API queries instead.
-- **EDDN websocket**: Still logging `HTTP 404` on ZMQ connection — not yet fixed, carry forward.
-
 ## Known issues / notes for next session
 
-- EDDN WebSocket connection fails with HTTP 404 — ZMQ endpoint may have changed.
 - Updater does not verify downloaded exe (no checksum).
 - CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
-- `data/guardian_sites.json` still only 8 sites.
-- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Guardian, Galaxy, Commander, Overlays) and make each work correctly.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Galaxy, Commander, Overlays) and make each work correctly. Guardian is done.
 
 ---
 *Session 22 complete — 2026-06-29*
+
+---
+
+## Build status — Session 23 (COMPLETE)
+
+| Item | Status | File |
+|---|---|---|
+| `api/eddn.py` deleted — dead websocket code (404'd, never imported; replaced by ZMQ in Session 14) | DONE | deleted |
+| EDDN known-issue note removed from HANDOFF — EDDN ZMQ is working (96k+ market rows in DB) | DONE | `HANDOFF.md` |
+| `guardian_sites.json` expanded: 5 new ruins added from Canonn page data (13 total: 10 ruins + 3 structures) | DONE | `data/guardian_sites.json` |
+| `Guardian.jsx` TYPE_COLORS updated: all 10 Canonn shape names (Fistbump/Bear/Hammerbot/Lacrosse/Crossroads/Turtle/Bowl/Squid/Stickyhand/Robolobster) now have distinct colors | DONE | `frontend/src/pages/Guardian.jsx` |
+
+## Key notes from Session 23
+
+- **EDDN ZMQ was already working**: The "HTTP 404" note in the HANDOFF referred to the old websocket code (`api/eddn.py`) from early development. The ZMQ listener in `main.py` connects successfully and has accumulated 96k+ market rows.
+- **Canonn API is down** (`api.canonn.tech` ECONNREFUSED): The full 209-ruins dataset couldn't be fetched. The 5 new ruins added are from the Canonn web page sample. Ruins now use Canonn shape-type names (Fistbump, Bear, etc.); existing 5 stubs keep their Alpha/Beta/Gamma in-game classification.
+- **Canonn ruins type naming**: Canonn uses community shape names (Fistbump, Bear, Hammerbot, Lacrosse, Crossroads, Turtle, Bowl, Squid, Stickyhand, Robolobster). In-game classification is Alpha/Beta/Gamma. Both systems coexist in the JSON.
+
+## Known issues / notes for next session
+
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` has 13 sites — Canonn API was down. When `api.canonn.tech` is back online, fetch full dataset via `GET https://api.canonn.tech/guardianruins?_limit=500` and `guardianstructures?_limit=500`.
+- **Next priority**: go through remaining pages one by one (Trading, Exploration, Engineering, Colonisation, Fleet Carriers, Galaxy, Commander, Overlays) and make each work correctly.
+
+---
+*Session 23 complete — 2026-06-29*
 
 ---
 *Session checkpoint: 2026-06-28 16:17:11*
@@ -1041,3 +1064,18 @@ Focus: Updater reliability, database persistence, Spansh dump replacement, CI ha
 
 ---
 *Session checkpoint: 2026-06-29 01:39:32*
+
+---
+*Session checkpoint: 2026-06-29 01:41:16*
+
+---
+*Session checkpoint: 2026-06-29 16:01:29*
+
+---
+*Session checkpoint: 2026-06-29 16:05:44*
+
+---
+*Session checkpoint: 2026-06-29 16:07:35*
+
+---
+*Session checkpoint: 2026-06-29 16:09:16*

@@ -23,9 +23,21 @@ function copyText(text) {
 // ---- Tab: Sites ----
 
 const TYPE_COLORS = {
+  // in-game ruins classification
   Alpha: 'border-blue-500/50 text-blue-400',
   Beta:  'border-purple-500/50 text-purple-400',
   Gamma: 'border-green-500/50 text-green-400',
+  // Canonn community shape names for ruins layouts
+  Fistbump:    'border-yellow-500/50 text-yellow-400',
+  Bear:        'border-orange-500/50 text-orange-400',
+  Hammerbot:   'border-red-500/50 text-red-400',
+  Lacrosse:    'border-teal-500/50 text-teal-400',
+  Crossroads:  'border-cyan-500/50 text-cyan-400',
+  Turtle:      'border-lime-500/50 text-lime-400',
+  Bowl:        'border-emerald-500/50 text-emerald-400',
+  Squid:       'border-violet-500/50 text-violet-400',
+  Stickyhand:  'border-pink-500/50 text-pink-400',
+  Robolobster: 'border-rose-500/50 text-rose-400',
 }
 
 function SiteCard({ site, kind, onUpdate }) {

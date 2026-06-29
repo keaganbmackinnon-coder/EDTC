@@ -41,6 +41,46 @@
       "type": "Beta",
       "coordinates": {"lat": -8.7, "lon": 72.3},
       "notes": "Beta site near Synuefe cluster."
+    },
+    {
+      "id": "synuefe_ly_i_b42_2_c2",
+      "system": "Synuefe LY-I b42-2",
+      "body": "C 2",
+      "type": "Fistbump",
+      "coordinates": null,
+      "notes": "Fistbump-layout ruins. One of the well-documented Synuefe cluster sites."
+    },
+    {
+      "id": "vela_dark_region_eg_x_b1_1_a1",
+      "system": "Vela Dark Region EG-X b1-1",
+      "body": "A 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Bear-layout ruins in the Vela Dark Region."
+    },
+    {
+      "id": "col_173_sector_hr_m_b23_3_b7",
+      "system": "Col 173 Sector HR-M b23-3",
+      "body": "B 7",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Hammerbot-layout ruins in Col 173 Sector."
+    },
+    {
+      "id": "vela_dark_region_kr_w_c1_24_7a",
+      "system": "Vela Dark Region KR-W c1-24",
+      "body": "7 A",
+      "type": "Lacrosse",
+      "coordinates": null,
+      "notes": "Lacrosse-layout ruins in the Vela Dark Region."
+    },
+    {
+      "id": "hip_39768_a14f",
+      "system": "HIP 39768",
+      "body": "A 14 F",
+      "type": "Fistbump",
+      "coordinates": null,
+      "notes": "Fistbump-layout ruins. One of the closer sites to the bubble."
     }
   ],
   "structures": [
