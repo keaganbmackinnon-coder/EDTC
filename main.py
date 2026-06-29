@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.19"  # bump this with every release
+APP_VERSION = "0.3.20"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1460,13 +1460,12 @@ class API:
     def check_for_update(self) -> dict:
         import urllib.request
         try:
-            url = "https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest"
-            req = urllib.request.Request(url, headers={"User-Agent": "EDTC"})
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                data = json.loads(resp.read())
-            latest = data.get("tag_name", "").lstrip("v")
+            release = self._fetch_highest_release(urllib.request)
+            if not release:
+                return {"current": APP_VERSION, "latest": None, "update_available": False, "download_url": None}
+            latest = release.get("tag_name", "").lstrip("v")
             download_url = next(
-                (a["browser_download_url"] for a in data.get("assets", []) if a["name"] == "EDTC.exe"),
+                (a["browser_download_url"] for a in release.get("assets", []) if a["name"] == "EDTC.exe"),
                 None,
             )
             update_available = self._version_gt(latest, APP_VERSION)
@@ -1474,6 +1473,21 @@ class API:
         except Exception as e:
             logging.warning(f"Update check failed: {e}")
             return {"current": APP_VERSION, "latest": None, "update_available": False, "download_url": None}
+
+    def _fetch_highest_release(self, urllib_request) -> dict | None:
+        url = "https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases?per_page=20"
+        req = urllib_request.Request(url, headers={"User-Agent": "EDTC"})
+        with urllib_request.urlopen(req, timeout=10) as resp:
+            releases = json.loads(resp.read())
+        valid = [r for r in releases if not r.get("draft") and not r.get("prerelease")]
+        if not valid:
+            return None
+        def _semver(r):
+            try:
+                return tuple(int(x) for x in r.get("tag_name", "").lstrip("v").split("."))
+            except Exception:
+                return (0, 0, 0)
+        return max(valid, key=_semver)
 
     def _version_gt(self, a: str, b: str) -> bool:
         try:
@@ -1495,19 +1509,17 @@ class API:
             tmp = Path(tempfile.gettempdir()) / "EDTC_update.exe"
             exe_path = Path(sys.executable)
 
-            # Always re-fetch the latest release URL so we never download a stale version
+            # Always re-fetch highest release URL so we never download a stale version
             try:
-                url = "https://api.github.com/repos/keaganbmackinnon-coder/EDTC/releases/latest"
-                req0 = urllib.request.Request(url, headers={"User-Agent": "EDTC"})
-                with urllib.request.urlopen(req0, timeout=10) as r0:
-                    data = json.loads(r0.read())
-                fresh_url = next(
-                    (a["browser_download_url"] for a in data.get("assets", []) if a["name"] == "EDTC.exe"),
-                    None,
-                )
-                if fresh_url:
-                    download_url = fresh_url
-                    logging.info(f"Update: using fresh URL for {data.get('tag_name')}")
+                release = self._fetch_highest_release(urllib.request)
+                if release:
+                    fresh_url = next(
+                        (a["browser_download_url"] for a in release.get("assets", []) if a["name"] == "EDTC.exe"),
+                        None,
+                    )
+                    if fresh_url:
+                        download_url = fresh_url
+                        logging.info(f"Update: using fresh URL for {release.get('tag_name')}")
             except Exception as e:
                 logging.warning(f"Update: could not re-fetch latest URL, using cached: {e}")
 
