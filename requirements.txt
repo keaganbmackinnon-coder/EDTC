@@ -9,3 +9,4 @@ pyinstaller>=6.0
 keyboard>=0.13
 pyperclip>=1.8
 pyzmq>=27.0
+ijson>=3.2

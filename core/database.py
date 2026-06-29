@@ -161,6 +161,17 @@ def init_db():
                 z      REAL NOT NULL
             );
         """)
+        # Migrations for columns added after initial release
+        for sql in [
+            "ALTER TABLE markets ADD COLUMN has_large_pad INTEGER DEFAULT 0",
+        ]:
+            try:
+                conn.execute(sql)
+            except Exception:
+                pass  # column already exists
+        # Indexes for fast commodity lookups
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_commodity ON markets(commodity)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_system ON markets(system)")
 
 
 # --- Builds ---
@@ -701,12 +712,29 @@ def upsert_system_coords(system: str, x: float, y: float, z: float) -> None:
         """, (system, x, y, z))
 
 
+def bulk_upsert_spansh_dump(rows: list[tuple]) -> None:
+    """rows: (system, station, commodity, buy_price, sell_price, supply, demand, updated_at, has_large_pad)"""
+    with _conn() as conn:
+        conn.executemany("""
+            INSERT INTO markets
+                (system, station, commodity, buy_price, sell_price, supply, demand, updated_at, has_large_pad)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(system, station, commodity) DO UPDATE SET
+                buy_price    = excluded.buy_price,
+                sell_price   = excluded.sell_price,
+                supply       = excluded.supply,
+                demand       = excluded.demand,
+                updated_at   = excluded.updated_at,
+                has_large_pad= excluded.has_large_pad
+        """, rows)
+
+
 def search_local_markets(commodity: str, ref_system: str | None = None) -> list[dict]:
     import math
     with _conn() as conn:
         rows = conn.execute("""
             SELECT m.system, m.station, m.buy_price, m.sell_price,
-                   m.supply, m.demand, m.updated_at,
+                   m.supply, m.demand, m.updated_at, m.has_large_pad,
                    sc.x, sc.y, sc.z
             FROM markets m
             LEFT JOIN system_coords sc ON sc.system = m.system
@@ -734,7 +762,7 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
                 "system":              r["system"],
                 "distance":            dist,
                 "distance_to_arrival": 0,
-                "has_large_pad":       None,
+                "has_large_pad":       r["has_large_pad"],
                 "is_planetary":        None,
                 "updated_at":          r["updated_at"],
                 "buy_price":           r["buy_price"],

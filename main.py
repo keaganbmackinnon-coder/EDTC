@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.8"  # bump this with every release
+APP_VERSION = "0.3.9"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1505,71 +1505,102 @@ def _setup_hotkeys(api: API):
         pass
 
 
-def _seed_market_db(api: API):
-    """One-time background seed: query Spansh for every commodity and cache results."""
-    from core.database import get_pref, set_pref, upsert_market_data
-    if get_pref("market_seeded"):
+def _seed_from_spansh_dump(api: API):
+    """One-time seed from the Spansh galaxy_stations dump — gives comprehensive station/market coverage."""
+    import gzip
+    import ijson
+    import tempfile
+    import urllib.request
+    from core.database import bulk_upsert_spansh_dump, get_pref, set_pref
+
+    if get_pref("spansh_dump_seeded"):
         return
+
+    tmp_gz = Path(tempfile.gettempdir()) / "spansh_stations.json.gz"
+    url = "https://spansh.co.uk/dumps/galaxy_stations.json.gz"
 
     try:
-        commodities = api._load_json("commodities.json").get("commodities", [])
-    except Exception:
-        return
-    if not commodities:
-        return
+        # --- Download ---
+        req = urllib.request.Request(url, headers={"User-Agent": "EDTC"})
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            total_bytes = int(resp.headers.get("Content-Length", 0) or 0)
+            downloaded = 0
+            with open(tmp_gz, "wb") as f:
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    pct = int(downloaded / total_bytes * 100) if total_bytes else 0
+                    api._emit("market_seed_status", {
+                        "status": "downloading",
+                        "pct": pct,
+                        "done": downloaded,
+                        "total": total_bytes,
+                        "current": "Spansh dump",
+                    })
 
-    import asyncio
+        # --- Parse and insert ---
+        batch: list[tuple] = []
+        n_stations = 0
+        n_rows = 0
 
-    async def _run():
-        from api.spansh import SpanshAPI
-        spansh = SpanshAPI()
-        total = len(commodities)
-        try:
-            for i, c in enumerate(commodities):
-                name = c.get("name", "")
-                if not name:
+        with gzip.open(tmp_gz, "rb") as gz:
+            for station in ijson.items(gz, "item", use_float=True):
+                market = station.get("market") or {}
+                commodities = market.get("commodities") or []
+                if not commodities:
                     continue
-                try:
-                    raw = await spansh.commodity_markets("Sol", name)
-                    needle = name.lower()
-                    for s in raw:
-                        system = s.get("system_name", "")
-                        station = s.get("name", "")
-                        timestamp = s.get("market_updated_at", "")
-                        entry = next(
-                            (m for m in (s.get("market") or []) if m.get("commodity", "").lower() == needle),
-                            None,
-                        )
-                        if system and station and entry:
-                            upsert_market_data(system, station, timestamp, [{
-                                "name": needle,
-                                "buyPrice": entry.get("buy_price", 0),
-                                "sellPrice": entry.get("sell_price", 0),
-                                "stock": entry.get("supply", 0),
-                                "demand": entry.get("demand", 0),
-                            }])
-                except Exception:
-                    pass
-                api._emit("market_seed_status", {
-                    "status": "seeding",
-                    "done": i + 1,
-                    "total": total,
-                    "current": name,
-                })
-                await asyncio.sleep(0.4)
-        finally:
-            await spansh.close()
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(_run())
-        set_pref("market_seeded", True)
-        api._emit("market_seed_status", {"status": "done"})
-        logging.info("Spansh market seed complete")
+                system = station.get("system", "") or ""
+                name = station.get("name", "") or ""
+                if not system or not name:
+                    continue
+
+                update_time = (station.get("updateTime") or {}).get("market", "") or ""
+                has_large_pad = 1 if station.get("hasLargePad") else 0
+
+                for c in commodities:
+                    cname = (c.get("name") or "").lower()
+                    if not cname:
+                        continue
+                    buy_price = int(c.get("buyPrice") or 0)
+                    sell_price = int(c.get("sellPrice") or 0)
+                    supply = int(c.get("supply") or 0)
+                    demand = int(c.get("demand") or 0)
+                    if buy_price == 0 and sell_price == 0:
+                        continue
+                    batch.append((system, name, cname, buy_price, sell_price, supply, demand, update_time, has_large_pad))
+                    n_rows += 1
+
+                n_stations += 1
+
+                if len(batch) >= 2000:
+                    bulk_upsert_spansh_dump(batch)
+                    batch.clear()
+                    api._emit("market_seed_status", {
+                        "status": "seeding",
+                        "done": n_stations,
+                        "total": 0,
+                        "current": f"{n_rows:,} rows",
+                    })
+
+        if batch:
+            bulk_upsert_spansh_dump(batch)
+
+        set_pref("spansh_dump_seeded", True)
+        api._emit("market_seed_status", {"status": "done", "rows": n_rows, "stations": n_stations})
+        logging.info(f"Spansh dump seed complete: {n_rows:,} rows across {n_stations:,} stations")
+
     except Exception as e:
-        logging.warning(f"Spansh market seed failed: {e}")
+        logging.warning(f"Spansh dump seed failed: {e}")
         api._emit("market_seed_status", {"status": "error"})
+    finally:
+        try:
+            tmp_gz.unlink(missing_ok=True)
+        except Exception:
+            pass
     finally:
         loop.close()
 
@@ -1629,7 +1660,7 @@ def main():
 
     threading.Thread(target=_setup_hotkeys, args=(api,), daemon=True).start()
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
-    threading.Thread(target=_seed_market_db, args=(api,), daemon=True).start()
+    threading.Thread(target=_seed_from_spansh_dump, args=(api,), daemon=True).start()
 
     def _on_ready():
         api._overlay_manager.enable()

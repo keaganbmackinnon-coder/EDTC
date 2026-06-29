@@ -114,7 +114,11 @@ function CommoditySearchTab({ currentSystem, commodities }) {
         <span className="text-xs font-mono text-ed-muted shrink-0 ml-4 whitespace-nowrap text-right">
           {seedStatus ? (
             <span className="text-ed-gold">
-              Seeding {seedStatus.done}/{seedStatus.total} · {seedStatus.current}
+              {seedStatus.status === 'downloading'
+                ? `Downloading station dump · ${seedStatus.pct ?? 0}%`
+                : seedStatus.total > 0
+                  ? `Seeding ${seedStatus.done}/${seedStatus.total} · ${seedStatus.current}`
+                  : `Seeding ${(seedStatus.done ?? 0).toLocaleString()} stations · ${seedStatus.current}`}
             </span>
           ) : eddnStats ? (
             <><span className="text-ed-success">EDDN</span> {eddnStats.stations} stations · {eddnStats.commodities} commodities</>
