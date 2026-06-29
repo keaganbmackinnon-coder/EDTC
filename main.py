@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.9"  # bump this with every release
+APP_VERSION = "0.3.10"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1505,10 +1505,49 @@ def _setup_hotkeys(api: API):
         pass
 
 
+def _stream_json_array(filepath):
+    """Stream objects from a gzipped JSON array using only stdlib — no ijson needed."""
+    import gzip, json
+    decoder = json.JSONDecoder()
+    with gzip.open(filepath, "rt", encoding="utf-8", errors="replace") as gz:
+        buf = ""
+        eof = False
+        # Advance past the opening '['
+        while "[" not in buf:
+            chunk = gz.read(4096)
+            if not chunk:
+                return
+            buf += chunk
+        buf = buf[buf.index("[") + 1:]
+        while True:
+            buf = buf.lstrip(" \t\r\n,")
+            if not buf:
+                if eof:
+                    return
+                chunk = gz.read(65536)
+                if chunk:
+                    buf += chunk
+                else:
+                    eof = True
+                continue
+            if buf[0] == "]":
+                return
+            try:
+                obj, end = decoder.raw_decode(buf)
+                buf = buf[end:]
+                yield obj
+            except json.JSONDecodeError:
+                if eof:
+                    return
+                chunk = gz.read(65536)
+                if chunk:
+                    buf += chunk
+                else:
+                    eof = True
+
+
 def _seed_from_spansh_dump(api: API):
     """One-time seed from the Spansh galaxy_stations dump — gives comprehensive station/market coverage."""
-    import gzip
-    import ijson
     import tempfile
     import urllib.request
     from core.database import bulk_upsert_spansh_dump, get_pref, set_pref
@@ -1546,45 +1585,39 @@ def _seed_from_spansh_dump(api: API):
         n_stations = 0
         n_rows = 0
 
-        with gzip.open(tmp_gz, "rb") as gz:
-            for station in ijson.items(gz, "item", use_float=True):
-                market = station.get("market") or {}
-                commodities = market.get("commodities") or []
-                if not commodities:
+        for station in _stream_json_array(tmp_gz):
+            market = station.get("market") or {}
+            commodities = market.get("commodities") or []
+            if not commodities:
+                continue
+            system = station.get("system", "") or ""
+            name = station.get("name", "") or ""
+            if not system or not name:
+                continue
+            update_time = (station.get("updateTime") or {}).get("market", "") or ""
+            has_large_pad = 1 if station.get("hasLargePad") else 0
+            for c in commodities:
+                cname = (c.get("name") or "").lower()
+                if not cname:
                     continue
-
-                system = station.get("system", "") or ""
-                name = station.get("name", "") or ""
-                if not system or not name:
+                buy_price = int(c.get("buyPrice") or 0)
+                sell_price = int(c.get("sellPrice") or 0)
+                supply = int(c.get("supply") or 0)
+                demand = int(c.get("demand") or 0)
+                if buy_price == 0 and sell_price == 0:
                     continue
-
-                update_time = (station.get("updateTime") or {}).get("market", "") or ""
-                has_large_pad = 1 if station.get("hasLargePad") else 0
-
-                for c in commodities:
-                    cname = (c.get("name") or "").lower()
-                    if not cname:
-                        continue
-                    buy_price = int(c.get("buyPrice") or 0)
-                    sell_price = int(c.get("sellPrice") or 0)
-                    supply = int(c.get("supply") or 0)
-                    demand = int(c.get("demand") or 0)
-                    if buy_price == 0 and sell_price == 0:
-                        continue
-                    batch.append((system, name, cname, buy_price, sell_price, supply, demand, update_time, has_large_pad))
-                    n_rows += 1
-
-                n_stations += 1
-
-                if len(batch) >= 2000:
-                    bulk_upsert_spansh_dump(batch)
-                    batch.clear()
-                    api._emit("market_seed_status", {
-                        "status": "seeding",
-                        "done": n_stations,
-                        "total": 0,
-                        "current": f"{n_rows:,} rows",
-                    })
+                batch.append((system, name, cname, buy_price, sell_price, supply, demand, update_time, has_large_pad))
+                n_rows += 1
+            n_stations += 1
+            if len(batch) >= 2000:
+                bulk_upsert_spansh_dump(batch)
+                batch.clear()
+                api._emit("market_seed_status", {
+                    "status": "seeding",
+                    "done": n_stations,
+                    "total": 0,
+                    "current": f"{n_rows:,} rows",
+                })
 
         if batch:
             bulk_upsert_spansh_dump(batch)
