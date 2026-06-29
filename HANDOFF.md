@@ -817,3 +817,44 @@ Focus: Updater reliability, database persistence, Spansh dump replacement, CI ha
 *Session 24 complete â€” 2026-06-29*
 
 ---
+
+---
+
+## Build status — Session 25 (COMPLETE)
+
+Focus: Colonisation tab overhaul — fix Market Finder, auto-import from depot, live depot view.
+
+| Item | Status | File |
+|---|---|---|
+| `_handle_construction_depot()` — now emits `station`, `progress`, `complete` in addition to `system`/`resources` | DONE | `main.py` |
+| `DepotBanner` component — auto-shows above tabs when `ColonisationConstructionDepot` fires | DONE | `frontend/src/pages/Colonisation.jsx` |
+| DepotBanner: "Import as Project" — creates project from `ResourcesRequired` with `ProvidedAmount` as delivered | DONE | `frontend/src/pages/Colonisation.jsx` |
+| DepotBanner: "Sync Delivered" — if matching project exists, updates all `delivered` counts from `ProvidedAmount` | DONE | `frontend/src/pages/Colonisation.jsx` |
+| `DepotTab` — 5th tab "Depot View" showing RequiredAmount/ProvidedAmount/remaining + FC cargo comparison | DONE | `frontend/src/pages/Colonisation.jsx` |
+| `MarketFinderTab` — fixed broken display (was using `r.market[]`/`r.name`/`r.system?.name`; now uses normalized `r.station`/`r.system`/`r.buy_price`/`r.supply`) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| MarketFinderTab — Inara badge on Inara-sourced results, "L" pad indicator, distance in ly next to system name | DONE | `frontend/src/pages/Colonisation.jsx` |
+| `construction_depot` event listener wired in Colonisation main component | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Depot banner dismisses independently from depot data (banner = `bannerOpen` state, data = `depot` state) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| `APP_VERSION` bumped to `0.3.22` | DONE | `main.py` |
+
+## Key notes from Session 25
+
+- **Depot banner**: fires whenever `ColonisationConstructionDepot` journal event arrives (docking at a construction site). Banner auto-dismisses when user clicks Import/Sync or ✕. Depot data persists in React state so Depot View tab stays populated after dismissing the banner.
+- **Import vs Sync**: "Import" creates a new project (used when no project exists for that system). "Sync Delivered" updates existing project's `delivered` counts from `ProvidedAmount` — which is the game's ground truth (includes all deliveries from all players in open mode). After sync, both should press Projects tab automatically.
+- **`depotCommodityName()`**: `ResourcesRequired[].Name` is in `$name_name;` format. `Name_Localised` gives the display name. Helper strips `$` prefix and `_name;` suffix as fallback.
+- **MarketFinderTab fix**: `search_commodity_markets()` returns normalized dicts since Session 14. The old tab code tried to read `r.market[]` from the raw Spansh response shape. Now correctly reads `r.station`, `r.system`, `r.buy_price`, `r.supply`, `r.distance_to_arrival`, `r.has_large_pad`, `r.source`.
+- **Colonisation now has 5 tabs**: Projects, Shopping List, FC Cargo, Depot View, Market Finder.
+
+## Known issues / notes for next session
+
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` has 13 sites. Full Canonn dataset available at `api.canonn.tech/guardianruins?_limit=500` when API is back up.
+- Inara integration wired but blocked pending app registration. Falls back silently.
+- **v0.3.22 not yet released** — build and tag when ready.
+
+---
+*Session 25 complete — 2026-06-29*
+
+---
+*Session checkpoint: 2026-06-29 19:32:04*

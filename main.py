@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.21"  # bump this with every release
+APP_VERSION = "0.3.22"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -454,12 +454,13 @@ class API:
                 self._emit("construction_update", proj)
 
     def _handle_construction_depot(self, event: dict):
-        # ColonisationConstructionDepot fires when docking at a construction site
-        # It may contain ResourcesRequired field with needed commodities
         resources = event.get("ResourcesRequired", [])
         if resources:
             self._emit("construction_depot", {
                 "system": self._current_system,
+                "station": self._current_station,
+                "progress": event.get("ConstructionProgress", 0.0),
+                "complete": event.get("ConstructionComplete", False),
                 "resources": resources,
             })
 

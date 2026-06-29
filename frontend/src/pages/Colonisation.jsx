@@ -25,6 +25,17 @@ function aggregateShoppingList(projects) {
     .sort((a, b) => a.commodity.localeCompare(b.commodity))
 }
 
+function depotCommodityName(r) {
+  return r.Name_Localised || r.Name.replace(/^\$/, '').replace(/_name;$/i, '').replace(/_/g, ' ')
+}
+
+function matchDepotName(depotResource, commodityName) {
+  const localized = (depotResource.Name_Localised || '').toLowerCase()
+  const fallback = depotResource.Name.replace(/^\$/, '').replace(/_name;$/i, '').replace(/_/g, ' ').toLowerCase()
+  const target = commodityName.toLowerCase()
+  return localized === target || fallback === target
+}
+
 // ---- Shared UI ----
 
 function Bar({ pct }) {
@@ -34,6 +45,93 @@ function Bar({ pct }) {
         className={`h-full rounded-full transition-all duration-300 ${pct >= 100 ? 'bg-ed-success' : 'bg-ed-orange'}`}
         style={{ width: `${pct}%` }}
       />
+    </div>
+  )
+}
+
+// ---- Depot Banner ----
+
+function DepotBanner({ depot, projects, setProjects, onDismiss, onAction }) {
+  const existing = projects.find(p =>
+    p.system && depot.system && p.system.toLowerCase() === depot.system.toLowerCase()
+  )
+
+  async function importProject() {
+    const reqs = depot.resources.map(r => ({
+      commodity: depotCommodityName(r),
+      required: r.RequiredAmount,
+      delivered: r.ProvidedAmount,
+    }))
+    const proj = await api()?.save_construction_project({
+      name: depot.system,
+      system: depot.system,
+      requirements: reqs,
+    })
+    if (proj) {
+      setProjects(prev => [proj, ...prev.filter(p => p.id !== proj.id)])
+    }
+    onAction()
+  }
+
+  async function syncProject() {
+    const requirements = existing.requirements.map(r => {
+      const match = depot.resources.find(d => matchDepotName(d, r.commodity))
+      return match ? { ...r, delivered: match.ProvidedAmount } : r
+    })
+    const proj = await api()?.save_construction_project({ ...existing, requirements })
+    if (proj) {
+      setProjects(prev => prev.map(p => p.id === proj.id ? proj : p))
+    }
+    onAction()
+  }
+
+  const progressVal = Math.round((depot.progress ?? 0) * 100)
+
+  return (
+    <div className="mb-5 border border-ed-orange/40 rounded bg-ed-orange/5 p-4">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <div className="text-ed-orange font-ui font-semibold text-sm">
+            Construction Depot — {depot.system}
+            <span className="text-ed-muted font-mono font-normal ml-2">{progressVal}% built</span>
+            {depot.complete && <span className="text-ed-success font-mono font-normal ml-2">COMPLETE</span>}
+          </div>
+          <p className="text-ed-muted text-xs font-mono mt-0.5">
+            {depot.resources.length} commodities ·{' '}
+            {existing
+              ? `matching project "${existing.name}" found`
+              : 'no matching project — import to track progress'}
+          </p>
+        </div>
+        <div className="flex gap-2 items-center shrink-0">
+          {existing ? (
+            <button className="btn-ghost text-xs" onClick={syncProject}>Sync Delivered</button>
+          ) : (
+            <button className="btn-primary text-xs" onClick={importProject}>Import as Project</button>
+          )}
+          <button className="text-ed-muted hover:text-ed-text text-sm px-1" onClick={onDismiss}>✕</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+        {depot.resources.map(r => {
+          const name = depotCommodityName(r)
+          const pct = r.RequiredAmount
+            ? Math.min(100, Math.round((r.ProvidedAmount / r.RequiredAmount) * 100))
+            : 0
+          const done = r.ProvidedAmount >= r.RequiredAmount
+          return (
+            <div key={r.Name}>
+              <div className="flex items-center justify-between text-xs font-mono mb-0.5">
+                <span className={done ? 'text-ed-success' : 'text-ed-text'}>{name}</span>
+                <span className="text-ed-muted ml-2 shrink-0">
+                  {r.ProvidedAmount.toLocaleString()} / {r.RequiredAmount.toLocaleString()}
+                </span>
+              </div>
+              <Bar pct={pct} />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -423,6 +521,91 @@ function FCCargoTab({ projects, fcCargo, setFcCargo }) {
   )
 }
 
+// ---- Tab: Depot View ----
+
+function DepotTab({ depot, fcCargo }) {
+  if (!depot) {
+    return (
+      <p className="text-ed-muted text-sm font-mono">
+        No depot data yet. Dock at a construction site in-game — the requirements will appear here automatically.
+      </p>
+    )
+  }
+
+  const cargoMap = {}
+  for (const c of fcCargo) {
+    cargoMap[c.commodity.toLowerCase()] = c.count
+  }
+
+  const progressVal = Math.round((depot.progress ?? 0) * 100)
+
+  return (
+    <div>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex-1">
+          <Bar pct={progressVal} />
+        </div>
+        <span className="text-xs font-mono text-ed-muted shrink-0">
+          {depot.system} · {progressVal}% built
+          {depot.complete && ' · COMPLETE'}
+        </span>
+      </div>
+
+      <div className="panel overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-ed-muted text-xs font-mono border-b border-ed-border">
+              <th className="text-left pb-2 pr-4">Commodity</th>
+              <th className="text-right pb-2 pr-4">Required</th>
+              <th className="text-right pb-2 pr-4">Delivered</th>
+              <th className="text-right pb-2 pr-4">Still Needed</th>
+              <th className="text-right pb-2 pr-4">FC Has</th>
+              <th className="pb-2 w-24"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {depot.resources.map(r => {
+              const name = depotCommodityName(r)
+              const remaining = Math.max(0, r.RequiredAmount - r.ProvidedAmount)
+              const fcHas = cargoMap[name.toLowerCase()] ?? 0
+              const done = remaining === 0
+              const pct = r.RequiredAmount
+                ? Math.min(100, Math.round((r.ProvidedAmount / r.RequiredAmount) * 100))
+                : 0
+              return (
+                <tr key={r.Name} className={`border-b border-ed-border/40 ${done ? 'opacity-50' : ''}`}>
+                  <td className="py-1.5 pr-4 font-mono text-ed-text">{name}</td>
+                  <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                    {r.RequiredAmount.toLocaleString()}
+                  </td>
+                  <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                    {r.ProvidedAmount.toLocaleString()}
+                  </td>
+                  <td className={`py-1.5 pr-4 text-right font-mono font-semibold ${
+                    done ? 'text-ed-success' : 'text-ed-orange'
+                  }`}>
+                    {remaining.toLocaleString()}
+                  </td>
+                  <td className={`py-1.5 pr-4 text-right font-mono ${
+                    fcHas > 0
+                      ? (fcHas >= remaining ? 'text-ed-success' : 'text-ed-text')
+                      : 'text-ed-muted'
+                  }`}>
+                    {fcHas > 0 ? fcHas.toLocaleString() : '—'}
+                  </td>
+                  <td className="py-1.5">
+                    <Bar pct={pct} />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 // ---- Tab: Market Finder ----
 
 function MarketFinderTab({ projects }) {
@@ -454,7 +637,7 @@ function MarketFinderTab({ projects }) {
 
   return (
     <div>
-      <p className="text-ed-muted text-sm mb-4">Find nearest stations with stock via Spansh (50 ly radius).</p>
+      <p className="text-ed-muted text-sm mb-4">Find nearest stations with stock via Spansh. Results sorted by distance.</p>
 
       <div className="panel mb-4 space-y-2">
         <div className="flex gap-2">
@@ -507,7 +690,7 @@ function MarketFinderTab({ projects }) {
 
       {results !== null && (
         results.length === 0 ? (
-          <p className="text-ed-muted text-sm font-mono">No stations found within 50 ly with &quot;{commodity}&quot; in stock.</p>
+          <p className="text-ed-muted text-sm font-mono">No stations found with &quot;{commodity}&quot; in stock.</p>
         ) : (
           <div className="panel overflow-x-auto">
             <table className="w-full text-sm">
@@ -517,34 +700,40 @@ function MarketFinderTab({ projects }) {
                   <th className="text-left pb-2 pr-4">System</th>
                   <th className="text-right pb-2 pr-4">Arrival</th>
                   <th className="text-right pb-2 pr-4">Supply</th>
-                  <th className="text-right pb-2">Price</th>
+                  <th className="text-right pb-2">Buy Price</th>
                 </tr>
               </thead>
               <tbody>
-                {results.map((r, i) => {
-                  const mkt = (r.market ?? []).find(
-                    m => m.name?.toLowerCase() === commodity.toLowerCase()
-                  )
-                  return (
-                    <tr key={i} className="border-b border-ed-border/40">
-                      <td className="py-1.5 pr-4 font-mono text-ed-text">{r.name ?? '—'}</td>
-                      <td className="py-1.5 pr-4 font-mono text-ed-muted">
-                        {r.system?.name ?? r.system_name ?? '—'}
-                      </td>
-                      <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
-                        {r.distance_to_arrival != null
-                          ? `${Math.round(r.distance_to_arrival).toLocaleString()} ls`
-                          : '—'}
-                      </td>
-                      <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
-                        {mkt?.supply != null ? mkt.supply.toLocaleString() : '—'}
-                      </td>
-                      <td className="py-1.5 text-right font-mono text-ed-muted">
-                        {mkt?.sell_price != null ? `${mkt.sell_price.toLocaleString()} Cr` : '—'}
-                      </td>
-                    </tr>
-                  )
-                })}
+                {results.map((r, i) => (
+                  <tr key={i} className="border-b border-ed-border/40">
+                    <td className="py-1.5 pr-4 font-mono text-ed-text">
+                      <span>{r.station ?? '—'}</span>
+                      {r.source === 'inara' && (
+                        <span className="ml-1 text-xs font-mono text-blue-400 border border-blue-400/30 rounded px-1">Inara</span>
+                      )}
+                      {r.has_large_pad && (
+                        <span className="ml-1 text-xs text-ed-muted font-mono">L</span>
+                      )}
+                    </td>
+                    <td className="py-1.5 pr-4 font-mono text-ed-muted">
+                      <span>{r.system ?? '—'}</span>
+                      {r.distance != null && (
+                        <span className="text-xs ml-1">{r.distance} ly</span>
+                      )}
+                    </td>
+                    <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                      {r.distance_to_arrival != null
+                        ? `${Math.round(r.distance_to_arrival).toLocaleString()} ls`
+                        : '—'}
+                    </td>
+                    <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                      {r.supply != null ? r.supply.toLocaleString() : '—'}
+                    </td>
+                    <td className="py-1.5 text-right font-mono text-ed-muted">
+                      {r.buy_price ? `${r.buy_price.toLocaleString()} Cr` : '—'}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -557,16 +746,19 @@ function MarketFinderTab({ projects }) {
 // ---- Main ----
 
 const TABS = [
-  { id: 'projects',  label: 'Projects' },
-  { id: 'shopping',  label: 'Shopping List' },
-  { id: 'fc_cargo',  label: 'FC Cargo' },
-  { id: 'market',    label: 'Market Finder' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'shopping', label: 'Shopping List' },
+  { id: 'fc_cargo', label: 'FC Cargo' },
+  { id: 'depot',    label: 'Depot View' },
+  { id: 'market',   label: 'Market Finder' },
 ]
 
 export default function Colonisation() {
   const [tab, setTab] = useState('projects')
   const [projects, setProjects] = useState([])
   const [fcCargo, setFcCargo] = useState([])
+  const [depot, setDepot] = useState(null)
+  const [bannerOpen, setBannerOpen] = useState(false)
 
   useEffect(() => {
     api()?.get_construction_projects(false).then(r => setProjects(r ?? []))
@@ -586,13 +778,27 @@ export default function Colonisation() {
     const off2 = window.__edtc?.on('fc_cargo_update', payload => {
       setFcCargo(payload?.cargo ?? [])
     })
-    return () => { off1?.(); off2?.() }
+    const off3 = window.__edtc?.on('construction_depot', payload => {
+      setDepot(payload)
+      setBannerOpen(true)
+    })
+    return () => { off1?.(); off2?.(); off3?.() }
   }, [])
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-ui font-semibold text-ed-orange mb-1">Colonisation</h1>
       <p className="text-ed-muted text-sm mb-5">System planning, build tracking, and logistics.</p>
+
+      {bannerOpen && depot && (
+        <DepotBanner
+          depot={depot}
+          projects={projects}
+          setProjects={setProjects}
+          onDismiss={() => setBannerOpen(false)}
+          onAction={() => { setBannerOpen(false); setTab('projects') }}
+        />
+      )}
 
       <div className="flex gap-1 mb-6 border-b border-ed-border">
         {TABS.map(t => (
@@ -618,6 +824,9 @@ export default function Colonisation() {
       )}
       {tab === 'fc_cargo' && (
         <FCCargoTab projects={projects} fcCargo={fcCargo} setFcCargo={setFcCargo} />
+      )}
+      {tab === 'depot' && (
+        <DepotTab depot={depot} fcCargo={fcCargo} />
       )}
       {tab === 'market' && (
         <MarketFinderTab projects={projects} />
