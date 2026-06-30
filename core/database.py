@@ -411,7 +411,7 @@ def record_construction_contribution(system: str, contributions: list) -> list:
             changed = False
             for contrib in contributions:
                 name = _normalize_contrib_name(contrib.get("Name", "") or contrib.get("Name_Localised", ""))
-                count = int(contrib.get("Count", 0))
+                count = int(contrib.get("Amount") or contrib.get("Count") or 0)
                 for req in reqs:
                     if _normalize_contrib_name(req.get("commodity", "")) == name:
                         req["delivered"] = req.get("delivered", 0) + count
