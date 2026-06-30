@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef } from 'react'
 
 const api = () => window?.pywebview?.api
 
 export default function Construction() {
   const [project, setProject] = useState(null)
   const [shipCargo, setShipCargo] = useState({})
+  const panelRef = useRef(null)
 
   useEffect(() => {
     api()?.get_construction_projects(true).then(projects => {
@@ -23,10 +24,17 @@ export default function Construction() {
     return () => { off1?.(); off2?.() }
   }, [])
 
+  // Resize the pywebview window to fit content after every render
+  useLayoutEffect(() => {
+    if (!panelRef.current) return
+    const h = panelRef.current.offsetHeight
+    api()?.resize_overlay?.('construction', 460, h + 24)
+  })
+
   if (!project) {
     return (
-      <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
-        <div className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[320px]">
+      <div className="w-full flex items-start justify-center pt-3 select-none">
+        <div ref={panelRef} className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
           <p className="text-ed-muted text-xs font-mono">No active construction project</p>
         </div>
       </div>
@@ -34,13 +42,18 @@ export default function Construction() {
   }
 
   const reqs = project.requirements ?? []
+  const pending = reqs.filter(r => (r.delivered ?? 0) < r.required)
+  const doneCount = reqs.length - pending.length
+
   const totalPct = reqs.length > 0
     ? Math.round(reqs.reduce((s, r) => s + Math.min(r.delivered ?? 0, r.required) / r.required, 0) / reqs.length * 100)
     : 0
 
   return (
-    <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
-      <div className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+    <div className="w-full flex items-start justify-center pt-3 select-none">
+      <div ref={panelRef} className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <span className="text-ed-muted text-xs font-mono uppercase tracking-widest">Construction</span>
           <span className="text-ed-orange text-xs font-mono">{totalPct}%</span>
@@ -58,53 +71,64 @@ export default function Construction() {
           />
         </div>
 
-        {/* Column headers */}
-        <div className="flex items-center gap-2 text-[9px] font-mono text-ed-muted/60 uppercase tracking-wider mb-1 px-0.5">
-          <span className="flex-1">Commodity</span>
-          <span className="w-24 text-right">Delivered</span>
-          <span className="w-14 text-right">Remaining</span>
-        </div>
+        {pending.length === 0 ? (
+          <p className="text-ed-success text-xs font-mono text-center py-1">
+            All commodities delivered!
+          </p>
+        ) : (
+          <>
+            {/* Column headers */}
+            <div className="flex items-center gap-2 text-[9px] font-mono text-ed-muted/60 uppercase tracking-wider mb-1 px-0.5">
+              <span className="flex-1">Commodity</span>
+              <span className="w-24 text-right">Delivered</span>
+              <span className="w-14 text-right">Remaining</span>
+            </div>
 
-        <div className="space-y-1.5 max-h-44 overflow-y-auto">
-          {reqs.map((r, i) => {
-            const delivered = r.delivered ?? 0
-            const remaining = Math.max(0, r.required - delivered)
-            const onShip = Math.min(shipCargo[r.commodity.toLowerCase()] ?? 0, remaining)
-            const deliveredPct = Math.min(100, Math.round((delivered / r.required) * 100))
-            const onShipPct = Math.min(100 - deliveredPct, Math.round((onShip / r.required) * 100))
-            const done = delivered >= r.required
-            return (
-              <div key={i}>
-                <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className={`flex-1 truncate ${done ? 'text-ed-success' : 'text-ed-text'}`}>
-                    {r.commodity}
-                  </span>
-                  <span className={`w-24 text-right shrink-0 ${done ? 'text-ed-success' : 'text-ed-muted'}`}>
-                    {delivered.toLocaleString()}
-                    {onShip > 0 && !done && (
-                      <span className="text-yellow-400"> +{onShip.toLocaleString()}</span>
-                    )}
-                  </span>
-                  <span className={`w-14 text-right shrink-0 font-semibold ${done ? 'text-ed-success' : 'text-ed-orange'}`}>
-                    {done ? 'DONE' : remaining.toLocaleString()}
-                  </span>
-                </div>
-                <div className="h-0.5 bg-ed-border rounded-full overflow-hidden mt-0.5 flex">
-                  <div
-                    className="h-full bg-ed-success transition-all duration-300"
-                    style={{ width: `${deliveredPct}%` }}
-                  />
-                  {onShipPct > 0 && (
-                    <div
-                      className="h-full bg-yellow-400 transition-all duration-300"
-                      style={{ width: `${onShipPct}%` }}
-                    />
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+            <div className="space-y-1.5">
+              {pending.map((r, i) => {
+                const delivered = r.delivered ?? 0
+                const remaining = Math.max(0, r.required - delivered)
+                const onShip = Math.min(shipCargo[r.commodity.toLowerCase()] ?? 0, remaining)
+                const deliveredPct = Math.min(100, Math.round((delivered / r.required) * 100))
+                const onShipPct = Math.min(100 - deliveredPct, Math.round((onShip / r.required) * 100))
+                return (
+                  <div key={i}>
+                    <div className="flex items-center gap-2 text-xs font-mono">
+                      <span className="flex-1 truncate text-ed-text">{r.commodity}</span>
+                      <span className="w-24 text-right shrink-0 text-ed-muted">
+                        {delivered.toLocaleString()}
+                        {onShip > 0 && (
+                          <span className="text-yellow-400"> +{onShip.toLocaleString()}</span>
+                        )}
+                      </span>
+                      <span className="w-14 text-right shrink-0 font-semibold text-ed-orange">
+                        {remaining.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="h-0.5 bg-ed-border rounded-full overflow-hidden mt-0.5 flex">
+                      <div
+                        className="h-full bg-ed-success transition-all duration-300"
+                        style={{ width: `${deliveredPct}%` }}
+                      />
+                      {onShipPct > 0 && (
+                        <div
+                          className="h-full bg-yellow-400 transition-all duration-300"
+                          style={{ width: `${onShipPct}%` }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {doneCount > 0 && (
+              <p className="text-ed-success text-[10px] font-mono mt-2 text-right">
+                {doneCount === 1 ? '1 commodity complete' : `${doneCount} commodities complete`}
+              </p>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

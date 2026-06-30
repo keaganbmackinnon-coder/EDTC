@@ -1,54 +1,654 @@
 {
-  "_source": "Canonn / community data — https://canonn.science/codex/guardian-ruins/",
-  "_note": "Stub — replace with full Canonn dataset for complete site coverage",
+  "_source": "Canonn Research Group (canonn.science) + SrvSurvey by njthomson (github.com/njthomson/SrvSurvey)",
+  "_note": "Ruins type = in-game classification (Alpha/Beta/Gamma). Structures type = Canonn layout name. Blueprint type: Bear/Hammerbot/Bowl=Weapon, Turtle=Module, Stickyhand/Robolobster/Squid=Vessel.",
   "ruins": [
+    {
+      "id": "2mass_j10444160_5947046_1b",
+      "system": "2MASS J10444160-5947046",
+      "body": "1 b",
+      "canonn_id": "GR158",
+      "type": "Alpha",
+      "coordinates": {"lat": -41.678974, "lon": -122.354286},
+      "notes": "Alpha ruins — 2 sites on this body. Good for Ram Tah obelisk data."
+    },
+    {
+      "id": "blaa_hypai_bn_i_b26_1_b4",
+      "system": "Blaa Hypai BN-I b26-1",
+      "body": "B 4",
+      "canonn_id": "GR440",
+      "type": "Gamma",
+      "coordinates": {"lat": -49.324352, "lon": 102.170715},
+      "notes": "Gamma ruins in the Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blaa_hypai_eu_d_c13_0_b4",
+      "system": "Blaa Hypai EU-D c13-0",
+      "body": "B 4",
+      "canonn_id": "GR252",
+      "type": "Gamma",
+      "coordinates": {"lat": -19.572639, "lon": -19.972872},
+      "notes": "Gamma ruins — 3 sites on this body. Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blaa_hypai_lz_f_b27_0_a5",
+      "system": "Blaa Hypai LZ-F b27-0",
+      "body": "A 5",
+      "canonn_id": "GR227",
+      "type": "Gamma",
+      "coordinates": {"lat": 45.787544, "lon": 60.897354},
+      "notes": "Gamma ruins — 3 sites on this body. Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blaa_hypai_oz_o_d6_16_4c",
+      "system": "Blaa Hypai OZ-O d6-16",
+      "body": "4 c",
+      "canonn_id": "GR232",
+      "type": "Beta",
+      "coordinates": {"lat": -62.536331, "lon": 12.74488},
+      "notes": "Beta ruins — 3 sites on this body. Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blaa_hypai_pb_a_b31_0_b5",
+      "system": "Blaa Hypai PB-A b31-0",
+      "body": "B 5",
+      "canonn_id": "GR471",
+      "type": "Alpha",
+      "coordinates": {"lat": -18.521685, "lon": -116.104843},
+      "notes": "Alpha ruins — 3 sites on this body. Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blaa_hypai_xr_i_b26_0_a3",
+      "system": "Blaa Hypai XR-I b26-0",
+      "body": "A 3",
+      "canonn_id": "GR247",
+      "type": "Alpha",
+      "coordinates": {"lat": -42.967045, "lon": 14.075525},
+      "notes": "Alpha ruins — 3 sites on this body. Blaa Hypai nebula cluster."
+    },
+    {
+      "id": "blae_eork_if_g_c27_13_a1",
+      "system": "Blae Eork IF-G c27-13",
+      "body": "A 1",
+      "canonn_id": "GR169",
+      "type": "Gamma",
+      "coordinates": {"lat": -41.569309, "lon": -134.046951},
+      "notes": "Gamma ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_eork_ne_e_d13_25_b2",
+      "system": "Blae Eork NE-E d13-25",
+      "body": "B 2",
+      "canonn_id": "GR355",
+      "type": "Beta",
+      "coordinates": {"lat": 39.75042, "lon": -174.838867},
+      "notes": "Beta ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_eork_qu_d_d13_3_3",
+      "system": "Blae Eork QU-D d13-3",
+      "body": "3",
+      "canonn_id": "GR146",
+      "type": "Gamma",
+      "coordinates": {"lat": 1.216057, "lon": 50.751694},
+      "notes": "Gamma ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_eork_ru_d_d13_17_1a",
+      "system": "Blae Eork RU-D d13-17",
+      "body": "1 a",
+      "canonn_id": "GR197",
+      "type": "Alpha",
+      "coordinates": {"lat": 43.018757, "lon": 124.163002},
+      "notes": "Alpha ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_eork_ru_d_d13_20_5d",
+      "system": "Blae Eork RU-D d13-20",
+      "body": "5 d",
+      "canonn_id": "GR203",
+      "type": "Beta",
+      "coordinates": {"lat": 3.818022, "lon": -155.793762},
+      "notes": "Beta ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_eork_ul_j_b56_1_a3",
+      "system": "Blae Eork UL-J b56-1",
+      "body": "A 3",
+      "canonn_id": "GR241",
+      "type": "Alpha",
+      "coordinates": {"lat": 18.360733, "lon": 51.984032},
+      "notes": "Alpha ruins — 3 sites on this body. Blae Eork cluster."
+    },
+    {
+      "id": "blae_hypue_da_p_d6_6_4a",
+      "system": "Blae Hypue DA-P d6-6",
+      "body": "4 a",
+      "canonn_id": "GR444",
+      "type": "Alpha",
+      "coordinates": {"lat": 34.57275, "lon": -73.864349},
+      "notes": "Alpha ruins — 3 sites on this body. Blae Hypue cluster."
+    },
+    {
+      "id": "blae_hypue_kg_c_c14_5_b1",
+      "system": "Blae Hypue KG-C c14-5",
+      "body": "B 1",
+      "canonn_id": "GR441",
+      "type": "Alpha",
+      "coordinates": {"lat": 27.164045, "lon": 135.94957},
+      "notes": "Alpha ruins — 3 sites on this body. Blae Hypue cluster."
+    },
+    {
+      "id": "blae_hypue_zd_g_c12_4_d2",
+      "system": "Blae Hypue ZD-G c12-4",
+      "body": "D 2",
+      "canonn_id": "GR562",
+      "type": "Beta",
+      "coordinates": {"lat": -33.340435, "lon": -67.737968},
+      "notes": "Beta ruins — 3 sites on this body. Blae Hypue cluster."
+    },
+    {
+      "id": "col_132_sector_gs_k_d8_33_d4",
+      "system": "Col 132 Sector GS-K d8-33",
+      "body": "D 4",
+      "canonn_id": "GR321",
+      "type": "Alpha",
+      "coordinates": {"lat": 15.808319, "lon": 43.691303},
+      "notes": "Alpha ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_ac_w_b31_3_a3",
+      "system": "Col 173 Sector AC-W b31-3",
+      "body": "A 3",
+      "canonn_id": "GR546",
+      "type": "Beta",
+      "coordinates": null,
+      "notes": "Beta ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_ai_h_c11_22_b1",
+      "system": "Col 173 Sector AI-H c11-22",
+      "body": "B 1",
+      "canonn_id": "GR290",
+      "type": "Gamma",
+      "coordinates": {"lat": 34.89064, "lon": -118.126839},
+      "notes": "Gamma ruins — 3 sites on this body. Also has a Guardian Structure on this body."
+    },
+    {
+      "id": "col_173_sector_ap_q_b21_2_a8",
+      "system": "Col 173 Sector AP-Q b21-2",
+      "body": "A 8",
+      "canonn_id": "GR058",
+      "type": "Beta",
+      "coordinates": {"lat": 9.20587, "lon": 112.845139},
+      "notes": "Beta ruins — 1 site on this body."
+    },
+    {
+      "id": "col_173_sector_ap_q_b21_2_b4",
+      "system": "Col 173 Sector AP-Q b21-2",
+      "body": "B 4",
+      "canonn_id": "GR059",
+      "type": "Gamma",
+      "coordinates": {"lat": 43.55751, "lon": 25.85762},
+      "notes": "Gamma ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_aq_g_b26_1_a2",
+      "system": "Col 173 Sector AQ-G b26-1",
+      "body": "A 2",
+      "canonn_id": "GR534",
+      "type": "Alpha",
+      "coordinates": null,
+      "notes": "Alpha ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_au_y_b30_0_b2",
+      "system": "Col 173 Sector AU-Y b30-0",
+      "body": "B 2",
+      "canonn_id": "GR387",
+      "type": "Alpha",
+      "coordinates": {"lat": 45.641048, "lon": 174.069275},
+      "notes": "Alpha ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_au_y_b30_2_b4",
+      "system": "Col 173 Sector AU-Y b30-2",
+      "body": "B 4",
+      "canonn_id": "GR236",
+      "type": "Gamma",
+      "coordinates": {"lat": -54.182861, "lon": 49.600803},
+      "notes": "Gamma ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_av_n_b23_5_a2",
+      "system": "Col 173 Sector AV-N b23-5",
+      "body": "A 2",
+      "canonn_id": "GR018",
+      "type": "Beta",
+      "coordinates": {"lat": 42.841373, "lon": -175.657761},
+      "notes": "Beta ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_aw_c_c13_8_c1",
+      "system": "Col 173 Sector AW-C c13-8",
+      "body": "C 1",
+      "canonn_id": "GR524",
+      "type": "Beta",
+      "coordinates": null,
+      "notes": "Beta ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_bx_i_c10_7_b2",
+      "system": "Col 173 Sector BX-I c10-7",
+      "body": "B 2",
+      "canonn_id": "GR283",
+      "type": "Alpha",
+      "coordinates": {"lat": -5.023737, "lon": -26.999365},
+      "notes": "Alpha ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_bx_i_c10_7_b3",
+      "system": "Col 173 Sector BX-I c10-7",
+      "body": "B 3",
+      "canonn_id": "GR287",
+      "type": "Gamma",
+      "coordinates": {"lat": 38.048756, "lon": -48.850998},
+      "notes": "Gamma ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_cc_z_b31_1_b1",
+      "system": "Col 173 Sector CC-Z b31-1",
+      "body": "B 1",
+      "canonn_id": "GR553",
+      "type": "Gamma",
+      "coordinates": null,
+      "notes": "Gamma ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_cg_m_b24_8_a4",
+      "system": "Col 173 Sector CG-M b24-8",
+      "body": "A 4",
+      "canonn_id": "GR031",
+      "type": "Gamma",
+      "coordinates": {"lat": -45.081577, "lon": -142.082657},
+      "notes": "Gamma ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_cg_m_b24_8_a5",
+      "system": "Col 173 Sector CG-M b24-8",
+      "body": "A 5",
+      "canonn_id": "GR032",
+      "type": "Gamma",
+      "coordinates": {"lat": -0.203577, "lon": -0.36909},
+      "notes": "Gamma ruins — 1 site on this body."
+    },
+    {
+      "id": "col_173_sector_ch_l_d8_14_d1",
+      "system": "Col 173 Sector CH-L d8-14",
+      "body": "D 1",
+      "canonn_id": "GR281",
+      "type": "Alpha",
+      "coordinates": {"lat": -23.239367, "lon": -37.279064},
+      "notes": "Alpha ruins — 2 sites on this body."
+    },
+    {
+      "id": "col_173_sector_ch_l_d8_14_d3",
+      "system": "Col 173 Sector CH-L d8-14",
+      "body": "D 3",
+      "canonn_id": "GR282",
+      "type": "Alpha",
+      "coordinates": {"lat": 36.648209, "lon": 3.457292},
+      "notes": "Alpha ruins — 1 site on this body."
+    },
+    {
+      "id": "col_173_sector_dh_k_b25_2_a5",
+      "system": "Col 173 Sector DH-K b25-2",
+      "body": "A 5",
+      "canonn_id": "GR073",
+      "type": "Alpha",
+      "coordinates": {"lat": 19.887537, "lon": 100.132706},
+      "notes": "Alpha ruins — 2 sites on this body. Also has a Guardian Structure on A 5."
+    },
+    {
+      "id": "col_173_sector_dh_k_b25_2_a7",
+      "system": "Col 173 Sector DH-K b25-2",
+      "body": "A 7",
+      "canonn_id": "GR075",
+      "type": "Beta",
+      "coordinates": {"lat": 15.06253, "lon": -159.607544},
+      "notes": "Beta ruins — 1 site on this body."
+    },
+    {
+      "id": "col_173_sector_dm_l_c8_0_b2",
+      "system": "Col 173 Sector DM-L c8-0",
+      "body": "B 2",
+      "canonn_id": "GR341",
+      "type": "Beta",
+      "coordinates": {"lat": -23.906872, "lon": -128.257874},
+      "notes": "Beta ruins — 3 sites on this body."
+    },
+    {
+      "id": "col_173_sector_dm_l_c8_0_b3",
+      "system": "Col 173 Sector DM-L c8-0",
+      "body": "B 3",
+      "canonn_id": "GR341",
+      "type": "Beta",
+      "coordinates": null,
+      "notes": "Beta ruins — 1 site on this body."
+    },
     {
       "id": "synuefe_xr_h_d11_102_1b",
       "system": "Synuefe XR-H d11-102",
       "body": "1 b",
-      "type": "Alpha",
-      "coordinates": {"lat": -31.7065, "lon": -128.9319},
-      "notes": "First discovered Alpha site. Well-documented, ideal for Ram Tah missions."
-    },
-    {
-      "id": "synuefe_pf_s_b21_1_1a",
-      "system": "Synuefe PF-S b21-1",
-      "body": "1 a",
+      "canonn_id": "GR001",
       "type": "Beta",
-      "coordinates": {"lat": 17.4, "lon": -34.8},
-      "notes": "Beta ruins site."
-    },
+      "coordinates": {"lat": -46.576923, "lon": 133.985107},
+      "notes": "First Guardian site ever discovered (2017). Ideal starting point for Ram Tah missions."
+    }
+  ],
+  "structures": [
     {
-      "id": "synuefe_il_n_c23_19_a5",
-      "system": "Synuefe IL-N c23-19",
-      "body": "A 5",
-      "type": "Alpha",
-      "coordinates": {"lat": -26.3, "lon": 56.1},
-      "notes": "Alpha site, multiple active obelisks."
-    },
-    {
-      "id": "synuefe_en_h_d11_96_7c",
-      "system": "Synuefe EN-H d11-96",
-      "body": "7 c",
-      "type": "Gamma",
-      "coordinates": {"lat": 40.2, "lon": -155.6},
-      "notes": "Gamma ruins. Good obelisk density for data collection."
-    },
-    {
-      "id": "synuefe_rl_c24_5_c3",
-      "system": "Synuefe RL-C24-5",
-      "body": "C 3",
-      "type": "Beta",
-      "coordinates": {"lat": -8.7, "lon": 72.3},
-      "notes": "Beta site near Synuefe cluster."
-    },
-    {
-      "id": "synuefe_ly_i_b42_2_c2",
-      "system": "Synuefe LY-I b42-2",
-      "body": "C 2",
-      "type": "Fistbump",
+      "id": "synuefe_gv_t_b50_4_b1",
+      "system": "Synuefe GV-T b50-4",
+      "body": "B 1",
+      "type": "Bear",
       "coordinates": null,
-      "notes": "Fistbump-layout ruins. One of the well-documented Synuefe cluster sites."
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_pm_l_c24_24_c6",
+      "system": "Synuefe PM-L c24-24",
+      "body": "C 6",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_eb_x_c1_18_c2",
+      "system": "NGC 2451A Sector EB-X c1-18",
+      "body": "C 2",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_eu_q_c21_10_a3",
+      "system": "Synuefe EU-Q c21-10",
+      "body": "A 3",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_uj_q_b5_7_b2",
+      "system": "NGC 2451A Sector UJ-Q b5-7",
+      "body": "B 2",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_hf_p_c22_17_b1",
+      "system": "Synuefe HF-P c22-17",
+      "body": "B 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_ir_w_d1_77_ab1a",
+      "system": "NGC 2451A Sector IR-W d1-77",
+      "body": "AB 1 a",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "pencil_sector_yj_a_c33_1",
+      "system": "Pencil Sector YJ-A c33",
+      "body": "1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_en_h_d11_106_6a",
+      "system": "Synuefe EN-H d11-106",
+      "body": "6 a",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "pencil_sector_cq_y_c31_c1",
+      "system": "Pencil Sector CQ-Y c31",
+      "body": "C 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "pencil_sector_bq_x_b1_4_b2",
+      "system": "Pencil Sector BQ-X b1-4",
+      "body": "B 2",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_we_q_b5_6_b1",
+      "system": "NGC 2451A Sector WE-Q b5-6",
+      "body": "B 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "wregoe_jr_a_b41_3_f2",
+      "system": "Wregoe JR-A b41-3",
+      "body": "F 2",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_fk_p_c22_2_e1",
+      "system": "Synuefe FK-P c22-2",
+      "body": "E 1",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "hip_41730_13ga",
+      "system": "HIP 41730",
+      "body": "13 g a",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_ce_r_c21_6_c1",
+      "system": "Synuefe CE-R c21-6",
+      "body": "C 1",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_mc_v_c2_5_e1",
+      "system": "NGC 2451A Sector MC-V c2-5",
+      "body": "E 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "pencil_sector_xo_a_c31_b3",
+      "system": "Pencil Sector XO-A c31",
+      "body": "B 3",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_sp_f_b44_0_c1",
+      "system": "Synuefe SP-F b44-0",
+      "body": "C 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_bh_j_d10_68_c1",
+      "system": "Synuefe BH-J d10-68",
+      "body": "C 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_zl_j_d10_109_e3",
+      "system": "Synuefe ZL-J d10-109",
+      "body": "E 3",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "wregoe_jr_l_c21_1_c2",
+      "system": "Wregoe JR-L c21-1",
+      "body": "C 2",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "synuefe_vk_f_b44_0_b1",
+      "system": "Synuefe VK-F b44-0",
+      "body": "B 1",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_fk_c_c14_6_d2",
+      "system": "Col 173 Sector FK-C c14-6",
+      "body": "D 2",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_pf_e_b28_3_b1",
+      "system": "Col 173 Sector PF-E b28-3",
+      "body": "B 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_me_p_d6_92_b5",
+      "system": "Col 173 Sector ME-P d6-92",
+      "body": "B 5",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "vela_dark_region_js_t_b3_0_a3",
+      "system": "Vela Dark Region JS-T b3-0",
+      "body": "A 3",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_zs_f_c12_27_b3",
+      "system": "Col 173 Sector ZS-F c12-27",
+      "body": "B 3",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_zl_l_b24_2_b1",
+      "system": "Col 173 Sector ZL-L b24-2",
+      "body": "B 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_xh_h_c11_21_b1",
+      "system": "Col 173 Sector XH-H c11-21",
+      "body": "B 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "vela_dark_region_dl_y_d91_5a",
+      "system": "Vela Dark Region DL-Y d91",
+      "body": "5 a",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_lt_q_d5_90_d1",
+      "system": "Col 173 Sector LT-Q d5-90",
+      "body": "D 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_zv_m_b23_1_a1",
+      "system": "Col 173 Sector ZV-M b23-1",
+      "body": "A 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_lt_q_d5_82_a3",
+      "system": "Col 173 Sector LT-Q d5-82",
+      "body": "A 3",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "vela_dark_region_cq_y_c0_a2",
+      "system": "Vela Dark Region CQ-Y c0",
+      "body": "A 2",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_pz_o_d6_110_5a",
+      "system": "Col 173 Sector PZ-O d6-110",
+      "body": "5 a",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_ad_h_c11_15_b2",
+      "system": "Col 173 Sector AD-H c11-15",
+      "body": "B 2",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_fz_d_c13_30_2",
+      "system": "Col 173 Sector FZ-D c13-30",
+      "body": "2",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
     },
     {
       "id": "vela_dark_region_eg_x_b1_1_a1",
@@ -56,7 +656,71 @@
       "body": "A 1",
       "type": "Bear",
       "coordinates": null,
-      "notes": "Bear-layout ruins in the Vela Dark Region."
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_nv_b_c14_1_1",
+      "system": "Col 173 Sector NV-B c14-1",
+      "body": "1",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "vela_dark_region_ze_a_d66_6b",
+      "system": "Vela Dark Region ZE-A d66",
+      "body": "6 b",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_cc_k_b25_8_a5",
+      "system": "Col 173 Sector CC-K b25-8",
+      "body": "A 5",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_ru_o_d6_16_a2a",
+      "system": "Col 173 Sector RU-O d6-16",
+      "body": "A 2 a",
+      "type": "Hammerbot",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "vela_dark_region_el_y_d55_1",
+      "system": "Vela Dark Region EL-Y d55",
+      "body": "1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_ky_q_d5_26_6a",
+      "system": "Col 173 Sector KY-Q d5-26",
+      "body": "6 a",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_hn_i_b26_5_a1",
+      "system": "Col 173 Sector HN-I b26-5",
+      "body": "A 1",
+      "type": "Bowl",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
+    },
+    {
+      "id": "col_173_sector_od_j_b25_2_b1",
+      "system": "Col 173 Sector OD-J b25-2",
+      "body": "B 1",
+      "type": "Bear",
+      "coordinates": null,
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
     },
     {
       "id": "col_173_sector_hr_m_b23_3_b7",
@@ -64,49 +728,415 @@
       "body": "B 7",
       "type": "Hammerbot",
       "coordinates": null,
-      "notes": "Hammerbot-layout ruins in Col 173 Sector."
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
     },
     {
-      "id": "vela_dark_region_kr_w_c1_24_7a",
-      "system": "Vela Dark Region KR-W c1-24",
-      "body": "7 A",
-      "type": "Lacrosse",
+      "id": "vela_dark_region_td_s_b4_5_c1",
+      "system": "Vela Dark Region TD-S b4-5",
+      "body": "C 1",
+      "type": "Bear",
       "coordinates": null,
-      "notes": "Lacrosse-layout ruins in the Vela Dark Region."
+      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
     },
     {
-      "id": "hip_39768_a14f",
-      "system": "HIP 39768",
-      "body": "A 14 F",
-      "type": "Fistbump",
+      "id": "wregoe_bu_y_b2_0_1c_bear",
+      "system": "Wregoe BU-Y b2-0",
+      "body": "1 c",
+      "type": "Bear",
       "coordinates": null,
-      "notes": "Fistbump-layout ruins. One of the closer sites to the bubble."
-    }
-  ],
-  "structures": [
+      "notes": "Weapon Blueprint Structure. Remote site ~1519 ly from Sol."
+    },
     {
-      "id": "vela_dark_region_fy_c_b3_a2",
-      "system": "Vela Dark Region FY-C b3",
+      "id": "synuefe_px_j_c25_8_7a",
+      "system": "Synuefe PX-J c25-8",
+      "body": "7 a",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "synuefe_lq_t_b50_1_b2",
+      "system": "Synuefe LQ-T b50-1",
+      "body": "B 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "synuefe_gt_h_b43_1_c4",
+      "system": "Synuefe GT-H b43-1",
+      "body": "C 4",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "ngc_2451a_sector_dl_y_d61_a2",
+      "system": "NGC 2451A Sector DL-Y d61",
       "body": "A 2",
-      "type": "Gamma",
-      "coordinates": {"lat": 42.1, "lon": -17.3},
-      "notes": "Guardian structure site."
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
     },
     {
-      "id": "hd63154_b3",
-      "system": "HD 63154",
+      "id": "pencil_sector_yj_a_c12_b3",
+      "system": "Pencil Sector YJ-A c12",
       "body": "B 3",
-      "type": "Alpha",
-      "coordinates": {"lat": -55.2, "lon": 93.8},
-      "notes": "Well-known structure site for blueprint fragment farming."
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
     },
     {
-      "id": "synuefe_eu_q_c21_10_b1",
-      "system": "Synuefe EU-Q c21-10",
+      "id": "pencil_sector_vy_a_b8_b1",
+      "system": "Pencil Sector VY-A b8",
       "body": "B 1",
-      "type": "Beta",
-      "coordinates": {"lat": 29.5, "lon": -44.1},
-      "notes": "Structure site, Sentinels present."
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "wregoe_im_z_b41_2_b2",
+      "system": "Wregoe IM-Z b41-2",
+      "body": "B 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "pencil_sector_zj_a_c4_b4",
+      "system": "Pencil Sector ZJ-A c4",
+      "body": "B 4",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "synuefe_nl_n_c23_4_b3",
+      "system": "Synuefe NL-N c23-4",
+      "body": "B 3",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "col_173_sector_xg_k_b25_3_b2",
+      "system": "Col 173 Sector XG-K b25-3",
+      "body": "B 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "col_173_sector_ds_j_b25_2_b5",
+      "system": "Col 173 Sector DS-J b25-2",
+      "body": "B 5",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "vela_dark_region_dl_y_d112_1a",
+      "system": "Vela Dark Region DL-Y d112",
+      "body": "1 a",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "vela_dark_region_dl_y_d83_5b",
+      "system": "Vela Dark Region DL-Y d83",
+      "body": "5 b",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "col_173_sector_sz_g_b26_0_b2",
+      "system": "Col 173 Sector SZ-G b26-0",
+      "body": "B 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "col_173_sector_gs_j_b25_4_d2",
+      "system": "Col 173 Sector GS-J b25-4",
+      "body": "D 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "col_173_sector_su_o_d6_54_b2",
+      "system": "Col 173 Sector SU-O d6-54",
+      "body": "B 2",
+      "type": "Turtle",
+      "coordinates": null,
+      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
+    },
+    {
+      "id": "hd_63154_b3a",
+      "system": "HD 63154",
+      "body": "B 3 a",
+      "type": "Turtle",
+      "coordinates": {"lat": -55.2, "lon": 93.8},
+      "notes": "Module Blueprint Structure. Well-known site for blueprint fragment farming."
+    },
+    {
+      "id": "ic_2391_sector_ca_a_d43_12a",
+      "system": "IC 2391 Sector CA-A d43",
+      "body": "12 a",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "ic_2391_sector_hg_x_b1_8_c2",
+      "system": "IC 2391 Sector HG-X b1-8",
+      "body": "C 2",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "ic_2391_sector_fl_x_b1_7_a3",
+      "system": "IC 2391 Sector FL-X b1-7",
+      "body": "A 3",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_nb_b_b47_10_b2",
+      "system": "Synuefe NB-B b47-10",
+      "body": "B 2",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_dk_d_b46_4_c1",
+      "system": "Synuefe DK-D b46-4",
+      "body": "C 1",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_gq_n_c23_21_b3",
+      "system": "Synuefe GQ-N c23-21",
+      "body": "B 3",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_il_n_c23_19_b2",
+      "system": "Synuefe IL-N c23-19",
+      "body": "B 2",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_dj_g_b44_3_a5",
+      "system": "Synuefe DJ-G b44-3",
+      "body": "A 5",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_hp_e_b45_8_d3",
+      "system": "Synuefe HP-E b45-8",
+      "body": "D 3",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "hip_36781_a6b",
+      "system": "HIP 36781",
+      "body": "A 6 b",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_jp_e_b45_4_c1",
+      "system": "Synuefe JP-E b45-4",
+      "body": "C 1",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_he_g_b44_5_b2",
+      "system": "Synuefe HE-G b44-5",
+      "body": "B 2",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_bz_q_c21_11_b5",
+      "system": "Synuefe BZ-Q c21-11",
+      "body": "B 5",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_zg_j_d10_79_b1",
+      "system": "Synuefe ZG-J d10-79",
+      "body": "B 1",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_ie_g_b44_2_a4",
+      "system": "Synuefe IE-G b44-2",
+      "body": "A 4",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_en_h_d11_29_6b",
+      "system": "Synuefe EN-H d11-29",
+      "body": "6 b",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_ah_j_d10_46_c1",
+      "system": "Synuefe AH-J d10-46",
+      "body": "C 1",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_kz_f_b44_5_a1",
+      "system": "Synuefe KZ-F b44-5",
+      "body": "A 1",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_vj_r_c4_22_a1",
+      "system": "NGC 2451A Sector VJ-R c4-22",
+      "body": "A 1",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_pf_e_b45_5_b2",
+      "system": "Synuefe PF-E b45-5",
+      "body": "B 2",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_en_h_d11_96_7a",
+      "system": "Synuefe EN-H d11-96",
+      "body": "7 a",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_eu_q_c21_15_a1",
+      "system": "Synuefe EU-Q c21-15",
+      "body": "A 1",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_en_h_d11_28_8b",
+      "system": "Synuefe EN-H d11-28",
+      "body": "8 b",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "ngc_2451a_sector_to_r_c4_10_b1",
+      "system": "NGC 2451A Sector TO-R c4-10",
+      "body": "B 1",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_ah_j_d10_20_a3",
+      "system": "Synuefe AH-J d10-20",
+      "body": "A 3",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_nu_f_b44_5_b1",
+      "system": "Synuefe NU-F b44-5",
+      "body": "B 1",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_be_r_c21_35_e2",
+      "system": "Synuefe BE-R c21-35",
+      "body": "E 2",
+      "type": "Robolobster",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_ah_j_d10_103_b1",
+      "system": "Synuefe AH-J d10-103",
+      "body": "B 1",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_ed_i_b43_8_a2",
+      "system": "Synuefe ED-I b43-8",
+      "body": "A 2",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "synuefe_dz_q_c21_14_10a",
+      "system": "Synuefe DZ-Q c21-14",
+      "body": "10 a",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
+    },
+    {
+      "id": "trapezium_sector_yu_x_c1_2_1a",
+      "system": "Trapezium Sector YU-X c1-2",
+      "body": "1 a",
+      "type": "Squid",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Remote site ~1344 ly from Sol near Trapezium Cluster."
+    },
+    {
+      "id": "wregoe_bu_y_b2_0_1c_stickyhand",
+      "system": "Wregoe BU-Y b2-0",
+      "body": "1 c",
+      "type": "Stickyhand",
+      "coordinates": null,
+      "notes": "Vessel Blueprint Structure. Remote site ~1519 ly from Sol."
     }
   ]
 }

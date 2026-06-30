@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.30"  # bump this with every release
+APP_VERSION = "0.3.32"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -845,6 +845,14 @@ class API:
             enabled = get_pref(f"overlay_auto_{name}", False)
             self._overlay_manager.load_user_enabled(name, bool(enabled))
 
+    def resize_overlay(self, name: str, width: int, height: int) -> None:
+        win = self._overlay_manager._windows.get(name)
+        if win:
+            try:
+                win.resize(int(width), int(height))
+            except Exception as e:
+                logging.warning(f"resize_overlay {name}: {e}")
+
     def show_overlay(self, name: str):
         self._overlay_manager.show(name)
         if name == "construction":
@@ -1431,11 +1439,18 @@ class API:
         data = self._load_json("guardian_sites.json")
         ruins = data.get("ruins", [])
         structures = data.get("structures", [])
-        for site in ruins + structures:
+        for site in ruins:
             v = visits.get(site["id"], {})
             site["visited"] = bool(v.get("visited", 0))
             site["data_collected"] = bool(v.get("data_collected", 0))
-            site["notes"] = v.get("notes", "")
+            db_notes = v.get("notes", "")
+            if db_notes:
+                site["notes"] = db_notes
+        for site in structures:
+            v = visits.get(site["id"], {})
+            site["visited"] = bool(v.get("visited", 0))
+            site["data_collected"] = bool(v.get("data_collected", 0))
+            site["notes"] = v.get("notes", "")  # UI shows blueprint info visually; only user notes here
         return {"ruins": ruins, "structures": structures}
 
     def set_guardian_visit(

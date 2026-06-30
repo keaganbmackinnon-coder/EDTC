@@ -23,7 +23,7 @@ OVERLAYS = {
         "title": "EDTC — Construction",
         "key": "construction",
         "width": 460,
-        "height": 300,
+        "height": 80,
     },
     "fss": {
         "title": "EDTC — FSS Values",

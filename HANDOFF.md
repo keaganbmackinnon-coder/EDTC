@@ -901,3 +901,56 @@ Focus: ErrorBoundary fix, cargo overlay fix, Construction overlay dynamic sizing
 
 ---
 *Session 26 complete — 2026-06-30*
+
+---
+
+## Build status — Session 27 (COMPLETE)
+
+Focus: Guardian sites data overhaul.
+
+| Item | Status | File |
+|---|---|---|
+| `data/guardian_sites.json` expanded from 13 stubs → 37 ruins + 99 structures (136 total) | DONE | `data/guardian_sites.json` |
+| Ruins: real types (Alpha/Beta/Gamma) and coordinates sourced from SrvSurvey data (github.com/njthomson/SrvSurvey) | DONE | `data/guardian_sites.json` |
+| Ruins: include canonn_id (GR001 etc.), site count per body, and useful notes | DONE | `data/guardian_sites.json` |
+| Structures: all 50 Weapon Blueprint sites (Bear/Hammerbot/Bowl) from Canonn | DONE | `data/guardian_sites.json` |
+| Structures: all 17 Module Blueprint sites (Turtle) from Canonn | DONE | `data/guardian_sites.json` |
+| Structures: all 32 Vessel Blueprint sites (Stickyhand/Robolobster/Squid) from Canonn | DONE | `data/guardian_sites.json` |
+| `get_guardian_sites()` fixed — ruins show JSON default notes; structures only show user-entered notes | DONE | `main.py` |
+| `BLUEPRINT_INFO` map added — structure cards now show "Weapon/Module/Vessel Blueprint → items" row visually | DONE | `frontend/src/pages/Guardian.jsx` |
+
+## Key notes from Session 27
+
+- **Data sources**: Canonn API (api.canonn.tech) was still down. Ruins data sourced from SrvSurvey JSON files (github.com/njthomson/SrvSurvey/tree/main/data/guardian/). Structure data sourced from Canonn codex page (canonn.science/codex/guardian-structure/).
+- **Ruins type** = in-game Alpha/Beta/Gamma classification (from SrvSurvey `t` field). Structures type = Canonn layout name (Bear/Hammerbot/Bowl/Turtle/Stickyhand/Robolobster/Squid).
+- **Blueprint mapping**: Bear/Hammerbot/Bowl → Weapon Blueprints; Turtle → Module Blueprints; Stickyhand/Robolobster/Squid → Vessel Blueprints.
+- **Notes fix**: `get_guardian_sites()` previously set `site["notes"] = ""` for any site with no DB entry, hiding JSON default notes. Fixed to only use DB notes when non-empty.
+- **SrvSurvey**: Very capable companion app (overlays, Guardian site maps, exobiology, navigation). Worth studying for feature ideas. Tracks visited Guardian site areas with on-screen maps, species prediction for exobiology, SRV coordinate guidance.
+- **Coords coverage**: Ruins have real coordinates from SrvSurvey for most entries (~30/37). Structures have no coordinates (not published by Canonn on their codex page).
+
+## Known issues / notes for next session
+
+- Canonn API (api.canonn.tech) still down — when it recovers, fetch full dataset via `GET https://api.canonn.tech/guardianruins?_limit=500` and `guardianstructures?_limit=500` for complete coverage (~113 ruins total, more structures).
+- Structures have no coordinates — would need cross-referencing with EDSM or SrvSurvey structure files to add lat/lon.
+- SrvSurvey directory listing shows ~37 unique ruins system+body pairs surveyed; full Canonn dataset likely has more ruins in Eta Carina, Prai Hypoo, Skaudai, and Teal Nebula clusters not yet in our JSON.
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- pygame not installable on Python 3.14 — audio disabled in dev; CI uses 3.12.
+
+---
+*Session 27 complete — 2026-06-30*
+
+---
+*Session checkpoint: 2026-06-30 19:41:59*
+
+---
+*Session checkpoint: 2026-06-30 19:43:15*
+
+---
+*Session checkpoint: 2026-06-30 19:44:39*
+
+---
+*Session checkpoint: 2026-06-30 19:45:25*
+
+---
+*Session checkpoint: 2026-06-30 19:47:12*

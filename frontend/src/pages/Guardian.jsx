@@ -23,11 +23,9 @@ function copyText(text) {
 // ---- Tab: Sites ----
 
 const TYPE_COLORS = {
-  // in-game ruins classification
   Alpha: 'border-blue-500/50 text-blue-400',
   Beta:  'border-purple-500/50 text-purple-400',
   Gamma: 'border-green-500/50 text-green-400',
-  // Canonn community shape names for ruins layouts
   Fistbump:    'border-yellow-500/50 text-yellow-400',
   Bear:        'border-orange-500/50 text-orange-400',
   Hammerbot:   'border-red-500/50 text-red-400',
@@ -38,6 +36,16 @@ const TYPE_COLORS = {
   Squid:       'border-violet-500/50 text-violet-400',
   Stickyhand:  'border-pink-500/50 text-pink-400',
   Robolobster: 'border-rose-500/50 text-rose-400',
+}
+
+const BLUEPRINT_INFO = {
+  Bear:        { label: 'Weapon Blueprint', color: 'text-red-400',    items: ['Gauss Cannon', 'Plasma Charger', 'Shard Cannon'] },
+  Hammerbot:   { label: 'Weapon Blueprint', color: 'text-red-400',    items: ['Gauss Cannon', 'Plasma Charger', 'Shard Cannon'] },
+  Bowl:        { label: 'Weapon Blueprint', color: 'text-red-400',    items: ['Gauss Cannon', 'Plasma Charger', 'Shard Cannon'] },
+  Turtle:      { label: 'Module Blueprint', color: 'text-blue-400',   items: ['FSD Booster', 'Power Distributor', 'Shield Generator', 'Hull Reinforcement'] },
+  Stickyhand:  { label: 'Vessel Blueprint', color: 'text-violet-400', items: ['Enhanced FSD', 'Pulse Laser', 'Multi-Cannon'] },
+  Robolobster: { label: 'Vessel Blueprint', color: 'text-violet-400', items: ['Enhanced FSD', 'Pulse Laser', 'Multi-Cannon'] },
+  Squid:       { label: 'Vessel Blueprint', color: 'text-violet-400', items: ['Enhanced FSD', 'Pulse Laser', 'Multi-Cannon'] },
 }
 
 function SiteCard({ site, kind, onUpdate }) {
@@ -83,6 +91,15 @@ function SiteCard({ site, kind, onUpdate }) {
               </span>
             )}
           </p>
+          {BLUEPRINT_INFO[site.type] && (() => {
+            const bp = BLUEPRINT_INFO[site.type]
+            return (
+              <p className="text-xs font-mono mt-1">
+                <span className={`font-semibold ${bp.color}`}>{bp.label}</span>
+                <span className="text-ed-muted ml-1">→ {bp.items.join(' · ')}</span>
+              </p>
+            )
+          })()}
         </div>
         <button
           className="btn-ghost text-xs shrink-0"
