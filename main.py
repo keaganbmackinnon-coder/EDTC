@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.29"  # bump this with every release
+APP_VERSION = "0.3.30"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -228,12 +228,17 @@ class API:
         from core.journal import journal_path
         cargo_file = journal_path() / "Cargo.json"
         if not cargo_file.exists():
+            logging.info("Cargo.json: file not found")
             return
         try:
             data = json.loads(cargo_file.read_text(encoding="utf-8"))
-            if data.get("Vehicle", "Ship") != "Ship":
+            vehicle = data.get("Vehicle", "Ship")
+            inventory = data.get("Inventory", [])
+            logging.info(f"Cargo.json: vehicle={vehicle}, items={len(inventory)}, names={[i.get('Name_Localised') or i.get('Name') for i in inventory[:5]]}")
+            if vehicle != "Ship":
+                logging.info(f"Cargo.json: skipping non-ship vehicle ({vehicle})")
                 return
-            self._ship_cargo = data.get("Inventory", [])
+            self._ship_cargo = inventory
             payload = {"cargo": self._ship_cargo}
             self._emit("ship_cargo_update", payload)
             self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
@@ -247,9 +252,22 @@ class API:
         payload = {"cargo": self._ship_cargo}
         self._emit("ship_cargo_update", payload)
         self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
+        logging.info(f"Cargo event: {len(self._ship_cargo)} items")
 
     def get_ship_cargo(self) -> list:
+        if not self._ship_cargo:
+            self._import_cargo_json()
         return self._ship_cargo
+
+    def _push_cargo_to_overlay(self):
+        """Push current ship cargo to the construction overlay after it has time to initialize."""
+        def _push():
+            import time
+            time.sleep(2.5)
+            payload = {"cargo": self._ship_cargo}
+            self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
+            logging.info(f"Pushed cargo to overlay: {len(self._ship_cargo)} items")
+        threading.Thread(target=_push, daemon=True).start()
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -829,6 +847,8 @@ class API:
 
     def show_overlay(self, name: str):
         self._overlay_manager.show(name)
+        if name == "construction":
+            self._push_cargo_to_overlay()
 
     def hide_overlay(self, name: str):
         self._overlay_manager.hide(name)
@@ -837,6 +857,8 @@ class API:
         from core.database import set_pref
         new_state = self._overlay_manager.toggle(name)
         set_pref(f"overlay_auto_{name}", new_state)
+        if new_state and name == "construction":
+            self._push_cargo_to_overlay()
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref
