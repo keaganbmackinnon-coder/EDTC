@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.27"  # bump this with every release
+APP_VERSION = "0.3.28"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -478,6 +478,8 @@ class API:
             for proj in updated:
                 self._overlay_manager.emit_to_overlay("construction", "construction_update", proj)
                 self._emit("construction_update", proj)
+        # Refresh ship cargo — delivered goods leave the hold
+        self._import_cargo_json()
 
     def _handle_construction_depot(self, event: dict):
         resources = event.get("ResourcesRequired", [])
