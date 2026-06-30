@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.26"  # bump this with every release
+APP_VERSION = "0.3.27"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -886,8 +886,14 @@ class API:
         return saved
 
     def delete_construction_project(self, project_id: int) -> bool:
-        from core.database import delete_construction_project
-        return delete_construction_project(project_id)
+        from core.database import delete_construction_project, get_construction_projects
+        delete_construction_project(project_id)
+        remaining = get_construction_projects(active_only=True)
+        if remaining:
+            self._overlay_manager.emit_to_overlay("construction", "construction_update", remaining[0])
+        else:
+            self._overlay_manager.emit_to_overlay("construction", "construction_update", None)
+        return True
 
     # --- FC Cargo ---
 
@@ -1695,6 +1701,7 @@ def main():
         min_size=(900, 600),
     )
     api.set_window(window)
+    window.events.closed += api._overlay_manager.close_all
 
     watcher = JournalWatcher(on_event=api.on_journal_event)
     threading.Thread(target=watcher.run, daemon=True).start()

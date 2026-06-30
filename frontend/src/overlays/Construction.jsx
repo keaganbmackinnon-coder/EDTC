@@ -15,7 +15,7 @@ export default function Construction() {
     })
 
     const off1 = window.__edtc?.on('construction_update', (payload) => {
-      setProject(payload)
+      setProject(payload ?? null)
     })
     const off2 = window.__edtc?.on('ship_cargo_update', (payload) => {
       setShipCargo(buildCargoMap(payload?.cargo ?? []))

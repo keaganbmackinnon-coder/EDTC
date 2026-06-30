@@ -147,6 +147,14 @@ class OverlayManager:
         for name in list(self._windows):
             self.hide(name)
 
+    def close_all(self):
+        for win in list(self._windows.values()):
+            try:
+                win.destroy()
+            except Exception:
+                pass
+        self._windows.clear()
+
     def emit_to_overlay(self, name: str, event_type: str, payload: dict):
         win = self._windows.get(name)
         if win is None:
