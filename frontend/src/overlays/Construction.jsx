@@ -40,7 +40,7 @@ export default function Construction() {
 
   return (
     <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
-      <div className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[330px]">
+      <div className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
         <div className="flex items-center justify-between mb-1">
           <span className="text-ed-muted text-xs font-mono uppercase tracking-widest">Construction</span>
           <span className="text-ed-orange text-xs font-mono">{totalPct}%</span>
@@ -58,7 +58,14 @@ export default function Construction() {
           />
         </div>
 
-        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+        {/* Column headers */}
+        <div className="flex items-center gap-2 text-[9px] font-mono text-ed-muted/60 uppercase tracking-wider mb-1 px-0.5">
+          <span className="flex-1">Commodity</span>
+          <span className="w-24 text-right">Delivered</span>
+          <span className="w-14 text-right">Remaining</span>
+        </div>
+
+        <div className="space-y-1.5 max-h-44 overflow-y-auto">
           {reqs.map((r, i) => {
             const delivered = r.delivered ?? 0
             const remaining = Math.max(0, r.required - delivered)
@@ -68,16 +75,18 @@ export default function Construction() {
             const done = delivered >= r.required
             return (
               <div key={i}>
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className={done ? 'text-ed-success' : 'text-ed-text'}>
+                <div className="flex items-center gap-2 text-xs font-mono">
+                  <span className={`flex-1 truncate ${done ? 'text-ed-success' : 'text-ed-text'}`}>
                     {r.commodity}
                   </span>
-                  <span className={done ? 'text-ed-success' : 'text-ed-muted'}>
+                  <span className={`w-24 text-right shrink-0 ${done ? 'text-ed-success' : 'text-ed-muted'}`}>
                     {delivered.toLocaleString()}
                     {onShip > 0 && !done && (
                       <span className="text-yellow-400"> +{onShip.toLocaleString()}</span>
                     )}
-                    {' '}/ {r.required.toLocaleString()}
+                  </span>
+                  <span className={`w-14 text-right shrink-0 font-semibold ${done ? 'text-ed-success' : 'text-ed-orange'}`}>
+                    {done ? 'DONE' : remaining.toLocaleString()}
                   </span>
                 </div>
                 <div className="h-0.5 bg-ed-border rounded-full overflow-hidden mt-0.5 flex">
