@@ -857,7 +857,26 @@ Focus: Colonisation tab overhaul — fix Market Finder, auto-import from depot, 
 *Session 25 complete — 2026-06-29*
 
 ---
-*Session checkpoint: 2026-06-29 19:32:04*
+
+## Build status — Session 26 (COMPLETE)
+
+| Item | Status |
+|---|---|
+| Fix cargo overlay not receiving ship_cargo_update | DONE — `_import_cargo_json` and `_handle_cargo` now emit to overlay too |
+| Fix 'page error on all pages' | DONE — ErrorBoundary now auto-resets on route change so one crash doesn't lock all pages |
+| Add null guard to construction_update in Colonisation | DONE |
+| Stack trace shown in error panel | DONE |
+| v0.3.29 released | DONE |
+
+## Key notes from Session 26
+
+- **Root cause of cargo overlay bug**: `_emit()` only sends to `self._window` (main window). The Construction overlay is a separate webview that needs `_overlay_manager.emit_to_overlay()`. Both `_import_cargo_json()` and `_handle_cargo()` now call both methods.
+- **Root cause of "everything is page error"**: The ErrorBoundary (class component) stays in error state when navigating routes — React doesn't auto-reset it. Added `componentDidUpdate` that resets when `resetKey` prop (= `pathname`) changes. User now sees the correct page after navigating away from a crashed page.
+- **Exact crash on page unknown**: Python logs were clean, build was clean. The crash was React-side but the exact component couldn't be identified from code inspection alone. The ErrorBoundary now shows a full stack trace so future crashes are diagnosable.
+- APP_VERSION = "0.3.29" in main.py line 33
+
+---
+*Session 26 complete — 2026-06-30*
 
 ---
 *Session checkpoint: 2026-06-29 19:34:10*
