@@ -860,65 +860,44 @@ Focus: Colonisation tab overhaul — fix Market Finder, auto-import from depot, 
 
 ## Build status — Session 26 (COMPLETE)
 
-| Item | Status |
-|---|---|
-| Fix cargo overlay not receiving ship_cargo_update | DONE — `_import_cargo_json` and `_handle_cargo` now emit to overlay too |
-| Fix 'page error on all pages' | DONE — ErrorBoundary now auto-resets on route change so one crash doesn't lock all pages |
-| Add null guard to construction_update in Colonisation | DONE |
-| Stack trace shown in error panel | DONE |
-| v0.3.29 released | DONE |
+Focus: ErrorBoundary fix, cargo overlay fix, Construction overlay dynamic sizing.
+
+| Item | Status | File |
+|---|---|---|
+| Fix "everything is a page error" — ErrorBoundary stays in error state across route changes | DONE | `frontend/src/App.jsx` |
+| ErrorBoundary `componentDidUpdate` resets on `resetKey` (pathname) change | DONE | `frontend/src/App.jsx` |
+| ErrorBoundary now shows full stack trace in-app for future debugging | DONE | `frontend/src/App.jsx` |
+| Fix cargo overlay yellow bar — `_emit()` only reaches main window, not overlay windows | DONE | `main.py` |
+| `_import_cargo_json()` and `_handle_cargo()` both emit to overlay via `emit_to_overlay()` | DONE | `main.py` |
+| `_push_cargo_to_overlay()` — pushes cargo 2.5s after overlay is shown/toggled (timing fix) | DONE | `main.py` |
+| `get_ship_cargo()` lazy-imports from Cargo.json if cache is empty | DONE | `main.py` |
+| `resize_overlay(name, width, height)` API method added | DONE | `main.py` |
+| Construction overlay initial height set to 80px (resizes dynamically) | DONE | `core/overlay.py` |
+| `Construction.jsx` — full rewrite: dynamic sizing + completed commodity filtering | DONE | `frontend/src/overlays/Construction.jsx` |
+| Completed commodities (delivered >= required) hidden from overlay list | DONE | `frontend/src/overlays/Construction.jsx` |
+| `useLayoutEffect` + `panelRef` measures panel height and calls `resize_overlay` after every render | DONE | `frontend/src/overlays/Construction.jsx` |
+| "N commodities complete" footer shown when some items are done | DONE | `frontend/src/overlays/Construction.jsx` |
+| "All commodities delivered!" shown when all done | DONE | `frontend/src/overlays/Construction.jsx` |
+| Null guard added to `construction_update` handler in Colonisation.jsx | DONE | `frontend/src/pages/Colonisation.jsx` |
+| v0.3.29 released — ErrorBoundary fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.29 |
+| v0.3.30 released — cargo overlay fix | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.30 |
+| v0.3.31 released — dynamic overlay + completed commodity filtering | DONE | https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.31 |
 
 ## Key notes from Session 26
 
-- **Root cause of cargo overlay bug**: `_emit()` only sends to `self._window` (main window). The Construction overlay is a separate webview that needs `_overlay_manager.emit_to_overlay()`. Both `_import_cargo_json()` and `_handle_cargo()` now call both methods.
-- **Root cause of "everything is page error"**: The ErrorBoundary (class component) stays in error state when navigating routes — React doesn't auto-reset it. Added `componentDidUpdate` that resets when `resetKey` prop (= `pathname`) changes. User now sees the correct page after navigating away from a crashed page.
-- **Exact crash on page unknown**: Python logs were clean, build was clean. The crash was React-side but the exact component couldn't be identified from code inspection alone. The ErrorBoundary now shows a full stack trace so future crashes are diagnosable.
-- APP_VERSION = "0.3.29" in main.py line 33
+- **Root cause of "everything is page error"**: The ErrorBoundary class component stays in error state when navigating routes — React doesn't auto-reset it. Added `componentDidUpdate` that resets when `resetKey` prop (= `pathname`) changes.
+- **Root cause of cargo overlay bug**: Three-layer problem — (1) `_emit()` only sends to main window, not overlay; (2) overlay window didn't exist yet when `_import_cargo_json()` fired at startup; (3) `get_ship_cargo()` returned stale empty cache. Fixed all three: emit to both windows, 2.5s delayed push when overlay opens, lazy import from Cargo.json.
+- **Dynamic overlay sizing**: `useLayoutEffect` (no deps array) runs after every render. Measures `panelRef.current.offsetHeight`, calls `api()?.resize_overlay?.('construction', 460, h + 24)`. No deps = fires on every state change. This is intentional — content changes trigger re-measure.
+- **APP_VERSION = "0.3.31"** in `main.py` line 33.
+- **gh CLI not installed** — releases created via GitHub REST API directly using credentials from git credential manager.
+
+## Known issues / notes for next session
+
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` has 13 sites. Full Canonn dataset at `api.canonn.tech/guardianruins?_limit=500`.
+- Inara integration wired but blocked pending app registration. Falls back silently.
+- pygame not installable on Python 3.14 — audio disabled in dev; CI uses 3.12.
 
 ---
 *Session 26 complete — 2026-06-30*
-
----
-*Session checkpoint: 2026-06-29 19:34:10*
-
----
-*Session checkpoint: 2026-06-29 19:50:02*
-
----
-*Session checkpoint: 2026-06-29 19:51:13*
-
----
-*Session checkpoint: 2026-06-29 20:05:38*
-
----
-*Session checkpoint: 2026-06-29 20:06:04*
-
----
-*Session checkpoint: 2026-06-29 20:12:18*
-
----
-*Session checkpoint: 2026-06-29 20:17:28*
-
----
-*Session checkpoint: 2026-06-29 20:18:18*
-
----
-*Session checkpoint: 2026-06-29 20:26:19*
-
----
-*Session checkpoint: 2026-06-29 20:31:24*
-
----
-*Session checkpoint: 2026-06-29 20:33:55*
-
----
-*Session checkpoint: 2026-06-29 20:38:07*
-
----
-*Session checkpoint: 2026-06-29 20:40:32*
-
----
-*Session checkpoint: 2026-06-29 20:46:08*
-
----
-*Session checkpoint: 2026-06-29 20:49:00*
