@@ -4,16 +4,23 @@ const api = () => window?.pywebview?.api
 
 export default function Construction() {
   const [project, setProject] = useState(null)
+  const [shipCargo, setShipCargo] = useState({})
 
   useEffect(() => {
     api()?.get_construction_projects(true).then(projects => {
       if (projects?.length > 0) setProject(projects[0])
     })
+    api()?.get_ship_cargo().then(cargo => {
+      if (cargo) setShipCargo(buildCargoMap(cargo))
+    })
 
-    const off = window.__edtc?.on('construction_update', (payload) => {
+    const off1 = window.__edtc?.on('construction_update', (payload) => {
       setProject(payload)
     })
-    return off
+    const off2 = window.__edtc?.on('ship_cargo_update', (payload) => {
+      setShipCargo(buildCargoMap(payload?.cargo ?? []))
+    })
+    return () => { off1?.(); off2?.() }
   }, [])
 
   if (!project) {
@@ -54,7 +61,10 @@ export default function Construction() {
         <div className="space-y-1.5 max-h-40 overflow-y-auto">
           {reqs.map((r, i) => {
             const delivered = r.delivered ?? 0
-            const pct = Math.min(Math.round((delivered / r.required) * 100), 100)
+            const remaining = Math.max(0, r.required - delivered)
+            const onShip = Math.min(shipCargo[r.commodity.toLowerCase()] ?? 0, remaining)
+            const deliveredPct = Math.min(100, Math.round((delivered / r.required) * 100))
+            const onShipPct = Math.min(100 - deliveredPct, Math.round((onShip / r.required) * 100))
             const done = delivered >= r.required
             return (
               <div key={i}>
@@ -63,14 +73,24 @@ export default function Construction() {
                     {r.commodity}
                   </span>
                   <span className={done ? 'text-ed-success' : 'text-ed-muted'}>
-                    {delivered.toLocaleString()} / {r.required.toLocaleString()}
+                    {delivered.toLocaleString()}
+                    {onShip > 0 && !done && (
+                      <span className="text-yellow-400"> +{onShip.toLocaleString()}</span>
+                    )}
+                    {' '}/ {r.required.toLocaleString()}
                   </span>
                 </div>
-                <div className="h-0.5 bg-ed-border rounded-full overflow-hidden mt-0.5">
+                <div className="h-0.5 bg-ed-border rounded-full overflow-hidden mt-0.5 flex">
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${done ? 'bg-ed-success' : 'bg-ed-orange/60'}`}
-                    style={{ width: `${pct}%` }}
+                    className="h-full bg-ed-success transition-all duration-300"
+                    style={{ width: `${deliveredPct}%` }}
                   />
+                  {onShipPct > 0 && (
+                    <div
+                      className="h-full bg-yellow-400 transition-all duration-300"
+                      style={{ width: `${onShipPct}%` }}
+                    />
+                  )}
                 </div>
               </div>
             )
@@ -79,4 +99,13 @@ export default function Construction() {
       </div>
     </div>
   )
+}
+
+function buildCargoMap(inventory) {
+  const map = {}
+  for (const c of inventory) {
+    const name = (c.Name_Localised || c.Name || '').toLowerCase()
+    if (name) map[name] = (map[name] ?? 0) + (c.Count ?? 0)
+  }
+  return map
 }

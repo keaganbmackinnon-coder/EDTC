@@ -21,7 +21,7 @@ WATCHED_EVENTS = {
     "MaterialTrade", "EngineerCraft", "Synthesis",
     "Rank", "Progress", "Statistics", "Reputation",
     "Powerplay", "NavRoute", "NavRouteClear", "Loadout",
-    "Market",
+    "Market", "Cargo",
 }
 
 

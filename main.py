@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.22"  # bump this with every release
+APP_VERSION = "0.3.23"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -91,6 +91,7 @@ class API:
         self._auto_jump_delay: int = 10
         self._auto_jump_timer: threading.Timer | None = None
         self._current_ship: dict = {}
+        self._ship_cargo: list[dict] = []
 
     def set_window(self, window):
         self._window = window
@@ -185,6 +186,8 @@ class API:
             self._handle_loadout(event)
         elif event_name == "Market":
             self._import_market_json()
+        elif event_name == "Cargo":
+            self._handle_cargo(event)
 
     def _import_market_json(self):
         from core.journal import journal_path
@@ -220,6 +223,29 @@ class API:
                 logging.info(f"Market.json: {len(commodities)} commodities from {station} / {system}")
         except Exception as e:
             logging.warning(f"Market.json import error: {e}")
+
+    def _import_cargo_json(self):
+        from core.journal import journal_path
+        cargo_file = journal_path() / "Cargo.json"
+        if not cargo_file.exists():
+            return
+        try:
+            data = json.loads(cargo_file.read_text(encoding="utf-8"))
+            if data.get("Vehicle", "Ship") != "Ship":
+                return
+            self._ship_cargo = data.get("Inventory", [])
+            self._emit("ship_cargo_update", {"cargo": self._ship_cargo})
+        except Exception as e:
+            logging.warning(f"Cargo.json import error: {e}")
+
+    def _handle_cargo(self, event: dict):
+        if event.get("Vehicle", "Ship") != "Ship":
+            return
+        self._ship_cargo = event.get("Inventory", [])
+        self._emit("ship_cargo_update", {"cargo": self._ship_cargo})
+
+    def get_ship_cargo(self) -> list:
+        return self._ship_cargo
 
     def get_journal_path(self) -> str:
         from core.journal import journal_path
@@ -1692,6 +1718,7 @@ def main():
             import time
             time.sleep(1.5)
             api._import_market_json()
+            api._import_cargo_json()
             if api._current_ship:
                 api._emit("ship_changed", api.get_ship_info())
             if api._current_system:
