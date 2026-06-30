@@ -389,6 +389,14 @@ def delete_construction_project(project_id: int) -> bool:
     return True
 
 
+def _normalize_contrib_name(raw: str) -> str:
+    """Normalize commodity name from journal — handles both 'Steel' and '$steel_name;' formats."""
+    s = raw.strip().lstrip("$")
+    if "_name;" in s.lower():
+        s = s.lower().split("_name;")[0]
+    return s.lower()
+
+
 def record_construction_contribution(system: str, contributions: list) -> list:
     """contributions: list of {Name, Count} dicts from journal event"""
     updated = []
@@ -402,10 +410,10 @@ def record_construction_contribution(system: str, contributions: list) -> list:
             reqs = json.loads(project_row["requirements"])
             changed = False
             for contrib in contributions:
-                name = contrib.get("Name", "").lower()
+                name = _normalize_contrib_name(contrib.get("Name", "") or contrib.get("Name_Localised", ""))
                 count = int(contrib.get("Count", 0))
                 for req in reqs:
-                    if req.get("commodity", "").lower() == name:
+                    if _normalize_contrib_name(req.get("commodity", "")) == name:
                         req["delivered"] = req.get("delivered", 0) + count
                         changed = True
                         break
