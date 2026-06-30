@@ -3,18 +3,25 @@ import { useState, useEffect, Component } from 'react'
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
   static getDerivedStateFromError(e) { return { error: e } }
+  componentDidUpdate(prevProps) {
+    // Reset when the route key changes so navigating away clears the error
+    if (this.state.error && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ error: null })
+    }
+  }
   render() {
     if (this.state.error) return (
       <div className="p-8 text-red-400 font-mono text-sm">
         <div className="text-ed-orange font-semibold mb-2">Page error</div>
         <pre className="whitespace-pre-wrap">{this.state.error?.message}</pre>
+        <pre className="whitespace-pre-wrap text-xs text-ed-muted mt-2 max-h-40 overflow-auto">{this.state.error?.stack}</pre>
         <button className="mt-4 btn-ghost text-xs" onClick={() => this.setState({ error: null })}>Dismiss</button>
       </div>
     )
     return this.props.children
   }
 }
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
 import Navigation from './pages/Navigation'
 import Trading from './pages/Trading'
 import Exploration from './pages/Exploration'
@@ -55,6 +62,7 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
+  const { pathname } = useLocation()
   const [version, setVersion] = useState('')
   const [updateInfo, setUpdateInfo] = useState(null)   // {latest, download_url}
   const [updateState, setUpdateState] = useState(null) // null | 'downloading' | {pct, downloaded, total} | 'installing' | {error}
@@ -164,7 +172,7 @@ export default function App() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-ed-dark">
-        <ErrorBoundary>
+        <ErrorBoundary resetKey={pathname}>
         <Routes>
           <Route path="/" element={<Navigate to="/navigation" replace />} />
           <Route path="/navigation"   element={<Navigation />} />

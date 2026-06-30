@@ -858,3 +858,48 @@ Focus: Colonisation tab overhaul — fix Market Finder, auto-import from depot, 
 
 ---
 *Session checkpoint: 2026-06-29 19:32:04*
+
+---
+*Session checkpoint: 2026-06-29 19:34:10*
+
+---
+*Session checkpoint: 2026-06-29 19:50:02*
+
+---
+*Session checkpoint: 2026-06-29 19:51:13*
+
+---
+*Session checkpoint: 2026-06-29 20:05:38*
+
+---
+*Session checkpoint: 2026-06-29 20:06:04*
+
+---
+*Session checkpoint: 2026-06-29 20:12:18*
+
+---
+*Session checkpoint: 2026-06-29 20:17:28*
+
+---
+*Session checkpoint: 2026-06-29 20:18:18*
+
+---
+*Session checkpoint: 2026-06-29 20:26:19*
+
+---
+*Session checkpoint: 2026-06-29 20:31:24*
+
+---
+*Session checkpoint: 2026-06-29 20:33:55*
+
+---
+*Session checkpoint: 2026-06-29 20:38:07*
+
+---
+*Session checkpoint: 2026-06-29 20:40:32*
+
+---
+*Session checkpoint: 2026-06-29 20:46:08*
+
+---
+*Session checkpoint: 2026-06-29 20:49:00*

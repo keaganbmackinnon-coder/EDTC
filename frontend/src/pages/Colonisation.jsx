@@ -767,6 +767,7 @@ export default function Colonisation() {
 
   useEffect(() => {
     const off1 = window.__edtc?.on('construction_update', proj => {
+      if (!proj) return
       setProjects(prev => {
         const idx = prev.findIndex(p => p.id === proj.id)
         if (idx === -1) return [proj, ...prev]

@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.28"  # bump this with every release
+APP_VERSION = "0.3.29"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -234,7 +234,9 @@ class API:
             if data.get("Vehicle", "Ship") != "Ship":
                 return
             self._ship_cargo = data.get("Inventory", [])
-            self._emit("ship_cargo_update", {"cargo": self._ship_cargo})
+            payload = {"cargo": self._ship_cargo}
+            self._emit("ship_cargo_update", payload)
+            self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
         except Exception as e:
             logging.warning(f"Cargo.json import error: {e}")
 
@@ -242,7 +244,9 @@ class API:
         if event.get("Vehicle", "Ship") != "Ship":
             return
         self._ship_cargo = event.get("Inventory", [])
-        self._emit("ship_cargo_update", {"cargo": self._ship_cargo})
+        payload = {"cargo": self._ship_cargo}
+        self._emit("ship_cargo_update", payload)
+        self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
 
     def get_ship_cargo(self) -> list:
         return self._ship_cargo
