@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const api = () => window?.pywebview?.api
 
@@ -1128,6 +1128,301 @@ function ThargoidTab({ currentSystem }) {
   )
 }
 
+// ---- Galaxy Map ----
+
+// Deterministic star field (no Math.random — stable across renders)
+const BG_STARS = Array.from({ length: 200 }, (_, i) => ({
+  x: (Math.sin(i * 1.618) + 1) / 2,
+  y: (Math.cos(i * 2.399) + 1) / 2,
+  r: ((Math.sin(i * 5.7) + 1) / 2) * 0.7 + 0.1,
+}))
+
+const GX_SCALE = 155  // ly per pixel for top-down 600×600 canvas
+const SGR_AX   = 25   // Sgr A* X offset from Sol (ly)
+const SGR_AZ   = 25900 // Sgr A* Z offset from Sol (ly)
+
+function gxToCanvas(edX, edZ, W, H) {
+  return [
+    W / 2 + (edX - SGR_AX) / GX_SCALE,
+    H / 2 - (edZ - SGR_AZ) / GX_SCALE,
+  ]
+}
+
+function drawTopDown(ctx, W, H) {
+  ctx.fillStyle = '#050510'
+  ctx.fillRect(0, 0, W, H)
+
+  for (const s of BG_STARS) {
+    ctx.fillStyle = `rgba(200,215,255,${(0.25 + s.r * 0.4).toFixed(2)})`
+    ctx.beginPath()
+    ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  const gcx = W / 2
+  const gcy = H / 2
+  const discR = 48000 / GX_SCALE
+
+  // Main disc gradient
+  const dg = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, discR)
+  dg.addColorStop(0,    'rgba(255,250,180,0.90)')
+  dg.addColorStop(0.03, 'rgba(255,200, 80,0.70)')
+  dg.addColorStop(0.08, 'rgba(220,130, 40,0.45)')
+  dg.addColorStop(0.18, 'rgba(180, 85, 22,0.25)')
+  dg.addColorStop(0.40, 'rgba(130, 55, 15,0.12)')
+  dg.addColorStop(0.70, 'rgba( 80, 35, 10,0.05)')
+  dg.addColorStop(1.00, 'rgba(  0,  0,  0,0.00)')
+  ctx.fillStyle = dg
+  ctx.beginPath()
+  ctx.ellipse(gcx, gcy, discR, discR * 0.97, 0, 0, Math.PI * 2)
+  ctx.fill()
+
+  // Spiral arm hints — 4 arms at 90° offsets, layered arcs
+  const armAngles = [0.2, Math.PI * 0.5 + 0.2, Math.PI + 0.2, Math.PI * 1.5 + 0.2]
+  ctx.save()
+  ctx.globalCompositeOperation = 'lighter'
+  for (const base of armAngles) {
+    for (let i = 0; i < 7; i++) {
+      const t = i / 6
+      const r = (0.10 + t * 0.60) * discR
+      const a = base + t * 0.85
+      ctx.beginPath()
+      ctx.arc(gcx, gcy, r, a, a + 0.75)
+      ctx.strokeStyle = `rgba(200,120,40,${(0.06 - t * 0.006).toFixed(3)})`
+      ctx.lineWidth = discR * 0.065
+      ctx.stroke()
+    }
+  }
+  ctx.restore()
+
+  // Sgr A* centre dot
+  ctx.fillStyle = 'rgba(255,240,100,0.95)'
+  ctx.beginPath(); ctx.arc(gcx, gcy, 2.5, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = 'rgba(255,240,100,0.75)'
+  ctx.font = '9px monospace'
+  ctx.fillText('Sgr A*', gcx + 4, gcy - 5)
+
+  // Key locations
+  const LOCS = [
+    { name: 'Sol',          edX: 0,     edZ: 0,     color: '#5599ff', glowR: 16, glowA: 0.30 },
+    { name: 'Colonia',      edX: -9530, edZ: 19808, color: '#ff9944', glowR: 0,  glowA: 0 },
+    { name: 'Beagle Point', edX: -1112, edZ: 65270, color: '#ff4499', glowR: 0,  glowA: 0 },
+  ]
+  ctx.font = '9px monospace'
+  for (const loc of LOCS) {
+    const [cx, cy] = gxToCanvas(loc.edX, loc.edZ, W, H)
+    if (cx < 4 || cx > W - 4 || cy < 4 || cy > H - 4) continue
+    if (loc.glowR) {
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, loc.glowR)
+      g.addColorStop(0, `rgba(85,153,255,${loc.glowA})`)
+      g.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = g
+      ctx.beginPath(); ctx.arc(cx, cy, loc.glowR, 0, Math.PI * 2); ctx.fill()
+    }
+    ctx.fillStyle = loc.color
+    ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill()
+    ctx.fillText(loc.name, cx + 5, cy - 3)
+  }
+
+  // Scale bar
+  const barPx = 10000 / GX_SCALE
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(12, H - 22); ctx.lineTo(12 + barPx, H - 22); ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(12, H - 26); ctx.lineTo(12, H - 18)
+  ctx.moveTo(12 + barPx, H - 26); ctx.lineTo(12 + barPx, H - 18)
+  ctx.stroke()
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.font = '8px monospace'
+  ctx.fillText('10,000 ly', 12, H - 10)
+}
+
+function drawEdgeOn(ctx, W, H) {
+  ctx.fillStyle = '#050510'
+  ctx.fillRect(0, 0, W, H)
+
+  for (const s of BG_STARS.slice(0, 100)) {
+    ctx.fillStyle = `rgba(200,215,255,${(0.15 + s.r * 0.25).toFixed(2)})`
+    ctx.beginPath()
+    ctx.arc(s.x * W, s.y * H, s.r * 0.6, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // Non-uniform scale: X covers 110,000 ly, Y shows ±2000 ly (exaggerated ~11×)
+  const SX = 110000 / W
+  const SY = 4000   / H
+  const CX = W / 2
+  const CY = H / 2
+  const gcx = CX + 25 / SX  // galactic centre ≈ same X as Sol
+
+  // Disc glow — three layers of increasing thickness
+  for (const [halfLy, alpha] of [[100, 0.55], [400, 0.22], [800, 0.08]]) {
+    const hp = halfLy / SY
+    const g = ctx.createLinearGradient(0, CY - hp, 0, CY + hp)
+    g.addColorStop(0,    'rgba(0,0,0,0)')
+    g.addColorStop(0.35, `rgba(180,100,30,${(alpha * 0.5).toFixed(2)})`)
+    g.addColorStop(0.50, `rgba(220,150,50,${alpha.toFixed(2)})`)
+    g.addColorStop(0.65, `rgba(180,100,30,${(alpha * 0.5).toFixed(2)})`)
+    g.addColorStop(1,    'rgba(0,0,0,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, CY - hp, W, hp * 2)
+  }
+
+  // Left/right edge fades
+  const fl = ctx.createLinearGradient(0, 0, W * 0.07, 0)
+  fl.addColorStop(0, '#050510'); fl.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = fl; ctx.fillRect(0, 0, W * 0.07, H)
+  const fr = ctx.createLinearGradient(W * 0.93, 0, W, 0)
+  fr.addColorStop(0, 'rgba(0,0,0,0)'); fr.addColorStop(1, '#050510')
+  ctx.fillStyle = fr; ctx.fillRect(W * 0.93, 0, W * 0.07, H)
+
+  // Galactic bulge (ellipse, taller than disc)
+  const bgW = 7000 / SX, bgH = 3000 / SY
+  const bg = ctx.createRadialGradient(gcx, CY, 0, gcx, CY, Math.max(bgW, bgH))
+  bg.addColorStop(0,    'rgba(255,230,100,0.85)')
+  bg.addColorStop(0.25, 'rgba(220,150, 40,0.35)')
+  bg.addColorStop(0.60, 'rgba(180, 90, 20,0.12)')
+  bg.addColorStop(1,    'rgba(  0,  0,  0,0.00)')
+  ctx.fillStyle = bg
+  ctx.beginPath(); ctx.ellipse(gcx, CY, bgW, bgH, 0, 0, Math.PI * 2); ctx.fill()
+
+  // Midplane reference lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'
+  ctx.lineWidth = 1
+  ctx.setLineDash([3, 8])
+  for (const ly of [-500, 0, 500]) {
+    const py = CY - ly / SY
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke()
+  }
+  ctx.setLineDash([])
+
+  // Sol dot
+  ctx.fillStyle = '#5599ff'
+  ctx.beginPath(); ctx.arc(CX, CY, 3, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = '#5599ff'
+  ctx.font = '9px monospace'
+  ctx.fillText('Sol', CX + 5, CY - 4)
+
+  // Y-axis labels
+  const y500 = 500 / SY
+  ctx.fillStyle = 'rgba(200,200,200,0.35)'
+  ctx.font = '9px monospace'
+  ctx.fillText('+500 ly', 5, CY - y500 + 9)
+  ctx.fillText('  0 ly',  5, CY - 1)
+  ctx.fillText('-500 ly', 5, CY + y500 - 2)
+}
+
+function GalaxyMapTab() {
+  const topRef  = useRef(null)
+  const edgeRef = useRef(null)
+  const [view,    setView]    = useState('topdown')
+  const [stats,   setStats]   = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(null)
+
+  async function loadStats() {
+    setLoading(true); setError(null)
+    const r = await api()?.get_galaxy_stats()
+    if (r?.error) setError(r.error)
+    else if (r)   setStats(r)
+    else           setError('No data returned — EDSM may be offline')
+    setLoading(false)
+  }
+
+  useEffect(() => { loadStats() }, [])
+
+  useEffect(() => {
+    const c = topRef.current
+    if (c) drawTopDown(c.getContext('2d'), c.width, c.height)
+  }, [])
+
+  useEffect(() => {
+    const c = edgeRef.current
+    if (c) drawEdgeOn(c.getContext('2d'), c.width, c.height)
+  }, [])
+
+  const systemsKnown = stats?.systems ?? 0
+  const rawPct  = systemsKnown > 0 ? systemsKnown / 400_000_000_000 * 100 : 0
+  // Log scale bar so tiny % is visible
+  const barPct  = rawPct > 0 ? Math.min(Math.log10(rawPct * 100 + 1) / Math.log10(101) * 100, 100) : 0
+
+  return (
+    <div className="space-y-4">
+      {/* Exploration % tracker */}
+      <div className="panel">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-ed-muted text-xs font-mono uppercase tracking-wider">Galaxy Exploration Progress</p>
+          <button className="btn-ghost text-xs" onClick={loadStats} disabled={loading}>
+            {loading ? 'Loading…' : 'Refresh'}
+          </button>
+        </div>
+        {loading && <p className="text-ed-muted text-sm font-mono">Fetching EDSM data…</p>}
+        {error   && <p className="text-ed-danger text-sm font-mono">{error}</p>}
+        {stats && !loading && (
+          <>
+            <p className="font-mono">
+              <span className="text-ed-orange font-semibold text-2xl">{rawPct.toFixed(5)}%</span>
+              <span className="text-ed-muted text-sm ml-2">of the Milky Way explored</span>
+            </p>
+            <p className="text-ed-muted text-xs font-mono mt-0.5">
+              {fmtNum(systemsKnown)} systems known to EDSM · ~400,000,000,000 estimated total
+            </p>
+            <div className="mt-3">
+              <div className="h-1.5 bg-ed-surface rounded overflow-hidden">
+                <div className="h-full bg-ed-orange rounded transition-all" style={{ width: `${barPct}%` }} />
+              </div>
+              <p className="text-ed-muted text-xs font-mono mt-1 text-right">progress bar uses logarithmic scale</p>
+            </div>
+            {stats.commanders != null && (
+              <div className="flex gap-4 mt-3 text-xs font-mono text-ed-muted">
+                <span>Commanders: <span className="text-ed-text">{fmtNum(stats.commanders)}</span></span>
+                {stats.bodies != null && <span>Bodies mapped: <span className="text-ed-text">{fmtNum(stats.bodies)}</span></span>}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Projection toggle */}
+      <div className="flex gap-2 items-center">
+        <span className="text-ed-muted text-xs font-mono">Projection:</span>
+        {[
+          { id: 'topdown', label: 'Top-Down' },
+          { id: 'edgeon',  label: 'Edge-On'  },
+        ].map(v => (
+          <button
+            key={v.id}
+            onClick={() => setView(v.id)}
+            className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
+              view === v.id
+                ? 'bg-ed-orange/20 border-ed-orange text-ed-orange'
+                : 'border-ed-border text-ed-muted hover:border-ed-text hover:text-ed-text'
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Canvas */}
+      <div className="rounded border border-ed-border overflow-hidden bg-[#050510]">
+        <canvas ref={topRef}  width={600} height={600} className={`w-full block ${view === 'topdown' ? '' : 'hidden'}`} />
+        <canvas ref={edgeRef} width={600} height={250} className={`w-full block ${view === 'edgeon'  ? '' : 'hidden'}`} />
+      </div>
+
+      <div className="flex justify-between text-xs font-mono text-ed-muted">
+        <span>
+          {view === 'topdown'
+            ? 'Galactic north = up · Sgr A* at centre · ~155 ly/px'
+            : 'Side view · Y=0 = galactic midplane · Y scale ~11× exaggerated'}
+        </span>
+        <span>Source: EDSM · map: stylized</span>
+      </div>
+    </div>
+  )
+}
+
 // ---- Main ----
 
 const TABS = [
@@ -1138,6 +1433,7 @@ const TABS = [
   { id: 'factions',  label: 'Factions' },
   { id: 'traffic',   label: 'Traffic' },
   { id: 'stats',     label: 'Galaxy Stats' },
+  { id: 'galmap',    label: 'Galaxy Map' },
 ]
 
 export default function Galaxy() {
@@ -1183,6 +1479,7 @@ export default function Galaxy() {
       {tab === 'factions'  && <FactionsTab currentSystem={currentSystem} />}
       {tab === 'traffic'   && <TrafficTab currentSystem={currentSystem} />}
       {tab === 'stats'     && <GalaxyStatsTab />}
+      {tab === 'galmap'    && <GalaxyMapTab />}
     </div>
   )
 }

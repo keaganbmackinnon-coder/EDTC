@@ -941,6 +941,43 @@ Focus: Guardian sites data overhaul.
 *Session 27 complete — 2026-06-30*
 
 ---
+
+## Build status — Session 28 (COMPLETE)
+
+Focus: Galaxy Map tab + overlay diagnostics.
+
+| Item | Status | File |
+|---|---|---|
+| Galaxy Map tab added to Galaxy page (new 8th tab) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `GalaxyMapTab` component — canvas-based galaxy visualization | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Top-down view: galaxy disc gradient + spiral arm hints + key locations (Sol, Colonia, Beagle Point, Sgr A*) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Edge-on view: thin disc glow + galactic bulge + ±500 ly reference lines | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Exploration % tracker: EDSM system count / 400B estimated · log-scale progress bar | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `useRef` added to React import in Galaxy.jsx | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Construction overlay: minimum height guard (skip resize if h < 20px) | DONE | `frontend/src/overlays/Construction.jsx` |
+| overlay.py: added `logging` import + try/except + info/error logs in `_create()` | DONE | `core/overlay.py` |
+| `APP_VERSION` bumped to `0.3.33` | DONE | `main.py` |
+
+## Key notes from Session 28
+
+- **Galaxy Map data**: exploration % from `get_galaxy_stats()` (EDSM `systems` field / 400B). Map itself is stylized canvas — no live heatmap yet (architecture stub).
+- **Galaxy coordinate system**: Sgr A* at ED (25, 25900) placed at canvas centre. Scale ≈ 155 ly/px. Sol at ~(300, 444) on a 600×600 canvas.
+- **Heatmap future work**: Spansh/EDSM don't expose a grid-density API. Options: (a) pre-process Spansh galaxy dump once into a density grid JSON, (b) use EDSM tile queries for a subset, (c) keep stylized map and show live system counts only.
+- **Construction overlay issue**: user reported overlay not popping up after "operation update" to ED. Possible causes: (1) ED switched to exclusive full-screen blocking `on_top=True` windows → fix is Windowed Borderless mode; (2) pywebview window creation failing silently → now logged in `edtc_debug.log`; (3) zero-height resize → guarded. Check `edtc_debug.log` for "overlay: creating window 'construction'" and "overlay: window 'construction' created" lines.
+- **Journal events post-operation-update**: if ED renamed `ColonisationContribution` → check journal files for new event names and update `WATCHED_EVENTS` + `_handle_construction_contribution`.
+
+## Known issues / notes for next session
+
+- Construction overlay root cause not confirmed — check `edtc_debug.log` after enabling overlay to see if window creation fails.
+- If game is in exclusive full-screen, all `on_top=True` overlays will be blocked — not a code bug.
+- Galaxy Map heatmap layer is a stub — see "Heatmap future work" above.
+- Y-slice bands for Galaxy Map (the user's requested feature) are not yet implemented — need density data source first.
+- Canonn API (api.canonn.tech) still down — Guardian data has 136 sites from SrvSurvey/Canonn codex.
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- pygame not installable on Python 3.14 — audio disabled in dev; CI uses 3.12.
+
+---
 *Session checkpoint: 2026-06-30 19:41:59*
 
 ---
@@ -954,3 +991,27 @@ Focus: Guardian sites data overhaul.
 
 ---
 *Session checkpoint: 2026-06-30 19:47:12*
+
+---
+*Session checkpoint: 2026-06-30 19:49:30*
+
+---
+*Session checkpoint: 2026-06-30 19:51:44*
+
+---
+*Session checkpoint: 2026-06-30 19:52:43*
+
+---
+*Session checkpoint: 2026-06-30 19:57:50*
+
+---
+*Session checkpoint: 2026-06-30 20:01:14*
+
+---
+*Session checkpoint: 2026-06-30 20:03:37*
+
+---
+*Session checkpoint: 2026-06-30 20:06:27*
+
+---
+*Session checkpoint: 2026-06-30 20:13:16*

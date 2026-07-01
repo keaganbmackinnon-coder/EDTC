@@ -1,4 +1,5 @@
 import json
+import logging
 import threading
 from pathlib import Path
 from typing import Callable
@@ -93,20 +94,25 @@ class OverlayManager:
 
         def _create():
             import time
-            win = webview.create_window(
-                title=cfg["title"],
-                url=url,
-                width=cfg["width"],
-                height=cfg["height"],
-                transparent=True,
-                on_top=True,
-                frameless=True,
-                easy_drag=True,
-            )
-            self._windows[name] = win
-            self._shown[name] = True
-            time.sleep(1.5)
-            self._apply_opacity(name)
+            logging.info(f"overlay: creating window '{name}' url={url}")
+            try:
+                win = webview.create_window(
+                    title=cfg["title"],
+                    url=url,
+                    width=cfg["width"],
+                    height=cfg["height"],
+                    transparent=True,
+                    on_top=True,
+                    frameless=True,
+                    easy_drag=True,
+                )
+                self._windows[name] = win
+                self._shown[name] = True
+                logging.info(f"overlay: window '{name}' created")
+                time.sleep(1.5)
+                self._apply_opacity(name)
+            except Exception as e:
+                logging.error(f"overlay: failed to create window '{name}': {e}")
 
         threading.Thread(target=_create, daemon=True).start()
 

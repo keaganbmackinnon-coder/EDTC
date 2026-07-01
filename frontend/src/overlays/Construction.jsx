@@ -28,6 +28,7 @@ export default function Construction() {
   useLayoutEffect(() => {
     if (!panelRef.current) return
     const h = panelRef.current.offsetHeight
+    if (h < 20) return  // guard against zero-height on first paint
     api()?.resize_overlay?.('construction', 460, h + 24)
   })
 
