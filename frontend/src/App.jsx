@@ -3,6 +3,20 @@ import { useState, useEffect, Component } from 'react'
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
   static getDerivedStateFromError(e) { return { error: e } }
+  componentDidCatch(error) {
+    // Overlay windows are tiny and hard to read on screen — log to edtc_debug.log
+    // (retrying once the pywebview bridge is ready, since a crash this early can
+    // happen before window.pywebview.api exists) and grow the overlay window so
+    // the error is actually legible in place.
+    const report = () => {
+      window?.pywebview?.api?.log_frontend_error?.(error?.message ?? '', error?.stack ?? '')
+      if (this.props.overlayName) {
+        window?.pywebview?.api?.resize_overlay?.(this.props.overlayName, 700, 400)
+      }
+    }
+    if (window.pywebview?.api) report()
+    else window.addEventListener('pywebviewready', report, { once: true })
+  }
   componentDidUpdate(prevProps) {
     // Reset when the route key changes so navigating away clears the error
     if (this.state.error && prevProps.resetKey !== this.props.resetKey) {
@@ -107,9 +121,15 @@ export default function App() {
   const OverlayComponent = overlayKey ? OVERLAY_MAP[overlayKey] : null
 
   if (OverlayComponent) {
-    document.body.style.background = 'transparent'
-    document.documentElement.style.background = 'transparent'
-    return <OverlayComponent />
+    // True per-pixel window transparency depends on an undocumented, unreliable
+    // pywebview/WebView2 mechanism (see core/overlay.py) that can render a flat
+    // white window instead of see-through. Use a solid dark HUD panel instead —
+    // reliable every time, matches the app's own theme.
+    document.body.style.background = '#0a0c0f'
+    document.documentElement.style.background = '#0a0c0f'
+    // Without a boundary here, a render error in an overlay silently unmounts to
+    // nothing — indistinguishable from the dark background, i.e. "blank overlay".
+    return <ErrorBoundary resetKey={overlayKey} overlayName={overlayKey}><OverlayComponent /></ErrorBoundary>
   }
 
   return (

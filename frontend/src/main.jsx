@@ -20,11 +20,13 @@ window.__edtc = {
   },
 }
 
-// Set transparent background before React mounts so overlay windows never flash white
+// Set dark HUD background before React mounts so overlay windows never flash white.
+// (Real per-pixel transparency depends on an unreliable pywebview/WebView2 mechanism —
+// see core/overlay.py — so overlays use a solid dark background instead.)
 const _overlayKey = new URLSearchParams(window.location.hash.replace(/^#\/?/, '')).get('overlay')
 if (_overlayKey) {
-  document.body.style.background = 'transparent'
-  document.documentElement.style.background = 'transparent'
+  document.body.style.background = '#0a0c0f'
+  document.documentElement.style.background = '#0a0c0f'
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

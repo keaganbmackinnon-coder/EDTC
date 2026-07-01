@@ -96,12 +96,16 @@ class OverlayManager:
             import time
             logging.info(f"overlay: creating window '{name}' url={url}")
             try:
+                # transparent=True depends on an undocumented, unreliable pywebview/
+                # WebView2 mechanism that can render a flat white window instead of
+                # see-through (open upstream issue, no fix). Use a solid dark HUD
+                # background instead (set in App.jsx) — reliable every time.
                 win = webview.create_window(
                     title=cfg["title"],
                     url=url,
                     width=cfg["width"],
                     height=cfg["height"],
-                    transparent=True,
+                    background_color="#0a0c0f",
                     on_top=True,
                     frameless=True,
                     easy_drag=True,

@@ -1565,6 +1565,11 @@ class API:
             return sorted(result, key=lambda x: x.get("distance", 0))
         return self._edsm_run(_run)
 
+    # --- Diagnostics ---
+
+    def log_frontend_error(self, message: str, stack: str) -> None:
+        logging.error(f"Frontend error: {message}\n{stack}")
+
     # --- Clipboard ---
 
     def copy_to_clipboard(self, text: str) -> bool:

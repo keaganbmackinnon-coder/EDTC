@@ -8,12 +8,22 @@ export default function Construction() {
   const panelRef = useRef(null)
 
   useEffect(() => {
-    api()?.get_construction_projects(true).then(projects => {
-      if (projects?.length > 0) setProject(projects[0])
-    })
-    api()?.get_ship_cargo().then(cargo => {
-      if (cargo) setShipCargo(buildCargoMap(cargo))
-    })
+    // window.pywebview.api isn't guaranteed to exist yet on mount — a fresh
+    // overlay window is a cold WebView2 start, so this race loses often enough
+    // to matter. Wait for pywebviewready like App.jsx does.
+    function loadInitial() {
+      api()?.get_construction_projects?.(true)?.then(projects => {
+        if (projects?.length > 0) setProject(projects[0])
+      })
+      api()?.get_ship_cargo?.()?.then(cargo => {
+        if (cargo) setShipCargo(buildCargoMap(cargo))
+      })
+    }
+    if (window.pywebview?.api) {
+      loadInitial()
+    } else {
+      window.addEventListener('pywebviewready', loadInitial)
+    }
 
     const off1 = window.__edtc?.on('construction_update', (payload) => {
       setProject(payload ?? null)
@@ -21,16 +31,30 @@ export default function Construction() {
     const off2 = window.__edtc?.on('ship_cargo_update', (payload) => {
       setShipCargo(buildCargoMap(payload?.cargo ?? []))
     })
-    return () => { off1?.(); off2?.() }
+    return () => {
+      window.removeEventListener('pywebviewready', loadInitial)
+      off1?.(); off2?.()
+    }
   }, [])
 
-  // Resize the pywebview window to fit content after every render
+  // Resize the pywebview window to fit content. A plain post-render measurement
+  // can miss changes (e.g. commodity rows added/removed after the initial project
+  // load), so use a ResizeObserver tied to the actual DOM node instead — it fires
+  // on every real layout change regardless of why the content changed.
   useLayoutEffect(() => {
     if (!panelRef.current) return
-    const h = panelRef.current.offsetHeight
-    if (h < 20) return  // guard against zero-height on first paint
-    api()?.resize_overlay?.('construction', 460, h + 24)
-  })
+    const el = panelRef.current
+    const applySize = (h) => {
+      if (h < 20) return  // guard against zero-height on first paint
+      api()?.resize_overlay?.('construction', 460, Math.ceil(h) + 24)
+    }
+    applySize(el.offsetHeight)
+    const ro = new ResizeObserver(entries => {
+      for (const entry of entries) applySize(entry.contentRect.height)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [project, shipCargo])
 
   if (!project) {
     return (

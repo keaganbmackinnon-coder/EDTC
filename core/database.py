@@ -1,4 +1,5 @@
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -785,6 +786,13 @@ def bulk_upsert_spansh_dump(rows: list[tuple]) -> None:
         """, rows)
 
 
+def _commodity_symbol(name: str) -> str:
+    """EDDN/Market.json store commodity names as bare symbols ('combatstabilisers',
+    no spaces/punctuation) while the UI searches by display name ('Combat
+    Stabilisers') — normalize both sides to the same symbol before comparing."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
 def search_local_markets(commodity: str, ref_system: str | None = None) -> list[dict]:
     import math
     with _conn() as conn:
@@ -794,10 +802,10 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
                    sc.x, sc.y, sc.z
             FROM markets m
             LEFT JOIN system_coords sc ON sc.system = m.system
-            WHERE LOWER(m.commodity) = LOWER(?)
+            WHERE LOWER(REPLACE(REPLACE(m.commodity, ' ', ''), '-', '')) = ?
               AND (m.buy_price > 0 OR m.sell_price > 0)
             ORDER BY m.updated_at DESC
-        """, (commodity,)).fetchall()
+        """, (_commodity_symbol(commodity),)).fetchall()
 
         ref_coords = None
         if ref_system:
