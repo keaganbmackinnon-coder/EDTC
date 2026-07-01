@@ -1051,3 +1051,66 @@ Focus: Galaxy Map tab + overlay diagnostics.
 
 ---
 *Session checkpoint: 2026-07-01 01:27:12*
+
+---
+*Session checkpoint: 2026-07-01 01:39:42*
+
+---
+*Session checkpoint: 2026-07-01 01:51:39*
+
+---
+*Session checkpoint: 2026-07-01 02:07:09*
+
+---
+*Session checkpoint: 2026-07-01 02:16:43*
+
+---
+
+## Build status — Session 29 (COMPLETE)
+
+Focus: Galaxy Map polish, three dead-EDSM-endpoint fixes, colonisation overlay
+crash + auto-sync, a real local commodity-search bug, and Nearest Service
+rewrite.
+
+| Item | Status | File |
+|---|---|---|
+| Top-down map: 42 named galactic regions added as outline borders + labels (data derived from the community `klightspeed/EliteDangerousRegionMap` boundary grid) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Edge-on map: replaced 3-line ±500ly reference with full ±2000ly banding in 500ly steps | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Fixed dead endpoint: `get_galaxy_stats()` called EDSM `/api-v1/stats`, which never existed (confirmed via EDSM's real API docs) — replaced "Galaxy Exploration Progress" with "Local Data Cache" backed by the existing `get_market_stats()` | DONE | `main.py`, `frontend/src/pages/Galaxy.jsx` |
+| Removed "Galaxy Stats" tab — relied on the same dead endpoint with no honest local replacement | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Fixed dead endpoint: GalNet called EDSM `/api-v1/news` (also never existed) — added `api/galnet.py` hitting Frontier's real CMS (`cms.zaonce.net`, same backend as `community.elitedangerous.com/galnet`) | DONE | `api/galnet.py`, `main.py` |
+| Fixed dead endpoint: Community Goals called EDSM `/api-v1/community-goals` (also never existed, same pattern) — added `api/communitygoals.py` hitting the real public initiatives API (`api.orerve.net/2.0/website/initiatives/list`) | DONE | `api/communitygoals.py`, `main.py`, `frontend/src/pages/Galaxy.jsx` |
+| Colonisation: docking now auto-syncs delivered counts from the game's `ProvidedAmount` into the matching tracked project (`sync_construction_depot`), instead of only updating on a manual "Sync Delivered" click | DONE | `core/database.py`, `main.py` |
+| Colonisation: opening/enabling the construction overlay now also pushes the current system's project state, not just cargo, so it isn't empty on first open | DONE | `main.py` |
+| Overlay "white screen" root cause found: real per-pixel window transparency depends on an undocumented, unreliable pywebview/WebView2 mechanism (confirmed via upstream source + open GitHub issues, no fix available) — switched overlays to a solid dark HUD background instead | DONE | `core/overlay.py`, `frontend/src/App.jsx`, `frontend/src/main.jsx` |
+| Added an ErrorBoundary around the overlay render path — a React crash there was previously silently unmounting to nothing (indistinguishable from "blank") | DONE | `frontend/src/App.jsx` |
+| Found and fixed the real crash the ErrorBoundary exposed: `Construction.jsx` called `api()?.get_construction_projects(true)` with only `api()` optional-chained, not the method call — threw "is not a function" when the pywebview bridge object existed but that method wasn't attached yet | DONE | `frontend/src/overlays/Construction.jsx` |
+| Overlay dynamic sizing: replaced single post-render height measurement with a `ResizeObserver` tied to the actual panel DOM node (more reliable than one measurement synced to React's render timing) | DONE | `frontend/src/overlays/Construction.jsx` |
+| Fixed real, higher-impact bug: `_import_market_json()` stores commodity names as bare internal symbols (`combatstabilisers`), but `search_local_markets()` compared that against the human-readable display name (`Combat Stabilisers`) — any multi-word commodity failed to match. Affected **all** locally-cached EDDN + Market.json data, not just newly-visited stations | DONE | `core/database.py` |
+| Nearest Service rewrite: the old `/nearest` Spansh endpoint actually requires x/y/z coords, not a system name (confirmed via direct testing — 400s on a system name) and only ever supported one service — it was very likely never working. Replaced with `/stations/search` (already used for commodity search), sorted nearest-first, with service matching done client-side against each station's real `services` list | DONE | `api/spansh.py`, `main.py` |
+| Nearest Service UI: service chips are now multi-select toggles (find nearest station with ALL selected services) instead of single-select | DONE | `frontend/src/pages/Trading.jsx` |
+| Commodity Search: sort chips are now multi-select with priority order (click to add/remove; first selected = primary sort, rest are tiebreakers in order) | DONE | `frontend/src/pages/Trading.jsx` |
+| `APP_VERSION` bumped `0.3.33` → `0.3.34` (local build only — not tagged/released to GitHub) | DONE | `main.py` |
+
+## Key notes from Session 29
+
+- **EDSM endpoint audit**: three separate calls (`/api-v1/stats`, `/api-v1/news`, `/api-v1/community-goals`) all 404'd because those paths never existed on EDSM — confirmed by checking EDSM's actual API docs (only `system`/`systems`/`sphere-systems`/`cube-systems` are real). These were likely hallucinated in earlier sessions and had been silently broken (returning error strings) since Session 8/11. All three now have real, verified, working replacements.
+- **Spansh sort bug found but not fixed**: `api/spansh.py`'s existing `commodity_markets()` uses `"sort": "distance"` (a bare string) — verified via direct testing that this does **not** actually sort results by distance (returns effectively unsorted order across systems). The new `stations_near()` uses the correct form, `"sort": [{"distance": {"direction": "asc"}}]`. `commodity_markets()` still has the old broken form — worth fixing next session, since Commodity Search's Spansh-sourced results may not be true nearest-first despite the "Closest first" sort option implying otherwise (the local/EDDN-sourced half of results computes real distance correctly in Python, so only the Spansh portion is affected).
+- **pywebview/WebView2 transparency is a known dead end**: `transparent=True` on Windows depends on an internal "hack" the pywebview maintainers themselves describe as "no idea why this works," with multiple open, unresolved upstream issues about it rendering solid instead of see-through. Don't re-attempt real transparency for overlays — the solid dark HUD background is the correct, permanent approach here.
+- **Local build/deploy loop used this session**: `cd frontend && npm run build` → `pyinstaller --onefile --windowed --name EDTC --icon "frontend/public/icon.ico" --add-data "frontend/dist;frontend/dist" --add-data "data;data" main.py` → `taskkill /F /IM EDTC.exe` → wait ~2s for file lock release → `cp dist/EDTC.exe` over `%LOCALAPPDATA%\EDTC\EDTC.exe` → relaunch. This is what `build_local.bat` does non-interactively; the `.bat` itself has `pause` calls unsuitable for automation.
+- **Windows enumeration lesson (read this before automating any more UI clicks)**: `Get-Process -Id X | Select MainWindowHandle` is unreliable once a process owns multiple top-level windows (main window + overlay) — it can silently return whichever window Windows considers "main" at that instant, not necessarily the one you want. Always enumerate with `EnumWindows` + `GetWindowThreadProcessId` and match on window title/handle explicitly before clicking or resizing anything. Two incidents this session (one stray click landed in the live game, one landed in an unrelated always-on-top app, SrvSurvey) both traced back to computing click coordinates from a window rect that went stale before the click executed — the same root cause. Prefer read-only screenshots over synthesized clicks whenever possible.
+
+## Known issues / notes for next session
+
+- `api/spansh.py`'s `commodity_markets()` still uses the broken `"sort": "distance"` string form — fix to the array form used in `stations_near()` for genuinely-nearest-first Spansh results.
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` has 136 sites (37 ruins + 99 structures) — Canonn API (`api.canonn.tech`) was down all session; fetch the full dataset when it recovers.
+- pygame not installable on Python 3.14 — audio disabled in dev; CI builds use 3.12.
+- Galaxy Map heatmap/y-slice bands are still a stub — no density data source yet (unrelated to the sector outlines added this session, which use a different, boundary-only data source).
+- Inara integration wired but blocked pending app registration with Inara (unrelated, unresolved from Session 24).
+- Construction overlay visibility over Elite Dangerous in **exclusive fullscreen** may still be blocked by Windows compositor rules — recommend Borderless/Windowed mode in ED's display settings if the overlay doesn't appear even though this session confirmed its data pipeline and rendering are now correct.
+- `APP_VERSION` is at `0.3.34` locally but **not tagged or released** — no `v0.3.34` GitHub release exists. Bump/tag/release through the normal CI flow when ready.
+
+---
+*Session 29 complete — 2026-07-01*

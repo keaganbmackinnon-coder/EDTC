@@ -50,13 +50,25 @@ const SORT_OPTIONS = [
   { id: 'demand',     label: 'Demand ↓',   fn: (a, b) => b.demand - a.demand },
 ]
 
+// Combine multiple sort keys in priority order — each is a tiebreaker for the ones before it.
+function combinedComparator(ids) {
+  const fns = ids.map(id => SORT_OPTIONS.find(s => s.id === id)?.fn).filter(Boolean)
+  return (a, b) => {
+    for (const fn of fns) {
+      const result = fn(a, b)
+      if (result !== 0) return result
+    }
+    return 0
+  }
+}
+
 function CommoditySearchTab({ currentSystem, commodities }) {
   const [query, setQuery] = useState('')
   const [system, setSystem] = useState(currentSystem ?? '')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
-  const [sortId, setSortId] = useState('distance')
+  const [sortIds, setSortIds] = useState(['distance'])
   const [eddnStats, setEddnStats] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
   const [inaraKey, setInaraKey] = useState('')
@@ -102,6 +114,18 @@ function CommoditySearchTab({ currentSystem, commodities }) {
   const suggestions = commodities.filter(c =>
     query.length >= 2 && c.name.toLowerCase().includes(query.toLowerCase())
   ).slice(0, 8)
+
+  // Clicking a selected key removes it (unless it's the last one); clicking a new
+  // key appends it as the lowest-priority tiebreaker.
+  function toggleSort(id) {
+    setSortIds(prev => {
+      if (prev.includes(id)) {
+        const next = prev.filter(x => x !== id)
+        return next.length > 0 ? next : prev
+      }
+      return [...prev, id]
+    })
+  }
 
   async function doSearch(commodityName) {
     const name = commodityName ?? query
@@ -236,22 +260,28 @@ function CommoditySearchTab({ currentSystem, commodities }) {
       {results && results.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap mb-2">
-            <span className="text-ed-muted text-xs font-mono">{results.length} stations · Sort:</span>
-            {SORT_OPTIONS.map(s => (
-              <button
-                key={s.id}
-                onClick={() => setSortId(s.id)}
-                className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
-                  sortId === s.id
-                    ? 'border-ed-orange text-ed-orange'
-                    : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-text'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+            <span className="text-ed-muted text-xs font-mono">{results.length} stations · Sort (click to add/remove, in priority order):</span>
+            {SORT_OPTIONS.map(s => {
+              const priority = sortIds.indexOf(s.id)
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => toggleSort(s.id)}
+                  className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
+                    priority !== -1
+                      ? 'border-ed-orange text-ed-orange'
+                      : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-text'
+                  }`}
+                >
+                  {priority !== -1 && sortIds.length > 1 && (
+                    <span className="mr-1 opacity-70">{priority + 1}</span>
+                  )}
+                  {s.label}
+                </button>
+              )
+            })}
           </div>
-          {[...results].sort(SORT_OPTIONS.find(s => s.id === sortId)?.fn).map((r, i) => (
+          {[...results].sort(combinedComparator(sortIds)).map((r, i) => (
             <div key={i} className="panel">
               <div className="flex items-start justify-between gap-3 mb-1">
                 <div className="flex-1 min-w-0">
