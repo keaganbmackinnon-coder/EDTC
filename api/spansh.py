@@ -120,11 +120,20 @@ class SpanshAPI(BaseAPI):
 
     # --- Nearest ---
 
-    async def nearest_with_service(
-        self, system: str, service: str = "Large Pad"
-    ) -> dict | None:
-        data = await self.get("/nearest", {"system": system, "service": service})
-        return data.get("system")
+    async def stations_near(self, system: str, size: int = 200) -> list[dict]:
+        """Stations sorted nearest-first to `system`. The API's `services` filter
+        param is silently ignored (verified: identical results with/without it),
+        so service matching is done client-side against each station's own
+        `services` list instead — see core/database.py or main.py callers."""
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post("/stations/search", json={
+            "reference_system": system,
+            "sort": [{"distance": {"direction": "asc"}}],
+            "size": size,
+        })
+        resp.raise_for_status()
+        return resp.json().get("results", [])
 
     # --- Exobiology route ---
 

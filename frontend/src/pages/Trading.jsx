@@ -319,7 +319,7 @@ const SERVICES = [
 
 function NearestServiceTab({ currentSystem }) {
   const [system, setSystem] = useState(currentSystem ?? '')
-  const [service, setService] = useState('Large Pad')
+  const [services, setServices] = useState(() => new Set(['Large Pad']))
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -328,13 +328,22 @@ function NearestServiceTab({ currentSystem }) {
     if (currentSystem && !system) setSystem(currentSystem)
   }, [currentSystem])
 
+  function toggleService(s) {
+    setServices(prev => {
+      const next = new Set(prev)
+      if (next.has(s)) next.delete(s)
+      else next.add(s)
+      return next
+    })
+  }
+
   async function doSearch() {
     const sys = system.trim()
-    if (!sys) return
+    if (!sys || services.size === 0) return
     setLoading(true)
     setResult(null)
     setError(null)
-    const r = await api()?.find_nearest_service(sys, service)
+    const r = await api()?.find_nearest_service(sys, Array.from(services))
     if (r?.error) {
       setError(r.error)
     } else {
@@ -343,12 +352,10 @@ function NearestServiceTab({ currentSystem }) {
     setLoading(false)
   }
 
-  const stations = result?.stations ?? []
-
   return (
     <div>
       <p className="text-ed-muted text-sm mb-4">
-        Find the nearest station with a specific service. Data via Spansh.
+        Find the nearest station with all the selected services. Data via Spansh.
       </p>
 
       <div className="flex flex-col gap-2 mb-4">
@@ -356,8 +363,8 @@ function NearestServiceTab({ currentSystem }) {
           {SERVICES.map(s => (
             <button
               key={s}
-              onClick={() => setService(s)}
-              className={`text-xs font-mono px-2 py-1 rounded border transition-colors ${service === s ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
+              onClick={() => toggleService(s)}
+              className={`text-xs font-mono px-2 py-1 rounded border transition-colors ${services.has(s) ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
             >
               {s}
             </button>
@@ -374,7 +381,7 @@ function NearestServiceTab({ currentSystem }) {
           <button
             className="btn-primary text-sm disabled:opacity-40"
             onClick={doSearch}
-            disabled={loading || !system.trim()}
+            disabled={loading || !system.trim() || services.size === 0}
           >
             {loading ? 'Searching…' : 'Find Nearest'}
           </button>
@@ -392,27 +399,27 @@ function NearestServiceTab({ currentSystem }) {
         <div className="panel">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="text-ed-orange font-semibold font-ui text-lg">{result.name}</p>
+              <p className="text-ed-orange font-semibold font-ui text-lg">{result.station}</p>
               <p className="text-ed-muted text-xs font-mono mt-0.5">
-                {result.distance != null ? `${Number(result.distance).toFixed(2)} ly away` : ''}
+                {result.system}
+                {result.distance != null && ` · ${Number(result.distance).toFixed(2)} ly away`}
+                {result.distance_to_arrival != null && result.distance_to_arrival > 0 && (
+                  ` · ${Math.round(result.distance_to_arrival).toLocaleString()} ls from entry`
+                )}
               </p>
             </div>
+            {result.has_large_pad && (
+              <span className="text-xs font-mono text-ed-orange border border-ed-orange/40 px-1.5 rounded shrink-0">
+                Large Pad
+              </span>
+            )}
           </div>
-          {stations.length > 0 && (
-            <div className="space-y-2">
-              {stations.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-sm font-mono">
-                  <span className="text-ed-text">{s.name ?? s}</span>
-                  <div className="flex gap-3 text-ed-muted text-xs">
-                    {s.type && <span>{s.type}</span>}
-                    {s.distance_to_star != null && (
-                      <span>{Math.round(s.distance_to_star).toLocaleString()} ls</span>
-                    )}
-                    {s.max_landing_pad && (
-                      <span className="text-ed-orange">Pad {s.max_landing_pad}</span>
-                    )}
-                  </div>
-                </div>
+          {result.services?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {result.services.map(s => (
+                <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-ed-border text-ed-muted">
+                  {s}
+                </span>
               ))}
             </div>
           )}
@@ -420,7 +427,7 @@ function NearestServiceTab({ currentSystem }) {
       )}
 
       {!result && !loading && !error && (
-        <EmptyState message="Select a service type and enter a system." />
+        <EmptyState message="Select one or more services and enter a system." />
       )}
     </div>
   )

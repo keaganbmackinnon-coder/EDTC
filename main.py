@@ -1427,20 +1427,44 @@ class API:
         from core.database import clear_trade_log
         return clear_trade_log()
 
-    def find_nearest_service(self, system: str, service: str) -> dict:
+    def find_nearest_service(self, system: str, services: list) -> dict:
         import asyncio
         from api.spansh import SpanshAPI
+
+        def station_has(station: dict, label: str) -> bool:
+            label_l = label.lower()
+            if label_l == "large pad":
+                return bool(station.get("has_large_pad"))
+            if label_l == "medium pad":
+                return (station.get("medium_pads") or 0) > 0
+            names = {s.get("name", "").lower() for s in (station.get("services") or [])}
+            if label_l == "interstellar factor":
+                return any("interstellar factor" in n for n in names)
+            return label_l in names
+
         async def _run():
             spansh = SpanshAPI()
             try:
-                return await spansh.nearest_with_service(system, service)
+                return await spansh.stations_near(system)
             finally:
                 await spansh.close()
+
         try:
-            result = asyncio.run(_run())
-            return result or {"error": "No result found"}
+            stations = asyncio.run(_run())
         except Exception as e:
             return {"error": str(e)}
+
+        match = next((s for s in stations if all(station_has(s, svc) for svc in services)), None)
+        if not match:
+            return {"error": "No nearby station found with all selected services"}
+        return {
+            "station": match.get("name", ""),
+            "system": match.get("system_name", ""),
+            "distance": match.get("distance", 0),
+            "distance_to_arrival": match.get("distance_to_arrival", 0),
+            "has_large_pad": bool(match.get("has_large_pad")),
+            "services": [s.get("name", "") for s in (match.get("services") or [])],
+        }
 
     def get_commodities(self) -> list:
         return self._load_json("commodities.json").get("commodities", [])
