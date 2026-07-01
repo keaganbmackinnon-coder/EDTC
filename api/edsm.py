@@ -122,10 +122,6 @@ class EdsmAPI(BaseAPI):
     async def get_factions(self, system_name: str) -> dict:
         return await self.get("/api-system-v1/factions", {"systemName": system_name}) or {}
 
-    async def get_community_goals(self) -> list:
-        data = await self.get("/api-v1/community-goals", {})
-        return data if isinstance(data, list) else []
-
     async def get_system_thargoid(self, system_name: str) -> dict:
         return await self.get("/api-v1/system", {
             "systemName": system_name,

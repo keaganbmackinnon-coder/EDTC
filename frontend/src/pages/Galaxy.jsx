@@ -402,7 +402,7 @@ function CGProgressBar({ current, max, tier, maxTier }) {
   return (
     <div>
       <div className="flex justify-between text-xs font-mono mb-1">
-        <span className="text-ed-muted">Tier {tier ?? '?'} / {maxTier ?? '?'}</span>
+        <span className="text-ed-muted">{tier != null ? `Tier ${tier} / ${maxTier ?? '?'}` : 'Progress'}</span>
         <span className="text-ed-text">{pct}%</span>
       </div>
       <div className="h-2 bg-ed-dark rounded-full overflow-hidden">
@@ -694,7 +694,7 @@ function CommunityGoalsTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-ed-muted text-sm">Live community goals data via EDSM.</p>
+        <p className="text-ed-muted text-sm">Live community goals data.</p>
         <button className="btn-ghost text-sm" onClick={load} disabled={loading}>
           {loading ? 'Loading…' : 'Refresh'}
         </button>
@@ -728,7 +728,7 @@ function CommunityGoalsTab() {
           {filtered.length === 0 ? (
             <EmptyState message={
               goals.length === 0
-                ? 'No community goals data returned from EDSM.'
+                ? 'No active community goals right now.'
                 : `No ${filter.toLowerCase()} community goals.`
             } />
           ) : (

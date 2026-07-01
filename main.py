@@ -1512,7 +1512,18 @@ class API:
         return self._edsm_run(lambda e: e.get_traffic(system_name))
 
     def get_community_goals(self) -> list:
-        result = self._edsm_run(lambda e: e.get_community_goals())
+        import asyncio
+        from api.communitygoals import CommunityGoalsAPI
+        async def _run():
+            cg = CommunityGoalsAPI()
+            try:
+                return await cg.get_active()
+            finally:
+                await cg.close()
+        try:
+            result = asyncio.run(_run())
+        except Exception:
+            return []
         return result if isinstance(result, list) else []
 
     def get_powerplay_status(self) -> dict:
