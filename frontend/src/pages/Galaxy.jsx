@@ -65,7 +65,7 @@ function GalNetTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-ed-muted text-sm">Live GalNet news feed via EDSM.</p>
+        <p className="text-ed-muted text-sm">Live GalNet news feed.</p>
         <button className="btn-ghost text-sm" onClick={load} disabled={loading}>
           {loading ? 'Loading…' : 'Refresh'}
         </button>

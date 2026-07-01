@@ -1491,7 +1491,18 @@ class API:
             return {"error": str(e)}
 
     def get_galnet(self) -> list:
-        result = self._edsm_run(lambda e: e.get_news())
+        import asyncio
+        from api.galnet import GalnetAPI
+        async def _run():
+            galnet = GalnetAPI()
+            try:
+                return await galnet.get_news()
+            finally:
+                await galnet.close()
+        try:
+            result = asyncio.run(_run())
+        except Exception:
+            return []
         return result if isinstance(result, list) else []
 
     def get_system_factions(self, system_name: str) -> dict:

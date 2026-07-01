@@ -119,10 +119,6 @@ class EdsmAPI(BaseAPI):
 
     # --- Galaxy ---
 
-    async def get_news(self) -> list:
-        data = await self.get("/api-v1/news", {})
-        return data if isinstance(data, list) else []
-
     async def get_factions(self, system_name: str) -> dict:
         return await self.get("/api-system-v1/factions", {"systemName": system_name}) or {}
 
