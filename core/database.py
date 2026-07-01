@@ -428,6 +428,42 @@ def record_construction_contribution(system: str, contributions: list) -> list:
     return updated
 
 
+def sync_construction_depot(system: str, resources: list) -> dict | None:
+    """Overwrite delivered counts for the active project in `system` from a
+    ColonisationConstructionDepot event's ResourcesRequired (game's ground truth,
+    includes deliveries from all players). resources: list of
+    {Name, Name_Localised, RequiredAmount, ProvidedAmount} dicts."""
+    with _conn() as conn:
+        project_row = conn.execute(
+            "SELECT * FROM construction_projects WHERE active=1 AND LOWER(system)=LOWER(?)",
+            (system,),
+        ).fetchone()
+        if not project_row:
+            return None
+        reqs = json.loads(project_row["requirements"])
+        by_name = {
+            _normalize_contrib_name(r.get("Name_Localised") or r.get("Name", "")): r.get("ProvidedAmount", 0)
+            for r in resources
+        }
+        changed = False
+        for req in reqs:
+            provided = by_name.get(_normalize_contrib_name(req.get("commodity", "")))
+            if provided is not None and req.get("delivered") != provided:
+                req["delivered"] = provided
+                changed = True
+        if not changed:
+            d = dict(project_row)
+            d["requirements"] = reqs
+            return d
+        conn.execute(
+            "UPDATE construction_projects SET requirements=? WHERE id=?",
+            (json.dumps(reqs), project_row["id"]),
+        )
+        d = dict(project_row)
+        d["requirements"] = reqs
+        return d
+
+
 # --- FC Cargo ---
 
 def get_fc_cargo() -> list:

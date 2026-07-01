@@ -260,13 +260,22 @@ class API:
         return self._ship_cargo
 
     def _push_cargo_to_overlay(self):
-        """Push current ship cargo to the construction overlay after it has time to initialize."""
+        """Push current ship cargo and the active project for the current system
+        to the construction overlay after it has time to initialize — otherwise the
+        overlay stays empty until the next dock/contribution event fires this session."""
         def _push():
             import time
             time.sleep(2.5)
             payload = {"cargo": self._ship_cargo}
             self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
             logging.info(f"Pushed cargo to overlay: {len(self._ship_cargo)} items")
+            if self._current_system:
+                from core.database import get_construction_projects
+                projects = get_construction_projects(active_only=True)
+                match = next((p for p in projects if p.get("system", "").lower() == self._current_system.lower()), None)
+                if match:
+                    self._overlay_manager.emit_to_overlay("construction", "construction_update", match)
+                    logging.info(f"Pushed construction project to overlay: {match.get('name')}")
         threading.Thread(target=_push, daemon=True).start()
 
     def get_journal_path(self) -> str:
@@ -513,6 +522,11 @@ class API:
                 "complete": event.get("ConstructionComplete", False),
                 "resources": resources,
             })
+            from core.database import sync_construction_depot
+            project = sync_construction_depot(self._current_system, resources)
+            if project:
+                self._overlay_manager.emit_to_overlay("construction", "construction_update", project)
+                self._emit("construction_update", project)
 
     def _handle_cargo_transfer(self, event: dict):
         transfers = event.get("Transfers", [])
@@ -1485,10 +1499,6 @@ class API:
 
     def get_system_traffic(self, system_name: str) -> dict:
         return self._edsm_run(lambda e: e.get_traffic(system_name))
-
-    def get_galaxy_stats(self) -> dict:
-        result = self._edsm_run(lambda e: e.get_stats())
-        return result if isinstance(result, dict) else {}
 
     def get_community_goals(self) -> list:
         result = self._edsm_run(lambda e: e.get_community_goals())
