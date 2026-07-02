@@ -1178,3 +1178,26 @@ accuracy fixes found by inspecting live game data.
 
 ---
 *Session 30 complete — 2026-07-01*
+
+---
+*Session checkpoint: 2026-07-01 20:13:18*
+
+---
+*Session checkpoint: 2026-07-01 20:16:26*
+
+---
+*Session checkpoint: 2026-07-01 20:17:24*
+
+---
+*Session checkpoint: 2026-07-01 20:38:09*
+
+---
+
+## Session 30 addendum — v0.3.35 release + updater finding
+
+- v0.3.35 tagged, CI built and released: https://github.com/keaganbmackinnon-coder/EDTC/releases/tag/v0.3.35
+- Local install updated to v0.3.35 via the in-app updater — download and exe swap worked.
+- **NEW BUG — updater relaunch step silently fails**: `edtc_update.bat` copied the new exe fine (`%TEMP%\edtc_copy.log` shows success) but the `Unblock-File` + `Start-Process` relaunch never started the app; it had to be launched manually. The bat logs copy output but nothing from the relaunch step, so there is no error trail. Fix next session: redirect the PowerShell relaunch commands' output to the log too (e.g. `>> "%TEMP%\edtc_copy.log" 2>&1`), and consider `Start-Process -WorkingDirectory` or falling back to `explorer.exe "<exe>"` if Start-Process fails.
+
+---
+*Session 30 addendum — 2026-07-01*
