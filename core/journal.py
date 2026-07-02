@@ -12,7 +12,7 @@ WATCHED_EVENTS = {
     "Docked", "Undocked", "ShipTargeted", "FSSDiscoveryScan",
     "SAAScanComplete", "SellExplorationData", "MultiSellExplorationData",
     "ScanOrganic", "SellOrganicData", "MarketBuy", "MarketSell",
-    "MiningRefined", "MaterialCollected", "MaterialDiscarded",
+    "MiningRefined", "MaterialCollected", "MaterialDiscarded", "Materials",
     "EngineerProgress", "LoadGame", "Commander", "Fileheader",
     "ColonisationContribution", "ColonisationConstructionDepot",
     "ColonisationConstructionProgress",
@@ -53,8 +53,14 @@ class JournalWatcher:
         if not self._current_file:
             return
         STARTUP_EVENTS = {"Location", "FSDJump", "LoadGame", "Commander",
-                          "Rank", "Progress", "Statistics", "Powerplay", "Loadout"}
+                          "Rank", "Progress", "Statistics", "Powerplay", "Loadout",
+                          "Materials"}
+        # Material deltas after the login 'Materials' snapshot must be re-applied
+        # so counts stay exact when EDTC is launched mid-session.
+        MATERIAL_DELTAS = {"MaterialCollected", "MaterialDiscarded", "MaterialTrade",
+                           "EngineerCraft", "Synthesis"}
         seen = {}
+        material_deltas = []
         try:
             with open(self._current_file, "r", encoding="utf-8", errors="replace") as f:
                 for line in f:
@@ -66,12 +72,20 @@ class JournalWatcher:
                         kind = event.get("event")
                         if kind in STARTUP_EVENTS:
                             seen[kind] = event
+                            if kind == "Materials":
+                                material_deltas = []  # snapshot resets the baseline
+                        elif kind in MATERIAL_DELTAS:
+                            material_deltas.append(event)
                     except json.JSONDecodeError:
                         pass
         except OSError:
             return
         for event in seen.values():
             self._on_event(event)
+        # Without a snapshot to reset from, re-applying deltas would double-count.
+        if "Materials" in seen:
+            for event in material_deltas:
+                self._on_event(event)
 
     def run(self):
         if not self._path.exists():

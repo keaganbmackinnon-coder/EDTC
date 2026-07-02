@@ -1114,3 +1114,67 @@ rewrite.
 
 ---
 *Session 29 complete — 2026-07-01*
+
+---
+*Session checkpoint: 2026-07-01 02:24:28*
+
+---
+*Session checkpoint: 2026-07-01 19:29:04*
+
+---
+*Session checkpoint: 2026-07-01 19:31:04*
+
+---
+*Session checkpoint: 2026-07-01 19:34:01*
+
+---
+*Session checkpoint: 2026-07-01 20:00:10*
+
+---
+*Session checkpoint: 2026-07-01 20:07:32*
+
+---
+*Session checkpoint: 2026-07-01 20:08:51*
+
+---
+*Session checkpoint: 2026-07-01 20:10:34*
+
+---
+
+## Build status — Session 30 (COMPLETE)
+
+Focus: markets DB performance (index use, batched writes, pruning) + three
+accuracy fixes found by inspecting live game data.
+
+| Item | Status | File |
+|---|---|---|
+| `upsert_market_data` — commodity names normalized to bare symbols at insert time (`_commodity_symbol`), rows written with one `executemany` instead of per-row execute | DONE | `core/database.py` |
+| `search_local_markets` — WHERE clause compares the indexed column directly (was `LOWER(REPLACE(REPLACE(...)))` which forced a full table scan on every search); verified via `EXPLAIN QUERY PLAN` it now uses `idx_markets_commodity` | DONE | `core/database.py` |
+| One-time migration in `init_db` normalizes existing `markets` rows, guarded by `markets_symbol_migrated` pref; `UPDATE OR REPLACE` handles PK collisions (migrated row wins — next EDDN message corrects it) | DONE | `core/database.py` |
+| `prune_markets(days=30)` — deletes market rows older than 30 days; called from a background daemon thread at startup; removed 32,915 stale rows on first run | DONE | `core/database.py`, `main.py` |
+| **Cargo `Vessel` bug fix**: both `_handle_cargo` and `_import_cargo_json` checked `event.get("Vehicle")` but the journal/Cargo.json key is `Vessel` — the check always defaulted to "Ship", so SRV cargo could overwrite ship cargo | DONE | `main.py` |
+| **Materials ground-truth resync**: `Materials` login event (exact Raw/Manufactured/Encoded counts) now triggers `sync_materials()` which replaces the whole materials table — clears drift from sessions played without EDTC | DONE | `main.py`, `core/database.py`, `core/journal.py` |
+| Startup replay applies the `Materials` snapshot then re-applies material delta events (collect/discard/trade/craft/synthesis) that came after it in the journal — mid-session EDTC launches land on exact counts; deltas only re-applied when a snapshot exists (no double-count) | DONE | `core/journal.py` |
+| **Depot event dedup**: `ColonisationConstructionDepot` re-fires every few seconds while docked at a construction site (2,640 events in one week of journals) — handler now caches (MarketID, progress, ProvidedAmounts) and skips no-op re-fires | DONE | `main.py` |
+| Local build + exe swap to `%LOCALAPPDATA%\EDTC\EDTC.exe`; startup log confirms prune, vessel key, and materials resync all working | DONE | — |
+
+## Key notes from Session 30
+
+- **Migration behavior**: when a legacy display-name row collides with an already-normalized row for the same station, the migrated row wins even if older. Acceptable — the EDDN cache self-heals on the next message for that station.
+- **`prune_markets` skips rows with empty `updated_at`** (they'd otherwise compare less-than any date and be deleted immediately). Comparison is on `substr(updated_at, 1, 10)` (date part), which tolerates both `T`- and space-separated ISO timestamps.
+- **Journal `Cargo` event and Cargo.json use `"Vessel"`, not `"Vehicle"`** — worth remembering for any future Odyssey/SRV work.
+- **`Materials` event names**: entries use internal names with `Name_Localised` where they differ; the handler stores `Name_Localised or Name` lowercased, consistent with the existing delta handlers, so Engineering.jsx cross-refs keep working.
+- **Live-data findings not yet implemented** (from scanning a week of real journals): `CarrierLocation` fires at login/carrier-jump and would keep carrier location current without opening Carrier Management; `Undocked` is watched but unhandled so `_current_station` never clears (trade log entries after undock attribute to the old station); `FSDTarget` carries next-jump star class + `RemainingJumpsInRoute` (route overlay could warn on non-scoopable stars); `NavRoute` journal event includes per-hop `StarClass` that `_handle_nav_route` currently throws away; `Missions`/`StoredShips`/`HullDamage`/`ShieldState` and the Status.json `Flags` bitmask are all available but unused (feature freeze).
+- **Optimization suggestions from this session's code review, not yet implemented**: `get_market_stats()` still full-scans every 15s from Trading.jsx polling; per-call `asyncio.run` + fresh API clients means the rate limiter never actually limits across calls; watchlist is re-read from DB on every `ShipTargeted`; `_emit("journal", ...)` pushes every event to the frontend; WAL mode not enabled; `commodity_markets()` still uses the broken `"sort": "distance"` string form.
+
+## Known issues / notes for next session
+
+- Updater does not verify downloaded exe (no checksum).
+- CMDR ping `hide_after(8s)`: second ping within 8s may hide early.
+- `data/guardian_sites.json` has 136 sites — fetch full Canonn dataset when `api.canonn.tech` recovers.
+- pygame not installable on Python 3.14 — audio disabled in dev and local builds; CI builds use 3.12.
+- Inara integration wired but blocked pending app registration.
+- `APP_VERSION` still `0.3.34`, **not tagged or released** — local install has Session 30 fixes baked in; bump to 0.3.35 + tag when releasing through CI.
+
+---
+*Session 30 complete — 2026-07-01*

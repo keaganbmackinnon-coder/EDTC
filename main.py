@@ -92,6 +92,9 @@ class API:
         self._auto_jump_timer: threading.Timer | None = None
         self._current_ship: dict = {}
         self._ship_cargo: list[dict] = []
+        # ColonisationConstructionDepot re-fires every few seconds while docked
+        # at a construction site — remember the last payload to skip no-op re-fires
+        self._last_depot_key: tuple | None = None
 
     def set_window(self, window):
         self._window = window
@@ -147,6 +150,8 @@ class API:
             self._handle_carrier_deposit_fuel(event)
         elif event_name == "CarrierBuy":
             self._handle_carrier_buy(event)
+        elif event_name == "Materials":
+            self._handle_materials(event)
         elif event_name == "MaterialCollected":
             self._handle_material_collected(event)
         elif event_name == "MaterialDiscarded":
@@ -232,11 +237,11 @@ class API:
             return
         try:
             data = json.loads(cargo_file.read_text(encoding="utf-8"))
-            vehicle = data.get("Vehicle", "Ship")
+            vessel = data.get("Vessel", "Ship")
             inventory = data.get("Inventory", [])
-            logging.info(f"Cargo.json: vehicle={vehicle}, items={len(inventory)}, names={[i.get('Name_Localised') or i.get('Name') for i in inventory[:5]]}")
-            if vehicle != "Ship":
-                logging.info(f"Cargo.json: skipping non-ship vehicle ({vehicle})")
+            logging.info(f"Cargo.json: vessel={vessel}, items={len(inventory)}, names={[i.get('Name_Localised') or i.get('Name') for i in inventory[:5]]}")
+            if vessel != "Ship":
+                logging.info(f"Cargo.json: skipping non-ship vessel ({vessel})")
                 return
             self._ship_cargo = inventory
             payload = {"cargo": self._ship_cargo}
@@ -246,7 +251,7 @@ class API:
             logging.warning(f"Cargo.json import error: {e}")
 
     def _handle_cargo(self, event: dict):
-        if event.get("Vehicle", "Ship") != "Ship":
+        if event.get("Vessel", "Ship") != "Ship":
             return
         self._ship_cargo = event.get("Inventory", [])
         payload = {"cargo": self._ship_cargo}
@@ -514,6 +519,14 @@ class API:
 
     def _handle_construction_depot(self, event: dict):
         resources = event.get("ResourcesRequired", [])
+        key = (
+            event.get("MarketID"),
+            event.get("ConstructionProgress"),
+            tuple((r.get("Name"), r.get("ProvidedAmount")) for r in resources),
+        )
+        if key == self._last_depot_key:
+            return
+        self._last_depot_key = key
         if resources:
             self._emit("construction_depot", {
                 "system": self._current_system,
@@ -582,6 +595,22 @@ class API:
             "location": event.get("Location", ""),
         })
         self._emit("carrier_update", {"carrier": carrier})
+
+    def _handle_materials(self, event: dict):
+        """'Materials' fires at every login with exact Raw/Manufactured/Encoded
+        counts — resync the whole table so delta-tracking drift is cleared."""
+        from core.database import sync_materials
+        rows = []
+        for category in ("Raw", "Manufactured", "Encoded"):
+            for m in event.get(category, []):
+                name = (m.get("Name_Localised") or m.get("Name", "")).lower()
+                if name:
+                    rows.append((name, category, int(m.get("Count", 0))))
+        if not rows:
+            return
+        sync_materials(rows)
+        logging.info(f"Materials resync: {len(rows)} materials from journal snapshot")
+        self._emit("materials_changed", {})
 
     def _handle_material_collected(self, event: dict):
         from core.database import upsert_material
@@ -1788,9 +1817,20 @@ def _create_desktop_shortcut():
         pass
 
 
+def _prune_markets():
+    try:
+        from core.database import prune_markets
+        n = prune_markets()
+        if n:
+            logging.info(f"markets prune: removed {n} rows older than 30 days")
+    except Exception as e:
+        logging.warning(f"markets prune failed: {e}")
+
+
 def main():
     init_db()
     _create_desktop_shortcut()
+    threading.Thread(target=_prune_markets, daemon=True).start()
 
     api = API()
 

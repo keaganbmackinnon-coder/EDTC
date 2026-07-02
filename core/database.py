@@ -177,6 +177,24 @@ def init_db():
         # Indexes for fast commodity lookups
         conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_commodity ON markets(commodity)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_system ON markets(system)")
+        # One-time migration: normalize stored commodity names to bare symbols
+        # ('Combat Stabilisers' -> 'combatstabilisers') so searches compare the
+        # indexed column directly instead of scanning with REPLACE()/LOWER().
+        done = conn.execute(
+            "SELECT 1 FROM prefs WHERE key='markets_symbol_migrated'"
+        ).fetchone()
+        if not done:
+            names = [r[0] for r in conn.execute("SELECT DISTINCT commodity FROM markets")]
+            for name in names:
+                sym = _commodity_symbol(name)
+                if sym != name:
+                    conn.execute(
+                        "UPDATE OR REPLACE markets SET commodity=? WHERE commodity=?",
+                        (sym, name),
+                    )
+            conn.execute(
+                "INSERT OR REPLACE INTO prefs (key, value) VALUES ('markets_symbol_migrated', '1')"
+            )
 
 
 # --- Builds ---
@@ -605,6 +623,18 @@ def upsert_material(name: str, category: str, delta: int) -> None:
             )
 
 
+def sync_materials(rows: list) -> None:
+    """Replace all material counts with the ground-truth snapshot from the
+    'Materials' journal event (fires at every login). Clears any drift from
+    delta events missed while EDTC wasn't running. rows: (name, category, count)."""
+    with _conn() as conn:
+        conn.execute("DELETE FROM materials")
+        conn.executemany(
+            "INSERT INTO materials (name, category, count) VALUES (?, ?, ?)",
+            rows,
+        )
+
+
 def set_material_count(name: str, category: str, count: int) -> None:
     key = name.lower()
     with _conn() as conn:
@@ -731,26 +761,32 @@ def clear_trade_log() -> bool:
 # --- EDDN Market Cache ---
 
 def upsert_market_data(system: str, station: str, timestamp: str, commodities: list) -> None:
+    rows = []
+    for c in commodities:
+        # Store the normalized symbol so search_local_markets can compare the
+        # column directly and hit idx_markets_commodity.
+        name = _commodity_symbol(c.get("name") or "")
+        if not name:
+            continue
+        rows.append((
+            system, station, name,
+            c.get("buyPrice", 0), c.get("sellPrice", 0),
+            c.get("stock", 0), c.get("demand", 0),
+            timestamp,
+        ))
+    if not rows:
+        return
     with _conn() as conn:
-        for c in commodities:
-            name = (c.get("name") or "").lower()
-            if not name:
-                continue
-            conn.execute("""
-                INSERT INTO markets (system, station, commodity, buy_price, sell_price, supply, demand, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(system, station, commodity) DO UPDATE SET
-                    buy_price=excluded.buy_price,
-                    sell_price=excluded.sell_price,
-                    supply=excluded.supply,
-                    demand=excluded.demand,
-                    updated_at=excluded.updated_at
-            """, (
-                system, station, name,
-                c.get("buyPrice", 0), c.get("sellPrice", 0),
-                c.get("stock", 0), c.get("demand", 0),
-                timestamp,
-            ))
+        conn.executemany("""
+            INSERT INTO markets (system, station, commodity, buy_price, sell_price, supply, demand, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(system, station, commodity) DO UPDATE SET
+                buy_price=excluded.buy_price,
+                sell_price=excluded.sell_price,
+                supply=excluded.supply,
+                demand=excluded.demand,
+                updated_at=excluded.updated_at
+        """, rows)
 
 
 def upsert_system_coords(system: str, x: float, y: float, z: float) -> None:
@@ -802,7 +838,7 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
                    sc.x, sc.y, sc.z
             FROM markets m
             LEFT JOIN system_coords sc ON sc.system = m.system
-            WHERE LOWER(REPLACE(REPLACE(m.commodity, ' ', ''), '-', '')) = ?
+            WHERE m.commodity = ?
               AND (m.buy_price > 0 OR m.sell_price > 0)
             ORDER BY m.updated_at DESC
         """, (_commodity_symbol(commodity),)).fetchall()
@@ -836,6 +872,19 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
                 "source":              "eddn",
             })
         return results
+
+
+def prune_markets(days: int = 30) -> int:
+    """Delete market rows older than `days` so the EDDN cache (and everything
+    that scans it) stays bounded. Rows with an empty updated_at are kept.
+    Returns the number of rows deleted."""
+    with _conn() as conn:
+        cur = conn.execute(
+            "DELETE FROM markets WHERE updated_at != '' "
+            "AND substr(updated_at, 1, 10) < date('now', ?)",
+            (f"-{int(days)} days",),
+        )
+        return cur.rowcount
 
 
 def get_market_stats() -> dict:
