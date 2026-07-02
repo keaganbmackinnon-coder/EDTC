@@ -1275,3 +1275,27 @@ Focus: hotfix — Guardian page crash from Session 31's dataset import.
 
 ---
 *Session 32 complete — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 18:19:49*
+
+---
+*Session checkpoint: 2026-07-02 18:20:31*
+
+---
+
+## Session 32 continued — Spansh market filter + Undocked handler (v0.3.38)
+
+| Item | Status | File |
+|---|---|---|
+| **Spansh `commodity_markets()` was broken worse than known**: not only was `"sort": "distance"` ignored, the top-level `"market"` filter was ALSO silently ignored — verified by comparing counts for a real commodity, a rare, and a fake name (all identical, 10000). Spansh-sourced Commodity Search results have been unfiltered nearest-station lists all along | DONE | `api/spansh.py` |
+| Fix: filter must be nested as `"filters": {"market": [{"name": commodity}]}` and sort as `[{"distance": {"direction": "asc"}}]`. Verified live: fake commodity → count 0; Tritium from Sol → 100 filtered, distance-ascending results with per-station `market` entries (`buy_price`/`sell_price`/`supply`/`demand` keys match main.py's consumer) | DONE | `api/spansh.py` |
+| `Undocked` handler added — clears `_current_station` so trade log entries after undocking no longer attribute to the previous station | DONE | `main.py` |
+| `APP_VERSION` bumped to `0.3.38`; local build swapped in and verified running | DONE | `main.py` |
+
+## Notes
+
+- **Spansh `/stations/search` lesson**: unknown top-level keys are silently ignored (no 400) — every filter/sort must be verified by comparing result counts against a known-negative (fake name) probe. `stations_near()`'s docstring note about the ignored `services` filter is the same failure mode.
+
+---
+*Session 32 continued — 2026-07-02*

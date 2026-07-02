@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.37"  # bump this with every release
+APP_VERSION = "0.3.38"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -177,6 +177,8 @@ class API:
         elif event_name == "Docked":
             self._current_station = event.get("StationName", "")
             self._current_system = event.get("StarSystem", self._current_system)
+        elif event_name == "Undocked":
+            self._current_station = ""
         elif event_name == "MarketBuy":
             self._handle_market_buy(event)
         elif event_name == "MarketSell":

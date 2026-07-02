@@ -168,8 +168,11 @@ class SpanshAPI(BaseAPI):
         client = await self._get_client()
         resp = await client.post("/stations/search", json={
             "reference_system": system,
-            "market": [{"name": commodity}],
-            "sort": "distance",
+            # top-level "market" and bare "sort": "distance" are both silently
+            # ignored by Spansh — filters must be nested and sort must be the
+            # array form (verified: fake commodity returns count=0 this way)
+            "filters": {"market": [{"name": commodity}]},
+            "sort": [{"distance": {"direction": "asc"}}],
             "size": 100,
         })
         resp.raise_for_status()
