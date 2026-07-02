@@ -233,6 +233,7 @@ function R2RTab({ currentSystem }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [expanded, setExpanded] = useState(null)
+  const [sortBy, setSortBy] = useState('route')
 
   useEffect(() => {
     if (currentSystem && !origin) setOrigin(currentSystem)
@@ -250,10 +251,10 @@ function R2RTab({ currentSystem }) {
   }
 
   const bodyValue = b => b.estimated_mapping_value ?? b.estimated_scan_value ?? 0
-  const systems = result?.systems ?? []
-  const totalValue = systems.reduce((sum, s) => {
-    return sum + (s.bodies ?? []).reduce((bs, b) => bs + bodyValue(b), 0)
-  }, 0)
+  const sysVal = s => (s.bodies ?? []).reduce((bs, b) => bs + bodyValue(b), 0)
+  const systems = (result?.systems ?? []).map((s, idx) => ({ ...s, _routeIdx: idx }))
+  if (sortBy === 'value') systems.sort((a, b) => sysVal(b) - sysVal(a))
+  const totalValue = systems.reduce((sum, s) => sum + sysVal(s), 0)
 
   return (
     <div>
@@ -322,7 +323,20 @@ function R2RTab({ currentSystem }) {
       {systems.length > 0 && (
         <>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-ed-muted text-sm font-mono">{systems.length} systems</p>
+            <div className="flex items-center gap-3">
+              <p className="text-ed-muted text-sm font-mono">{systems.length} systems</p>
+              <div className="flex gap-1">
+                {[['route', 'Route Order'], ['value', 'Highest Value']].map(([id, label]) => (
+                  <button
+                    key={id}
+                    onClick={() => setSortBy(id)}
+                    className={`text-xs font-mono px-2 py-1 rounded border transition-colors ${sortBy === id ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-ed-gold font-mono font-semibold">
               Total: {fmtCredits(totalValue)} mapped
             </p>
@@ -332,7 +346,7 @@ function R2RTab({ currentSystem }) {
             {systems.map((s, i) => {
               const sysName = s.system ?? s.name ?? `System ${i + 1}`
               const bodies = s.bodies ?? []
-              const sysValue = bodies.reduce((sum, b) => sum + bodyValue(b), 0)
+              const sysValue = sysVal(s)
               const isOpen = expanded === i
 
               return (
@@ -342,7 +356,7 @@ function R2RTab({ currentSystem }) {
                     onClick={() => setExpanded(isOpen ? null : i)}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{i + 1}</span>
+                      <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{s._routeIdx + 1}</span>
                       <span className="text-ed-text font-ui font-semibold truncate">{sysName}</span>
                       {s.jumps != null && (
                         <span className="text-ed-muted text-xs font-mono shrink-0">
@@ -523,6 +537,8 @@ function ExoPlannerTab({ currentSystem }) {
   const [loading, setLoading]   = useState(false)
   const [result, setResult]     = useState(null)
   const [expanded, setExpanded] = useState(null)
+  const [bioFilter, setBioFilter] = useState([])
+  const [sortBy, setSortBy]     = useState('route')
 
   useEffect(() => {
     if (currentSystem && !origin) setOrigin(currentSystem)
@@ -543,14 +559,41 @@ function ExoPlannerTab({ currentSystem }) {
     setLoading(true)
     setResult(null)
     setExpanded(null)
+    setBioFilter([])
     const res = await api()?.plan_exobiology_route(origin.trim(), r, rad, n)
     setResult(res ?? { error: 'No response' })
     setLoading(false)
   }
 
-  const systems = (result?.systems ?? []).filter(s => s.bodies?.length > 0)
-  const totalValue = systems.reduce((sum, s) =>
-    sum + (s.bodies ?? []).reduce((bs, b) => bs + (b.landmark_value ?? 0), 0), 0)
+  const rawSystems = (result?.systems ?? []).filter(s => s.bodies?.length > 0)
+
+  const allBioTypes = [...new Set(rawSystems.flatMap(s =>
+    (s.bodies ?? []).flatMap(b => (b.landmarks ?? []).map(lm => lm.type).filter(Boolean))
+  ))].sort()
+
+  // Apply bio-type filter: keep only matching landmarks, recompute body values
+  // (landmark_value = sum of per-species values — one payout per species per body),
+  // and drop bodies/systems with nothing left.
+  const sysValue = s => (s.bodies ?? []).reduce((sum, b) => sum + (b.landmark_value ?? 0), 0)
+  const systems = rawSystems
+    .map((s, idx) => {
+      const bodies = (s.bodies ?? [])
+        .map(b => {
+          const landmarks = (b.landmarks ?? []).filter(lm =>
+            bioFilter.length === 0 || bioFilter.includes(lm.type))
+          return {
+            ...b,
+            landmarks,
+            landmark_value: landmarks.reduce((sum, lm) => sum + (lm.value ?? 0), 0),
+          }
+        })
+        .filter(b => b.landmarks.length > 0)
+      return { ...s, bodies, _routeIdx: idx }
+    })
+    .filter(s => s.bodies.length > 0)
+  if (sortBy === 'value') systems.sort((a, b) => sysValue(b) - sysValue(a))
+
+  const totalValue = systems.reduce((sum, s) => sum + sysValue(s), 0)
 
   return (
     <div>
@@ -612,6 +655,42 @@ function ExoPlannerTab({ currentSystem }) {
         </div>
       )}
 
+      {rawSystems.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <div className="flex gap-1">
+            {[['route', 'Route Order'], ['value', 'Highest Value']].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setSortBy(id)}
+                className={`text-xs font-mono px-2 py-1 rounded border transition-colors ${sortBy === id ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {allBioTypes.length > 0 && <span className="text-ed-muted text-xs font-mono ml-2">Bio:</span>}
+          <div className="flex gap-1 flex-wrap">
+            {allBioTypes.map(t => (
+              <button
+                key={t}
+                onClick={() => setBioFilter(f => f.includes(t) ? f.filter(x => x !== t) : [...f, t])}
+                className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${bioFilter.includes(t) ? 'border-green-500 text-green-400' : 'border-ed-border text-ed-muted hover:border-green-500/50'}`}
+              >
+                {t}
+              </button>
+            ))}
+            {bioFilter.length > 0 && (
+              <button
+                onClick={() => setBioFilter([])}
+                className="text-xs font-mono px-2 py-0.5 rounded border border-ed-border text-ed-muted hover:border-ed-orange/50"
+              >
+                ✕ Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {systems.length > 0 && (
         <>
           <div className="flex items-center justify-between mb-3">
@@ -622,8 +701,8 @@ function ExoPlannerTab({ currentSystem }) {
           <div className="space-y-1">
             {systems.map((s, i) => {
               const isOpen = expanded === i
-              const sysValue = (s.bodies ?? []).reduce((sum, b) => sum + (b.landmark_value ?? 0), 0)
               const speciesCount = (s.bodies ?? []).reduce((sum, b) => sum + (b.landmarks ?? []).length, 0)
+              const sVal = sysValue(s)
 
               return (
                 <div key={i} className="panel">
@@ -632,7 +711,7 @@ function ExoPlannerTab({ currentSystem }) {
                     onClick={() => setExpanded(isOpen ? null : i)}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{i + 1}</span>
+                      <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{s._routeIdx + 1}</span>
                       <span className="text-ed-text font-ui font-semibold truncate">{s.name}</span>
                       <span className="text-ed-muted text-xs font-mono shrink-0">
                         {s.jumps} {s.jumps === 1 ? 'jump' : 'jumps'}
@@ -643,7 +722,7 @@ function ExoPlannerTab({ currentSystem }) {
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-ed-gold font-mono text-sm font-semibold">
-                        {fmtCredits(sysValue)}
+                        {fmtCredits(sVal)}
                       </span>
                       <span className="text-ed-muted text-xs">{isOpen ? '▲' : '▼'}</span>
                     </div>

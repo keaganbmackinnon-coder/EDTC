@@ -1329,3 +1329,25 @@ every backend path those pages use.
 
 ---
 *Session 32 continued (Nomad audit) — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 19:23:38*
+
+---
+
+## Session 32 continued — Exo Planner filters (v0.3.40)
+
+| Item | Status | File |
+|---|---|---|
+| Exo Planner: bio-type filter chips (multi-toggle by genus, from `landmark.type`) — filters landmarks, recomputes body/system/total values from visible landmarks only, hides emptied bodies/systems | DONE | `frontend/src/pages/Exploration.jsx` |
+| Exo Planner + Road to Riches: sort chips (Route Order / Highest Value); row number stays the route index when value-sorted | DONE | `frontend/src/pages/Exploration.jsx` |
+| `APP_VERSION` bumped to `0.3.40`; local build swapped in | DONE | `main.py` |
+
+## Notes
+
+- **`landmark_value` semantics verified live**: equals `sum(landmark.value)` — `count` does NOT multiply (one payout per species per body). Filtered totals recompute with the same rule.
+- **Landmark `type` field is the genus** (e.g. "Cactoida") — no need to parse `subtype`.
+- **No discovery/footfall data in Spansh exo route** (checked all keys: system `{bodies,id64,jumps,name,x,y,z}`, body adds nothing discovery-related). All planner results are by definition already FSS-scanned by someone (data comes from EDDN uploads); the 5× first-logged exobiology bonus and first-footfall status are not available from any public API.
+
+---
+*Session 32 continued (exo filters) — 2026-07-02*
