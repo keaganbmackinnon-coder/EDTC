@@ -1245,3 +1245,33 @@ CMDR ping timer, Guardian dataset, Inara) while user play-tested colonisation.
 
 ---
 *Session 31 complete — 2026-07-01*
+
+---
+*Session checkpoint: 2026-07-01 21:31:22*
+
+---
+*Session checkpoint: 2026-07-01 21:32:24*
+
+---
+*Session checkpoint: 2026-07-02 18:09:41*
+
+---
+
+## Build status — Session 32 (COMPLETE)
+
+Focus: hotfix — Guardian page crash from Session 31's dataset import.
+
+| Item | Status | File |
+|---|---|---|
+| **Guardian page crash fixed**: 32 entries in the Session 31 SrvSurvey import had `"lat": "NaN"` / `"lon": "NaN"` as *strings*; `site.coordinates.lat?.toFixed(4)` in SiteCard threw `TypeError` (optional chaining doesn't guard non-null non-numbers), crashing SitesTab → ErrorBoundary took down the whole page | DONE | `data/guardian_sites.json` |
+| Data fix: those 32 entries now have `coordinates: null` (coords genuinely unknown in SrvSurvey source) | DONE | `data/guardian_sites.json` |
+| Render guard hardened: coords line only renders when `Number.isFinite(lat) && Number.isFinite(lon)` — bad data can no longer crash the page | DONE | `frontend/src/pages/Guardian.jsx` |
+| `APP_VERSION` bumped to `0.3.37`; local build swapped in and verified running | DONE | `main.py` |
+
+## Key notes from Session 32
+
+- **Lesson for future data imports**: SrvSurvey's allRuins.json uses `NaN` for unsurveyed lat/lon; a str() conversion during Session 31's import turned those into the JSON string `"NaN"`. When importing external datasets, validate that numeric fields are actually numeric (`isinstance(x, (int, float))`) before writing.
+- PyInstaller must be run from the project venv: `.venv\Scripts\pyinstaller.exe` (not on the system Python 3.14 path).
+
+---
+*Session 32 complete — 2026-07-02*

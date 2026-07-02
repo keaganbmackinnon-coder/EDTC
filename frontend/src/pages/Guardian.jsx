@@ -85,9 +85,9 @@ function SiteCard({ site, kind, onUpdate }) {
           </div>
           <p className="text-ed-muted text-xs font-mono mt-0.5">
             Body: {site.body}
-            {site.coordinates && (
+            {Number.isFinite(site.coordinates?.lat) && Number.isFinite(site.coordinates?.lon) && (
               <span className="ml-2">
-                {site.coordinates.lat?.toFixed(4)}°, {site.coordinates.lon?.toFixed(4)}°
+                {site.coordinates.lat.toFixed(4)}°, {site.coordinates.lon.toFixed(4)}°
               </span>
             )}
           </p>

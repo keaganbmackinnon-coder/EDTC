@@ -381,10 +381,7 @@
    "system": "Col 173 Sector AC-W b31-3",
    "body": "A 3",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "56 ls from arrival"
   },
   {
@@ -392,10 +389,7 @@
    "system": "Col 173 Sector AC-W b31-3",
    "body": "A 3",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "56 ls from arrival"
   },
   {
@@ -469,10 +463,7 @@
    "system": "Col 173 Sector AQ-G b26-1",
    "body": "A 2",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Alpha sites on this body · 38 ls from arrival"
   },
   {
@@ -546,10 +537,7 @@
    "system": "Col 173 Sector AW-C c13-8",
    "body": "C 1",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Beta sites on this body · 16,353 ls from arrival"
   },
   {
@@ -557,10 +545,7 @@
    "system": "Col 173 Sector AW-C c13-8",
    "body": "C 1",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "16,353 ls from arrival"
   },
   {
@@ -612,10 +597,7 @@
    "system": "Col 173 Sector CC-Z b31-1",
    "body": "B 1",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42,792 ls from arrival"
   },
   {
@@ -623,10 +605,7 @@
    "system": "Col 173 Sector CC-Z b31-1",
    "body": "B 1",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42,792 ls from arrival"
   },
   {
@@ -634,10 +613,7 @@
    "system": "Col 173 Sector CC-Z b31-1",
    "body": "B 1",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42,792 ls from arrival"
   },
   {
@@ -942,10 +918,7 @@
    "system": "Col 173 Sector GE-D b14-0",
    "body": "B 3",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "20,568 ls from arrival"
   },
   {
@@ -953,10 +926,7 @@
    "system": "Col 173 Sector GE-D b14-0",
    "body": "B 3",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Gamma sites on this body · 20,568 ls from arrival"
   },
   {
@@ -964,10 +934,7 @@
    "system": "Col 173 Sector GE-D b14-0",
    "body": "C 2",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Beta sites on this body · 20,379 ls from arrival"
   },
   {
@@ -1052,10 +1019,7 @@
    "system": "Col 173 Sector HG-G b26-1",
    "body": "B 1",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Gamma sites on this body · 1,820 ls from arrival"
   },
   {
@@ -1547,10 +1511,7 @@
    "system": "Col 173 Sector NI-J d9-48",
    "body": "A 5 c",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Beta sites on this body · 667 ls from arrival"
   },
   {
@@ -1778,10 +1739,7 @@
    "system": "Col 173 Sector PF-B b31-3",
    "body": "C 5",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "12,064 ls from arrival"
   },
   {
@@ -1789,10 +1747,7 @@
    "system": "Col 173 Sector PF-B b31-3",
    "body": "C 5",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Beta sites on this body · 12,064 ls from arrival"
   },
   {
@@ -2009,10 +1964,7 @@
    "system": "Col 173 Sector TK-C b30-6",
    "body": "B 2",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Alpha sites on this body · 262 ls from arrival"
   },
   {
@@ -2020,10 +1972,7 @@
    "system": "Col 173 Sector TK-C b30-6",
    "body": "B 2",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "262 ls from arrival"
   },
   {
@@ -2075,10 +2024,7 @@
    "system": "Col 173 Sector UP-O d6-41",
    "body": "11 c",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "1,941 ls from arrival"
   },
   {
@@ -2086,10 +2032,7 @@
    "system": "Col 173 Sector UP-O d6-41",
    "body": "11 c",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "1,941 ls from arrival"
   },
   {
@@ -2097,10 +2040,7 @@
    "system": "Col 173 Sector UP-O d6-41",
    "body": "11 d",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "1,928 ls from arrival"
   },
   {
@@ -2196,10 +2136,7 @@
    "system": "Col 173 Sector VC-W c17-15",
    "body": "B 4",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "44,377 ls from arrival"
   },
   {
@@ -2207,10 +2144,7 @@
    "system": "Col 173 Sector VC-W c17-15",
    "body": "B 4",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "2 Gamma sites on this body · 44,377 ls from arrival"
   },
   {
@@ -2966,10 +2900,7 @@
    "system": "Graea Hypue AG-V d3-438",
    "body": "10 a",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "4,316 ls from arrival"
   },
   {
@@ -2977,10 +2908,7 @@
    "system": "Graea Hypue AG-V d3-438",
    "body": "10 a",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "4,316 ls from arrival"
   },
   {
@@ -2988,10 +2916,7 @@
    "system": "Graea Hypue AG-V d3-438",
    "body": "10 b",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "4,322 ls from arrival"
   },
   {
@@ -3780,10 +3705,7 @@
    "system": "NGC 2516 Sector EL-Y d40",
    "body": "B 6",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "3,130 ls from arrival"
   },
   {
@@ -3791,10 +3713,7 @@
    "system": "NGC 2516 Sector EL-Y d40",
    "body": "B 6",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "3,130 ls from arrival"
   },
   {
@@ -3802,10 +3721,7 @@
    "system": "NGC 2516 Sector EL-Y d40",
    "body": "B 6",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "3,130 ls from arrival"
   },
   {
@@ -4649,10 +4565,7 @@
    "system": "Vela Dark Region IM-U b3-7",
    "body": "A 6",
    "type": "Alpha",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42 ls from arrival"
   },
   {
@@ -4660,10 +4573,7 @@
    "system": "Vela Dark Region IM-U b3-7",
    "body": "A 6",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42 ls from arrival"
   },
   {
@@ -4671,10 +4581,7 @@
    "system": "Vela Dark Region IM-U b3-7",
    "body": "A 6",
    "type": "Gamma",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "42 ls from arrival"
   },
   {
@@ -4682,10 +4589,7 @@
    "system": "Vela Dark Region IM-U b3-7",
    "body": "A 7",
    "type": "Beta",
-   "coordinates": {
-    "lat": "NaN",
-    "lon": "NaN"
-   },
+   "coordinates": null,
    "notes": "51 ls from arrival"
   },
   {
