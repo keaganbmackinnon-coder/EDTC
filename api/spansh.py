@@ -68,24 +68,38 @@ class SpanshAPI(BaseAPI):
     async def road_to_riches(
         self,
         origin: str,
-        destination: str,
-        range_ly: float,
+        destination: str = "",
+        range_ly: float = 30,
         max_systems: int = 100,
         max_distance: float = 500,
+        radius: float = 200,
+        min_value: int = 300_000,
     ) -> list[dict]:
-        data = await self.get("/riches/route", {
+        """Form POST — the endpoint requires from/range/radius/max_results and
+        rejects GET (verified live: the old GET with max_systems/buffer always
+        400'd). Result is a list of {name, jumps, bodies[]} where bodies use
+        snake_case keys (estimated_mapping_value, distance_to_arrival, ...).
+        Destination is optional — omit for a loop around the origin."""
+        await self._limiter.wait()
+        client = await self._get_client()
+        form = {
             "from": origin,
-            "to": destination,
             "range": range_ly,
-            "max_systems": max_systems,
+            "radius": radius,
+            "max_results": max_systems,
             "max_distance": max_distance,
-            "buffer": 1000,
-        })
-        job_id = data.get("job")
+            "min_value": min_value,
+            "use_mapping_value": "true",
+            "loop": "false",
+        }
+        if destination:
+            form["to"] = destination
+        resp = await client.post("/riches/route", data=form)
+        resp.raise_for_status()
+        job_id = resp.json().get("job")
         if not job_id:
             return []
-        result = await self._poll_job(job_id)
-        return result.get("system_jumps", [])
+        return await self._poll_job(job_id)
 
     # --- Fleet carrier planner ---
 

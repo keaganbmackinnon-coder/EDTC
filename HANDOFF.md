@@ -1299,3 +1299,33 @@ Focus: hotfix — Guardian page crash from Session 31's dataset import.
 
 ---
 *Session 32 continued — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 18:28:00*
+
+---
+
+## Session 32 continued — Exploration/Navigation audit for the Nomad (v0.3.39)
+
+Focus: user got the new **Nomad** ship (journal internal name `explorer_nx`, 80.1 ly
+max jump range) and wants Exploration + Navigation working perfectly. Live-tested
+every backend path those pages use.
+
+| Item | Status | File |
+|---|---|---|
+| **EDSM bodies endpoint 404**: `get_bodies()` called `/api-system-v0/bodies` which never existed — System Lookup's body list has been broken since Session 7. Fixed to `/api-system-v1/bodies` (verified live: 200, 40 bodies for Sol, field names match existing parser) | DONE | `api/edsm.py` |
+| **EDSM traffic endpoint 404**: same v0→v1 bug in `get_traffic()` — Galaxy Traffic tab was broken too | DONE | `api/edsm.py` |
+| **Road to Riches 400**: `/riches/route` requires form POST with `from/range/radius/max_results` — the old GET with `max_systems`/`buffer` params always 400'd (endpoint helpfully returns the required-params error). Rewritten as form POST with `radius`, `min_value=300000`, `use_mapping_value=true`; destination now optional (blank = loop near origin) | DONE | `api/spansh.py` |
+| **R2R frontend field mismatch**: response bodies use snake_case (`estimated_mapping_value`, `subtype`, `distance_to_arrival`, `is_terraformable`) but the tab read camelCase (`valueMapped`, `subType`, `distanceToArrival`) — values would have shown 0 even if the endpoint had worked. Fixed all reads; added jumps count + Terraformable badge; destination input now optional | DONE | `frontend/src/pages/Exploration.jsx` |
+| **Ship display names**: journal `Ship_Localised` is missing/empty for new ships — the Nomad showed as raw `explorer_nx`. Added `_SHIP_DISPLAY_NAMES` map (all ~45 standard ships incl. explorer_nx→Nomad, panthermkii→Panther Clipper Mk II) + `_ship_display_name()` helper used by `_handle_loadout` and `_handle_load_game` | DONE | `main.py` |
+| Verified working live, no changes needed: EDSM `get_system`, Spansh `neutron_route` (91 waypoints Sol→Colonia), Spansh `exobiology_route` (field names match ExoPlanner tab), Session Scanner pipeline, jump-range autofill (reads Loadout fields all present for the Nomad) | VERIFIED | — |
+| `APP_VERSION` bumped to `0.3.39`; local build swapped in and verified running | DONE | `main.py` |
+
+## Notes
+
+- **Nomad Loadout facts**: `Ship=explorer_nx`, `Ship_Localised` absent, `MaxJumpRange=80.11`, `UnladenMass=1403.6`, `FuelCapacity.Main=128`, `CargoCapacity=64`. All fields `get_ship_info()` needs are present.
+- **EDSM system endpoints**: `api-system-v1` is the real prefix for bodies/traffic (v0 404s). `factions` was already on v1. This is the 5th dead-EDSM-endpoint fix across sessions — always verify EDSM paths live before trusting them.
+- **Spansh riches API**: rejects GET; returns `{"error":"from, range, radius and max_results are required"}` on 400, which documents its own required params. Result = list of `{name, jumps, bodies[]}`, bodies in snake_case.
+
+---
+*Session 32 continued (Nomad audit) — 2026-07-02*

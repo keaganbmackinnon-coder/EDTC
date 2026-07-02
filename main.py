@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.38"  # bump this with every release
+APP_VERSION = "0.3.39"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -54,6 +54,43 @@ _SCAN_VALUES = {
     "Helium rich gas giant": 8_000,
     "Helium gas giant": 8_000,
 }
+
+
+# Journal internal ship names → display names. The journal's Ship_Localised is
+# missing or empty for some ships (notably new releases like the Nomad), so we
+# can't rely on it alone.
+_SHIP_DISPLAY_NAMES = {
+    "sidewinder": "Sidewinder", "eagle": "Eagle", "hauler": "Hauler",
+    "adder": "Adder", "empire_eagle": "Imperial Eagle",
+    "viper": "Viper Mk III", "viper_mkiv": "Viper Mk IV",
+    "cobramkiii": "Cobra Mk III", "cobramkiv": "Cobra Mk IV",
+    "cobramkv": "Cobra Mk V", "type6": "Type-6 Transporter",
+    "dolphin": "Dolphin", "type7": "Type-7 Transporter",
+    "asp": "Asp Explorer", "asp_scout": "Asp Scout", "vulture": "Vulture",
+    "empire_trader": "Imperial Clipper", "federation_dropship": "Federal Dropship",
+    "federation_dropship_mkii": "Federal Assault Ship",
+    "federation_gunship": "Federal Gunship", "diamondback": "Diamondback Scout",
+    "diamondbackxl": "Diamondback Explorer", "empire_courier": "Imperial Courier",
+    "independant_trader": "Keelback", "orca": "Orca", "type8": "Type-8 Transporter",
+    "type9": "Type-9 Heavy", "type9_military": "Type-10 Defender",
+    "krait_mkii": "Krait Mk II", "krait_light": "Krait Phantom",
+    "typex": "Alliance Chieftain", "typex_2": "Alliance Crusader",
+    "typex_3": "Alliance Challenger", "python": "Python",
+    "python_nx": "Python Mk II", "belugaliner": "Beluga Liner",
+    "ferdelance": "Fer-de-Lance", "mamba": "Mamba", "anaconda": "Anaconda",
+    "federation_corvette": "Federal Corvette", "cutter": "Imperial Cutter",
+    "mandalay": "Mandalay", "corsair": "Corsair",
+    "panthermkii": "Panther Clipper Mk II", "explorer_nx": "Nomad",
+}
+
+
+def _ship_display_name(event: dict) -> str:
+    raw = event.get("Ship", "")
+    return (
+        event.get("Ship_Localised")
+        or _SHIP_DISPLAY_NAMES.get(raw.lower())
+        or raw
+    )
 
 
 def _estimate_scan_value(event: dict) -> int:
@@ -709,7 +746,7 @@ class API:
     _GUARDIAN_BOOSTER_BONUS = {1: 4.0, 2: 6.0, 3: 7.75, 4: 9.25, 5: 10.5}
 
     def _handle_loadout(self, event: dict):
-        ship_type = event.get("Ship_Localised") or event.get("Ship", "")
+        ship_type = _ship_display_name(event)
         fuel = event.get("FuelCapacity", {})
 
         guardian_bonus = 0.0
@@ -748,7 +785,7 @@ class API:
         if event.get("Credits") is not None:
             set_cmdr_stat("credits", event["Credits"])
         if event.get("Ship"):
-            set_cmdr_stat("ship", event.get("Ship_Localised") or event["Ship"])
+            set_cmdr_stat("ship", _ship_display_name(event))
         if event.get("ShipIdent"):
             set_cmdr_stat("ship_ident", event["ShipIdent"])
         if event.get("ShipName"):

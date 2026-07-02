@@ -87,7 +87,8 @@ class EdsmAPI(BaseAPI):
     # --- Bodies ---
 
     async def get_bodies(self, system_name: str) -> list[Body]:
-        data = await self.get("/api-system-v0/bodies", {"systemName": system_name})
+        # v1, not v0 — the v0 path never existed (404s)
+        data = await self.get("/api-system-v1/bodies", {"systemName": system_name})
         bodies = data.get("bodies", []) if data else []
         return [
             Body(
@@ -115,7 +116,8 @@ class EdsmAPI(BaseAPI):
     # --- Traffic ---
 
     async def get_traffic(self, system_name: str) -> dict:
-        return await self.get("/api-system-v0/traffic", {"systemName": system_name})
+        # v1, not v0 — the v0 path never existed (404s)
+        return await self.get("/api-system-v1/traffic", {"systemName": system_name})
 
     # --- Galaxy ---
 

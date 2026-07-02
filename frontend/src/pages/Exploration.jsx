@@ -240,7 +240,7 @@ function R2RTab({ currentSystem }) {
 
   async function doRoute() {
     const r = parseFloat(range)
-    if (!origin.trim() || !dest.trim() || isNaN(r) || r <= 0) return
+    if (!origin.trim() || isNaN(r) || r <= 0) return
     setLoading(true)
     setResult(null)
     setExpanded(null)
@@ -249,9 +249,10 @@ function R2RTab({ currentSystem }) {
     setLoading(false)
   }
 
+  const bodyValue = b => b.estimated_mapping_value ?? b.estimated_scan_value ?? 0
   const systems = result?.systems ?? []
   const totalValue = systems.reduce((sum, s) => {
-    return sum + (s.bodies ?? []).reduce((bs, b) => bs + (b.valueMapped ?? b.value ?? 0), 0)
+    return sum + (s.bodies ?? []).reduce((bs, b) => bs + bodyValue(b), 0)
   }, 0)
 
   return (
@@ -272,12 +273,12 @@ function R2RTab({ currentSystem }) {
             />
           </div>
           <div>
-            <label className="text-ed-muted text-xs font-mono mb-1 block">Destination</label>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Destination (optional)</label>
             <input
               className="input font-mono text-sm w-full"
               value={dest}
               onChange={e => setDest(e.target.value)}
-              placeholder="Colonia"
+              placeholder="Blank = loop near origin"
             />
           </div>
           <div>
@@ -306,7 +307,7 @@ function R2RTab({ currentSystem }) {
         <button
           className="btn-primary text-sm disabled:opacity-40"
           onClick={doRoute}
-          disabled={loading || !origin.trim() || !dest.trim()}
+          disabled={loading || !origin.trim()}
         >
           {loading ? 'Plotting route (may take ~30s)…' : 'Plot Route'}
         </button>
@@ -331,7 +332,7 @@ function R2RTab({ currentSystem }) {
             {systems.map((s, i) => {
               const sysName = s.system ?? s.name ?? `System ${i + 1}`
               const bodies = s.bodies ?? []
-              const sysValue = bodies.reduce((sum, b) => sum + (b.valueMapped ?? b.value ?? 0), 0)
+              const sysValue = bodies.reduce((sum, b) => sum + bodyValue(b), 0)
               const isOpen = expanded === i
 
               return (
@@ -343,9 +344,9 @@ function R2RTab({ currentSystem }) {
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span className="text-ed-muted font-mono text-xs w-6 shrink-0">{i + 1}</span>
                       <span className="text-ed-text font-ui font-semibold truncate">{sysName}</span>
-                      {s.distance_to_destination != null && (
+                      {s.jumps != null && (
                         <span className="text-ed-muted text-xs font-mono shrink-0">
-                          {fmtLy(s.distance_to_destination)} remaining
+                          {s.jumps} {s.jumps === 1 ? 'jump' : 'jumps'}
                         </span>
                       )}
                     </div>
@@ -360,14 +361,19 @@ function R2RTab({ currentSystem }) {
                   {isOpen && bodies.length > 0 && (
                     <div className="mt-3 border-t border-ed-border pt-3 space-y-1">
                       {bodies.map((b, j) => {
-                        const bVal = b.valueMapped ?? b.value ?? 0
+                        const bVal = bodyValue(b)
                         return (
                           <div key={j} className="flex items-center gap-3 text-xs font-mono">
                             <span className="text-ed-muted w-4 text-center shrink-0">●</span>
-                            <span className="text-ed-text flex-1 truncate">{b.name ?? b.bodyName}</span>
-                            <span className="text-ed-muted shrink-0">{b.subType ?? b.type ?? ''}</span>
-                            {b.distanceToArrival != null && (
-                              <span className="text-ed-muted shrink-0">{fmtDist(b.distanceToArrival)}</span>
+                            <span className="text-ed-text flex-1 truncate">{b.name}</span>
+                            {b.is_terraformable && (
+                              <span className="text-green-300 border border-green-500/40 px-1 rounded shrink-0">
+                                Terraformable
+                              </span>
+                            )}
+                            <span className="text-ed-muted shrink-0">{b.subtype ?? b.type ?? ''}</span>
+                            {b.distance_to_arrival != null && (
+                              <span className="text-ed-muted shrink-0">{fmtDist(b.distance_to_arrival)}</span>
                             )}
                             <span className={`shrink-0 font-semibold ${bVal >= ELITE_VALUE ? 'text-ed-gold' : bVal >= HIGH_VALUE ? 'text-ed-orange' : 'text-ed-text'}`}>
                               {fmtCredits(bVal)}
