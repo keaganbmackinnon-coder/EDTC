@@ -165,6 +165,14 @@ def init_db():
                 y      REAL NOT NULL,
                 z      REAL NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS galaxy_coverage (
+                layer TEXT    NOT NULL,
+                gx    INTEGER NOT NULL,
+                gz    INTEGER NOT NULL,
+                count INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (layer, gx, gz)
+            );
         """)
         # Migrations for columns added after initial release
         for sql in [
@@ -893,6 +901,43 @@ def get_market_stats() -> dict:
         commodities = conn.execute("SELECT COUNT(DISTINCT commodity) FROM markets").fetchone()[0]
         systems = conn.execute("SELECT COUNT(*) FROM system_coords").fetchone()[0]
         return {"stations": stations, "commodities": commodities, "systems_with_coords": systems}
+
+
+# --- Galaxy scan coverage (heatmap grid) ---
+
+# Grid cell size in ly. The top-down map renders ~155 ly/px, so 300 ly ≈ 2 px.
+COVERAGE_CELL_LY = 300
+
+
+def coverage_cell(x: float, z: float) -> tuple[int, int]:
+    return (int(x // COVERAGE_CELL_LY), int(z // COVERAGE_CELL_LY))
+
+
+def replace_coverage_layer(layer: str, cells: dict) -> None:
+    """Atomically replace a layer's whole grid. cells: {(gx, gz): count}"""
+    with _conn() as conn:
+        conn.execute("DELETE FROM galaxy_coverage WHERE layer = ?", (layer,))
+        conn.executemany(
+            "INSERT INTO galaxy_coverage (layer, gx, gz, count) VALUES (?, ?, ?, ?)",
+            [(layer, gx, gz, c) for (gx, gz), c in cells.items()],
+        )
+
+
+def bump_coverage_cells(layer: str, cells: dict) -> None:
+    """Accumulate counts into a layer. cells: {(gx, gz): delta}"""
+    with _conn() as conn:
+        conn.executemany("""
+            INSERT INTO galaxy_coverage (layer, gx, gz, count) VALUES (?, ?, ?, ?)
+            ON CONFLICT(layer, gx, gz) DO UPDATE SET count = count + excluded.count
+        """, [(layer, gx, gz, c) for (gx, gz), c in cells.items()])
+
+
+def get_coverage_layer(layer: str) -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT gx, gz, count FROM galaxy_coverage WHERE layer = ?", (layer,)
+        ).fetchall()
+        return [[r["gx"], r["gz"], r["count"]] for r in rows]
 
 
 # --- Guardian ---

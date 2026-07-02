@@ -1351,3 +1351,33 @@ every backend path those pages use.
 
 ---
 *Session 32 continued (exo filters) — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 19:33:35*
+
+---
+
+## Session 32 continued — Galaxy Map scan-coverage heatmap (v0.3.41)
+
+Goal: show which sectors players have recently scanned so the user knows where
+NOT to go for first discoveries. This is the "heatmap future work" stub from
+Session 28, now real.
+
+| Item | Status | File |
+|---|---|---|
+| `galaxy_coverage` table (layer, gx, gz, count) + `coverage_cell()`, `replace_coverage_layer()`, `bump_coverage_cells()`, `get_coverage_layer()`; `COVERAGE_CELL_LY = 300` | DONE | `core/database.py` |
+| **Week layer**: `_refresh_week_coverage()` downloads EDSM `systemsWithCoordinates7days.json.gz` (~5 MB, nightly refresh upstream), bins into grid; runs on startup at most once per 20h (pref `coverage_week_refreshed`). Verified live: 138,081 systems → 12,357 cells in ~1s | DONE | `main.py` |
+| **Live layer**: EDDN journal-schema messages (every networked player's FSDJump/Scan/etc, ~17 msg/s measured) binned via `StarPos`, buffered in-memory, flushed to DB every 15s. The ZMQ listener already received all schemas — journal was just being dropped | DONE | `main.py` |
+| `get_galaxy_coverage(layer)` API — returns sparse `[[gx,gz,count],...]` + cell size; flushes live buffer on read | DONE | `main.py` |
+| Galaxy Map top-down view: "Scan activity" toggle (Off / Last 7 Days / Live EDDN), red log-scale heat cells, legend with report/sector counts; live polls every 60s | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `APP_VERSION` bumped to `0.3.41`; local install confirmed rebuilding week layer on launch | DONE | `main.py` |
+
+## Notes / data source facts
+
+- **EDSM 7-day dump**: `https://www.edsm.net/dump/systemsWithCoordinates7days.json.gz` — 5 MB, one JSON object per line inside an array, `{name, coords:{x,y,z}, date}`. Full historical dump is 3.6 GB (`systemsWithCoordinates.json.gz`) — NOT downloaded; would enable an "all known systems ever" base layer via one-time preprocess (offer as scripts/build_density.py if wanted).
+- **Spansh galaxy dumps** are 1.5 GB (1-day) / 3 GB (7-day) — rejected in favour of EDSM's 5 MB.
+- Coverage grid coords: `gx = floor(x/300)`, `gz = floor(z/300)` — signed, sparse; canvas mapping reuses `gxToCanvas()`.
+- Honest framing shown in UI: red = recently visited/scanned by players (EDSM submissions + EDDN traffic). It cannot show all-time discovery status without the 3.6 GB preprocess.
+
+---
+*Session 32 continued (coverage heatmap) — 2026-07-02*

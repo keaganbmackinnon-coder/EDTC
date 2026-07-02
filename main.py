@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.40"  # bump this with every release
+APP_VERSION = "0.3.41"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -132,6 +132,11 @@ class API:
         # ColonisationConstructionDepot re-fires every few seconds while docked
         # at a construction site — remember the last payload to skip no-op re-fires
         self._last_depot_key: tuple | None = None
+        # Galaxy scan-coverage: EDDN journal messages buffered here and flushed
+        # to the DB periodically (journal traffic is ~20-50 msg/s at peak)
+        self._cov_buf: dict[tuple, int] = {}
+        self._cov_last_flush: float = 0.0
+        self._cov_lock = threading.Lock()
 
     def set_window(self, window):
         self._window = window
@@ -1152,6 +1157,9 @@ class API:
 
     def _handle_eddn_message(self, msg: dict):
         schema = msg.get("$schemaRef", "")
+        if "journal" in schema:
+            self._handle_eddn_journal(msg.get("message", {}))
+            return
         if "commodity" not in schema:
             return
         message = msg.get("message", {})
@@ -1163,9 +1171,96 @@ class API:
             from core.database import upsert_market_data
             upsert_market_data(system, station, timestamp, commodities)
 
+    def _handle_eddn_journal(self, message: dict):
+        """Every journal-schema message (any player's FSDJump/Scan/Location/...)
+        carries StarPos — bin it into the live scan-coverage grid."""
+        star_pos = message.get("StarPos")
+        if not (isinstance(star_pos, list) and len(star_pos) == 3):
+            return
+        import time
+        from core.database import coverage_cell, bump_coverage_cells
+        cell = coverage_cell(star_pos[0], star_pos[2])
+        with self._cov_lock:
+            self._cov_buf[cell] = self._cov_buf.get(cell, 0) + 1
+            now = time.time()
+            if now - self._cov_last_flush < 15:
+                return
+            buf, self._cov_buf = self._cov_buf, {}
+            self._cov_last_flush = now
+        try:
+            bump_coverage_cells("live", buf)
+        except Exception as e:
+            logging.warning(f"coverage flush failed: {e}")
+
     def get_market_stats(self) -> dict:
         from core.database import get_market_stats
         return get_market_stats()
+
+    # --- Galaxy scan coverage ---
+
+    def _refresh_week_coverage(self):
+        """Download EDSM's 'systems updated in the last 7 days' dump (~5 MB)
+        and rebuild the 'week' coverage layer. Runs at most once per 20h."""
+        import gzip
+        import time
+        import urllib.request
+        from datetime import datetime, timezone
+        from core.database import get_pref, set_pref, coverage_cell, replace_coverage_layer
+
+        last = get_pref("coverage_week_refreshed", "")
+        if last:
+            try:
+                age_h = (time.time() - float(last)) / 3600
+                if age_h < 20:
+                    return
+            except ValueError:
+                pass
+        try:
+            url = "https://www.edsm.net/dump/systemsWithCoordinates7days.json.gz"
+            req = urllib.request.Request(url, headers={"User-Agent": f"EDTC/{APP_VERSION}"})
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                raw = gzip.decompress(resp.read())
+            cells: dict[tuple, int] = {}
+            n = 0
+            # Dump is a JSON array, one object per line: strip array/comma noise
+            for line in raw.decode("utf-8", errors="replace").splitlines():
+                line = line.strip().rstrip(",")
+                if not line.startswith("{"):
+                    continue
+                try:
+                    coords = json.loads(line).get("coords") or {}
+                    cell = coverage_cell(coords["x"], coords["z"])
+                except (KeyError, ValueError):
+                    continue
+                cells[cell] = cells.get(cell, 0) + 1
+                n += 1
+            if not cells:
+                logging.warning("coverage: EDSM week dump parsed to 0 systems, keeping old layer")
+                return
+            replace_coverage_layer("week", cells)
+            set_pref("coverage_week_refreshed", str(time.time()))
+            logging.info(f"coverage: week layer rebuilt — {n} systems into {len(cells)} cells")
+            self._emit("coverage_updated", {"layer": "week", "systems": n, "cells": len(cells)})
+        except Exception as e:
+            logging.warning(f"coverage: week refresh failed: {e}")
+
+    def get_galaxy_coverage(self, layer: str = "week") -> dict:
+        from core.database import get_coverage_layer, bump_coverage_cells, COVERAGE_CELL_LY, get_pref
+        if layer == "live":
+            # Flush any buffered EDDN cells so the map is current
+            with self._cov_lock:
+                buf, self._cov_buf = self._cov_buf, {}
+            if buf:
+                try:
+                    bump_coverage_cells("live", buf)
+                except Exception:
+                    pass
+        refreshed = get_pref("coverage_week_refreshed", "") if layer == "week" else ""
+        return {
+            "cells": get_coverage_layer(layer),
+            "cell_ly": COVERAGE_CELL_LY,
+            "refreshed": refreshed,
+        }
 
     def get_inara_key(self) -> str:
         from core.database import get_pref
@@ -1937,6 +2032,7 @@ def main():
             if api._current_system:
                 api._emit("system_changed", {"system": api._current_system})
         threading.Thread(target=_push_startup, daemon=True).start()
+        threading.Thread(target=api._refresh_week_coverage, daemon=True).start()
 
     webview.start(debug=DEV_MODE, func=_on_ready)
 

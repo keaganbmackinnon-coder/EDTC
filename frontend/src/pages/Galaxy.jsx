@@ -1318,6 +1318,21 @@ function drawEdgeOn(ctx, W, H) {
   }
 }
 
+function drawCoverage(ctx, W, H, coverage) {
+  const cells = coverage?.cells ?? []
+  if (cells.length === 0) return
+  const cellLy = coverage.cell_ly ?? 300
+  const px = Math.max(2, Math.ceil(cellLy / GX_SCALE))
+  // Log-scale alpha: 1 report = faint, hundreds = solid
+  for (const [gx, gz, count] of cells) {
+    const [cx, cy] = gxToCanvas(gx * cellLy + cellLy / 2, gz * cellLy + cellLy / 2, W, H)
+    if (cx < -px || cx > W + px || cy < -px || cy > H + px) continue
+    const a = Math.min(0.8, 0.18 + 0.20 * Math.log10(count + 1))
+    ctx.fillStyle = `rgba(255,60,60,${a.toFixed(2)})`
+    ctx.fillRect(cx - px / 2, cy - px / 2, px, px)
+  }
+}
+
 function GalaxyMapTab() {
   const topRef  = useRef(null)
   const edgeRef = useRef(null)
@@ -1325,6 +1340,9 @@ function GalaxyMapTab() {
   const [stats,   setStats]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
+  const [overlay,  setOverlay]  = useState('off')
+  const [coverage, setCoverage] = useState(null)
+  const [covInfo,  setCovInfo]  = useState('')
 
   async function loadStats() {
     setLoading(true); setError(null)
@@ -1336,10 +1354,37 @@ function GalaxyMapTab() {
 
   useEffect(() => { loadStats() }, [])
 
+  async function loadCoverage(layer) {
+    const r = await api()?.get_galaxy_coverage(layer)
+    setCoverage(r ?? null)
+    if (!r || r.cells.length === 0) {
+      setCovInfo(layer === 'live'
+        ? 'No live data yet — accumulates from the player network while EDTC runs.'
+        : 'Weekly data not downloaded yet — refreshes automatically shortly after launch.')
+    } else {
+      const total = r.cells.reduce((s, c) => s + c[2], 0)
+      setCovInfo(`${total.toLocaleString()} reports in ${r.cells.length.toLocaleString()} sectors`)
+    }
+  }
+
+  // Load coverage when the overlay layer changes; poll every 60s on live
+  useEffect(() => {
+    if (overlay === 'off') { setCoverage(null); setCovInfo(''); return }
+    loadCoverage(overlay)
+    if (overlay === 'live') {
+      const t = setInterval(() => loadCoverage('live'), 60000)
+      return () => clearInterval(t)
+    }
+  }, [overlay])
+
+  // Redraw base map + coverage overlay together
   useEffect(() => {
     const c = topRef.current
-    if (c) drawTopDown(c.getContext('2d'), c.width, c.height)
-  }, [])
+    if (!c) return
+    const ctx = c.getContext('2d')
+    drawTopDown(ctx, c.width, c.height)
+    if (overlay !== 'off' && coverage) drawCoverage(ctx, c.width, c.height, coverage)
+  }, [overlay, coverage])
 
   useEffect(() => {
     const c = edgeRef.current
@@ -1376,7 +1421,7 @@ function GalaxyMapTab() {
       </div>
 
       {/* Projection toggle */}
-      <div className="flex gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <span className="text-ed-muted text-xs font-mono">Projection:</span>
         {[
           { id: 'topdown', label: 'Top-Down' },
@@ -1394,7 +1439,38 @@ function GalaxyMapTab() {
             {v.label}
           </button>
         ))}
+        {view === 'topdown' && (
+          <>
+            <span className="text-ed-muted text-xs font-mono ml-4">Scan activity:</span>
+            {[
+              { id: 'off',  label: 'Off' },
+              { id: 'week', label: 'Last 7 Days' },
+              { id: 'live', label: 'Live (EDDN)' },
+            ].map(v => (
+              <button
+                key={v.id}
+                onClick={() => setOverlay(v.id)}
+                className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
+                  overlay === v.id
+                    ? 'bg-red-500/20 border-red-500 text-red-400'
+                    : 'border-ed-border text-ed-muted hover:border-ed-text hover:text-ed-text'
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </>
+        )}
       </div>
+
+      {overlay !== 'off' && view === 'topdown' && (
+        <p className="text-xs font-mono text-ed-muted">
+          <span className="text-red-400">■</span> = systems recently visited/scanned by players
+          (EDSM weekly submissions{overlay === 'live' ? ' · live EDDN journal traffic' : ''}) —
+          avoid these areas for first discoveries.
+          {covInfo && <span className="text-ed-text ml-2">{covInfo}</span>}
+        </p>
+      )}
 
       {/* Canvas */}
       <div className="rounded border border-ed-border overflow-hidden bg-[#050510]">
