@@ -1201,3 +1201,47 @@ accuracy fixes found by inspecting live game data.
 
 ---
 *Session 30 addendum — 2026-07-01*
+
+---
+*Session checkpoint: 2026-07-01 20:44:28*
+
+---
+*Session checkpoint: 2026-07-01 20:58:26*
+
+---
+
+## Build status — Session 31 (COMPLETE)
+
+Focus: knock out the four longstanding known-issue items (updater checksum,
+CMDR ping timer, Guardian dataset, Inara) while user play-tested colonisation.
+
+| Item | Status | File |
+|---|---|---|
+| **CMDR ping timer-cancel** — already fixed: `hide_after()` cancels the pending timer before scheduling a new one; the known-issue note had been stale for many sessions | VERIFIED, no change | `core/overlay.py` |
+| **Updater checksum** — GitHub's release API exposes a per-asset `digest` (sha256); `_do_update()` now reads it during the pre-download re-fetch and verifies the downloaded bytes with `hashlib.sha256` before writing; aborts with a clear error on mismatch; skips (with log warning) if digest unavailable | DONE | `main.py` |
+| **Updater relaunch fix** (Session 30 addendum carryover) — every bat step now appends to `%TEMP%\edtc_copy.log` (was: only the copy); `Start-Process` gets `-WorkingDirectory`; on failure falls back to `explorer.exe "<exe>"` | DONE | `main.py` |
+| **Guardian dataset** — replaced 136-site stub with the complete SrvSurvey catalogue: **447 ruin entries (566 individual sites grouped by system+body+type) + 163 structures = 610 entries**, all with real lat/lon coordinates and distance-to-arrival notes | DONE | `data/guardian_sites.json` |
+| **Inara** — retested with saved key: still `400 "This application has no access allowed"` (external blocker, needs app registration with Inara). Header-level errors now raised from `InaraAPI.commodity_markets()` and surfaced by `test_inara_key()` so the UI says "EDTC is not registered with Inara" instead of blaming the key | DONE (surfacing only) | `api/inara.py`, `main.py` |
+| `APP_VERSION` bumped to `0.3.36` | DONE | `main.py` |
+
+## Key notes from Session 31
+
+- **Canonn API is permanently dead at `api.canonn.tech`** (DNS/connect timeout; `canonn.tech` itself is down). `canonn.science` and their Google Cloud Functions API (`us-central1-canonn-api-236217.cloudfunctions.net/query/...`) are alive, but the cloud API only has Guardian *component* codex entries (pylons/terminals), not site catalogues. The real complete site catalogue lives in **SrvSurvey's repo**: `SrvSurvey/allRuins.json` (566 ruins) + `SrvSurvey/allStructures.json` (163 structures) at github.com/njthomson/SrvSurvey — fields: systemName, bodyName, siteType, idx, lat/lon, siteHeading, relicTowerHeading, starPos, distanceToArrival. Stop waiting for api.canonn.tech to recover — remove that from known issues.
+- **Guardian ID scheme preserved**: ids are `slug(system)_slug(body)`, with `_<type>` suffix only when needed for uniqueness (multiple ruin types on one body — 156 bodies have 2–3 types; or a body hosting both ruins and a structure — 23 such bodies). 103/137 old ids survive; the 34 dropped ones were bodies that now split per-type. `guardian_visits` DB table was empty, so nothing orphaned.
+- **GitHub asset digest**: every release asset in `/releases` API responses has `"digest": "sha256:..."` — no CI changes needed for update verification. Verified present on v0.3.35 and earlier assets.
+- **Inara registration**: the only path forward is asking Inara to whitelist "EDTC" as an app (via their forum/Discord dev contact). Code is fully wired and will start working the moment access is granted.
+
+## Known issues / notes for next session
+
+- ~~Updater does not verify downloaded exe~~ — fixed this session (sha256 digest check).
+- ~~CMDR ping hide_after timer~~ — was already fixed; note removed.
+- ~~guardian_sites.json incomplete / waiting on Canonn API~~ — full SrvSurvey catalogue imported (610 entries); api.canonn.tech is dead for good, use SrvSurvey repo for refreshes.
+- Inara integration wired but blocked pending app registration with Inara (external).
+- pygame not installable on Python 3.14 — audio disabled in dev; CI builds use 3.12.
+- `commodity_markets()` in `api/spansh.py` still uses the broken `"sort": "distance"` string form (Spansh results not truly nearest-first) — fix to the array form used by `stations_near()`.
+- Perf backlog from Session 30 review: WAL mode, `get_market_stats()` full-scan every 15s, rate limiter never limits across calls (per-call `asyncio.run` + fresh clients), watchlist re-read on every `ShipTargeted`.
+- Untapped journal data (Session 30 findings): `CarrierLocation`, `Undocked` (stale `_current_station` mis-attributes trade log), `FSDTarget` star class, `NavRoute` per-hop `StarClass`.
+- v0.3.36 updater relaunch fix note: the *running* v0.3.35 exe still has the old relaunch code, so the update TO v0.3.36 may still need a manual relaunch — updates FROM v0.3.36 onward relaunch automatically (same bootstrapping pattern as Session 21).
+
+---
+*Session 31 complete — 2026-07-01*

@@ -53,6 +53,12 @@ class InaraAPI:
             resp.raise_for_status()
             data = resp.json()
 
+        header_status = data.get("header", {}).get("eventStatus", 200)
+        if header_status != 200:
+            text = data.get("header", {}).get("eventStatusText", "") or f"header status {header_status}"
+            logging.warning(f"Inara API rejected request: {text}")
+            raise RuntimeError(f"Inara: {text}")
+
         events = data.get("events", [])
         if not events:
             return []

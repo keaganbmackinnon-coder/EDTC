@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.35"  # bump this with every release
+APP_VERSION = "0.3.36"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1153,6 +1153,8 @@ class API:
             return {"ok": False, "error": "Unexpected response"}
         except Exception as e:
             msg = str(e)
+            if "no access allowed" in msg.lower():
+                return {"ok": False, "error": "Your key is valid, but EDTC is not yet registered as an app with Inara — Inara integration stays disabled until Inara grants access"}
             if "401" in msg or "403" in msg or "invalid" in msg.lower():
                 return {"ok": False, "error": "Invalid API key"}
             return {"ok": False, "error": f"Connection error: {msg}"}
@@ -1698,16 +1700,21 @@ class API:
             exe_path = Path(sys.executable)
 
             # Always re-fetch highest release URL so we never download a stale version
+            expected_sha256 = None
             try:
                 release = self._fetch_highest_release(urllib.request)
                 if release:
-                    fresh_url = next(
-                        (a["browser_download_url"] for a in release.get("assets", []) if a["name"] == "EDTC.exe"),
+                    asset = next(
+                        (a for a in release.get("assets", []) if a["name"] == "EDTC.exe"),
                         None,
                     )
-                    if fresh_url:
-                        download_url = fresh_url
-                        logging.info(f"Update: using fresh URL for {release.get('tag_name')}")
+                    if asset and asset.get("browser_download_url"):
+                        download_url = asset["browser_download_url"]
+                        # GitHub publishes a sha256 digest per asset — use it to verify the download
+                        digest = asset.get("digest") or ""
+                        if digest.startswith("sha256:"):
+                            expected_sha256 = digest.removeprefix("sha256:").lower()
+                        logging.info(f"Update: using fresh URL for {release.get('tag_name')} (sha256: {expected_sha256 or 'unavailable'})")
             except Exception as e:
                 logging.warning(f"Update: could not re-fetch latest URL, using cached: {e}")
 
@@ -1725,20 +1732,36 @@ class API:
                     pct = int(downloaded / total * 100) if total else 0
                     self._emit("update_progress", {"pct": pct, "downloaded": downloaded, "total": total})
 
-            tmp.write_bytes(b"".join(chunks))
+            data = b"".join(chunks)
+            if expected_sha256:
+                import hashlib
+                actual = hashlib.sha256(data).hexdigest()
+                if actual != expected_sha256:
+                    raise RuntimeError(
+                        f"Checksum mismatch — download corrupt or tampered (expected {expected_sha256[:12]}…, got {actual[:12]}…)"
+                    )
+                logging.info("Update: sha256 checksum verified")
+            else:
+                logging.warning("Update: no checksum available from GitHub — skipping verification")
+            tmp.write_bytes(data)
             self._emit("update_progress", {"pct": 100, "status": "installing"})
 
             bat = Path(tempfile.gettempdir()) / "edtc_update.bat"
+            log = "%TEMP%\\edtc_copy.log"
             bat.write_text(
                 f"@echo off\r\n"
+                f'echo === update started %date% %time% >> "{log}"\r\n'
                 f"timeout /t 3 /nobreak > nul\r\n"
                 f"taskkill /f /im EDTC.exe >nul 2>&1\r\n"
                 f"timeout /t 2 /nobreak > nul\r\n"
-                f'copy /y "{tmp}" "{exe_path}" >> "%TEMP%\\edtc_copy.log" 2>&1\r\n'
-                f"if %errorlevel% neq 0 exit /b 1\r\n"
-                f'powershell -Command "Unblock-File -LiteralPath \'{exe_path}\'"\r\n'
+                f'copy /y "{tmp}" "{exe_path}" >> "{log}" 2>&1\r\n'
+                f'if %errorlevel% neq 0 (echo copy FAILED errorlevel %errorlevel% >> "{log}" & exit /b 1)\r\n'
+                f'powershell -Command "Unblock-File -LiteralPath \'{exe_path}\'" >> "{log}" 2>&1\r\n'
                 f"timeout /t 1 /nobreak > nul\r\n"
-                f'powershell -Command "Start-Process -FilePath \'{exe_path}\'"\r\n'
+                f'echo relaunching >> "{log}"\r\n'
+                f'powershell -Command "Start-Process -FilePath \'{exe_path}\' -WorkingDirectory \'{exe_path.parent}\'" >> "{log}" 2>&1\r\n'
+                f'if %errorlevel% neq 0 (echo Start-Process FAILED errorlevel %errorlevel%, falling back to explorer >> "{log}" & explorer.exe "{exe_path}")\r\n'
+                f'echo relaunch step done >> "{log}"\r\n'
                 f"del \"%~f0\"\r\n",
                 encoding="utf-8",
             )

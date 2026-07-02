@@ -1,1142 +1,6718 @@
 {
-  "_source": "Canonn Research Group (canonn.science) + SrvSurvey by njthomson (github.com/njthomson/SrvSurvey)",
-  "_note": "Ruins type = in-game classification (Alpha/Beta/Gamma). Structures type = Canonn layout name. Blueprint type: Bear/Hammerbot/Bowl=Weapon, Turtle=Module, Stickyhand/Robolobster/Squid=Vessel.",
-  "ruins": [
-    {
-      "id": "2mass_j10444160_5947046_1b",
-      "system": "2MASS J10444160-5947046",
-      "body": "1 b",
-      "canonn_id": "GR158",
-      "type": "Alpha",
-      "coordinates": {"lat": -41.678974, "lon": -122.354286},
-      "notes": "Alpha ruins — 2 sites on this body. Good for Ram Tah obelisk data."
-    },
-    {
-      "id": "blaa_hypai_bn_i_b26_1_b4",
-      "system": "Blaa Hypai BN-I b26-1",
-      "body": "B 4",
-      "canonn_id": "GR440",
-      "type": "Gamma",
-      "coordinates": {"lat": -49.324352, "lon": 102.170715},
-      "notes": "Gamma ruins in the Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blaa_hypai_eu_d_c13_0_b4",
-      "system": "Blaa Hypai EU-D c13-0",
-      "body": "B 4",
-      "canonn_id": "GR252",
-      "type": "Gamma",
-      "coordinates": {"lat": -19.572639, "lon": -19.972872},
-      "notes": "Gamma ruins — 3 sites on this body. Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blaa_hypai_lz_f_b27_0_a5",
-      "system": "Blaa Hypai LZ-F b27-0",
-      "body": "A 5",
-      "canonn_id": "GR227",
-      "type": "Gamma",
-      "coordinates": {"lat": 45.787544, "lon": 60.897354},
-      "notes": "Gamma ruins — 3 sites on this body. Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blaa_hypai_oz_o_d6_16_4c",
-      "system": "Blaa Hypai OZ-O d6-16",
-      "body": "4 c",
-      "canonn_id": "GR232",
-      "type": "Beta",
-      "coordinates": {"lat": -62.536331, "lon": 12.74488},
-      "notes": "Beta ruins — 3 sites on this body. Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blaa_hypai_pb_a_b31_0_b5",
-      "system": "Blaa Hypai PB-A b31-0",
-      "body": "B 5",
-      "canonn_id": "GR471",
-      "type": "Alpha",
-      "coordinates": {"lat": -18.521685, "lon": -116.104843},
-      "notes": "Alpha ruins — 3 sites on this body. Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blaa_hypai_xr_i_b26_0_a3",
-      "system": "Blaa Hypai XR-I b26-0",
-      "body": "A 3",
-      "canonn_id": "GR247",
-      "type": "Alpha",
-      "coordinates": {"lat": -42.967045, "lon": 14.075525},
-      "notes": "Alpha ruins — 3 sites on this body. Blaa Hypai nebula cluster."
-    },
-    {
-      "id": "blae_eork_if_g_c27_13_a1",
-      "system": "Blae Eork IF-G c27-13",
-      "body": "A 1",
-      "canonn_id": "GR169",
-      "type": "Gamma",
-      "coordinates": {"lat": -41.569309, "lon": -134.046951},
-      "notes": "Gamma ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_eork_ne_e_d13_25_b2",
-      "system": "Blae Eork NE-E d13-25",
-      "body": "B 2",
-      "canonn_id": "GR355",
-      "type": "Beta",
-      "coordinates": {"lat": 39.75042, "lon": -174.838867},
-      "notes": "Beta ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_eork_qu_d_d13_3_3",
-      "system": "Blae Eork QU-D d13-3",
-      "body": "3",
-      "canonn_id": "GR146",
-      "type": "Gamma",
-      "coordinates": {"lat": 1.216057, "lon": 50.751694},
-      "notes": "Gamma ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_eork_ru_d_d13_17_1a",
-      "system": "Blae Eork RU-D d13-17",
-      "body": "1 a",
-      "canonn_id": "GR197",
-      "type": "Alpha",
-      "coordinates": {"lat": 43.018757, "lon": 124.163002},
-      "notes": "Alpha ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_eork_ru_d_d13_20_5d",
-      "system": "Blae Eork RU-D d13-20",
-      "body": "5 d",
-      "canonn_id": "GR203",
-      "type": "Beta",
-      "coordinates": {"lat": 3.818022, "lon": -155.793762},
-      "notes": "Beta ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_eork_ul_j_b56_1_a3",
-      "system": "Blae Eork UL-J b56-1",
-      "body": "A 3",
-      "canonn_id": "GR241",
-      "type": "Alpha",
-      "coordinates": {"lat": 18.360733, "lon": 51.984032},
-      "notes": "Alpha ruins — 3 sites on this body. Blae Eork cluster."
-    },
-    {
-      "id": "blae_hypue_da_p_d6_6_4a",
-      "system": "Blae Hypue DA-P d6-6",
-      "body": "4 a",
-      "canonn_id": "GR444",
-      "type": "Alpha",
-      "coordinates": {"lat": 34.57275, "lon": -73.864349},
-      "notes": "Alpha ruins — 3 sites on this body. Blae Hypue cluster."
-    },
-    {
-      "id": "blae_hypue_kg_c_c14_5_b1",
-      "system": "Blae Hypue KG-C c14-5",
-      "body": "B 1",
-      "canonn_id": "GR441",
-      "type": "Alpha",
-      "coordinates": {"lat": 27.164045, "lon": 135.94957},
-      "notes": "Alpha ruins — 3 sites on this body. Blae Hypue cluster."
-    },
-    {
-      "id": "blae_hypue_zd_g_c12_4_d2",
-      "system": "Blae Hypue ZD-G c12-4",
-      "body": "D 2",
-      "canonn_id": "GR562",
-      "type": "Beta",
-      "coordinates": {"lat": -33.340435, "lon": -67.737968},
-      "notes": "Beta ruins — 3 sites on this body. Blae Hypue cluster."
-    },
-    {
-      "id": "col_132_sector_gs_k_d8_33_d4",
-      "system": "Col 132 Sector GS-K d8-33",
-      "body": "D 4",
-      "canonn_id": "GR321",
-      "type": "Alpha",
-      "coordinates": {"lat": 15.808319, "lon": 43.691303},
-      "notes": "Alpha ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_ac_w_b31_3_a3",
-      "system": "Col 173 Sector AC-W b31-3",
-      "body": "A 3",
-      "canonn_id": "GR546",
-      "type": "Beta",
-      "coordinates": null,
-      "notes": "Beta ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_ai_h_c11_22_b1",
-      "system": "Col 173 Sector AI-H c11-22",
-      "body": "B 1",
-      "canonn_id": "GR290",
-      "type": "Gamma",
-      "coordinates": {"lat": 34.89064, "lon": -118.126839},
-      "notes": "Gamma ruins — 3 sites on this body. Also has a Guardian Structure on this body."
-    },
-    {
-      "id": "col_173_sector_ap_q_b21_2_a8",
-      "system": "Col 173 Sector AP-Q b21-2",
-      "body": "A 8",
-      "canonn_id": "GR058",
-      "type": "Beta",
-      "coordinates": {"lat": 9.20587, "lon": 112.845139},
-      "notes": "Beta ruins — 1 site on this body."
-    },
-    {
-      "id": "col_173_sector_ap_q_b21_2_b4",
-      "system": "Col 173 Sector AP-Q b21-2",
-      "body": "B 4",
-      "canonn_id": "GR059",
-      "type": "Gamma",
-      "coordinates": {"lat": 43.55751, "lon": 25.85762},
-      "notes": "Gamma ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_aq_g_b26_1_a2",
-      "system": "Col 173 Sector AQ-G b26-1",
-      "body": "A 2",
-      "canonn_id": "GR534",
-      "type": "Alpha",
-      "coordinates": null,
-      "notes": "Alpha ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_au_y_b30_0_b2",
-      "system": "Col 173 Sector AU-Y b30-0",
-      "body": "B 2",
-      "canonn_id": "GR387",
-      "type": "Alpha",
-      "coordinates": {"lat": 45.641048, "lon": 174.069275},
-      "notes": "Alpha ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_au_y_b30_2_b4",
-      "system": "Col 173 Sector AU-Y b30-2",
-      "body": "B 4",
-      "canonn_id": "GR236",
-      "type": "Gamma",
-      "coordinates": {"lat": -54.182861, "lon": 49.600803},
-      "notes": "Gamma ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_av_n_b23_5_a2",
-      "system": "Col 173 Sector AV-N b23-5",
-      "body": "A 2",
-      "canonn_id": "GR018",
-      "type": "Beta",
-      "coordinates": {"lat": 42.841373, "lon": -175.657761},
-      "notes": "Beta ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_aw_c_c13_8_c1",
-      "system": "Col 173 Sector AW-C c13-8",
-      "body": "C 1",
-      "canonn_id": "GR524",
-      "type": "Beta",
-      "coordinates": null,
-      "notes": "Beta ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_bx_i_c10_7_b2",
-      "system": "Col 173 Sector BX-I c10-7",
-      "body": "B 2",
-      "canonn_id": "GR283",
-      "type": "Alpha",
-      "coordinates": {"lat": -5.023737, "lon": -26.999365},
-      "notes": "Alpha ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_bx_i_c10_7_b3",
-      "system": "Col 173 Sector BX-I c10-7",
-      "body": "B 3",
-      "canonn_id": "GR287",
-      "type": "Gamma",
-      "coordinates": {"lat": 38.048756, "lon": -48.850998},
-      "notes": "Gamma ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_cc_z_b31_1_b1",
-      "system": "Col 173 Sector CC-Z b31-1",
-      "body": "B 1",
-      "canonn_id": "GR553",
-      "type": "Gamma",
-      "coordinates": null,
-      "notes": "Gamma ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_cg_m_b24_8_a4",
-      "system": "Col 173 Sector CG-M b24-8",
-      "body": "A 4",
-      "canonn_id": "GR031",
-      "type": "Gamma",
-      "coordinates": {"lat": -45.081577, "lon": -142.082657},
-      "notes": "Gamma ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_cg_m_b24_8_a5",
-      "system": "Col 173 Sector CG-M b24-8",
-      "body": "A 5",
-      "canonn_id": "GR032",
-      "type": "Gamma",
-      "coordinates": {"lat": -0.203577, "lon": -0.36909},
-      "notes": "Gamma ruins — 1 site on this body."
-    },
-    {
-      "id": "col_173_sector_ch_l_d8_14_d1",
-      "system": "Col 173 Sector CH-L d8-14",
-      "body": "D 1",
-      "canonn_id": "GR281",
-      "type": "Alpha",
-      "coordinates": {"lat": -23.239367, "lon": -37.279064},
-      "notes": "Alpha ruins — 2 sites on this body."
-    },
-    {
-      "id": "col_173_sector_ch_l_d8_14_d3",
-      "system": "Col 173 Sector CH-L d8-14",
-      "body": "D 3",
-      "canonn_id": "GR282",
-      "type": "Alpha",
-      "coordinates": {"lat": 36.648209, "lon": 3.457292},
-      "notes": "Alpha ruins — 1 site on this body."
-    },
-    {
-      "id": "col_173_sector_dh_k_b25_2_a5",
-      "system": "Col 173 Sector DH-K b25-2",
-      "body": "A 5",
-      "canonn_id": "GR073",
-      "type": "Alpha",
-      "coordinates": {"lat": 19.887537, "lon": 100.132706},
-      "notes": "Alpha ruins — 2 sites on this body. Also has a Guardian Structure on A 5."
-    },
-    {
-      "id": "col_173_sector_dh_k_b25_2_a7",
-      "system": "Col 173 Sector DH-K b25-2",
-      "body": "A 7",
-      "canonn_id": "GR075",
-      "type": "Beta",
-      "coordinates": {"lat": 15.06253, "lon": -159.607544},
-      "notes": "Beta ruins — 1 site on this body."
-    },
-    {
-      "id": "col_173_sector_dm_l_c8_0_b2",
-      "system": "Col 173 Sector DM-L c8-0",
-      "body": "B 2",
-      "canonn_id": "GR341",
-      "type": "Beta",
-      "coordinates": {"lat": -23.906872, "lon": -128.257874},
-      "notes": "Beta ruins — 3 sites on this body."
-    },
-    {
-      "id": "col_173_sector_dm_l_c8_0_b3",
-      "system": "Col 173 Sector DM-L c8-0",
-      "body": "B 3",
-      "canonn_id": "GR341",
-      "type": "Beta",
-      "coordinates": null,
-      "notes": "Beta ruins — 1 site on this body."
-    },
-    {
-      "id": "synuefe_xr_h_d11_102_1b",
-      "system": "Synuefe XR-H d11-102",
-      "body": "1 b",
-      "canonn_id": "GR001",
-      "type": "Beta",
-      "coordinates": {"lat": -46.576923, "lon": 133.985107},
-      "notes": "First Guardian site ever discovered (2017). Ideal starting point for Ram Tah missions."
-    }
-  ],
-  "structures": [
-    {
-      "id": "synuefe_gv_t_b50_4_b1",
-      "system": "Synuefe GV-T b50-4",
-      "body": "B 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_pm_l_c24_24_c6",
-      "system": "Synuefe PM-L c24-24",
-      "body": "C 6",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_eb_x_c1_18_c2",
-      "system": "NGC 2451A Sector EB-X c1-18",
-      "body": "C 2",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_eu_q_c21_10_a3",
-      "system": "Synuefe EU-Q c21-10",
-      "body": "A 3",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_uj_q_b5_7_b2",
-      "system": "NGC 2451A Sector UJ-Q b5-7",
-      "body": "B 2",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_hf_p_c22_17_b1",
-      "system": "Synuefe HF-P c22-17",
-      "body": "B 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_ir_w_d1_77_ab1a",
-      "system": "NGC 2451A Sector IR-W d1-77",
-      "body": "AB 1 a",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "pencil_sector_yj_a_c33_1",
-      "system": "Pencil Sector YJ-A c33",
-      "body": "1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_en_h_d11_106_6a",
-      "system": "Synuefe EN-H d11-106",
-      "body": "6 a",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "pencil_sector_cq_y_c31_c1",
-      "system": "Pencil Sector CQ-Y c31",
-      "body": "C 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "pencil_sector_bq_x_b1_4_b2",
-      "system": "Pencil Sector BQ-X b1-4",
-      "body": "B 2",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_we_q_b5_6_b1",
-      "system": "NGC 2451A Sector WE-Q b5-6",
-      "body": "B 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "wregoe_jr_a_b41_3_f2",
-      "system": "Wregoe JR-A b41-3",
-      "body": "F 2",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_fk_p_c22_2_e1",
-      "system": "Synuefe FK-P c22-2",
-      "body": "E 1",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "hip_41730_13ga",
-      "system": "HIP 41730",
-      "body": "13 g a",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_ce_r_c21_6_c1",
-      "system": "Synuefe CE-R c21-6",
-      "body": "C 1",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_mc_v_c2_5_e1",
-      "system": "NGC 2451A Sector MC-V c2-5",
-      "body": "E 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "pencil_sector_xo_a_c31_b3",
-      "system": "Pencil Sector XO-A c31",
-      "body": "B 3",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_sp_f_b44_0_c1",
-      "system": "Synuefe SP-F b44-0",
-      "body": "C 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_bh_j_d10_68_c1",
-      "system": "Synuefe BH-J d10-68",
-      "body": "C 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_zl_j_d10_109_e3",
-      "system": "Synuefe ZL-J d10-109",
-      "body": "E 3",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "wregoe_jr_l_c21_1_c2",
-      "system": "Wregoe JR-L c21-1",
-      "body": "C 2",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "synuefe_vk_f_b44_0_b1",
-      "system": "Synuefe VK-F b44-0",
-      "body": "B 1",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_fk_c_c14_6_d2",
-      "system": "Col 173 Sector FK-C c14-6",
-      "body": "D 2",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_pf_e_b28_3_b1",
-      "system": "Col 173 Sector PF-E b28-3",
-      "body": "B 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_me_p_d6_92_b5",
-      "system": "Col 173 Sector ME-P d6-92",
-      "body": "B 5",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_js_t_b3_0_a3",
-      "system": "Vela Dark Region JS-T b3-0",
-      "body": "A 3",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_zs_f_c12_27_b3",
-      "system": "Col 173 Sector ZS-F c12-27",
-      "body": "B 3",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_zl_l_b24_2_b1",
-      "system": "Col 173 Sector ZL-L b24-2",
-      "body": "B 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_xh_h_c11_21_b1",
-      "system": "Col 173 Sector XH-H c11-21",
-      "body": "B 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_dl_y_d91_5a",
-      "system": "Vela Dark Region DL-Y d91",
-      "body": "5 a",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_lt_q_d5_90_d1",
-      "system": "Col 173 Sector LT-Q d5-90",
-      "body": "D 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_zv_m_b23_1_a1",
-      "system": "Col 173 Sector ZV-M b23-1",
-      "body": "A 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_lt_q_d5_82_a3",
-      "system": "Col 173 Sector LT-Q d5-82",
-      "body": "A 3",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_cq_y_c0_a2",
-      "system": "Vela Dark Region CQ-Y c0",
-      "body": "A 2",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_pz_o_d6_110_5a",
-      "system": "Col 173 Sector PZ-O d6-110",
-      "body": "5 a",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_ad_h_c11_15_b2",
-      "system": "Col 173 Sector AD-H c11-15",
-      "body": "B 2",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_fz_d_c13_30_2",
-      "system": "Col 173 Sector FZ-D c13-30",
-      "body": "2",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_eg_x_b1_1_a1",
-      "system": "Vela Dark Region EG-X b1-1",
-      "body": "A 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_nv_b_c14_1_1",
-      "system": "Col 173 Sector NV-B c14-1",
-      "body": "1",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_ze_a_d66_6b",
-      "system": "Vela Dark Region ZE-A d66",
-      "body": "6 b",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_cc_k_b25_8_a5",
-      "system": "Col 173 Sector CC-K b25-8",
-      "body": "A 5",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_ru_o_d6_16_a2a",
-      "system": "Col 173 Sector RU-O d6-16",
-      "body": "A 2 a",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_el_y_d55_1",
-      "system": "Vela Dark Region EL-Y d55",
-      "body": "1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_ky_q_d5_26_6a",
-      "system": "Col 173 Sector KY-Q d5-26",
-      "body": "6 a",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_hn_i_b26_5_a1",
-      "system": "Col 173 Sector HN-I b26-5",
-      "body": "A 1",
-      "type": "Bowl",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_od_j_b25_2_b1",
-      "system": "Col 173 Sector OD-J b25-2",
-      "body": "B 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "col_173_sector_hr_m_b23_3_b7",
-      "system": "Col 173 Sector HR-M b23-3",
-      "body": "B 7",
-      "type": "Hammerbot",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "vela_dark_region_td_s_b4_5_c1",
-      "system": "Vela Dark Region TD-S b4-5",
-      "body": "C 1",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Required for Gauss Cannon, Plasma Charger, Shard Cannon."
-    },
-    {
-      "id": "wregoe_bu_y_b2_0_1c_bear",
-      "system": "Wregoe BU-Y b2-0",
-      "body": "1 c",
-      "type": "Bear",
-      "coordinates": null,
-      "notes": "Weapon Blueprint Structure. Remote site ~1519 ly from Sol."
-    },
-    {
-      "id": "synuefe_px_j_c25_8_7a",
-      "system": "Synuefe PX-J c25-8",
-      "body": "7 a",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "synuefe_lq_t_b50_1_b2",
-      "system": "Synuefe LQ-T b50-1",
-      "body": "B 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "synuefe_gt_h_b43_1_c4",
-      "system": "Synuefe GT-H b43-1",
-      "body": "C 4",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "ngc_2451a_sector_dl_y_d61_a2",
-      "system": "NGC 2451A Sector DL-Y d61",
-      "body": "A 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "pencil_sector_yj_a_c12_b3",
-      "system": "Pencil Sector YJ-A c12",
-      "body": "B 3",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "pencil_sector_vy_a_b8_b1",
-      "system": "Pencil Sector VY-A b8",
-      "body": "B 1",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "wregoe_im_z_b41_2_b2",
-      "system": "Wregoe IM-Z b41-2",
-      "body": "B 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "pencil_sector_zj_a_c4_b4",
-      "system": "Pencil Sector ZJ-A c4",
-      "body": "B 4",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "synuefe_nl_n_c23_4_b3",
-      "system": "Synuefe NL-N c23-4",
-      "body": "B 3",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "col_173_sector_xg_k_b25_3_b2",
-      "system": "Col 173 Sector XG-K b25-3",
-      "body": "B 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "col_173_sector_ds_j_b25_2_b5",
-      "system": "Col 173 Sector DS-J b25-2",
-      "body": "B 5",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "vela_dark_region_dl_y_d112_1a",
-      "system": "Vela Dark Region DL-Y d112",
-      "body": "1 a",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "vela_dark_region_dl_y_d83_5b",
-      "system": "Vela Dark Region DL-Y d83",
-      "body": "5 b",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "col_173_sector_sz_g_b26_0_b2",
-      "system": "Col 173 Sector SZ-G b26-0",
-      "body": "B 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "col_173_sector_gs_j_b25_4_d2",
-      "system": "Col 173 Sector GS-J b25-4",
-      "body": "D 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "col_173_sector_su_o_d6_54_b2",
-      "system": "Col 173 Sector SU-O d6-54",
-      "body": "B 2",
-      "type": "Turtle",
-      "coordinates": null,
-      "notes": "Module Blueprint Structure. Required for FSD Booster, Shield Generator, Hull Reinforcement, Power Distributor."
-    },
-    {
-      "id": "hd_63154_b3a",
-      "system": "HD 63154",
-      "body": "B 3 a",
-      "type": "Turtle",
-      "coordinates": {"lat": -55.2, "lon": 93.8},
-      "notes": "Module Blueprint Structure. Well-known site for blueprint fragment farming."
-    },
-    {
-      "id": "ic_2391_sector_ca_a_d43_12a",
-      "system": "IC 2391 Sector CA-A d43",
-      "body": "12 a",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "ic_2391_sector_hg_x_b1_8_c2",
-      "system": "IC 2391 Sector HG-X b1-8",
-      "body": "C 2",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "ic_2391_sector_fl_x_b1_7_a3",
-      "system": "IC 2391 Sector FL-X b1-7",
-      "body": "A 3",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_nb_b_b47_10_b2",
-      "system": "Synuefe NB-B b47-10",
-      "body": "B 2",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_dk_d_b46_4_c1",
-      "system": "Synuefe DK-D b46-4",
-      "body": "C 1",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_gq_n_c23_21_b3",
-      "system": "Synuefe GQ-N c23-21",
-      "body": "B 3",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_il_n_c23_19_b2",
-      "system": "Synuefe IL-N c23-19",
-      "body": "B 2",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_dj_g_b44_3_a5",
-      "system": "Synuefe DJ-G b44-3",
-      "body": "A 5",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_hp_e_b45_8_d3",
-      "system": "Synuefe HP-E b45-8",
-      "body": "D 3",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "hip_36781_a6b",
-      "system": "HIP 36781",
-      "body": "A 6 b",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_jp_e_b45_4_c1",
-      "system": "Synuefe JP-E b45-4",
-      "body": "C 1",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_he_g_b44_5_b2",
-      "system": "Synuefe HE-G b44-5",
-      "body": "B 2",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_bz_q_c21_11_b5",
-      "system": "Synuefe BZ-Q c21-11",
-      "body": "B 5",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_zg_j_d10_79_b1",
-      "system": "Synuefe ZG-J d10-79",
-      "body": "B 1",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_ie_g_b44_2_a4",
-      "system": "Synuefe IE-G b44-2",
-      "body": "A 4",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_en_h_d11_29_6b",
-      "system": "Synuefe EN-H d11-29",
-      "body": "6 b",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_ah_j_d10_46_c1",
-      "system": "Synuefe AH-J d10-46",
-      "body": "C 1",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_kz_f_b44_5_a1",
-      "system": "Synuefe KZ-F b44-5",
-      "body": "A 1",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_vj_r_c4_22_a1",
-      "system": "NGC 2451A Sector VJ-R c4-22",
-      "body": "A 1",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_pf_e_b45_5_b2",
-      "system": "Synuefe PF-E b45-5",
-      "body": "B 2",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_en_h_d11_96_7a",
-      "system": "Synuefe EN-H d11-96",
-      "body": "7 a",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_eu_q_c21_15_a1",
-      "system": "Synuefe EU-Q c21-15",
-      "body": "A 1",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_en_h_d11_28_8b",
-      "system": "Synuefe EN-H d11-28",
-      "body": "8 b",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "ngc_2451a_sector_to_r_c4_10_b1",
-      "system": "NGC 2451A Sector TO-R c4-10",
-      "body": "B 1",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_ah_j_d10_20_a3",
-      "system": "Synuefe AH-J d10-20",
-      "body": "A 3",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_nu_f_b44_5_b1",
-      "system": "Synuefe NU-F b44-5",
-      "body": "B 1",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_be_r_c21_35_e2",
-      "system": "Synuefe BE-R c21-35",
-      "body": "E 2",
-      "type": "Robolobster",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_ah_j_d10_103_b1",
-      "system": "Synuefe AH-J d10-103",
-      "body": "B 1",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_ed_i_b43_8_a2",
-      "system": "Synuefe ED-I b43-8",
-      "body": "A 2",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "synuefe_dz_q_c21_14_10a",
-      "system": "Synuefe DZ-Q c21-14",
-      "body": "10 a",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Required for Guardian FSD, Pulse Laser, Multi-Cannon."
-    },
-    {
-      "id": "trapezium_sector_yu_x_c1_2_1a",
-      "system": "Trapezium Sector YU-X c1-2",
-      "body": "1 a",
-      "type": "Squid",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Remote site ~1344 ly from Sol near Trapezium Cluster."
-    },
-    {
-      "id": "wregoe_bu_y_b2_0_1c_stickyhand",
-      "system": "Wregoe BU-Y b2-0",
-      "body": "1 c",
-      "type": "Stickyhand",
-      "coordinates": null,
-      "notes": "Vessel Blueprint Structure. Remote site ~1519 ly from Sol."
-    }
-  ]
+ "_source": "SrvSurvey complete Guardian catalogue (github.com/njthomson/SrvSurvey — allRuins.json + allStructures.json), Canonn/GRG survey data",
+ "_note": "Ruins grouped per system+body+type; coordinates are the first surveyed site of that type. Ruin type = Alpha/Beta/Gamma; structure type = Canonn layout name.",
+ "ruins": [
+  {
+   "id": "2mass_j10444160_5947046_1b_alpha",
+   "system": "2MASS J10444160-5947046",
+   "body": "1 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -41.678974,
+    "lon": -122.354286
+   },
+   "notes": "1,536 ls from arrival"
+  },
+  {
+   "id": "2mass_j10444160_5947046_1b_gamma",
+   "system": "2MASS J10444160-5947046",
+   "body": "1 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -73.765099,
+    "lon": -30.819651
+   },
+   "notes": "1,536 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_bn_i_b26_1_b4",
+   "system": "Blaa Hypai BN-I b26-1",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -49.320396,
+    "lon": 102.181343
+   },
+   "notes": "5,106 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_eu_d_c13_0_b4_alpha",
+   "system": "Blaa Hypai EU-D c13-0",
+   "body": "B 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -45.642773,
+    "lon": 110.194397
+   },
+   "notes": "414,092 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_eu_d_c13_0_b4_gamma",
+   "system": "Blaa Hypai EU-D c13-0",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -19.572639,
+    "lon": -19.972874
+   },
+   "notes": "2 Gamma sites on this body · 414,092 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_lz_f_b27_0_a5_alpha",
+   "system": "Blaa Hypai LZ-F b27-0",
+   "body": "A 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -84.528687,
+    "lon": -57.096031
+   },
+   "notes": "56 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_lz_f_b27_0_a5_gamma",
+   "system": "Blaa Hypai LZ-F b27-0",
+   "body": "A 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 45.792507,
+    "lon": 60.89727
+   },
+   "notes": "2 Gamma sites on this body · 56 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_oz_o_d6_16_4c_beta",
+   "system": "Blaa Hypai OZ-O d6-16",
+   "body": "4 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -62.536331,
+    "lon": 12.744882
+   },
+   "notes": "1,002 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_oz_o_d6_16_4c_gamma",
+   "system": "Blaa Hypai OZ-O d6-16",
+   "body": "4 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -36.860264,
+    "lon": 56.678776
+   },
+   "notes": "2 Gamma sites on this body · 1,002 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_pb_a_b31_0_b5_alpha",
+   "system": "Blaa Hypai PB-A b31-0",
+   "body": "B 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -18.516102,
+    "lon": -116.100334
+   },
+   "notes": "2 Alpha sites on this body · 21,834 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_pb_a_b31_0_b5_gamma",
+   "system": "Blaa Hypai PB-A b31-0",
+   "body": "B 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 0.0,
+    "lon": 0.0
+   },
+   "notes": "21,834 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_xr_i_b26_0_a3_alpha",
+   "system": "Blaa Hypai XR-I b26-0",
+   "body": "A 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -42.958149,
+    "lon": 14.087853
+   },
+   "notes": "2 Alpha sites on this body · 62 ls from arrival"
+  },
+  {
+   "id": "blaa_hypai_xr_i_b26_0_a3_beta",
+   "system": "Blaa Hypai XR-I b26-0",
+   "body": "A 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -18.595112,
+    "lon": -5.775413
+   },
+   "notes": "62 ls from arrival"
+  },
+  {
+   "id": "blae_eork_if_g_c27_13_a1_beta",
+   "system": "Blae Eork IF-G c27-13",
+   "body": "A 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -37.897995,
+    "lon": -85.38591
+   },
+   "notes": "2 Beta sites on this body · 296 ls from arrival"
+  },
+  {
+   "id": "blae_eork_if_g_c27_13_a1_gamma",
+   "system": "Blae Eork IF-G c27-13",
+   "body": "A 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -41.569309,
+    "lon": -134.046951
+   },
+   "notes": "296 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ne_e_d13_25_b2_alpha",
+   "system": "Blae Eork NE-E d13-25",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -2.4535,
+    "lon": -140.340057
+   },
+   "notes": "2 Alpha sites on this body · 10,423 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ne_e_d13_25_b2_beta",
+   "system": "Blae Eork NE-E d13-25",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 39.75042,
+    "lon": -174.838867
+   },
+   "notes": "10,423 ls from arrival"
+  },
+  {
+   "id": "blae_eork_qu_d_d13_3_3_beta",
+   "system": "Blae Eork QU-D d13-3",
+   "body": "3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 41.437531,
+    "lon": 83.861938
+   },
+   "notes": "629 ls from arrival"
+  },
+  {
+   "id": "blae_eork_qu_d_d13_3_3_gamma",
+   "system": "Blae Eork QU-D d13-3",
+   "body": "3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 1.216057,
+    "lon": 50.751694
+   },
+   "notes": "2 Gamma sites on this body · 629 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ru_d_d13_17_1a_alpha",
+   "system": "Blae Eork RU-D d13-17",
+   "body": "1 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 43.018757,
+    "lon": 124.163002
+   },
+   "notes": "2 Alpha sites on this body · 869 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ru_d_d13_17_1a_beta",
+   "system": "Blae Eork RU-D d13-17",
+   "body": "1 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -62.23624,
+    "lon": -83.952904
+   },
+   "notes": "869 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ru_d_d13_20_5d_alpha",
+   "system": "Blae Eork RU-D d13-20",
+   "body": "5 d",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 40.181839,
+    "lon": -50.630165
+   },
+   "notes": "944 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ru_d_d13_20_5d_beta",
+   "system": "Blae Eork RU-D d13-20",
+   "body": "5 d",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 3.818022,
+    "lon": -155.793762
+   },
+   "notes": "944 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ru_d_d13_20_5d_gamma",
+   "system": "Blae Eork RU-D d13-20",
+   "body": "5 d",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -14.490176,
+    "lon": -26.414272
+   },
+   "notes": "944 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ul_j_b56_1_a3_alpha",
+   "system": "Blae Eork UL-J b56-1",
+   "body": "A 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 18.360735,
+    "lon": 51.984032
+   },
+   "notes": "2 Alpha sites on this body · 62 ls from arrival"
+  },
+  {
+   "id": "blae_eork_ul_j_b56_1_a3_beta",
+   "system": "Blae Eork UL-J b56-1",
+   "body": "A 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -41.157185,
+    "lon": 45.367687
+   },
+   "notes": "62 ls from arrival"
+  },
+  {
+   "id": "blae_hypue_da_p_d6_6_4a_alpha",
+   "system": "Blae Hypue DA-P d6-6",
+   "body": "4 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 34.57275,
+    "lon": -73.864349
+   },
+   "notes": "974 ls from arrival"
+  },
+  {
+   "id": "blae_hypue_da_p_d6_6_4a_beta",
+   "system": "Blae Hypue DA-P d6-6",
+   "body": "4 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -55.174702,
+    "lon": 46.426826
+   },
+   "notes": "2 Beta sites on this body · 974 ls from arrival"
+  },
+  {
+   "id": "blae_hypue_kg_c_c14_5_b1_alpha",
+   "system": "Blae Hypue KG-C c14-5",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 27.164045,
+    "lon": 135.94957
+   },
+   "notes": "2 Alpha sites on this body · 6,510 ls from arrival"
+  },
+  {
+   "id": "blae_hypue_kg_c_c14_5_b1_beta",
+   "system": "Blae Hypue KG-C c14-5",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 46.858971,
+    "lon": 133.088287
+   },
+   "notes": "6,510 ls from arrival"
+  },
+  {
+   "id": "blae_hypue_zd_g_c12_4_d2",
+   "system": "Blae Hypue ZD-G c12-4",
+   "body": "D 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -33.340435,
+    "lon": -67.737968
+   },
+   "notes": "3 Beta sites on this body · 360,199 ls from arrival"
+  },
+  {
+   "id": "col_132_sector_gs_k_d8_33_d4_alpha",
+   "system": "Col 132 Sector GS-K d8-33",
+   "body": "D 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 15.808319,
+    "lon": 43.691299
+   },
+   "notes": "136,748 ls from arrival"
+  },
+  {
+   "id": "col_132_sector_gs_k_d8_33_d4_beta",
+   "system": "Col 132 Sector GS-K d8-33",
+   "body": "D 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 2.335009,
+    "lon": 73.095917
+   },
+   "notes": "136,748 ls from arrival"
+  },
+  {
+   "id": "col_132_sector_gs_k_d8_33_d4_gamma",
+   "system": "Col 132 Sector GS-K d8-33",
+   "body": "D 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -46.866459,
+    "lon": 59.660629
+   },
+   "notes": "136,748 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ac_w_b31_3_a3_alpha",
+   "system": "Col 173 Sector AC-W b31-3",
+   "body": "A 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "56 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ac_w_b31_3_a3_beta",
+   "system": "Col 173 Sector AC-W b31-3",
+   "body": "A 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "56 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ai_h_c11_22_b1_alpha",
+   "system": "Col 173 Sector AI-H c11-22",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -14.673106,
+    "lon": 45.045235
+   },
+   "notes": "17,614 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ai_h_c11_22_b1_gamma",
+   "system": "Col 173 Sector AI-H c11-22",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 34.89064,
+    "lon": -118.126839
+   },
+   "notes": "2 Gamma sites on this body · 17,614 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ap_q_b21_2_a8",
+   "system": "Col 173 Sector AP-Q b21-2",
+   "body": "A 8",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 9.205869,
+    "lon": 112.845139
+   },
+   "notes": "93 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ap_q_b21_2_b4_alpha",
+   "system": "Col 173 Sector AP-Q b21-2",
+   "body": "B 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 19.020304,
+    "lon": -101.010918
+   },
+   "notes": "659 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ap_q_b21_2_b4_beta",
+   "system": "Col 173 Sector AP-Q b21-2",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 0.152342,
+    "lon": -42.163006
+   },
+   "notes": "659 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ap_q_b21_2_b4_gamma",
+   "system": "Col 173 Sector AP-Q b21-2",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 43.555763,
+    "lon": 25.816267
+   },
+   "notes": "659 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_aq_g_b26_1_a2",
+   "system": "Col 173 Sector AQ-G b26-1",
+   "body": "A 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Alpha sites on this body · 38 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_au_y_b30_0_b2_alpha",
+   "system": "Col 173 Sector AU-Y b30-0",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 45.642021,
+    "lon": 174.075195
+   },
+   "notes": "2 Alpha sites on this body · 66,379 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_au_y_b30_0_b2_beta",
+   "system": "Col 173 Sector AU-Y b30-0",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -17.586605,
+    "lon": -139.951096
+   },
+   "notes": "66,379 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_au_y_b30_2_b4_beta",
+   "system": "Col 173 Sector AU-Y b30-2",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -7.524005,
+    "lon": 117.234108
+   },
+   "notes": "1,633 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_au_y_b30_2_b4_gamma",
+   "system": "Col 173 Sector AU-Y b30-2",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -54.182861,
+    "lon": 49.600803
+   },
+   "notes": "1,633 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_av_n_b23_5_a2_beta",
+   "system": "Col 173 Sector AV-N b23-5",
+   "body": "A 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 42.841373,
+    "lon": -175.657761
+   },
+   "notes": "2 Beta sites on this body · 55 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_av_n_b23_5_a2_gamma",
+   "system": "Col 173 Sector AV-N b23-5",
+   "body": "A 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.047829,
+    "lon": 55.121727
+   },
+   "notes": "55 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_aw_c_c13_8_c1_beta",
+   "system": "Col 173 Sector AW-C c13-8",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Beta sites on this body · 16,353 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_aw_c_c13_8_c1_gamma",
+   "system": "Col 173 Sector AW-C c13-8",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "16,353 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bx_i_c10_7_b2_alpha",
+   "system": "Col 173 Sector BX-I c10-7",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -5.023737,
+    "lon": -26.999365
+   },
+   "notes": "24,706 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bx_i_c10_7_b2_beta",
+   "system": "Col 173 Sector BX-I c10-7",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -2.974376,
+    "lon": -128.414917
+   },
+   "notes": "24,706 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bx_i_c10_7_b2_gamma",
+   "system": "Col 173 Sector BX-I c10-7",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -2.976738,
+    "lon": -128.482803
+   },
+   "notes": "24,706 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bx_i_c10_7_b3",
+   "system": "Col 173 Sector BX-I c10-7",
+   "body": "B 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 38.048756,
+    "lon": -48.850998
+   },
+   "notes": "2 Gamma sites on this body · 24,706 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cc_z_b31_1_b1_alpha",
+   "system": "Col 173 Sector CC-Z b31-1",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42,792 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cc_z_b31_1_b1_beta",
+   "system": "Col 173 Sector CC-Z b31-1",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42,792 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cc_z_b31_1_b1_gamma",
+   "system": "Col 173 Sector CC-Z b31-1",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42,792 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cg_m_b24_8_a4",
+   "system": "Col 173 Sector CG-M b24-8",
+   "body": "A 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -45.081581,
+    "lon": -142.082657
+   },
+   "notes": "2 Gamma sites on this body · 80 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cg_m_b24_8_a5",
+   "system": "Col 173 Sector CG-M b24-8",
+   "body": "A 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -0.201146,
+    "lon": -0.398435
+   },
+   "notes": "80 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ch_l_d8_14_d1_alpha",
+   "system": "Col 173 Sector CH-L d8-14",
+   "body": "D 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -23.239367,
+    "lon": -37.279064
+   },
+   "notes": "80,843 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ch_l_d8_14_d1_gamma",
+   "system": "Col 173 Sector CH-L d8-14",
+   "body": "D 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -10.023327,
+    "lon": 170.458984
+   },
+   "notes": "80,843 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ch_l_d8_14_d3",
+   "system": "Col 173 Sector CH-L d8-14",
+   "body": "D 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 36.648209,
+    "lon": 3.457292
+   },
+   "notes": "80,827 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dh_k_b25_2_a5_alpha",
+   "system": "Col 173 Sector DH-K b25-2",
+   "body": "A 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 19.887537,
+    "lon": 100.132706
+   },
+   "notes": "88 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dh_k_b25_2_a5_beta",
+   "system": "Col 173 Sector DH-K b25-2",
+   "body": "A 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -32.795288,
+    "lon": -41.064831
+   },
+   "notes": "88 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dh_k_b25_2_a7",
+   "system": "Col 173 Sector DH-K b25-2",
+   "body": "A 7",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 15.06253,
+    "lon": -159.607544
+   },
+   "notes": "166 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dm_l_c8_0_b2_alpha",
+   "system": "Col 173 Sector DM-L c8-0",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -32.054241,
+    "lon": -3.798693
+   },
+   "notes": "3,199 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dm_l_c8_0_b2_beta",
+   "system": "Col 173 Sector DM-L c8-0",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -23.906872,
+    "lon": -128.257874
+   },
+   "notes": "2 Beta sites on this body · 3,199 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dm_l_c8_0_b3",
+   "system": "Col 173 Sector DM-L c8-0",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -38.387333,
+    "lon": 127.432098
+   },
+   "notes": "3,056 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dx_k_d8_17_5a_alpha",
+   "system": "Col 173 Sector DX-K d8-17",
+   "body": "5 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -37.874645,
+    "lon": 49.279049
+   },
+   "notes": "1,320 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dx_k_d8_17_5a_gamma",
+   "system": "Col 173 Sector DX-K d8-17",
+   "body": "5 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.325459,
+    "lon": -50.094551
+   },
+   "notes": "1,320 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dx_k_d8_17_5b",
+   "system": "Col 173 Sector DX-K d8-17",
+   "body": "5 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -8.763789,
+    "lon": -122.239967
+   },
+   "notes": "1,320 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dy_g_b40_4_d1_alpha",
+   "system": "Col 173 Sector DY-G b40-4",
+   "body": "D 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -63.167625,
+    "lon": 142.72583
+   },
+   "notes": "69,041 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dy_g_b40_4_d1_beta",
+   "system": "Col 173 Sector DY-G b40-4",
+   "body": "D 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 30.477827,
+    "lon": -131.653305
+   },
+   "notes": "69,041 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dy_g_b40_4_d1_gamma",
+   "system": "Col 173 Sector DY-G b40-4",
+   "body": "D 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -42.410183,
+    "lon": 35.973042
+   },
+   "notes": "69,041 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ec_l_d8_54_1c_alpha",
+   "system": "Col 173 Sector EC-L d8-54",
+   "body": "1 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -14.074353,
+    "lon": 42.513012
+   },
+   "notes": "2 Alpha sites on this body · 645 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ec_l_d8_54_1c_beta",
+   "system": "Col 173 Sector EC-L d8-54",
+   "body": "1 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -42.690331,
+    "lon": -100.046577
+   },
+   "notes": "645 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_eh_l_d8_41_1a_alpha",
+   "system": "Col 173 Sector EH-L d8-41",
+   "body": "1 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 32.808704,
+    "lon": -138.409836
+   },
+   "notes": "937 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_eh_l_d8_41_1a_beta",
+   "system": "Col 173 Sector EH-L d8-41",
+   "body": "1 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -4.650696,
+    "lon": 20.727201
+   },
+   "notes": "937 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_em_l_d8_27_4a_alpha",
+   "system": "Col 173 Sector EM-L d8-27",
+   "body": "4 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 17.440723,
+    "lon": 160.64801
+   },
+   "notes": "1,758 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_em_l_d8_27_4a_gamma",
+   "system": "Col 173 Sector EM-L d8-27",
+   "body": "4 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 42.408779,
+    "lon": -15.98443
+   },
+   "notes": "1,758 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_em_l_d8_60_8a_alpha",
+   "system": "Col 173 Sector EM-L d8-60",
+   "body": "8 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 22.919901,
+    "lon": 13.481147
+   },
+   "notes": "1,105 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_em_l_d8_60_8a_gamma",
+   "system": "Col 173 Sector EM-L d8-60",
+   "body": "8 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 33.238209,
+    "lon": 126.196205
+   },
+   "notes": "1,105 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_fc_l_d8_28_14c_alpha",
+   "system": "Col 173 Sector FC-L d8-28",
+   "body": "14 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 51.59824,
+    "lon": -88.815392
+   },
+   "notes": "971 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_fc_l_d8_28_14c_beta",
+   "system": "Col 173 Sector FC-L d8-28",
+   "body": "14 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 17.146477,
+    "lon": -133.271057
+   },
+   "notes": "2 Beta sites on this body · 971 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ge_d_b14_0_b3_beta",
+   "system": "Col 173 Sector GE-D b14-0",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "20,568 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ge_d_b14_0_b3_gamma",
+   "system": "Col 173 Sector GE-D b14-0",
+   "body": "B 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Gamma sites on this body · 20,568 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ge_d_b14_0_c2",
+   "system": "Col 173 Sector GE-D b14-0",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Beta sites on this body · 20,379 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gh_l_d8_31_c3_alpha",
+   "system": "Col 173 Sector GH-L d8-31",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -85.897781,
+    "lon": 37.392334
+   },
+   "notes": "195,240 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gh_l_d8_31_c3_gamma",
+   "system": "Col 173 Sector GH-L d8-31",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 16.489565,
+    "lon": 136.142731
+   },
+   "notes": "195,240 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gm_v_d2_3_ab1b_alpha",
+   "system": "Col 173 Sector GM-V d2-3",
+   "body": "AB 1 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -18.691351,
+    "lon": 134.98407
+   },
+   "notes": "2,719 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gm_v_d2_3_ab1b_beta",
+   "system": "Col 173 Sector GM-V d2-3",
+   "body": "AB 1 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 33.447948,
+    "lon": -131.619522
+   },
+   "notes": "2,719 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gm_v_d2_3_ab1b_gamma",
+   "system": "Col 173 Sector GM-V d2-3",
+   "body": "AB 1 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 39.75692,
+    "lon": 121.283783
+   },
+   "notes": "2,719 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gm_v_d2_3_ab1c_beta",
+   "system": "Col 173 Sector GM-V d2-3",
+   "body": "AB 1 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 40.106152,
+    "lon": 50.48032
+   },
+   "notes": "2,720 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gm_v_d2_3_ab1c_gamma",
+   "system": "Col 173 Sector GM-V d2-3",
+   "body": "AB 1 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 16.496561,
+    "lon": 24.000294
+   },
+   "notes": "2,720 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hg_g_b26_1_b1",
+   "system": "Col 173 Sector HG-G b26-1",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Gamma sites on this body · 1,820 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hi_m_a55_0_a2_alpha",
+   "system": "Col 173 Sector HI-M a55-0",
+   "body": "A 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 27.738825,
+    "lon": -128.061508
+   },
+   "notes": "16 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hi_m_a55_0_a2_gamma",
+   "system": "Col 173 Sector HI-M a55-0",
+   "body": "A 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 32.456226,
+    "lon": 158.741486
+   },
+   "notes": "16 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hi_m_a55_0_a3",
+   "system": "Col 173 Sector HI-M a55-0",
+   "body": "A 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -14.315631,
+    "lon": 74.613327
+   },
+   "notes": "21 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hr_m_b23_3_b7",
+   "system": "Col 173 Sector HR-M b23-3",
+   "body": "B 7",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 54.087475,
+    "lon": -126.164291
+   },
+   "notes": "2 Alpha sites on this body · 2,652 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hr_m_b23_3_c5",
+   "system": "Col 173 Sector HR-M b23-3",
+   "body": "C 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 30.094763,
+    "lon": 143.079041
+   },
+   "notes": "2,941 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_id_z_c14_0_a4",
+   "system": "Col 173 Sector ID-Z c14-0",
+   "body": "A 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -12.738662,
+    "lon": -151.08493
+   },
+   "notes": "2 Alpha sites on this body · 173 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ie_r_b34_3_b2",
+   "system": "Col 173 Sector IE-R b34-3",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 0.801331,
+    "lon": 84.443619
+   },
+   "notes": "2 Alpha sites on this body · 4,456 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_iy_h_d10_54_b9_beta",
+   "system": "Col 173 Sector IY-H d10-54",
+   "body": "B 9",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 34.510921,
+    "lon": 142.428513
+   },
+   "notes": "410,727 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_iy_h_d10_54_b9_gamma",
+   "system": "Col 173 Sector IY-H d10-54",
+   "body": "B 9",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -55.140121,
+    "lon": -130.421799
+   },
+   "notes": "410,727 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jb_f_b27_1_a4_beta",
+   "system": "Col 173 Sector JB-F b27-1",
+   "body": "A 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 59.81496,
+    "lon": 154.360596
+   },
+   "notes": "107 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jb_f_b27_1_a4_gamma",
+   "system": "Col 173 Sector JB-F b27-1",
+   "body": "A 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 44.721157,
+    "lon": 82.188416
+   },
+   "notes": "107 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jb_f_b27_1_bc3",
+   "system": "Col 173 Sector JB-F b27-1",
+   "body": "BC 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 7.534891,
+    "lon": 128.832611
+   },
+   "notes": "1,406 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_je_v_b33_4_b2",
+   "system": "Col 173 Sector JE-V b33-4",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 12.990463,
+    "lon": -148.406097
+   },
+   "notes": "3 Alpha sites on this body · 1,027 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_js_j_d9_76_14b",
+   "system": "Col 173 Sector JS-J d9-76",
+   "body": "14 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 37.644577,
+    "lon": -166.447784
+   },
+   "notes": "2 Beta sites on this body · 2,746 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_js_j_d9_76_14c",
+   "system": "Col 173 Sector JS-J d9-76",
+   "body": "14 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -13.853409,
+    "lon": 27.501083
+   },
+   "notes": "2,749 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jx_k_b24_0_b2_alpha",
+   "system": "Col 173 Sector JX-K b24-0",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 8.263453,
+    "lon": 82.77124
+   },
+   "notes": "560 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jx_k_b24_0_b2_gamma",
+   "system": "Col 173 Sector JX-K b24-0",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 8.169463,
+    "lon": 82.877914
+   },
+   "notes": "560 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jx_k_b24_0_b4",
+   "system": "Col 173 Sector JX-K b24-0",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -15.3317,
+    "lon": 6.521774
+   },
+   "notes": "543 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kn_j_b25_5_c3_beta",
+   "system": "Col 173 Sector KN-J b25-5",
+   "body": "C 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -45.092583,
+    "lon": -169.119461
+   },
+   "notes": "2 Beta sites on this body · 11,052 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kn_j_b25_5_c3_gamma",
+   "system": "Col 173 Sector KN-J b25-5",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -31.563124,
+    "lon": -92.938499
+   },
+   "notes": "11,052 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kn_j_d9_22_5a_alpha",
+   "system": "Col 173 Sector KN-J d9-22",
+   "body": "5 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -14.026104,
+    "lon": 66.86187
+   },
+   "notes": "2,022 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kn_j_d9_22_5a_beta",
+   "system": "Col 173 Sector KN-J d9-22",
+   "body": "5 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 0.922304,
+    "lon": -6.602104
+   },
+   "notes": "2,022 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kp_t_b34_8_b2_beta",
+   "system": "Col 173 Sector KP-T b34-8",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 47.770763,
+    "lon": 143.7043
+   },
+   "notes": "345 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kp_t_b34_8_b2_gamma",
+   "system": "Col 173 Sector KP-T b34-8",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -24.793108,
+    "lon": -161.430939
+   },
+   "notes": "345 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kt_g_b40_2_a3",
+   "system": "Col 173 Sector KT-G b40-2",
+   "body": "A 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 36.162029,
+    "lon": -52.180965
+   },
+   "notes": "3 Alpha sites on this body · 24 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_47_8c_alpha",
+   "system": "Col 173 Sector KY-Q d5-47",
+   "body": "8 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -36.779533,
+    "lon": -127.128456
+   },
+   "notes": "1,013 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_47_8c_beta",
+   "system": "Col 173 Sector KY-Q d5-47",
+   "body": "8 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -32.697018,
+    "lon": 29.834707
+   },
+   "notes": "1,013 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_47_9a_alpha",
+   "system": "Col 173 Sector KY-Q d5-47",
+   "body": "9 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 33.948612,
+    "lon": 75.746376
+   },
+   "notes": "1,439 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_47_9a_gamma",
+   "system": "Col 173 Sector KY-Q d5-47",
+   "body": "9 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 60.73185,
+    "lon": -24.159771
+   },
+   "notes": "1,439 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_47_9d",
+   "system": "Col 173 Sector KY-Q d5-47",
+   "body": "9 d",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 49.74485,
+    "lon": -63.096291
+   },
+   "notes": "1,437 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lb_w_b31_0_c1_beta",
+   "system": "Col 173 Sector LB-W b31-0",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 42.541378,
+    "lon": 122.004898
+   },
+   "notes": "2 Beta sites on this body · 225,403 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lb_w_b31_0_c1_gamma",
+   "system": "Col 173 Sector LB-W b31-0",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 14.248201,
+    "lon": -139.827942
+   },
+   "notes": "225,403 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lj_f_c12_0_b6",
+   "system": "Col 173 Sector LJ-F c12-0",
+   "body": "B 6",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -42.098766,
+    "lon": 101.85881
+   },
+   "notes": "3 Beta sites on this body · 159,136 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lj_f_c12_0_b7_alpha",
+   "system": "Col 173 Sector LJ-F c12-0",
+   "body": "B 7",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 23.414459,
+    "lon": 20.67874
+   },
+   "notes": "159,042 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lj_f_c12_0_b7_gamma",
+   "system": "Col 173 Sector LJ-F c12-0",
+   "body": "B 7",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 40.755966,
+    "lon": 149.412399
+   },
+   "notes": "159,042 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_13_ab9a_alpha",
+   "system": "Col 173 Sector LY-Q d5-13",
+   "body": "AB 9 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -36.850231,
+    "lon": 32.322792
+   },
+   "notes": "4,692 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_13_ab9a_beta",
+   "system": "Col 173 Sector LY-Q d5-13",
+   "body": "AB 9 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 81.05201,
+    "lon": -3.962217
+   },
+   "notes": "2 Beta sites on this body · 4,692 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_13_ab9b",
+   "system": "Col 173 Sector LY-Q d5-13",
+   "body": "AB 9 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.415854,
+    "lon": 120.901711
+   },
+   "notes": "4,722 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_59_8a_alpha",
+   "system": "Col 173 Sector LY-Q d5-59",
+   "body": "8 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -20.301718,
+    "lon": -133.645996
+   },
+   "notes": "1,172 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_59_8a_beta",
+   "system": "Col 173 Sector LY-Q d5-59",
+   "body": "8 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 1.527324,
+    "lon": -116.647827
+   },
+   "notes": "1,172 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_59_8a_gamma",
+   "system": "Col 173 Sector LY-Q d5-59",
+   "body": "8 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -4.984453,
+    "lon": -175.226913
+   },
+   "notes": "1,172 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ly_q_d5_59_8b",
+   "system": "Col 173 Sector LY-Q d5-59",
+   "body": "8 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -6.347799,
+    "lon": 130.667557
+   },
+   "notes": "1,169 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_mk_d_c13_3_b2_alpha",
+   "system": "Col 173 Sector MK-D c13-3",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 5.711215,
+    "lon": -139.355087
+   },
+   "notes": "2 Alpha sites on this body · 188,810 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_mk_d_c13_3_b2_gamma",
+   "system": "Col 173 Sector MK-D c13-3",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 7.187415,
+    "lon": 112.45224
+   },
+   "notes": "188,810 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ni_j_d9_48_a5c",
+   "system": "Col 173 Sector NI-J d9-48",
+   "body": "A 5 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Beta sites on this body · 667 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oc_c_b29_1_a4_beta",
+   "system": "Col 173 Sector OC-C b29-1",
+   "body": "A 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 21.073893,
+    "lon": 54.491516
+   },
+   "notes": "96 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oc_c_b29_1_a4_gamma",
+   "system": "Col 173 Sector OC-C b29-1",
+   "body": "A 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 21.130445,
+    "lon": 54.572971
+   },
+   "notes": "2 Gamma sites on this body · 96 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oe_p_d6_11_b3_alpha",
+   "system": "Col 173 Sector OE-P d6-11",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 38.688274,
+    "lon": 111.204277
+   },
+   "notes": "2 Alpha sites on this body · 34,417 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oe_p_d6_11_b3_beta",
+   "system": "Col 173 Sector OE-P d6-11",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -35.286682,
+    "lon": -130.545822
+   },
+   "notes": "34,417 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oe_p_d6_11_c2_alpha",
+   "system": "Col 173 Sector OE-P d6-11",
+   "body": "C 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -18.898125,
+    "lon": 105.076225
+   },
+   "notes": "34,939 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oe_p_d6_11_c2_gamma",
+   "system": "Col 173 Sector OE-P d6-11",
+   "body": "C 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 2.411193,
+    "lon": 132.04863
+   },
+   "notes": "34,939 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_og_z_c15_35_b1_alpha",
+   "system": "Col 173 Sector OG-Z c15-35",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -15.411836,
+    "lon": -175.081619
+   },
+   "notes": "2 Alpha sites on this body · 4,771 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_og_z_c15_35_b1_gamma",
+   "system": "Col 173 Sector OG-Z c15-35",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 51.0284,
+    "lon": -121.420273
+   },
+   "notes": "4,771 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oh_e_b27_1_a1",
+   "system": "Col 173 Sector OH-E b27-1",
+   "body": "A 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -41.6117,
+    "lon": 66.677055
+   },
+   "notes": "2 Alpha sites on this body · 42 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oo_q_d5_18_6a",
+   "system": "Col 173 Sector OO-Q d5-18",
+   "body": "6 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 25.87369,
+    "lon": 148.24144
+   },
+   "notes": "3 Beta sites on this body · 2,043 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oo_q_d5_18_6b_alpha",
+   "system": "Col 173 Sector OO-Q d5-18",
+   "body": "6 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -38.475159,
+    "lon": 88.906883
+   },
+   "notes": "2,030 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oo_q_d5_18_6b_gamma",
+   "system": "Col 173 Sector OO-Q d5-18",
+   "body": "6 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 2.879414,
+    "lon": -19.828882
+   },
+   "notes": "2,030 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_op_e_b41_1_b1_alpha",
+   "system": "Col 173 Sector OP-E b41-1",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -75.296959,
+    "lon": -135.825745
+   },
+   "notes": "63,246 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_op_e_b41_1_b1_beta",
+   "system": "Col 173 Sector OP-E b41-1",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 42.931976,
+    "lon": 154.270401
+   },
+   "notes": "63,246 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ot_q_d5_18_d2_alpha",
+   "system": "Col 173 Sector OT-Q d5-18",
+   "body": "D 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -41.072948,
+    "lon": 57.271481
+   },
+   "notes": "2 Alpha sites on this body · 31,223 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ot_q_d5_18_d2_gamma",
+   "system": "Col 173 Sector OT-Q d5-18",
+   "body": "D 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -20.959419,
+    "lon": 82.600647
+   },
+   "notes": "31,223 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oz_u_b33_6_a1_alpha",
+   "system": "Col 173 Sector OZ-U b33-6",
+   "body": "A 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 1.290927,
+    "lon": -116.242691
+   },
+   "notes": "2 Alpha sites on this body · 31 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_oz_u_b33_6_a1_gamma",
+   "system": "Col 173 Sector OZ-U b33-6",
+   "body": "A 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 68.319298,
+    "lon": 17.665337
+   },
+   "notes": "31 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pd_b_b29_4_a5",
+   "system": "Col 173 Sector PD-B b29-4",
+   "body": "A 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 18.445381,
+    "lon": 90.150291
+   },
+   "notes": "2 Beta sites on this body · 95 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pd_b_b29_4_a6",
+   "system": "Col 173 Sector PD-B b29-4",
+   "body": "A 6",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 33.12989,
+    "lon": 48.12883
+   },
+   "notes": "95 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_b_b31_3_c5_alpha",
+   "system": "Col 173 Sector PF-B b31-3",
+   "body": "C 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "12,064 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_b_b31_3_c5_beta",
+   "system": "Col 173 Sector PF-B b31-3",
+   "body": "C 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Beta sites on this body · 12,064 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_c_c14_22_b2_alpha",
+   "system": "Col 173 Sector PF-C c14-22",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -30.074547,
+    "lon": -14.224767
+   },
+   "notes": "2 Alpha sites on this body · 47,093 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_c_c14_22_b2_beta",
+   "system": "Col 173 Sector PF-C c14-22",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 0.593404,
+    "lon": -124.841492
+   },
+   "notes": "47,093 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_e_b28_3_b1_alpha",
+   "system": "Col 173 Sector PF-E b28-3",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -21.743458,
+    "lon": -20.67609
+   },
+   "notes": "1,535 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_e_b28_3_b1_beta",
+   "system": "Col 173 Sector PF-E b28-3",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 24.998842,
+    "lon": 152.3647
+   },
+   "notes": "1,535 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pv_b_c14_1_d2",
+   "system": "Col 173 Sector PV-B c14-1",
+   "body": "D 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 0.233751,
+    "lon": 123.747482
+   },
+   "notes": "3 Gamma sites on this body · 132,999 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_qu_o_d6_25_5b_alpha",
+   "system": "Col 173 Sector QU-O d6-25",
+   "body": "5 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -35.138523,
+    "lon": -135.35257
+   },
+   "notes": "1,285 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_qu_o_d6_25_5b_beta",
+   "system": "Col 173 Sector QU-O d6-25",
+   "body": "5 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 19.499439,
+    "lon": -126.738434
+   },
+   "notes": "1,285 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_rf_d_c13_12_c3_alpha",
+   "system": "Col 173 Sector RF-D c13-12",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 49.625275,
+    "lon": -44.74371
+   },
+   "notes": "128,544 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_rf_d_c13_12_c3_gamma",
+   "system": "Col 173 Sector RF-D c13-12",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -11.140706,
+    "lon": 97.996269
+   },
+   "notes": "2 Gamma sites on this body · 128,544 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_rh_c_b29_1_b3_alpha",
+   "system": "Col 173 Sector RH-C b29-1",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 41.129772,
+    "lon": -37.819523
+   },
+   "notes": "1,952 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_rh_c_b29_1_b3_beta",
+   "system": "Col 173 Sector RH-C b29-1",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 1.685362,
+    "lon": 145.352661
+   },
+   "notes": "2 Beta sites on this body · 1,952 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ri_r_b21_3_c1_alpha",
+   "system": "Col 173 Sector RI-R b21-3",
+   "body": "C 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 12.523696,
+    "lon": -172.57959
+   },
+   "notes": "70,044 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ri_r_b21_3_c1_beta",
+   "system": "Col 173 Sector RI-R b21-3",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -59.681427,
+    "lon": -3.864312
+   },
+   "notes": "70,044 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ri_r_b21_3_c1_gamma",
+   "system": "Col 173 Sector RI-R b21-3",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -19.177673,
+    "lon": 6.386498
+   },
+   "notes": "70,044 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sa_c_c14_1_a5",
+   "system": "Col 173 Sector SA-C c14-1",
+   "body": "A 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -8.044847,
+    "lon": 107.581512
+   },
+   "notes": "165 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sa_c_c14_1_b4_beta",
+   "system": "Col 173 Sector SA-C c14-1",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -27.479891,
+    "lon": -77.042274
+   },
+   "notes": "3,343 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sa_c_c14_1_b4_gamma",
+   "system": "Col 173 Sector SA-C c14-1",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -39.139961,
+    "lon": -107.919724
+   },
+   "notes": "3,343 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sb_z_c15_7_b4_beta",
+   "system": "Col 173 Sector SB-Z c15-7",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -28.915104,
+    "lon": -146.264984
+   },
+   "notes": "2 Beta sites on this body · 4,064 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sb_z_c15_7_b4_gamma",
+   "system": "Col 173 Sector SB-Z c15-7",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 46.792973,
+    "lon": 111.800919
+   },
+   "notes": "4,064 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_tk_c_b30_6_b2_alpha",
+   "system": "Col 173 Sector TK-C b30-6",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Alpha sites on this body · 262 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_tk_c_b30_6_b2_gamma",
+   "system": "Col 173 Sector TK-C b30-6",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "262 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ug_b_c14_0_c1_beta",
+   "system": "Col 173 Sector UG-B c14-0",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -24.529325,
+    "lon": -34.498886
+   },
+   "notes": "77,668 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ug_b_c14_0_c1_gamma",
+   "system": "Col 173 Sector UG-B c14-0",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 14.027361,
+    "lon": -14.848372
+   },
+   "notes": "77,668 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_um_x_b16_0_e1_beta",
+   "system": "Col 173 Sector UM-X b16-0",
+   "body": "E 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 0.0,
+    "lon": 0.0
+   },
+   "notes": "2 Beta sites on this body · 201,177 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_um_x_b16_0_e1_gamma",
+   "system": "Col 173 Sector UM-X b16-0",
+   "body": "E 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -18.873735,
+    "lon": -36.637352
+   },
+   "notes": "201,177 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_up_o_d6_41_11c_beta",
+   "system": "Col 173 Sector UP-O d6-41",
+   "body": "11 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "1,941 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_up_o_d6_41_11c_gamma",
+   "system": "Col 173 Sector UP-O d6-41",
+   "body": "11 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "1,941 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_up_o_d6_41_11d",
+   "system": "Col 173 Sector UP-O d6-41",
+   "body": "11 d",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "1,928 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_20_6c_alpha",
+   "system": "Col 173 Sector UU-O d6-20",
+   "body": "6 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 43.51329,
+    "lon": -8.933491
+   },
+   "notes": "799 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_20_6c_beta",
+   "system": "Col 173 Sector UU-O d6-20",
+   "body": "6 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 36.85696,
+    "lon": -48.561127
+   },
+   "notes": "799 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_20_6d",
+   "system": "Col 173 Sector UU-O d6-20",
+   "body": "6 d",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -17.390844,
+    "lon": -104.857132
+   },
+   "notes": "795 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_30_4d_alpha",
+   "system": "Col 173 Sector UU-O d6-30",
+   "body": "4 d",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 22.561901,
+    "lon": -170.458603
+   },
+   "notes": "927 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_30_4d_gamma",
+   "system": "Col 173 Sector UU-O d6-30",
+   "body": "4 d",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 24.72402,
+    "lon": -133.209122
+   },
+   "notes": "927 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_30_4f",
+   "system": "Col 173 Sector UU-O d6-30",
+   "body": "4 f",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -44.460346,
+    "lon": 175.773056
+   },
+   "notes": "923 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_42_a1c_beta",
+   "system": "Col 173 Sector UU-O d6-42",
+   "body": "A 1 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -59.790413,
+    "lon": -40.041767
+   },
+   "notes": "642 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_uu_o_d6_42_a1c_gamma",
+   "system": "Col 173 Sector UU-O d6-42",
+   "body": "A 1 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -37.690178,
+    "lon": 44.457455
+   },
+   "notes": "2 Gamma sites on this body · 642 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vc_w_c17_15_b4_beta",
+   "system": "Col 173 Sector VC-W c17-15",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "44,377 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vc_w_c17_15_b4_gamma",
+   "system": "Col 173 Sector VC-W c17-15",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "2 Gamma sites on this body · 44,377 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vn_a_b30_1_c3_alpha",
+   "system": "Col 173 Sector VN-A b30-1",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -23.577604,
+    "lon": -47.931961
+   },
+   "notes": "2,361 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vn_a_b30_1_c3_gamma",
+   "system": "Col 173 Sector VN-A b30-1",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -42.777966,
+    "lon": 52.965553
+   },
+   "notes": "2 Gamma sites on this body · 2,361 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vv_c_c13_7_ab9a",
+   "system": "Col 173 Sector VV-C c13-7",
+   "body": "AB 9 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 22.091936,
+    "lon": 44.947121
+   },
+   "notes": "2 Beta sites on this body · 1,986 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wf_n_d7_52_b2_beta",
+   "system": "Col 173 Sector WF-N d7-52",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -57.851223,
+    "lon": -89.185516
+   },
+   "notes": "11,147 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wf_n_d7_52_b2_gamma",
+   "system": "Col 173 Sector WF-N d7-52",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -58.607151,
+    "lon": -171.629257
+   },
+   "notes": "2 Gamma sites on this body · 11,147 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wg_j_c10_16_b1_beta",
+   "system": "Col 173 Sector WG-J c10-16",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -56.778076,
+    "lon": -22.286072
+   },
+   "notes": "85,113 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wg_j_c10_16_b1_gamma",
+   "system": "Col 173 Sector WG-J c10-16",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -29.117455,
+    "lon": 137.748245
+   },
+   "notes": "2 Gamma sites on this body · 85,113 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wk_a_a48_4_a3_alpha",
+   "system": "Col 173 Sector WK-A a48-4",
+   "body": "A 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 21.003735,
+    "lon": -173.533142
+   },
+   "notes": "24 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wk_a_a48_4_a3_beta",
+   "system": "Col 173 Sector WK-A a48-4",
+   "body": "A 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -28.011415,
+    "lon": 148.298447
+   },
+   "notes": "24 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wk_a_a48_4_a3_gamma",
+   "system": "Col 173 Sector WK-A a48-4",
+   "body": "A 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 20.687569,
+    "lon": -116.205589
+   },
+   "notes": "24 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wn_b_b29_1_d1_beta",
+   "system": "Col 173 Sector WN-B b29-1",
+   "body": "D 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -17.49996,
+    "lon": 43.178604
+   },
+   "notes": "2 Beta sites on this body · 182,632 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wn_b_b29_1_d1_gamma",
+   "system": "Col 173 Sector WN-B b29-1",
+   "body": "D 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -53.833969,
+    "lon": -57.637196
+   },
+   "notes": "182,632 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wz_o_b22_4_c5_alpha",
+   "system": "Col 173 Sector WZ-O b22-4",
+   "body": "C 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 36.278057,
+    "lon": -37.948723
+   },
+   "notes": "2 Alpha sites on this body · 299,584 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wz_o_b22_4_c5_gamma",
+   "system": "Col 173 Sector WZ-O b22-4",
+   "body": "C 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -41.542217,
+    "lon": 40.109863
+   },
+   "notes": "299,584 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wz_o_b22_4_c6",
+   "system": "Col 173 Sector WZ-O b22-4",
+   "body": "C 6",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -1.795978,
+    "lon": 135.026703
+   },
+   "notes": "299,608 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xf_n_d7_105_a4a_alpha",
+   "system": "Col 173 Sector XF-N d7-105",
+   "body": "A 4 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 31.706148,
+    "lon": 131.931412
+   },
+   "notes": "2,029 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xf_n_d7_105_a4a_gamma",
+   "system": "Col 173 Sector XF-N d7-105",
+   "body": "A 4 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 23.648855,
+    "lon": 173.745163
+   },
+   "notes": "2 Gamma sites on this body · 2,029 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xg_j_c10_17_a2",
+   "system": "Col 173 Sector XG-J c10-17",
+   "body": "A 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -17.008703,
+    "lon": 44.243992
+   },
+   "notes": "291 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xg_j_c10_17_b4",
+   "system": "Col 173 Sector XG-J c10-17",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -26.474369,
+    "lon": -50.78775
+   },
+   "notes": "2 Beta sites on this body · 3,994 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xy_y_b30_1_b2_alpha",
+   "system": "Col 173 Sector XY-Y b30-1",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -23.178288,
+    "lon": 87.217514
+   },
+   "notes": "643 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xy_y_b30_1_b2_gamma",
+   "system": "Col 173 Sector XY-Y b30-1",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -45.705158,
+    "lon": -58.284225
+   },
+   "notes": "643 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ya_n_d7_17_a2",
+   "system": "Col 173 Sector YA-N d7-17",
+   "body": "A 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 8.786351,
+    "lon": -117.978325
+   },
+   "notes": "2 Alpha sites on this body · 537 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ya_n_d7_17_b2",
+   "system": "Col 173 Sector YA-N d7-17",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 63.340961,
+    "lon": 164.126022
+   },
+   "notes": "96,896 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_c7_5_b2_alpha",
+   "system": "Col 173 Sector YF-N c7-5",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -21.317204,
+    "lon": 150.858505
+   },
+   "notes": "2 Alpha sites on this body · 1,988 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_c7_5_b2_gamma",
+   "system": "Col 173 Sector YF-N c7-5",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 42.346638,
+    "lon": -140.390366
+   },
+   "notes": "1,988 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_c7_5_b3_alpha",
+   "system": "Col 173 Sector YF-N c7-5",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -17.458122,
+    "lon": -120.9244
+   },
+   "notes": "1,988 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_c7_5_b3_beta",
+   "system": "Col 173 Sector YF-N c7-5",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -19.551157,
+    "lon": 106.154015
+   },
+   "notes": "1,988 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_d7_74_c4_alpha",
+   "system": "Col 173 Sector YF-N d7-74",
+   "body": "C 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 44.408997,
+    "lon": 50.945049
+   },
+   "notes": "2 Alpha sites on this body · 4,825 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_d7_74_c4_beta",
+   "system": "Col 173 Sector YF-N d7-74",
+   "body": "C 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 52.932083,
+    "lon": -23.634287
+   },
+   "notes": "4,825 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yg_a_c15_12_b1",
+   "system": "Col 173 Sector YG-A c15-12",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 39.843349,
+    "lon": -29.852173
+   },
+   "notes": "2 Gamma sites on this body · 3,070 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yg_a_c15_20_a1_beta",
+   "system": "Col 173 Sector YG-A c15-20",
+   "body": "A 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 27.031685,
+    "lon": -85.837418
+   },
+   "notes": "249 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yg_a_c15_20_a1_gamma",
+   "system": "Col 173 Sector YG-A c15-20",
+   "body": "A 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 40.779701,
+    "lon": -21.052679
+   },
+   "notes": "249 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yv_m_d7_23_a7a_alpha",
+   "system": "Col 173 Sector YV-M d7-23",
+   "body": "A 7 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 16.353453,
+    "lon": -69.655365
+   },
+   "notes": "1,419 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yv_m_d7_23_a7a_beta",
+   "system": "Col 173 Sector YV-M d7-23",
+   "body": "A 7 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 25.366232,
+    "lon": 58.058861
+   },
+   "notes": "1,419 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zk_o_d6_24_3a_alpha",
+   "system": "Col 173 Sector ZK-O d6-24",
+   "body": "3 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 3.468123,
+    "lon": 89.548042
+   },
+   "notes": "1,015 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zk_o_d6_24_3a_gamma",
+   "system": "Col 173 Sector ZK-O d6-24",
+   "body": "3 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 28.157928,
+    "lon": 136.398956
+   },
+   "notes": "2 Gamma sites on this body · 1,015 ls from arrival"
+  },
+  {
+   "id": "drokoe_fu_o_b39_0_c7_beta",
+   "system": "Drokoe FU-O b39-0",
+   "body": "C 7",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -31.831688,
+    "lon": 133.052246
+   },
+   "notes": "3,771 ls from arrival"
+  },
+  {
+   "id": "drokoe_fu_o_b39_0_c7_gamma",
+   "system": "Drokoe FU-O b39-0",
+   "body": "C 7",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 32.143036,
+    "lon": 119.707397
+   },
+   "notes": "3,771 ls from arrival"
+  },
+  {
+   "id": "drokoe_ml_m_b40_0_c1_beta",
+   "system": "Drokoe ML-M b40-0",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 2.300134,
+    "lon": 142.526352
+   },
+   "notes": "799 ls from arrival"
+  },
+  {
+   "id": "drokoe_ml_m_b40_0_c1_gamma",
+   "system": "Drokoe ML-M b40-0",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -26.671299,
+    "lon": -16.115026
+   },
+   "notes": "799 ls from arrival"
+  },
+  {
+   "id": "drokoe_ml_m_b40_0_c2",
+   "system": "Drokoe ML-M b40-0",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 62.410629,
+    "lon": -96.417374
+   },
+   "notes": "799 ls from arrival"
+  },
+  {
+   "id": "drokoe_sb_m_b40_0_c2_alpha",
+   "system": "Drokoe SB-M b40-0",
+   "body": "C 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 42.686401,
+    "lon": -79.727585
+   },
+   "notes": "5,184 ls from arrival"
+  },
+  {
+   "id": "drokoe_sb_m_b40_0_c2_beta",
+   "system": "Drokoe SB-M b40-0",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 45.284348,
+    "lon": 93.882744
+   },
+   "notes": "5,184 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3468_abc1h",
+   "system": "Eorl Auwsy SY-Z d13-3468",
+   "body": "ABC 1 h",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -58.034016,
+    "lon": 43.753841
+   },
+   "notes": "1,310 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3468_abc3c_beta",
+   "system": "Eorl Auwsy SY-Z d13-3468",
+   "body": "ABC 3 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 40.928864,
+    "lon": 68.960686
+   },
+   "notes": "3,772 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3468_abc3c_gamma",
+   "system": "Eorl Auwsy SY-Z d13-3468",
+   "body": "ABC 3 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 8.277909,
+    "lon": 176.780197
+   },
+   "notes": "3,772 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3732_9a",
+   "system": "Eorl Auwsy SY-Z d13-3732",
+   "body": "9 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 41.69302,
+    "lon": -0.320431
+   },
+   "notes": "2 Gamma sites on this body · 2,603 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3732_9b",
+   "system": "Eorl Auwsy SY-Z d13-3732",
+   "body": "9 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.475473,
+    "lon": -107.609077
+   },
+   "notes": "2,599 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3861_3c_beta",
+   "system": "Eorl Auwsy SY-Z d13-3861",
+   "body": "3 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 37.045094,
+    "lon": 41.110115
+   },
+   "notes": "1,187 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3861_3c_gamma",
+   "system": "Eorl Auwsy SY-Z d13-3861",
+   "body": "3 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -2.456378,
+    "lon": 101.12336
+   },
+   "notes": "1,187 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_3861_4c",
+   "system": "Eorl Auwsy SY-Z d13-3861",
+   "body": "4 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 53.619003,
+    "lon": -57.67487
+   },
+   "notes": "1,778 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_sy_z_d13_450_1a",
+   "system": "Eorl Auwsy SY-Z d13-450",
+   "body": "1 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -35.825291,
+    "lon": 40.368271
+   },
+   "notes": "2 Beta sites on this body · 1,187 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_yf_y_b56_16_b3_alpha",
+   "system": "Eorl Auwsy YF-Y b56-16",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 5.530008,
+    "lon": -139.680618
+   },
+   "notes": "279,360 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_yf_y_b56_16_b3_gamma",
+   "system": "Eorl Auwsy YF-Y b56-16",
+   "body": "B 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -44.522194,
+    "lon": -90.380325
+   },
+   "notes": "279,360 ls from arrival"
+  },
+  {
+   "id": "eorl_auwsy_yf_y_b56_16_c3",
+   "system": "Eorl Auwsy YF-Y b56-16",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -48.125645,
+    "lon": 102.694077
+   },
+   "notes": "279,477 ls from arrival"
+  },
+  {
+   "id": "eta_carina_sector_el_y_d16_abc4a_beta",
+   "system": "Eta Carina Sector EL-Y d16",
+   "body": "ABC 4 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 28.402754,
+    "lon": -144.767242
+   },
+   "notes": "1,984 ls from arrival"
+  },
+  {
+   "id": "eta_carina_sector_el_y_d16_abc4a_gamma",
+   "system": "Eta Carina Sector EL-Y d16",
+   "body": "ABC 4 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -36.167725,
+    "lon": -50.345085
+   },
+   "notes": "2 Gamma sites on this body · 1,984 ls from arrival"
+  },
+  {
+   "id": "eta_carina_sector_im_v_c2_4_a2_alpha",
+   "system": "Eta Carina Sector IM-V c2-4",
+   "body": "A 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 30.952396,
+    "lon": 35.77401
+   },
+   "notes": "2 Alpha sites on this body · 447 ls from arrival"
+  },
+  {
+   "id": "eta_carina_sector_im_v_c2_4_a2_gamma",
+   "system": "Eta Carina Sector IM-V c2-4",
+   "body": "A 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -11.018473,
+    "lon": 115.328758
+   },
+   "notes": "447 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_aa_z_e24_12b_alpha",
+   "system": "Graea Hypue AA-Z e24",
+   "body": "12 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -45.081062,
+    "lon": -53.79969
+   },
+   "notes": "5,201 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_aa_z_e24_12b_gamma",
+   "system": "Graea Hypue AA-Z e24",
+   "body": "12 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 37.092598,
+    "lon": -70.483406
+   },
+   "notes": "5,201 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_aa_z_e24_12c",
+   "system": "Graea Hypue AA-Z e24",
+   "body": "12 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -9.91196,
+    "lon": 21.810028
+   },
+   "notes": "5,202 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_25_a10b",
+   "system": "Graea Hypue AG-V d3-25",
+   "body": "A 10 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 39.979576,
+    "lon": 102.146126
+   },
+   "notes": "1,035 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_25_a7a_alpha",
+   "system": "Graea Hypue AG-V d3-25",
+   "body": "A 7 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -39.337906,
+    "lon": -11.38049
+   },
+   "notes": "507 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_25_a7a_beta",
+   "system": "Graea Hypue AG-V d3-25",
+   "body": "A 7 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 1.050882,
+    "lon": -49.383057
+   },
+   "notes": "507 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_254_a6b",
+   "system": "Graea Hypue AG-V d3-254",
+   "body": "A 6 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -51.606956,
+    "lon": -101.472702
+   },
+   "notes": "1,519 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_254_a8a_beta",
+   "system": "Graea Hypue AG-V d3-254",
+   "body": "A 8 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 21.829588,
+    "lon": -142.407684
+   },
+   "notes": "2,611 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_254_a8a_gamma",
+   "system": "Graea Hypue AG-V d3-254",
+   "body": "A 8 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -31.810097,
+    "lon": -76.156189
+   },
+   "notes": "2,611 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_438_10a_beta",
+   "system": "Graea Hypue AG-V d3-438",
+   "body": "10 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "4,316 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_438_10a_gamma",
+   "system": "Graea Hypue AG-V d3-438",
+   "body": "10 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "4,316 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_438_10b",
+   "system": "Graea Hypue AG-V d3-438",
+   "body": "10 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "4,322 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_60_9a",
+   "system": "Graea Hypue AG-V d3-60",
+   "body": "9 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -32.786118,
+    "lon": 101.328247
+   },
+   "notes": "2 Beta sites on this body · 2,549 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_65_7a_beta",
+   "system": "Graea Hypue AG-V d3-65",
+   "body": "7 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 31.69031,
+    "lon": 135.460297
+   },
+   "notes": "1,166 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_65_7a_gamma",
+   "system": "Graea Hypue AG-V d3-65",
+   "body": "7 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -45.001289,
+    "lon": 87.424591
+   },
+   "notes": "1,166 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ag_v_d3_65_8b",
+   "system": "Graea Hypue AG-V d3-65",
+   "body": "8 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -45.828781,
+    "lon": 1.654112
+   },
+   "notes": "1,559 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_bh_t_d4_242_b5",
+   "system": "Graea Hypue BH-T d4-242",
+   "body": "B 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -37.440922,
+    "lon": -99.58387
+   },
+   "notes": "72,545 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_bh_t_d4_242_c4",
+   "system": "Graea Hypue BH-T d4-242",
+   "body": "C 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 11.12618,
+    "lon": 133.910553
+   },
+   "notes": "2 Alpha sites on this body · 71,957 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_bx_g_b28_27_b1_alpha",
+   "system": "Graea Hypue BX-G b28-27",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -24.928978,
+    "lon": -49.649189
+   },
+   "notes": "2,506 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_bx_g_b28_27_b1_gamma",
+   "system": "Graea Hypue BX-G b28-27",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -62.757656,
+    "lon": -66.128876
+   },
+   "notes": "2,506 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_dl_w_d2_16_3",
+   "system": "Graea Hypue DL-W d2-16",
+   "body": "3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 42.421646,
+    "lon": 83.573105
+   },
+   "notes": "2 Alpha sites on this body · 522 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_gh_m_b11_1_b1_alpha",
+   "system": "Graea Hypue GH-M b11-1",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 24.971212,
+    "lon": 51.855862
+   },
+   "notes": "107,479 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_gh_m_b11_1_b1_gamma",
+   "system": "Graea Hypue GH-M b11-1",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.211847,
+    "lon": -101.296432
+   },
+   "notes": "107,479 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ki_k_b12_13_b1",
+   "system": "Graea Hypue KI-K b12-13",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 53.076233,
+    "lon": -41.167393
+   },
+   "notes": "2 Beta sites on this body · 1,199 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_lo_p_d6_194_14a_beta",
+   "system": "Graea Hypue LO-P d6-194",
+   "body": "14 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 22.209421,
+    "lon": -112.090813
+   },
+   "notes": "2,503 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_lo_p_d6_194_14a_gamma",
+   "system": "Graea Hypue LO-P d6-194",
+   "body": "14 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 15.938621,
+    "lon": 132.153992
+   },
+   "notes": "2,503 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_lo_p_d6_194_14b",
+   "system": "Graea Hypue LO-P d6-194",
+   "body": "14 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -43.566963,
+    "lon": -45.432392
+   },
+   "notes": "2,502 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_3_4a",
+   "system": "Graea Hypue LS-S d4-3",
+   "body": "4 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -42.053902,
+    "lon": 97.562523
+   },
+   "notes": "1,647 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_3_6a_beta",
+   "system": "Graea Hypue LS-S d4-3",
+   "body": "6 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -0.186005,
+    "lon": 65.909142
+   },
+   "notes": "2,238 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_3_6a_gamma",
+   "system": "Graea Hypue LS-S d4-3",
+   "body": "6 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -10.547581,
+    "lon": 137.081116
+   },
+   "notes": "2,238 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_81_ab5a",
+   "system": "Graea Hypue LS-S d4-81",
+   "body": "AB 5 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 50.607838,
+    "lon": -156.586807
+   },
+   "notes": "2 Alpha sites on this body · 2,362 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_81_ab6b_alpha",
+   "system": "Graea Hypue LS-S d4-81",
+   "body": "AB 6 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -0.453253,
+    "lon": -67.712708
+   },
+   "notes": "3,539 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_81_ab6b_gamma",
+   "system": "Graea Hypue LS-S d4-81",
+   "body": "AB 6 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 46.01667,
+    "lon": 2.834296
+   },
+   "notes": "3,539 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_81_ab6c_beta",
+   "system": "Graea Hypue LS-S d4-81",
+   "body": "AB 6 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 20.990799,
+    "lon": 136.019531
+   },
+   "notes": "3,535 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ls_s_d4_81_ab6c_gamma",
+   "system": "Graea Hypue LS-S d4-81",
+   "body": "AB 6 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 34.128849,
+    "lon": -7.960019
+   },
+   "notes": "3,535 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ny_q_d5_111_5a",
+   "system": "Graea Hypue NY-Q d5-111",
+   "body": "5 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -47.667118,
+    "lon": 76.123566
+   },
+   "notes": "2 Gamma sites on this body · 622 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ny_q_d5_118_9a_beta",
+   "system": "Graea Hypue NY-Q d5-118",
+   "body": "9 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -28.024704,
+    "lon": -51.36367
+   },
+   "notes": "2,149 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ny_q_d5_118_9a_gamma",
+   "system": "Graea Hypue NY-Q d5-118",
+   "body": "9 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 36.978504,
+    "lon": 142.947144
+   },
+   "notes": "2,149 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ny_q_d5_148_8a_alpha",
+   "system": "Graea Hypue NY-Q d5-148",
+   "body": "8 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -43.874695,
+    "lon": -45.487785
+   },
+   "notes": "2,841 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ny_q_d5_148_8a_gamma",
+   "system": "Graea Hypue NY-Q d5-148",
+   "body": "8 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 44.894035,
+    "lon": 138.226364
+   },
+   "notes": "2,841 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_oj_w_c3_34_c1",
+   "system": "Graea Hypue OJ-W c3-34",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 32.340317,
+    "lon": 146.81369
+   },
+   "notes": "2 Gamma sites on this body · 18,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_oj_w_c3_34_c2",
+   "system": "Graea Hypue OJ-W c3-34",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 0.633229,
+    "lon": 38.642307
+   },
+   "notes": "18,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_pt_q_d5_122_10a",
+   "system": "Graea Hypue PT-Q d5-122",
+   "body": "10 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -2.819338,
+    "lon": -176.397766
+   },
+   "notes": "2 Gamma sites on this body · 2,061 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_pt_q_d5_122_10b",
+   "system": "Graea Hypue PT-Q d5-122",
+   "body": "10 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 10.569999,
+    "lon": -2.05828
+   },
+   "notes": "2,054 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_pt_q_d5_97_7c_beta",
+   "system": "Graea Hypue PT-Q d5-97",
+   "body": "7 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -33.765491,
+    "lon": -161.570251
+   },
+   "notes": "1,347 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_pt_q_d5_97_7c_gamma",
+   "system": "Graea Hypue PT-Q d5-97",
+   "body": "7 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 41.275333,
+    "lon": -16.668972
+   },
+   "notes": "1,347 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_pt_q_d5_99_7a",
+   "system": "Graea Hypue PT-Q d5-99",
+   "body": "7 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -2.201819,
+    "lon": 25.819477
+   },
+   "notes": "2,183 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qg_q_c7_17_c1_beta",
+   "system": "Graea Hypue QG-Q c7-17",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -43.400528,
+    "lon": 159.039154
+   },
+   "notes": "35,275 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qg_q_c7_17_c1_gamma",
+   "system": "Graea Hypue QG-Q c7-17",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -49.330994,
+    "lon": 11.428535
+   },
+   "notes": "35,275 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qg_q_c7_17_c2",
+   "system": "Graea Hypue QG-Q c7-17",
+   "body": "C 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 49.368778,
+    "lon": -28.956181
+   },
+   "notes": "35,354 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_c3_alpha",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -37.55595,
+    "lon": -56.306335
+   },
+   "notes": "77,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_c3_gamma",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 28.99748,
+    "lon": 49.365677
+   },
+   "notes": "77,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_c4_alpha",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "C 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 0.200533,
+    "lon": 113.530975
+   },
+   "notes": "77,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_c4_gamma",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "C 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -12.883823,
+    "lon": 139.458115
+   },
+   "notes": "77,761 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_d2_alpha",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "D 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -36.303894,
+    "lon": -44.759796
+   },
+   "notes": "77,640 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ql_v_b19_15_d2_gamma",
+   "system": "Graea Hypue QL-V b19-15",
+   "body": "D 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 0.469522,
+    "lon": 55.585617
+   },
+   "notes": "77,640 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_j_b12_7_b4_beta",
+   "system": "Graea Hypue QY-J b12-7",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 34.526989,
+    "lon": 87.789673
+   },
+   "notes": "958 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_j_b12_7_b4_gamma",
+   "system": "Graea Hypue QY-J b12-7",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -41.44738,
+    "lon": -161.544785
+   },
+   "notes": "958 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_j_b12_7_b5",
+   "system": "Graea Hypue QY-J b12-7",
+   "body": "B 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 7.177795,
+    "lon": -117.493759
+   },
+   "notes": "958 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_z_d179_b3_alpha",
+   "system": "Graea Hypue QY-Z d179",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -37.657635,
+    "lon": 64.198578
+   },
+   "notes": "73,796 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_z_d179_b3_beta",
+   "system": "Graea Hypue QY-Z d179",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -31.837275,
+    "lon": 98.019241
+   },
+   "notes": "73,763 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_qy_z_d179_b4",
+   "system": "Graea Hypue QY-Z d179",
+   "body": "B 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 4.065606,
+    "lon": 108.535789
+   },
+   "notes": "73,796 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ue_y_d1_58_c1_alpha",
+   "system": "Graea Hypue UE-Y d1-58",
+   "body": "C 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 4.855154,
+    "lon": -132.646561
+   },
+   "notes": "34,372 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ue_y_d1_58_c1_beta",
+   "system": "Graea Hypue UE-Y d1-58",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -43.623703,
+    "lon": 71.240189
+   },
+   "notes": "34,372 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ue_y_d1_58_c5",
+   "system": "Graea Hypue UE-Y d1-58",
+   "body": "C 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 3.24297,
+    "lon": 25.892408
+   },
+   "notes": "35,578 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ut_d_b17_5_c3",
+   "system": "Graea Hypue UT-D b17-5",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 43.100727,
+    "lon": 52.397034
+   },
+   "notes": "73,287 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ut_d_b17_5_d1",
+   "system": "Graea Hypue UT-D b17-5",
+   "body": "D 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -42.009892,
+    "lon": -84.964058
+   },
+   "notes": "2 Alpha sites on this body · 73,254 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_vz_x_d1_92_5b",
+   "system": "Graea Hypue VZ-X d1-92",
+   "body": "5 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -24.590872,
+    "lon": -24.024014
+   },
+   "notes": "2 Alpha sites on this body · 1,272 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_wa_v_d3_215_b1",
+   "system": "Graea Hypue WA-V d3-215",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -25.143944,
+    "lon": 36.250568
+   },
+   "notes": "36,077 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_wa_v_d3_215_c1_alpha",
+   "system": "Graea Hypue WA-V d3-215",
+   "body": "C 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 70.624649,
+    "lon": -1.822445
+   },
+   "notes": "30,445 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_wa_v_d3_215_c1_beta",
+   "system": "Graea Hypue WA-V d3-215",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -33.708,
+    "lon": 108.620872
+   },
+   "notes": "30,445 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_ye_y_d1_212_3a",
+   "system": "Graea Hypue YE-Y d1-212",
+   "body": "3 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -20.645212,
+    "lon": -99.828445
+   },
+   "notes": "2 Gamma sites on this body · 1,758 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_yx_s_b7_4_b2",
+   "system": "Graea Hypue YX-S b7-4",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 56.479362,
+    "lon": -128.927765
+   },
+   "notes": "2 Beta sites on this body · 413 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_yx_s_b7_4_b3",
+   "system": "Graea Hypue YX-S b7-4",
+   "body": "B 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 20.269428,
+    "lon": 162.223663
+   },
+   "notes": "422 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_zr_o_c8_117_b1",
+   "system": "Graea Hypue ZR-O c8-117",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 0.656817,
+    "lon": 133.632217
+   },
+   "notes": "2 Alpha sites on this body · 33,184 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_zv_u_d3_301_a9a_alpha",
+   "system": "Graea Hypue ZV-U d3-301",
+   "body": "A 9 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -47.045456,
+    "lon": 10.889312
+   },
+   "notes": "3,636 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_zv_u_d3_301_a9a_beta",
+   "system": "Graea Hypue ZV-U d3-301",
+   "body": "A 9 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -6.088584,
+    "lon": -44.799984
+   },
+   "notes": "3,636 ls from arrival"
+  },
+  {
+   "id": "graea_hypue_zv_u_d3_301_a9c",
+   "system": "Graea Hypue ZV-U d3-301",
+   "body": "A 9 c",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 34.914604,
+    "lon": 120.991287
+   },
+   "notes": "3,637 ls from arrival"
+  },
+  {
+   "id": "hip_39768_a14f",
+   "system": "HIP 39768",
+   "body": "A 14 f",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 37.457077,
+    "lon": 47.07233
+   },
+   "notes": "2 Beta sites on this body · 7,106 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_fl_x_b1_7_a2",
+   "system": "IC 2391 Sector FL-X b1-7",
+   "body": "A 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 9.200873,
+    "lon": -130.064285
+   },
+   "notes": "53 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_gw_v_b2_4_b1",
+   "system": "IC 2391 Sector GW-V b2-4",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -41.88707,
+    "lon": 26.236826
+   },
+   "notes": "3,026 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_ye_a_d103_b1",
+   "system": "IC 2391 Sector YE-A d103",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -54.580582,
+    "lon": 25.089531
+   },
+   "notes": "22,384 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_ze_a_d101_c3",
+   "system": "IC 2391 Sector ZE-A d101",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -33.664738,
+    "lon": -62.201862
+   },
+   "notes": "337,488 ls from arrival"
+  },
+  {
+   "id": "ngc_2516_sector_el_y_d40_b6_alpha",
+   "system": "NGC 2516 Sector EL-Y d40",
+   "body": "B 6",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "3,130 ls from arrival"
+  },
+  {
+   "id": "ngc_2516_sector_el_y_d40_b6_beta",
+   "system": "NGC 2516 Sector EL-Y d40",
+   "body": "B 6",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "3,130 ls from arrival"
+  },
+  {
+   "id": "ngc_2516_sector_el_y_d40_b6_gamma",
+   "system": "NGC 2516 Sector EL-Y d40",
+   "body": "B 6",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "3,130 ls from arrival"
+  },
+  {
+   "id": "ngc_2516_sector_ut_z_b2_a1",
+   "system": "NGC 2516 Sector UT-Z b2",
+   "body": "A 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -47.34771,
+    "lon": -169.645142
+   },
+   "notes": "2 Gamma sites on this body · 42 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_bv_y_c2_b1",
+   "system": "NGC 3199 Sector BV-Y c2",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 41.002014,
+    "lon": -142.749649
+   },
+   "notes": "2 Gamma sites on this body · 5,444 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_cq_y_d6_b4_beta",
+   "system": "NGC 3199 Sector CQ-Y d6",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -10.279774,
+    "lon": -127.464394
+   },
+   "notes": "6,694 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_cq_y_d6_b4_gamma",
+   "system": "NGC 3199 Sector CQ-Y d6",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -14.694014,
+    "lon": 137.537796
+   },
+   "notes": "6,694 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_dl_y_d12_1a_alpha",
+   "system": "NGC 3199 Sector DL-Y d12",
+   "body": "1 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -10.721328,
+    "lon": 62.295555
+   },
+   "notes": "854 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_dl_y_d12_1a_beta",
+   "system": "NGC 3199 Sector DL-Y d12",
+   "body": "1 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 28.367592,
+    "lon": 128.391953
+   },
+   "notes": "854 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_im_v_c2_5_b3",
+   "system": "NGC 3199 Sector IM-V c2-5",
+   "body": "B 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -30.702377,
+    "lon": 106.59507
+   },
+   "notes": "2 Beta sites on this body · 231,520 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_im_v_c2_5_b4",
+   "system": "NGC 3199 Sector IM-V c2-5",
+   "body": "B 4",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 0.926786,
+    "lon": 149.312912
+   },
+   "notes": "231,520 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_mc_v_c2_8_a5_alpha",
+   "system": "NGC 3199 Sector MC-V c2-8",
+   "body": "A 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -78.633034,
+    "lon": -141.174057
+   },
+   "notes": "93 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_mc_v_c2_8_a5_beta",
+   "system": "NGC 3199 Sector MC-V c2-8",
+   "body": "A 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 50.224155,
+    "lon": 115.943504
+   },
+   "notes": "93 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_xj_a_d10_11a_alpha",
+   "system": "NGC 3199 Sector XJ-A d10",
+   "body": "11 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -20.519329,
+    "lon": -12.087277
+   },
+   "notes": "1,875 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_xj_a_d10_11a_beta",
+   "system": "NGC 3199 Sector XJ-A d10",
+   "body": "11 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -35.418163,
+    "lon": 11.11412
+   },
+   "notes": "1,875 ls from arrival"
+  },
+  {
+   "id": "ngc_3199_sector_xj_a_d10_13b",
+   "system": "NGC 3199 Sector XJ-A d10",
+   "body": "13 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 16.080513,
+    "lon": -42.013065
+   },
+   "notes": "2,445 ls from arrival"
+  },
+  {
+   "id": "nyeajeou_vp_g_b56_0_b2_beta",
+   "system": "Nyeajeou VP-G b56-0",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -45.131325,
+    "lon": 86.665642
+   },
+   "notes": "773 ls from arrival"
+  },
+  {
+   "id": "nyeajeou_vp_g_b56_0_b2_gamma",
+   "system": "Nyeajeou VP-G b56-0",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 13.831583,
+    "lon": -33.495411
+   },
+   "notes": "773 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_gf_e_c10_b4",
+   "system": "Prai Hypoo GF-E c10",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 31.968714,
+    "lon": -94.988426
+   },
+   "notes": "3 Gamma sites on this body · 1,386 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_nq_f_b2_3_c1_beta",
+   "system": "Prai Hypoo NQ-F b2-3",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -10.961467,
+    "lon": 13.611351
+   },
+   "notes": "204,885 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_nq_f_b2_3_c1_gamma",
+   "system": "Prai Hypoo NQ-F b2-3",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 3.831339,
+    "lon": -148.244766
+   },
+   "notes": "2 Gamma sites on this body · 204,885 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_pc_c_d50_c1",
+   "system": "Prai Hypoo PC-C d50",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -36.099964,
+    "lon": -132.88269
+   },
+   "notes": "3 Gamma sites on this body · 476,037 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_qc_c_d31_2a",
+   "system": "Prai Hypoo QC-C d31",
+   "body": "2 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -42.271961,
+    "lon": -149.530594
+   },
+   "notes": "2 Alpha sites on this body · 698 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_rc_c_d19_b1_alpha",
+   "system": "Prai Hypoo RC-C d19",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -48.709755,
+    "lon": -13.772521
+   },
+   "notes": "33,890 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_rc_c_d19_b1_beta",
+   "system": "Prai Hypoo RC-C d19",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 9.102358,
+    "lon": -22.878204
+   },
+   "notes": "33,890 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_wd_a_d1_41_5c",
+   "system": "Prai Hypoo WD-A d1-41",
+   "body": "5 c",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 19.796623,
+    "lon": -118.454102
+   },
+   "notes": "2,337 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_wd_a_d1_6_10a_alpha",
+   "system": "Prai Hypoo WD-A d1-6",
+   "body": "10 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 15.710412,
+    "lon": -66.086388
+   },
+   "notes": "2 Alpha sites on this body · 3,231 ls from arrival"
+  },
+  {
+   "id": "prai_hypoo_wd_a_d1_6_10a_beta",
+   "system": "Prai Hypoo WD-A d1-6",
+   "body": "10 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -34.876957,
+    "lon": 130.663635
+   },
+   "notes": "3,231 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_ts_b_d252_c6",
+   "system": "Prua Phoe TS-B d252",
+   "body": "C 6",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -28.767719,
+    "lon": 136.057449
+   },
+   "notes": "505,685 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_ts_b_d252_d1_beta",
+   "system": "Prua Phoe TS-B d252",
+   "body": "D 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -38.000549,
+    "lon": 56.63615
+   },
+   "notes": "2 Beta sites on this body · 505,701 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_ts_b_d252_d1_gamma",
+   "system": "Prua Phoe TS-B d252",
+   "body": "D 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -36.144669,
+    "lon": -29.703331
+   },
+   "notes": "505,701 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_us_b_d86_c2_beta",
+   "system": "Prua Phoe US-B d86",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -27.152845,
+    "lon": 66.300507
+   },
+   "notes": "31,613 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_us_b_d86_c2_gamma",
+   "system": "Prua Phoe US-B d86",
+   "body": "C 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 35.326942,
+    "lon": -144.447083
+   },
+   "notes": "2 Gamma sites on this body · 31,613 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_us_b_d86_c3_alpha",
+   "system": "Prua Phoe US-B d86",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -52.523491,
+    "lon": 155.002625
+   },
+   "notes": "31,613 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_us_b_d86_c3_gamma",
+   "system": "Prua Phoe US-B d86",
+   "body": "C 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 18.225508,
+    "lon": -166.977829
+   },
+   "notes": "31,613 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d114_4d",
+   "system": "Prua Phoe XY-Z d114",
+   "body": "4 d",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -40.120716,
+    "lon": -143.096405
+   },
+   "notes": "837 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d114_4f_alpha",
+   "system": "Prua Phoe XY-Z d114",
+   "body": "4 f",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 75.540733,
+    "lon": 172.558228
+   },
+   "notes": "839 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d114_4f_gamma",
+   "system": "Prua Phoe XY-Z d114",
+   "body": "4 f",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 47.558807,
+    "lon": -159.222687
+   },
+   "notes": "2 Gamma sites on this body · 839 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d42_7a_alpha",
+   "system": "Prua Phoe XY-Z d42",
+   "body": "7 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -34.62616,
+    "lon": 43.152912
+   },
+   "notes": "1,129 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d42_7a_beta",
+   "system": "Prua Phoe XY-Z d42",
+   "body": "7 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -59.638931,
+    "lon": -10.03684
+   },
+   "notes": "1,129 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d42_7a_gamma",
+   "system": "Prua Phoe XY-Z d42",
+   "body": "7 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 28.927814,
+    "lon": 146.277328
+   },
+   "notes": "1,129 ls from arrival"
+  },
+  {
+   "id": "prua_phoe_xy_z_d42_8a",
+   "system": "Prua Phoe XY-Z d42",
+   "body": "8 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -38.186302,
+    "lon": 51.392151
+   },
+   "notes": "2 Alpha sites on this body · 1,617 ls from arrival"
+  },
+  {
+   "id": "skaudai_am_b_d14_138_ab7a_beta",
+   "system": "Skaudai AM-B d14-138",
+   "body": "AB 7 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -30.501816,
+    "lon": 43.374393
+   },
+   "notes": "2,643 ls from arrival"
+  },
+  {
+   "id": "skaudai_am_b_d14_138_ab7a_gamma",
+   "system": "Skaudai AM-B d14-138",
+   "body": "AB 7 a",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 28.876606,
+    "lon": 66.779831
+   },
+   "notes": "2 Gamma sites on this body · 2,643 ls from arrival"
+  },
+  {
+   "id": "swoilz_ae_f_c13_c1_alpha",
+   "system": "Swoilz AE-F c13",
+   "body": "C 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -0.044892,
+    "lon": -48.85511
+   },
+   "notes": "5,290 ls from arrival"
+  },
+  {
+   "id": "swoilz_ae_f_c13_c1_gamma",
+   "system": "Swoilz AE-F c13",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 0.01127,
+    "lon": -48.85984
+   },
+   "notes": "5,290 ls from arrival"
+  },
+  {
+   "id": "swoilz_pa_f_b3_2_b2_alpha",
+   "system": "Swoilz PA-F b3-2",
+   "body": "B 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -29.87978,
+    "lon": 145.956833
+   },
+   "notes": "50,141 ls from arrival"
+  },
+  {
+   "id": "swoilz_pa_f_b3_2_b2_gamma",
+   "system": "Swoilz PA-F b3-2",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -70.137321,
+    "lon": -2.441412
+   },
+   "notes": "2 Gamma sites on this body · 50,141 ls from arrival"
+  },
+  {
+   "id": "synuefe_ce_r_c21_6_c1_alpha",
+   "system": "Synuefe CE-R c21-6",
+   "body": "C 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 8.218402,
+    "lon": -108.929054
+   },
+   "notes": "2 Alpha sites on this body · 72,645 ls from arrival"
+  },
+  {
+   "id": "synuefe_ce_r_c21_6_c1_beta",
+   "system": "Synuefe CE-R c21-6",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -50.968216,
+    "lon": 81.48188
+   },
+   "notes": "72,645 ls from arrival"
+  },
+  {
+   "id": "synuefe_cn_h_d11_63_a2b",
+   "system": "Synuefe CN-H d11-63",
+   "body": "A 2 b",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 24.134918,
+    "lon": 172.044754
+   },
+   "notes": "1,483 ls from arrival"
+  },
+  {
+   "id": "synuefe_dk_d_b46_4_c1",
+   "system": "Synuefe DK-D b46-4",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -26.583031,
+    "lon": -3.456446
+   },
+   "notes": "80,604 ls from arrival"
+  },
+  {
+   "id": "synuefe_ly_i_b42_2_c2_beta",
+   "system": "Synuefe LY-I b42-2",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 34.363152,
+    "lon": 131.432648
+   },
+   "notes": "1,713 ls from arrival"
+  },
+  {
+   "id": "synuefe_ly_i_b42_2_c2_gamma",
+   "system": "Synuefe LY-I b42-2",
+   "body": "C 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -37.303799,
+    "lon": 106.436562
+   },
+   "notes": "2 Gamma sites on this body · 1,713 ls from arrival"
+  },
+  {
+   "id": "synuefe_nl_n_c23_4_b3_alpha",
+   "system": "Synuefe NL-N c23-4",
+   "body": "B 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -30.544333,
+    "lon": -24.205046
+   },
+   "notes": "2 Alpha sites on this body · 1,971 ls from arrival"
+  },
+  {
+   "id": "synuefe_nl_n_c23_4_b3_gamma",
+   "system": "Synuefe NL-N c23-4",
+   "body": "B 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 48.175247,
+    "lon": -48.364521
+   },
+   "notes": "1,971 ls from arrival"
+  },
+  {
+   "id": "synuefe_tp_f_b44_0_cd1_alpha",
+   "system": "Synuefe TP-F b44-0",
+   "body": "CD 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 54.109013,
+    "lon": 141.158997
+   },
+   "notes": "1,275 ls from arrival"
+  },
+  {
+   "id": "synuefe_tp_f_b44_0_cd1_beta",
+   "system": "Synuefe TP-F b44-0",
+   "body": "CD 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 18.604595,
+    "lon": -19.260212
+   },
+   "notes": "1,275 ls from arrival"
+  },
+  {
+   "id": "synuefe_tp_f_b44_0_cd1_gamma",
+   "system": "Synuefe TP-F b44-0",
+   "body": "CD 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 59.331982,
+    "lon": 15.105295
+   },
+   "notes": "1,275 ls from arrival"
+  },
+  {
+   "id": "synuefe_xo_p_c22_17_c1",
+   "system": "Synuefe XO-P c22-17",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -30.239441,
+    "lon": 147.695908
+   },
+   "notes": "1,483 ls from arrival"
+  },
+  {
+   "id": "synuefe_xr_h_d11_102_1b",
+   "system": "Synuefe XR-H d11-102",
+   "body": "1 b",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -46.576923,
+    "lon": 133.985107
+   },
+   "notes": "798 ls from arrival"
+  },
+  {
+   "id": "synuefe_yy_q_c21_19_2a",
+   "system": "Synuefe YY-Q c21-19",
+   "body": "2 a",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 59.93998,
+    "lon": -115.809319
+   },
+   "notes": "731 ls from arrival"
+  },
+  {
+   "id": "synuefe_zl_j_d10_109_e3_alpha",
+   "system": "Synuefe ZL-J d10-109",
+   "body": "E 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -57.499321,
+    "lon": -100.514328
+   },
+   "notes": "88,767 ls from arrival"
+  },
+  {
+   "id": "synuefe_zl_j_d10_109_e3_beta",
+   "system": "Synuefe ZL-J d10-109",
+   "body": "E 3",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -31.134563,
+    "lon": -43.791157
+   },
+   "notes": "2 Beta sites on this body · 88,767 ls from arrival"
+  },
+  {
+   "id": "synuefe_zl_j_d10_119_9b",
+   "system": "Synuefe ZL-J d10-119",
+   "body": "9 b",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 61.246143,
+    "lon": 135.009842
+   },
+   "notes": "1,073 ls from arrival"
+  },
+  {
+   "id": "synuefe_zr_i_b43_10_d2_alpha",
+   "system": "Synuefe ZR-I b43-10",
+   "body": "D 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -22.18557,
+    "lon": 135.450165
+   },
+   "notes": "2 Alpha sites on this body · 69,433 ls from arrival"
+  },
+  {
+   "id": "synuefe_zr_i_b43_10_d2_beta",
+   "system": "Synuefe ZR-I b43-10",
+   "body": "D 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 13.868011,
+    "lon": -0.544045
+   },
+   "notes": "69,433 ls from arrival"
+  },
+  {
+   "id": "trapezium_sector_yu_x_c1_2_1a",
+   "system": "Trapezium Sector YU-X c1-2",
+   "body": "1 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 32.850113,
+    "lon": 123.799965
+   },
+   "notes": "253 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_el_y_d32_b1_alpha",
+   "system": "Vela Dark Region EL-Y d32",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 21.309702,
+    "lon": -43.924812
+   },
+   "notes": "57,912 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_el_y_d32_b1_beta",
+   "system": "Vela Dark Region EL-Y d32",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -17.526474,
+    "lon": 12.750948
+   },
+   "notes": "57,912 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_el_y_d32_b1_gamma",
+   "system": "Vela Dark Region EL-Y d32",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 44.274754,
+    "lon": -92.582336
+   },
+   "notes": "57,912 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_fl_y_d63_a5_alpha",
+   "system": "Vela Dark Region FL-Y d63",
+   "body": "A 5",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 20.504259,
+    "lon": -125.858711
+   },
+   "notes": "278 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_fl_y_d63_a5_beta",
+   "system": "Vela Dark Region FL-Y d63",
+   "body": "A 5",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 21.326088,
+    "lon": -179.693039
+   },
+   "notes": "278 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_fl_y_d63_b1_beta",
+   "system": "Vela Dark Region FL-Y d63",
+   "body": "B 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 47.642536,
+    "lon": 20.667847
+   },
+   "notes": "6,653 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_fl_y_d63_b1_gamma",
+   "system": "Vela Dark Region FL-Y d63",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 39.231083,
+    "lon": -44.341866
+   },
+   "notes": "6,653 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_hb_x_c1_28_e2_alpha",
+   "system": "Vela Dark Region HB-X c1-28",
+   "body": "E 2",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 11.373722,
+    "lon": -154.28569
+   },
+   "notes": "368,939 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_hb_x_c1_28_e2_gamma",
+   "system": "Vela Dark Region HB-X c1-28",
+   "body": "E 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 33.386272,
+    "lon": -70.07534
+   },
+   "notes": "368,939 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_hb_x_c1_28_e3_alpha",
+   "system": "Vela Dark Region HB-X c1-28",
+   "body": "E 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 8.899587,
+    "lon": -115.398209
+   },
+   "notes": "368,949 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_hb_x_c1_28_e3_gamma",
+   "system": "Vela Dark Region HB-X c1-28",
+   "body": "E 3",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 42.449951,
+    "lon": -143.801926
+   },
+   "notes": "368,949 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_im_u_b3_7_a6_alpha",
+   "system": "Vela Dark Region IM-U b3-7",
+   "body": "A 6",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_im_u_b3_7_a6_beta",
+   "system": "Vela Dark Region IM-U b3-7",
+   "body": "A 6",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_im_u_b3_7_a6_gamma",
+   "system": "Vela Dark Region IM-U b3-7",
+   "body": "A 6",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "42 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_im_u_b3_7_a7",
+   "system": "Vela Dark Region IM-U b3-7",
+   "body": "A 7",
+   "type": "Beta",
+   "coordinates": {
+    "lat": "NaN",
+    "lon": "NaN"
+   },
+   "notes": "51 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_kr_w_c1_24_7a",
+   "system": "Vela Dark Region KR-W c1-24",
+   "body": "7 a",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 2.782053,
+    "lon": 145.656754
+   },
+   "notes": "2 Alpha sites on this body · 638 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_kr_w_c1_24_7c",
+   "system": "Vela Dark Region KR-W c1-24",
+   "body": "7 c",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -47.041386,
+    "lon": -148.084564
+   },
+   "notes": "635 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_rc_v_b2_5_c3",
+   "system": "Vela Dark Region RC-V b2-5",
+   "body": "C 3",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 30.049314,
+    "lon": -49.50473
+   },
+   "notes": "3 Alpha sites on this body · 59,687 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_rc_v_b2_5_c4",
+   "system": "Vela Dark Region RC-V b2-5",
+   "body": "C 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 36.814186,
+    "lon": 132.886734
+   },
+   "notes": "59,653 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_td_s_b4_5_c1_beta",
+   "system": "Vela Dark Region TD-S b4-5",
+   "body": "C 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 38.139454,
+    "lon": 173.195724
+   },
+   "notes": "2 Beta sites on this body · 51,237 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_td_s_b4_5_c1_gamma",
+   "system": "Vela Dark Region TD-S b4-5",
+   "body": "C 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 36.495205,
+    "lon": -150.971832
+   },
+   "notes": "51,237 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_td_s_b4_5_c2",
+   "system": "Vela Dark Region TD-S b4-5",
+   "body": "C 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -30.909986,
+    "lon": 120.301247
+   },
+   "notes": "51,225 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_1_b6_beta",
+   "system": "Vela Dark Region VO-Q b5-1",
+   "body": "B 6",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 25.660898,
+    "lon": -133.531845
+   },
+   "notes": "6,813 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_1_b6_gamma",
+   "system": "Vela Dark Region VO-Q b5-1",
+   "body": "B 6",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 41.238857,
+    "lon": -18.370182
+   },
+   "notes": "6,813 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_1_c5",
+   "system": "Vela Dark Region VO-Q b5-1",
+   "body": "C 5",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -42.056332,
+    "lon": 96.347557
+   },
+   "notes": "8,001 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_6_a1_alpha",
+   "system": "Vela Dark Region VO-Q b5-6",
+   "body": "A 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": -9.377935,
+    "lon": 175.201874
+   },
+   "notes": "104 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_6_a1_beta",
+   "system": "Vela Dark Region VO-Q b5-6",
+   "body": "A 1",
+   "type": "Beta",
+   "coordinates": {
+    "lat": -41.746414,
+    "lon": 57.417152
+   },
+   "notes": "104 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_vo_q_b5_6_a2",
+   "system": "Vela Dark Region VO-Q b5-6",
+   "body": "A 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -23.562004,
+    "lon": 45.618153
+   },
+   "notes": "154 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_wj_q_b5_8_b1",
+   "system": "Vela Dark Region WJ-Q b5-8",
+   "body": "B 1",
+   "type": "Alpha",
+   "coordinates": {
+    "lat": 21.354179,
+    "lon": -69.235626
+   },
+   "notes": "2 Alpha sites on this body · 2,624 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_wj_q_b5_8_b2",
+   "system": "Vela Dark Region WJ-Q b5-8",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 10.20345,
+    "lon": -104.118515
+   },
+   "notes": "2,615 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_wt_r_b4_3_b1",
+   "system": "Vela Dark Region WT-R b4-3",
+   "body": "B 1",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -56.473892,
+    "lon": -85.354713
+   },
+   "notes": "965 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_wt_r_b4_3_b2_beta",
+   "system": "Vela Dark Region WT-R b4-3",
+   "body": "B 2",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 77.062057,
+    "lon": 51.526718
+   },
+   "notes": "971 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_wt_r_b4_3_b2_gamma",
+   "system": "Vela Dark Region WT-R b4-3",
+   "body": "B 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 27.58954,
+    "lon": -105.912987
+   },
+   "notes": "971 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_yo_r_b4_1_b4_beta",
+   "system": "Vela Dark Region YO-R b4-1",
+   "body": "B 4",
+   "type": "Beta",
+   "coordinates": {
+    "lat": 55.967926,
+    "lon": 164.067795
+   },
+   "notes": "849 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_yo_r_b4_1_b4_gamma",
+   "system": "Vela Dark Region YO-R b4-1",
+   "body": "B 4",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": -16.56628,
+    "lon": -3.442219
+   },
+   "notes": "849 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_yo_r_b4_1_d2",
+   "system": "Vela Dark Region YO-R b4-1",
+   "body": "D 2",
+   "type": "Gamma",
+   "coordinates": {
+    "lat": 76.520485,
+    "lon": 120.015633
+   },
+   "notes": "13,880 ls from arrival"
+  }
+ ],
+ "structures": [
+  {
+   "id": "col_135_sector_tu_o_c6_15_d1",
+   "system": "Col 135 Sector TU-O c6-15",
+   "body": "D 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 39.743687,
+    "lon": 72.974297
+   },
+   "notes": "11,379 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ad_h_c11_15_b2",
+   "system": "Col 173 Sector AD-H c11-15",
+   "body": "B 2",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -14.838905,
+    "lon": 67.709763
+   },
+   "notes": "Weapon Blueprint Structure. · 7,382 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ai_h_c11_22_b1_fistbump",
+   "system": "Col 173 Sector AI-H c11-22",
+   "body": "B 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -36.508419,
+    "lon": 52.917187
+   },
+   "notes": "17,614 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ay_f_c12_0_a1",
+   "system": "Col 173 Sector AY-F c12-0",
+   "body": "A 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -43.308563,
+    "lon": 163.735626
+   },
+   "notes": "207 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bh_k_b25_8_b3",
+   "system": "Col 173 Sector BH-K b25-8",
+   "body": "B 3",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -50.119286,
+    "lon": -69.979225
+   },
+   "notes": "4,406 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_bo_f_c12_24_a3",
+   "system": "Col 173 Sector BO-F c12-24",
+   "body": "A 3",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -7.948433,
+    "lon": -0.178041
+   },
+   "notes": "141 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_cc_k_b25_8_a5",
+   "system": "Col 173 Sector CC-K b25-8",
+   "body": "A 5",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -45.083519,
+    "lon": 44.343475
+   },
+   "notes": "Weapon Blueprint Structure. · 35 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_de_e_c13_27_c2",
+   "system": "Col 173 Sector DE-E c13-27",
+   "body": "C 2",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -31.861481,
+    "lon": -132.126892
+   },
+   "notes": "7,232 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dh_k_b25_2_a5_lacrosse",
+   "system": "Col 173 Sector DH-K b25-2",
+   "body": "A 5",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 21.215445,
+    "lon": 39.19553
+   },
+   "notes": "88 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_do_f_c12_4_a1",
+   "system": "Col 173 Sector DO-F c12-4",
+   "body": "A 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -21.143145,
+    "lon": 44.135551
+   },
+   "notes": "332 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ds_j_b25_2_b5",
+   "system": "Col 173 Sector DS-J b25-2",
+   "body": "B 5",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 44.620869,
+    "lon": 111.888855
+   },
+   "notes": "Module Blueprint Structure. · 608 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_dz_d_c13_2_12a",
+   "system": "Col 173 Sector DZ-D c13-2",
+   "body": "12 a",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -48.058647,
+    "lon": -20.001421
+   },
+   "notes": "2,723 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ez_d_c13_25_b1",
+   "system": "Col 173 Sector EZ-D c13-25",
+   "body": "B 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 41.285805,
+    "lon": -44.602657
+   },
+   "notes": "26,053 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_fk_c_c14_6_d2",
+   "system": "Col 173 Sector FK-C c14-6",
+   "body": "D 2",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -26.228455,
+    "lon": -75.500862
+   },
+   "notes": "Weapon Blueprint Structure. · 11,865 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_fz_d_c13_30_2",
+   "system": "Col 173 Sector FZ-D c13-30",
+   "body": "2",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 10.522972,
+    "lon": 131.982635
+   },
+   "notes": "Weapon Blueprint Structure. · 323 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_gs_j_b25_4_d2",
+   "system": "Col 173 Sector GS-J b25-4",
+   "body": "D 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -46.121265,
+    "lon": -163.866425
+   },
+   "notes": "Module Blueprint Structure. · 29,731 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hn_i_b26_5_a1",
+   "system": "Col 173 Sector HN-I b26-5",
+   "body": "A 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -27.743124,
+    "lon": -15.290405
+   },
+   "notes": "Weapon Blueprint Structure. · 95 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hr_m_b23_0_c1",
+   "system": "Col 173 Sector HR-M b23-0",
+   "body": "C 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -26.658451,
+    "lon": -127.018219
+   },
+   "notes": "1,075 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hr_m_b23_3_b7_hammerbot",
+   "system": "Col 173 Sector HR-M b23-3",
+   "body": "B 7",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -0.465408,
+    "lon": 92.140396
+   },
+   "notes": "Weapon Blueprint Structure. · 2,693 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_hu_d_c13_2_a1",
+   "system": "Col 173 Sector HU-D c13-2",
+   "body": "A 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 43.696274,
+    "lon": -170.381058
+   },
+   "notes": "303 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ij_g_b27_1_a1",
+   "system": "Col 173 Sector IJ-G b27-1",
+   "body": "A 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -33.219879,
+    "lon": 87.628571
+   },
+   "notes": "84 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ji_j_b25_0_ab2",
+   "system": "Col 173 Sector JI-J b25-0",
+   "body": "AB 2",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -31.777176,
+    "lon": 144.74408
+   },
+   "notes": "52 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jp_d_c13_14_a4",
+   "system": "Col 173 Sector JP-D c13-14",
+   "body": "A 4",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 69.366951,
+    "lon": -95.814087
+   },
+   "notes": "367 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_jx_k_b24_0_b2_crossroads",
+   "system": "Col 173 Sector JX-K b24-0",
+   "body": "B 2",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -11.482594,
+    "lon": 107.162323
+   },
+   "notes": "628 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_kn_j_b25_5_c3_lacrosse",
+   "system": "Col 173 Sector KN-J b25-5",
+   "body": "C 3",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 48.182552,
+    "lon": 87.63282
+   },
+   "notes": "11,305 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_26_6a",
+   "system": "Col 173 Sector KY-Q d5-26",
+   "body": "6 a",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 67.983154,
+    "lon": 21.8657
+   },
+   "notes": "Weapon Blueprint Structure. · 1,347 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ky_q_d5_42_1a",
+   "system": "Col 173 Sector KY-Q d5-42",
+   "body": "1 a",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 59.925705,
+    "lon": -43.706291
+   },
+   "notes": "989 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lt_q_d5_82_a3",
+   "system": "Col 173 Sector LT-Q d5-82",
+   "body": "A 3",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 41.200089,
+    "lon": -50.037632
+   },
+   "notes": "Weapon Blueprint Structure. · 615 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_lt_q_d5_90_d1",
+   "system": "Col 173 Sector LT-Q d5-90",
+   "body": "D 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -43.215603,
+    "lon": 157.734146
+   },
+   "notes": "Weapon Blueprint Structure. · 74,484 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_me_p_d6_92_b5",
+   "system": "Col 173 Sector ME-P d6-92",
+   "body": "B 5",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 7.507686,
+    "lon": -68.310425
+   },
+   "notes": "Weapon Blueprint Structure. · 381 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_nv_b_c14_1_1",
+   "system": "Col 173 Sector NV-B c14-1",
+   "body": "1",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -57.501709,
+    "lon": 142.130188
+   },
+   "notes": "Weapon Blueprint Structure. · 384 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_od_j_b25_2_b1",
+   "system": "Col 173 Sector OD-J b25-2",
+   "body": "B 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 19.253191,
+    "lon": -46.770954
+   },
+   "notes": "Weapon Blueprint Structure. · 1,472 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pf_e_b28_3_b1_bowl",
+   "system": "Col 173 Sector PF-E b28-3",
+   "body": "B 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -14.499706,
+    "lon": 145.032257
+   },
+   "notes": "Weapon Blueprint Structure. · 1,561 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pz_o_d6_110_5a",
+   "system": "Col 173 Sector PZ-O d6-110",
+   "body": "5 a",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -40.390713,
+    "lon": 144.709595
+   },
+   "notes": "Weapon Blueprint Structure. · 1,940 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_pz_o_d6_116_6d",
+   "system": "Col 173 Sector PZ-O d6-116",
+   "body": "6 d",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -1.700207,
+    "lon": 131.111252
+   },
+   "notes": "1,275 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_qu_o_d6_25_5b_lacrosse",
+   "system": "Col 173 Sector QU-O d6-25",
+   "body": "5 b",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 25.948015,
+    "lon": 16.520372
+   },
+   "notes": "1,278 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_qu_o_d6_32_3a",
+   "system": "Col 173 Sector QU-O d6-32",
+   "body": "3 a",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 31.457447,
+    "lon": -154.251556
+   },
+   "notes": "1,691 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_qz_o_d6_1_4c",
+   "system": "Col 173 Sector QZ-O d6-1",
+   "body": "4 c",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 37.813358,
+    "lon": -140.112839
+   },
+   "notes": "920 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_rt_i_b25_1_b1",
+   "system": "Col 173 Sector RT-I b25-1",
+   "body": "B 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 47.709942,
+    "lon": -168.178223
+   },
+   "notes": "1,200 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_ru_o_d6_16_a2a",
+   "system": "Col 173 Sector RU-O d6-16",
+   "body": "A 2 a",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 50.684097,
+    "lon": -70.51017
+   },
+   "notes": "Weapon Blueprint Structure. · 1,496 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_su_o_d6_54_b2",
+   "system": "Col 173 Sector SU-O d6-54",
+   "body": "B 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 38.602749,
+    "lon": -159.793243
+   },
+   "notes": "Module Blueprint Structure. · 7,113 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_sz_g_b26_0_b2",
+   "system": "Col 173 Sector SZ-G b26-0",
+   "body": "B 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 49.715645,
+    "lon": 77.462921
+   },
+   "notes": "Module Blueprint Structure. · 1,212 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_vv_d_b28_0_a1",
+   "system": "Col 173 Sector VV-D b28-0",
+   "body": "A 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 34.593796,
+    "lon": -52.222752
+   },
+   "notes": "87 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wp_o_b22_1_a3",
+   "system": "Col 173 Sector WP-O b22-1",
+   "body": "A 3",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 43.750557,
+    "lon": 179.357498
+   },
+   "notes": "22 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_wz_o_b22_4_c5_lacrosse",
+   "system": "Col 173 Sector WZ-O b22-4",
+   "body": "C 5",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -77.975349,
+    "lon": -170.472656
+   },
+   "notes": "299,635 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xg_k_b25_3_b2",
+   "system": "Col 173 Sector XG-K b25-3",
+   "body": "B 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 46.019592,
+    "lon": -18.272928
+   },
+   "notes": "Module Blueprint Structure. · 1,506 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xh_h_c11_21_b1",
+   "system": "Col 173 Sector XH-H c11-21",
+   "body": "B 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -34.296829,
+    "lon": 150.305801
+   },
+   "notes": "Weapon Blueprint Structure. · 18,580 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_xl_k_b25_1_b1",
+   "system": "Col 173 Sector XL-K b25-1",
+   "body": "B 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -16.160803,
+    "lon": -10.064655
+   },
+   "notes": "4,202 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yc_g_c12_17_b8a",
+   "system": "Col 173 Sector YC-G c12-17",
+   "body": "B 8 a",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 19.578655,
+    "lon": 106.872337
+   },
+   "notes": "55,000 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_b23_5_a5",
+   "system": "Col 173 Sector YF-N b23-5",
+   "body": "A 5",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -23.988466,
+    "lon": -115.195076
+   },
+   "notes": "89 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_yf_n_b23_6_a3",
+   "system": "Col 173 Sector YF-N b23-6",
+   "body": "A 3",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -35.128635,
+    "lon": -42.341866
+   },
+   "notes": "41 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zl_l_b24_2_b1",
+   "system": "Col 173 Sector ZL-L b24-2",
+   "body": "B 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -18.243898,
+    "lon": -175.576874
+   },
+   "notes": "Weapon Blueprint Structure. · 544 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zl_l_b24_7_c4",
+   "system": "Col 173 Sector ZL-L b24-7",
+   "body": "C 4",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 22.184898,
+    "lon": -61.064617
+   },
+   "notes": "1,905 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zs_f_c12_27_b3",
+   "system": "Col 173 Sector ZS-F c12-27",
+   "body": "B 3",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 19.272213,
+    "lon": 67.520538
+   },
+   "notes": "Weapon Blueprint Structure. · 10,059 ls from arrival"
+  },
+  {
+   "id": "col_173_sector_zv_m_b23_1_a1",
+   "system": "Col 173 Sector ZV-M b23-1",
+   "body": "A 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 19.981455,
+    "lon": -38.105019
+   },
+   "notes": "Weapon Blueprint Structure. · 81 ls from arrival"
+  },
+  {
+   "id": "hd_62755_10b",
+   "system": "HD 62755",
+   "body": "10 b",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 57.234314,
+    "lon": 28.793852
+   },
+   "notes": "6,549 ls from arrival"
+  },
+  {
+   "id": "hd_63154_b3a",
+   "system": "HD 63154",
+   "body": "B 3 a",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -45.782867,
+    "lon": -102.657578
+   },
+   "notes": "Module Blueprint Structure. · 149,122 ls from arrival"
+  },
+  {
+   "id": "hip_36781_a6b",
+   "system": "HIP 36781",
+   "body": "A 6 b",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 19.553461,
+    "lon": -132.669281
+   },
+   "notes": "Vessel Blueprint Structure. · 3,801 ls from arrival"
+  },
+  {
+   "id": "hip_39768_a14f_fistbump",
+   "system": "HIP 39768",
+   "body": "A 14 f",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -19.53747,
+    "lon": -36.963837
+   },
+   "notes": "7,046 ls from arrival"
+  },
+  {
+   "id": "hip_39890_10a",
+   "system": "HIP 39890",
+   "body": "10 a",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -14.247764,
+    "lon": -36.906628
+   },
+   "notes": "1,648 ls from arrival"
+  },
+  {
+   "id": "hip_41730_13ga",
+   "system": "HIP 41730",
+   "body": "13 g a",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 24.304094,
+    "lon": -65.507484
+   },
+   "notes": "Weapon Blueprint Structure. · 4,252 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_ca_a_d43_12a",
+   "system": "IC 2391 Sector CA-A d43",
+   "body": "12 a",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": -0.874411,
+    "lon": -38.162308
+   },
+   "notes": "Vessel Blueprint Structure. · 2,729 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_fl_x_b1_7_a3",
+   "system": "IC 2391 Sector FL-X b1-7",
+   "body": "A 3",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 25.465786,
+    "lon": -132.903366
+   },
+   "notes": "Vessel Blueprint Structure. · 53 ls from arrival"
+  },
+  {
+   "id": "ic_2391_sector_hg_x_b1_8_c2",
+   "system": "IC 2391 Sector HG-X b1-8",
+   "body": "C 2",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": -44.520168,
+    "lon": 34.332687
+   },
+   "notes": "Vessel Blueprint Structure. · 19,390 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_dl_y_d61_a2",
+   "system": "NGC 2451A Sector DL-Y d61",
+   "body": "A 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -14.801762,
+    "lon": -101.44075
+   },
+   "notes": "Module Blueprint Structure. · 287 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_eb_x_c1_18_c2",
+   "system": "NGC 2451A Sector EB-X c1-18",
+   "body": "C 2",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -25.6188,
+    "lon": -33.7918
+   },
+   "notes": "Weapon Blueprint Structure. · 51,254 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_ir_w_d1_77_ab1a",
+   "system": "NGC 2451A Sector IR-W d1-77",
+   "body": "AB 1 a",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 62.745342,
+    "lon": 43.220318
+   },
+   "notes": "Weapon Blueprint Structure. · 1,303 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_iw_w_c1_10_b4",
+   "system": "NGC 2451A Sector IW-W c1-10",
+   "body": "B 4",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -10.356405,
+    "lon": -39.289055
+   },
+   "notes": "4,861 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_jr_w_c1_1_1c",
+   "system": "NGC 2451A Sector JR-W c1-1",
+   "body": "1 c",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 54.100517,
+    "lon": -52.077148
+   },
+   "notes": "787 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_mc_v_c2_5_e1",
+   "system": "NGC 2451A Sector MC-V c2-5",
+   "body": "E 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -39.310135,
+    "lon": -95.305794
+   },
+   "notes": "Weapon Blueprint Structure. · 51,347 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_mx_u_c2_1_b1",
+   "system": "NGC 2451A Sector MX-U c2-1",
+   "body": "B 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -53.092567,
+    "lon": 79.52636
+   },
+   "notes": "17,137 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_oi_s_b4_7_a1",
+   "system": "NGC 2451A Sector OI-S b4-7",
+   "body": "A 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -54.465458,
+    "lon": -156.092178
+   },
+   "notes": "72 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_to_r_c4_10_b1",
+   "system": "NGC 2451A Sector TO-R c4-10",
+   "body": "B 1",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": -21.960999,
+    "lon": 127.821297
+   },
+   "notes": "Vessel Blueprint Structure. · 355,747 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_ty_r_b4_6_c1",
+   "system": "NGC 2451A Sector TY-R b4-6",
+   "body": "C 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 40.688301,
+    "lon": 169.298096
+   },
+   "notes": "3,462 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_uj_q_b5_7_b2",
+   "system": "NGC 2451A Sector UJ-Q b5-7",
+   "body": "B 2",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -3.147438,
+    "lon": 159.473068
+   },
+   "notes": "Weapon Blueprint Structure. · 374 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_uo_r_c4_4_b5",
+   "system": "NGC 2451A Sector UO-R c4-4",
+   "body": "B 5",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -49.538887,
+    "lon": -81.89782
+   },
+   "notes": "116,600 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_vj_r_c4_22_a1",
+   "system": "NGC 2451A Sector VJ-R c4-22",
+   "body": "A 1",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": 37.194111,
+    "lon": 30.487875
+   },
+   "notes": "Vessel Blueprint Structure. · 269 ls from arrival"
+  },
+  {
+   "id": "ngc_2451a_sector_we_q_b5_6_b1",
+   "system": "NGC 2451A Sector WE-Q b5-6",
+   "body": "B 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 28.127224,
+    "lon": 50.590214
+   },
+   "notes": "Weapon Blueprint Structure. · 900 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_af_a_d80_8f",
+   "system": "Pencil Sector AF-A d80",
+   "body": "8 f",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 67.93824,
+    "lon": 171.216034
+   },
+   "notes": "1,387 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_bq_x_b1_4_b2",
+   "system": "Pencil Sector BQ-X b1-4",
+   "body": "B 2",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 48.424553,
+    "lon": -84.539001
+   },
+   "notes": "Weapon Blueprint Structure. · 1,966 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_cq_y_c31_c1",
+   "system": "Pencil Sector CQ-Y c31",
+   "body": "C 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 27.593573,
+    "lon": 111.994247
+   },
+   "notes": "Weapon Blueprint Structure. · 4,495 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_vy_a_b8_b1",
+   "system": "Pencil Sector VY-A b8",
+   "body": "B 1",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 28.877272,
+    "lon": 10.441991
+   },
+   "notes": "Module Blueprint Structure. · 1,686 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_xo_a_c31_b3",
+   "system": "Pencil Sector XO-A c31",
+   "body": "B 3",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 51.103813,
+    "lon": -81.72084
+   },
+   "notes": "Weapon Blueprint Structure. · 94,741 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_yj_a_c12_b3",
+   "system": "Pencil Sector YJ-A c12",
+   "body": "B 3",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -42.131813,
+    "lon": 120.871452
+   },
+   "notes": "Module Blueprint Structure. · 8,834 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_yj_a_c33_1",
+   "system": "Pencil Sector YJ-A c33",
+   "body": "1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 3.07507,
+    "lon": -68.783615
+   },
+   "notes": "Weapon Blueprint Structure. · 225 ls from arrival"
+  },
+  {
+   "id": "pencil_sector_zj_a_c4_b4",
+   "system": "Pencil Sector ZJ-A c4",
+   "body": "B 4",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 46.485451,
+    "lon": -28.382158
+   },
+   "notes": "Module Blueprint Structure. · 3,618 ls from arrival"
+  },
+  {
+   "id": "synuefe_ah_j_d10_103_b1",
+   "system": "Synuefe AH-J d10-103",
+   "body": "B 1",
+   "type": "Squid",
+   "coordinates": {
+    "lat": -46.799656,
+    "lon": -132.282379
+   },
+   "notes": "Vessel Blueprint Structure. · 182,058 ls from arrival"
+  },
+  {
+   "id": "synuefe_ah_j_d10_20_a3",
+   "system": "Synuefe AH-J d10-20",
+   "body": "A 3",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": -8.711272,
+    "lon": -51.778748
+   },
+   "notes": "Vessel Blueprint Structure. · 795 ls from arrival"
+  },
+  {
+   "id": "synuefe_ah_j_d10_46_c1",
+   "system": "Synuefe AH-J d10-46",
+   "body": "C 1",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": 40.593163,
+    "lon": -28.932734
+   },
+   "notes": "Vessel Blueprint Structure. · 21,789 ls from arrival"
+  },
+  {
+   "id": "synuefe_be_r_c21_35_e2",
+   "system": "Synuefe BE-R c21-35",
+   "body": "E 2",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": -16.195827,
+    "lon": -5.728627
+   },
+   "notes": "Vessel Blueprint Structure. · 46,704 ls from arrival"
+  },
+  {
+   "id": "synuefe_bh_j_d10_68_c1",
+   "system": "Synuefe BH-J d10-68",
+   "body": "C 1",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -15.310192,
+    "lon": 53.221272
+   },
+   "notes": "Weapon Blueprint Structure. · 159,060 ls from arrival"
+  },
+  {
+   "id": "synuefe_bz_q_c21_11_b5",
+   "system": "Synuefe BZ-Q c21-11",
+   "body": "B 5",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": -2.036813,
+    "lon": 54.365608
+   },
+   "notes": "Vessel Blueprint Structure. · 34,639 ls from arrival"
+  },
+  {
+   "id": "synuefe_ce_r_c21_6_c1_hammerbot",
+   "system": "Synuefe CE-R c21-6",
+   "body": "C 1",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 11.428931,
+    "lon": -30.32794
+   },
+   "notes": "Weapon Blueprint Structure. · 72,531 ls from arrival"
+  },
+  {
+   "id": "synuefe_dj_g_b44_3_a5",
+   "system": "Synuefe DJ-G b44-3",
+   "body": "A 5",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": 76.911507,
+    "lon": 174.095932
+   },
+   "notes": "Vessel Blueprint Structure. · 60 ls from arrival"
+  },
+  {
+   "id": "synuefe_dk_d_b46_4_c1_squid",
+   "system": "Synuefe DK-D b46-4",
+   "body": "C 1",
+   "type": "Squid",
+   "coordinates": {
+    "lat": -58.067825,
+    "lon": 114.49604
+   },
+   "notes": "Vessel Blueprint Structure. · 80,845 ls from arrival"
+  },
+  {
+   "id": "synuefe_dz_q_c21_14_10a",
+   "system": "Synuefe DZ-Q c21-14",
+   "body": "10 a",
+   "type": "Squid",
+   "coordinates": {
+    "lat": -29.165123,
+    "lon": 9.459513
+   },
+   "notes": "Vessel Blueprint Structure. · 855 ls from arrival"
+  },
+  {
+   "id": "synuefe_ea_u_b50_3_b6",
+   "system": "Synuefe EA-U b50-3",
+   "body": "B 6",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -45.130802,
+    "lon": 109.935677
+   },
+   "notes": "553 ls from arrival"
+  },
+  {
+   "id": "synuefe_ed_i_b43_8_a2",
+   "system": "Synuefe ED-I b43-8",
+   "body": "A 2",
+   "type": "Squid",
+   "coordinates": {
+    "lat": -23.98826,
+    "lon": 174.221298
+   },
+   "notes": "Vessel Blueprint Structure. · 73 ls from arrival"
+  },
+  {
+   "id": "synuefe_en_h_d11_106_6a",
+   "system": "Synuefe EN-H d11-106",
+   "body": "6 a",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -25.660549,
+    "lon": 169.939041
+   },
+   "notes": "Weapon Blueprint Structure. · 1,557 ls from arrival"
+  },
+  {
+   "id": "synuefe_en_h_d11_28_8b",
+   "system": "Synuefe EN-H d11-28",
+   "body": "8 b",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": 42.945576,
+    "lon": 179.955643
+   },
+   "notes": "Vessel Blueprint Structure. · 742 ls from arrival"
+  },
+  {
+   "id": "synuefe_en_h_d11_29_6b",
+   "system": "Synuefe EN-H d11-29",
+   "body": "6 b",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": 39.446285,
+    "lon": -127.877617
+   },
+   "notes": "Vessel Blueprint Structure. · 1,256 ls from arrival"
+  },
+  {
+   "id": "synuefe_en_h_d11_5_4e",
+   "system": "Synuefe EN-H d11-5",
+   "body": "4 e",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 58.95113,
+    "lon": 88.509132
+   },
+   "notes": "1,116 ls from arrival"
+  },
+  {
+   "id": "synuefe_en_h_d11_96_7a",
+   "system": "Synuefe EN-H d11-96",
+   "body": "7 a",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": -15.146383,
+    "lon": -124.884094
+   },
+   "notes": "Vessel Blueprint Structure. · 2,229 ls from arrival"
+  },
+  {
+   "id": "synuefe_eu_q_c21_10_a3",
+   "system": "Synuefe EU-Q c21-10",
+   "body": "A 3",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 19.823612,
+    "lon": -82.460922
+   },
+   "notes": "Weapon Blueprint Structure. · 312 ls from arrival"
+  },
+  {
+   "id": "synuefe_eu_q_c21_15_a1",
+   "system": "Synuefe EU-Q c21-15",
+   "body": "A 1",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 44.868057,
+    "lon": -118.881874
+   },
+   "notes": "Vessel Blueprint Structure. · 114 ls from arrival"
+  },
+  {
+   "id": "synuefe_fk_p_c22_2_e1",
+   "system": "Synuefe FK-P c22-2",
+   "body": "E 1",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 39.116386,
+    "lon": 166.909653
+   },
+   "notes": "Weapon Blueprint Structure. · 492,161 ls from arrival"
+  },
+  {
+   "id": "synuefe_gq_n_c23_21_b3",
+   "system": "Synuefe GQ-N c23-21",
+   "body": "B 3",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": 55.388264,
+    "lon": 16.360062
+   },
+   "notes": "Vessel Blueprint Structure. · 79,414 ls from arrival"
+  },
+  {
+   "id": "synuefe_gt_h_b43_1_c4",
+   "system": "Synuefe GT-H b43-1",
+   "body": "C 4",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 27.952511,
+    "lon": -5.201449
+   },
+   "notes": "Module Blueprint Structure. · 27,555 ls from arrival"
+  },
+  {
+   "id": "synuefe_gv_t_b50_4_b1",
+   "system": "Synuefe GV-T b50-4",
+   "body": "B 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -40.403393,
+    "lon": 128.508774
+   },
+   "notes": "Weapon Blueprint Structure. · 1,566 ls from arrival"
+  },
+  {
+   "id": "synuefe_he_g_b44_5_b2",
+   "system": "Synuefe HE-G b44-5",
+   "body": "B 2",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 33.619419,
+    "lon": 40.013123
+   },
+   "notes": "Vessel Blueprint Structure. · 644 ls from arrival"
+  },
+  {
+   "id": "synuefe_hf_p_c22_17_b1",
+   "system": "Synuefe HF-P c22-17",
+   "body": "B 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -40.911968,
+    "lon": -156.147552
+   },
+   "notes": "Weapon Blueprint Structure. · 3,454 ls from arrival"
+  },
+  {
+   "id": "synuefe_hf_v_b49_5_c1",
+   "system": "Synuefe HF-V b49-5",
+   "body": "C 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 16.793079,
+    "lon": -52.37011
+   },
+   "notes": "1,075 ls from arrival"
+  },
+  {
+   "id": "synuefe_hp_e_b45_8_d3",
+   "system": "Synuefe HP-E b45-8",
+   "body": "D 3",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": 43.729572,
+    "lon": -98.208046
+   },
+   "notes": "Vessel Blueprint Structure. · 159,863 ls from arrival"
+  },
+  {
+   "id": "synuefe_ht_f_d12_29_c3",
+   "system": "Synuefe HT-F d12-29",
+   "body": "C 3",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 33.411873,
+    "lon": 6.633374
+   },
+   "notes": "55,858 ls from arrival"
+  },
+  {
+   "id": "synuefe_ie_g_b44_2_a4",
+   "system": "Synuefe IE-G b44-2",
+   "body": "A 4",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": -48.670284,
+    "lon": -10.052026
+   },
+   "notes": "Vessel Blueprint Structure. · 104 ls from arrival"
+  },
+  {
+   "id": "synuefe_il_n_c23_19_b2",
+   "system": "Synuefe IL-N c23-19",
+   "body": "B 2",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 39.420448,
+    "lon": -49.136593
+   },
+   "notes": "Vessel Blueprint Structure. · 2,097 ls from arrival"
+  },
+  {
+   "id": "synuefe_jp_e_b45_4_c1",
+   "system": "Synuefe JP-E b45-4",
+   "body": "C 1",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": -11.561507,
+    "lon": -144.114349
+   },
+   "notes": "Vessel Blueprint Structure. · 20,053 ls from arrival"
+  },
+  {
+   "id": "synuefe_kz_f_b44_5_a1",
+   "system": "Synuefe KZ-F b44-5",
+   "body": "A 1",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": 6.33101,
+    "lon": -11.048854
+   },
+   "notes": "Vessel Blueprint Structure. · 21 ls from arrival"
+  },
+  {
+   "id": "synuefe_lq_t_b50_1_b2",
+   "system": "Synuefe LQ-T b50-1",
+   "body": "B 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -43.850643,
+    "lon": -21.313807
+   },
+   "notes": "Module Blueprint Structure. · 1,197 ls from arrival"
+  },
+  {
+   "id": "synuefe_ly_i_b42_2_c2_fistbump",
+   "system": "Synuefe LY-I b42-2",
+   "body": "C 2",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 54.702057,
+    "lon": -118.181046
+   },
+   "notes": "1,766 ls from arrival"
+  },
+  {
+   "id": "synuefe_nb_b_b47_10_b2",
+   "system": "Synuefe NB-B b47-10",
+   "body": "B 2",
+   "type": "Robolobster",
+   "coordinates": {
+    "lat": 53.72599,
+    "lon": 97.492889
+   },
+   "notes": "Vessel Blueprint Structure. · 2,279 ls from arrival"
+  },
+  {
+   "id": "synuefe_nl_n_c23_4_b3_turtle",
+   "system": "Synuefe NL-N c23-4",
+   "body": "B 3",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 51.209953,
+    "lon": 89.097206
+   },
+   "notes": "Module Blueprint Structure. · 1,897 ls from arrival"
+  },
+  {
+   "id": "synuefe_nu_f_b44_5_b1",
+   "system": "Synuefe NU-F b44-5",
+   "body": "B 1",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": 55.652012,
+    "lon": -27.694227
+   },
+   "notes": "Vessel Blueprint Structure. · 677 ls from arrival"
+  },
+  {
+   "id": "synuefe_ot_i_b42_4_b2",
+   "system": "Synuefe OT-I b42-4",
+   "body": "B 2",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -15.695237,
+    "lon": -27.645632
+   },
+   "notes": "550 ls from arrival"
+  },
+  {
+   "id": "synuefe_pf_e_b45_5_b2",
+   "system": "Synuefe PF-E b45-5",
+   "body": "B 2",
+   "type": "Stickyhand",
+   "coordinates": {
+    "lat": -2.251864,
+    "lon": 117.278419
+   },
+   "notes": "Vessel Blueprint Structure. · 777 ls from arrival"
+  },
+  {
+   "id": "synuefe_pm_l_c24_24_c6",
+   "system": "Synuefe PM-L c24-24",
+   "body": "C 6",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 45.987629,
+    "lon": 175.797653
+   },
+   "notes": "Weapon Blueprint Structure. · 110,124 ls from arrival"
+  },
+  {
+   "id": "synuefe_px_j_c25_8_7a",
+   "system": "Synuefe PX-J c25-8",
+   "body": "7 a",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 54.487339,
+    "lon": 64.281319
+   },
+   "notes": "Module Blueprint Structure. · 2,068 ls from arrival"
+  },
+  {
+   "id": "synuefe_sp_f_b44_0_c1",
+   "system": "Synuefe SP-F b44-0",
+   "body": "C 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -30.655045,
+    "lon": 167.240494
+   },
+   "notes": "Weapon Blueprint Structure. · 31,923 ls from arrival"
+  },
+  {
+   "id": "synuefe_tp_f_b44_0_cd1_fistbump",
+   "system": "Synuefe TP-F b44-0",
+   "body": "CD 1",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -27.326454,
+    "lon": -17.166643
+   },
+   "notes": "1,254 ls from arrival"
+  },
+  {
+   "id": "synuefe_vk_f_b44_0_b1",
+   "system": "Synuefe VK-F b44-0",
+   "body": "B 1",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": 4.92378,
+    "lon": -94.175446
+   },
+   "notes": "Weapon Blueprint Structure. · 1,057 ls from arrival"
+  },
+  {
+   "id": "synuefe_zg_j_d10_79_b1",
+   "system": "Synuefe ZG-J d10-79",
+   "body": "B 1",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 46.210194,
+    "lon": -70.963852
+   },
+   "notes": "Vessel Blueprint Structure. · 5,290 ls from arrival"
+  },
+  {
+   "id": "synuefe_zl_j_d10_109_e3_hammerbot",
+   "system": "Synuefe ZL-J d10-109",
+   "body": "E 3",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -48.604752,
+    "lon": 121.875587
+   },
+   "notes": "Weapon Blueprint Structure. · 89,052 ls from arrival"
+  },
+  {
+   "id": "synuefe_zl_j_d10_119_9b_fistbump",
+   "system": "Synuefe ZL-J d10-119",
+   "body": "9 b",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 13.470932,
+    "lon": -50.470749
+   },
+   "notes": "1,068 ls from arrival"
+  },
+  {
+   "id": "synuefe_zr_i_b43_10_d2_lacrosse",
+   "system": "Synuefe ZR-I b43-10",
+   "body": "D 2",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 55.992836,
+    "lon": 4.726782
+   },
+   "notes": "68,995 ls from arrival"
+  },
+  {
+   "id": "trapezium_sector_yu_x_c1_2_1a_squid",
+   "system": "Trapezium Sector YU-X c1-2",
+   "body": "1 a",
+   "type": "Squid",
+   "coordinates": {
+    "lat": 31.6155,
+    "lon": 119.8659
+   },
+   "notes": "Vessel Blueprint Structure. · 253 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_bq_y_d110_4b",
+   "system": "Vela Dark Region BQ-Y d110",
+   "body": "4 b",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": 34.131947,
+    "lon": -124.692345
+   },
+   "notes": "1,024 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_bq_y_d94_9b",
+   "system": "Vela Dark Region BQ-Y d94",
+   "body": "9 b",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 35.001404,
+    "lon": -51.4855
+   },
+   "notes": "1,283 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_cq_y_c0_a2",
+   "system": "Vela Dark Region CQ-Y c0",
+   "body": "A 2",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 42.97744,
+    "lon": 42.669018
+   },
+   "notes": "Weapon Blueprint Structure. · 309 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_dl_y_d112_1a",
+   "system": "Vela Dark Region DL-Y d112",
+   "body": "1 a",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": -37.078789,
+    "lon": -138.124985
+   },
+   "notes": "Module Blueprint Structure. · 1,187 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_dl_y_d83_5b",
+   "system": "Vela Dark Region DL-Y d83",
+   "body": "5 b",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 45.836552,
+    "lon": -179.821075
+   },
+   "notes": "Module Blueprint Structure. · 1,014 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_dl_y_d91_5a",
+   "system": "Vela Dark Region DL-Y d91",
+   "body": "5 a",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 15.545576,
+    "lon": -166.476242
+   },
+   "notes": "Weapon Blueprint Structure. · 1,953 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_eg_x_b1_1_a1",
+   "system": "Vela Dark Region EG-X b1-1",
+   "body": "A 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -34.10603,
+    "lon": 66.936562
+   },
+   "notes": "Weapon Blueprint Structure. · 42 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_el_y_d32_b1_crossroads",
+   "system": "Vela Dark Region EL-Y d32",
+   "body": "B 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 64.110748,
+    "lon": -25.365894
+   },
+   "notes": "58,274 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_el_y_d55_1",
+   "system": "Vela Dark Region EL-Y d55",
+   "body": "1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -60.041149,
+    "lon": 71.153229
+   },
+   "notes": "Weapon Blueprint Structure. · 367 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_fl_y_d63_b1_lacrosse",
+   "system": "Vela Dark Region FL-Y d63",
+   "body": "B 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -21.909544,
+    "lon": -18.934084
+   },
+   "notes": "6,631 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_hb_x_c1_28_e2_crossroads",
+   "system": "Vela Dark Region HB-X c1-28",
+   "body": "E 2",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 22.190657,
+    "lon": -1.282367
+   },
+   "notes": "368,789 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_iw_w_b1_3_b1",
+   "system": "Vela Dark Region IW-W b1-3",
+   "body": "B 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -41.814926,
+    "lon": -137.674301
+   },
+   "notes": "1,902 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_js_t_b3_0_a3",
+   "system": "Vela Dark Region JS-T b3-0",
+   "body": "A 3",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 67.082237,
+    "lon": -154.795837
+   },
+   "notes": "Weapon Blueprint Structure. · 109 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_kr_w_c1_24_7a_lacrosse",
+   "system": "Vela Dark Region KR-W c1-24",
+   "body": "7 a",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 28.004879,
+    "lon": -15.423215
+   },
+   "notes": "638 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_py_r_b4_3_b2",
+   "system": "Vela Dark Region PY-R b4-3",
+   "body": "B 2",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -43.241249,
+    "lon": 108.2631
+   },
+   "notes": "2,380 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_qi_t_b3_2_b1",
+   "system": "Vela Dark Region QI-T b3-2",
+   "body": "B 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -14.347525,
+    "lon": 142.573624
+   },
+   "notes": "3,437 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_ry_r_b4_7_a1",
+   "system": "Vela Dark Region RY-R b4-7",
+   "body": "A 1",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 1.910246,
+    "lon": -52.670677
+   },
+   "notes": "25 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_td_s_b4_5_c1_bear",
+   "system": "Vela Dark Region TD-S b4-5",
+   "body": "C 1",
+   "type": "Bear",
+   "coordinates": {
+    "lat": 34.362774,
+    "lon": -14.608253
+   },
+   "notes": "Weapon Blueprint Structure. · 51,237 ls from arrival"
+  },
+  {
+   "id": "vela_dark_region_ze_a_d66_6b",
+   "system": "Vela Dark Region ZE-A d66",
+   "body": "6 b",
+   "type": "Hammerbot",
+   "coordinates": {
+    "lat": -28.255943,
+    "lon": 18.774065
+   },
+   "notes": "Weapon Blueprint Structure. · 1,437 ls from arrival"
+  },
+  {
+   "id": "wregoe_bu_y_b2_0_1c",
+   "system": "Wregoe BU-Y b2-0",
+   "body": "1 c",
+   "type": "Bear",
+   "coordinates": {
+    "lat": -2.3777,
+    "lon": -95.3708
+   },
+   "notes": "Weapon Blueprint Structure. · 1,220 ls from arrival"
+  },
+  {
+   "id": "wregoe_cq_g_d10_153_c2",
+   "system": "Wregoe CQ-G d10-153",
+   "body": "C 2",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": 23.931753,
+    "lon": -51.990963
+   },
+   "notes": "19,924 ls from arrival"
+  },
+  {
+   "id": "wregoe_cq_g_d10_56_6a",
+   "system": "Wregoe CQ-G d10-56",
+   "body": "6 a",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": -22.337757,
+    "lon": 6.003507
+   },
+   "notes": "1,137 ls from arrival"
+  },
+  {
+   "id": "wregoe_dq_g_d10_42_5a",
+   "system": "Wregoe DQ-G d10-42",
+   "body": "5 a",
+   "type": "Crossroads",
+   "coordinates": {
+    "lat": -1.496974,
+    "lon": 136.608704
+   },
+   "notes": "1,813 ls from arrival"
+  },
+  {
+   "id": "wregoe_im_z_b41_2_b2",
+   "system": "Wregoe IM-Z b41-2",
+   "body": "B 2",
+   "type": "Turtle",
+   "coordinates": {
+    "lat": 11.443815,
+    "lon": -64.927292
+   },
+   "notes": "Module Blueprint Structure. · 2,519 ls from arrival"
+  },
+  {
+   "id": "wregoe_jm_l_c21_5_a1",
+   "system": "Wregoe JM-L c21-5",
+   "body": "A 1",
+   "type": "Lacrosse",
+   "coordinates": {
+    "lat": 33.686405,
+    "lon": -128.231308
+   },
+   "notes": "425 ls from arrival"
+  },
+  {
+   "id": "wregoe_jr_a_b41_3_f2",
+   "system": "Wregoe JR-A b41-3",
+   "body": "F 2",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": -56.137829,
+    "lon": 68.315697
+   },
+   "notes": "Weapon Blueprint Structure. · 373,722 ls from arrival"
+  },
+  {
+   "id": "wregoe_jr_l_c21_1_c2",
+   "system": "Wregoe JR-L c21-1",
+   "body": "C 2",
+   "type": "Bowl",
+   "coordinates": {
+    "lat": 76.710686,
+    "lon": -142.042236
+   },
+   "notes": "Weapon Blueprint Structure. · 119,869 ls from arrival"
+  },
+  {
+   "id": "wregoe_kh_z_b41_0_c3",
+   "system": "Wregoe KH-Z b41-0",
+   "body": "C 3",
+   "type": "Fistbump",
+   "coordinates": {
+    "lat": -50.283966,
+    "lon": 77.582657
+   },
+   "notes": "788 ls from arrival"
+  }
+ ]
 }
