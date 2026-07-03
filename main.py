@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.41"  # bump this with every release
+APP_VERSION = "0.3.42"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1244,7 +1244,30 @@ class API:
         except Exception as e:
             logging.warning(f"coverage: week refresh failed: {e}")
 
-    def get_galaxy_coverage(self, layer: str = "week") -> dict:
+    def _import_alltime_density(self):
+        """Seed the 'alltime' layer from the bundled snapshot built by
+        scripts/build_density.py (EDSM full dump, ~150M systems). Import is
+        skipped when the bundled snapshot has already been loaded."""
+        import gzip
+        path = BASE_DIR / "data" / "galaxy_density_alltime.json.gz"
+        if not path.exists():
+            return
+        from core.database import get_pref, set_pref, replace_coverage_layer
+        try:
+            with gzip.open(path, "rt", encoding="utf-8") as f:
+                data = json.load(f)
+            stamp = data.get("generated", "")
+            if not stamp or get_pref("coverage_alltime_imported", "") == stamp:
+                return
+            cells = {(c[0], c[1]): c[2] for c in data.get("cells", [])}
+            if cells:
+                replace_coverage_layer("alltime", cells)
+                set_pref("coverage_alltime_imported", stamp)
+                logging.info(f"coverage: alltime layer imported — {len(cells)} cells (snapshot {stamp})")
+        except Exception as e:
+            logging.warning(f"coverage: alltime import failed: {e}")
+
+    def get_galaxy_coverage(self, layer: str = "week", bounds: list | None = None) -> dict:
         from core.database import get_coverage_layer, bump_coverage_cells, COVERAGE_CELL_LY, get_pref
         if layer == "live":
             # Flush any buffered EDDN cells so the map is current
@@ -1255,12 +1278,35 @@ class API:
                     bump_coverage_cells("live", buf)
                 except Exception:
                     pass
+        cells = get_coverage_layer(layer, bounds)
+        cell_ly = COVERAGE_CELL_LY
+        # The alltime layer can hold millions of 300-ly cells; for the full
+        # galaxy view aggregate to keep the bridge payload reasonable. The
+        # map renders ~2 px per 300 ly, so 4x aggregation loses nothing.
+        if not bounds and len(cells) > 150_000:
+            f = 4
+            agg: dict[tuple, int] = {}
+            for gx, gz, c in cells:
+                k = (gx // f, gz // f)
+                agg[k] = agg.get(k, 0) + c
+            cells = [[gx, gz, c] for (gx, gz), c in agg.items()]
+            cell_ly = COVERAGE_CELL_LY * f
         refreshed = get_pref("coverage_week_refreshed", "") if layer == "week" else ""
         return {
-            "cells": get_coverage_layer(layer),
-            "cell_ly": COVERAGE_CELL_LY,
+            "cells": cells,
+            "cell_ly": cell_ly,
             "refreshed": refreshed,
         }
+
+    def get_current_position(self) -> dict:
+        """Current system name + galactic coords (if known) for map markers."""
+        from core.database import get_system_coords
+        if not self._current_system:
+            return {}
+        coords = get_system_coords(self._current_system)
+        if not coords:
+            return {"system": self._current_system}
+        return {"system": self._current_system, "x": coords[0], "y": coords[1], "z": coords[2]}
 
     def get_inara_key(self) -> str:
         from core.database import get_pref
@@ -2033,6 +2079,7 @@ def main():
                 api._emit("system_changed", {"system": api._current_system})
         threading.Thread(target=_push_startup, daemon=True).start()
         threading.Thread(target=api._refresh_week_coverage, daemon=True).start()
+        threading.Thread(target=api._import_alltime_density, daemon=True).start()
 
     webview.start(debug=DEV_MODE, func=_on_ready)
 

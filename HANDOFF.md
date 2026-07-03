@@ -1381,3 +1381,53 @@ Session 28, now real.
 
 ---
 *Session 32 continued (coverage heatmap) — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 19:57:01*
+
+---
+*Session checkpoint: 2026-07-02 20:08:16*
+
+---
+*Session checkpoint: 2026-07-02 20:09:17*
+
+---
+*Session checkpoint: 2026-07-02 20:10:48*
+
+---
+*Session checkpoint: 2026-07-02 20:13:16*
+
+---
+
+## Build status — Session 32 final — Galaxy Map overhaul + all-time layer (v0.3.42)
+
+| Item | Status | File |
+|---|---|---|
+| Edge-On view removed (user request) — `drawEdgeOn`, projection toggle, edge canvas all deleted | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Yellow spiral-arm arcs removed from the top-down map (user request) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| **Sector detail maps**: click a region name on the galaxy map (nearest-centroid hit test, 40px) or pick from the "Open sector map…" dropdown → zoomed view of the FULL region | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Region bounding boxes computed from klightspeed/EliteDangerousRegionMap boundary grid (2048² cells of 4096/83 ly, origin x0=-49985 z0=-24105; RLE rows) — all 42 regions now carry minX/maxX/minZ/maxZ; viewport fits bbox × 1.08 | DONE | `frontend/src/pages/Galaxy.jsx` |
+| Sector view renders: adaptive grid (2,000 or 5,000 ly), region borders (converted from main-map px space), neighbour labels, key locations, coverage heat at native 300 ly, cyan YOU marker via new `get_current_position()` API | DONE | `frontend/src/pages/Galaxy.jsx`, `main.py` |
+| **All-time discovery layer**: `scripts/build_density.py` streams/parses EDSM `systemsWithCoordinates.json.gz` (3.6 GB, 96,865,046 systems) → `data/galaxy_density_alltime.json.gz` (274 KB, 56,668 cells); bundled with the exe; imported into `alltime` layer at startup (guarded by `coverage_alltime_imported` pref = snapshot date) | DONE | `scripts/build_density.py`, `data/galaxy_density_alltime.json.gz`, `main.py` |
+| "All Time" added to the Scan-activity toggle (Off / All Time / Last 7 Days / Live) | DONE | `frontend/src/pages/Galaxy.jsx` |
+| `get_galaxy_coverage(layer, bounds)` — optional `[minGx,maxGx,minGz,maxGz]` viewport filter; auto-aggregates 4× when unbounded results exceed 150k cells (payload guard) | DONE | `main.py`, `core/database.py` |
+| `APP_VERSION` = `0.3.42`; local install verified: alltime import + sector maps working | DONE | `main.py` |
+
+## Key notes from Session 32 final
+
+- **EDSM full dump reality check**: 96.9M systems (not the 150M guessed), downloads in ~8 min, parses locally in ~4.5 min (regex per line, no json.loads). Cell count saturates fast — 56k cells by 25M systems, only +400 more cells over the remaining 72M systems. Refresh cadence: months is fine; re-run `scripts/build_density.py` and rebuild.
+- **Region bbox source**: `RegionMapData.json` in klightspeed/EliteDangerousRegionMap. Row format is plain RLE `[[run, region_id], ...]` per z-row (no x-offset prefix — RegionMap.py's `findRegion` is the reference decoder). Region ids index the `regions` list; id 0 = outside.
+- **Region size spread**: Galactic Centre 6.7k ly → Tenebrae 36.8k ly; the earlier fixed 14k ly sector viewport (first iteration this session) cropped most regions — that's why bboxes were needed.
+- Background-task lesson: the 10-min Bash timeout kills long streams; download-to-file with `curl -C -` (resumable) then parse locally beats streaming for multi-GB jobs.
+
+## Known issues / notes for next session
+
+- Sector maps show coverage + landmarks; possible future additions: clickable systems (needs a per-system query source at sector zoom), route overlay, Guardian sites from data/guardian_sites.json (have coordinates only per-body lat/lon, but system coords could come from system_coords/EDSM).
+- The `live` EDDN layer accumulates indefinitely in the DB — consider pruning by age (add `last_seen` column) if it ever gets heavy; current volume (~17 msg/s → few thousand cells/day) is harmless.
+- Perf backlog from Session 30 review still open: WAL mode, `get_market_stats()` 15s polling full-scan, rate limiter never limits across calls, watchlist re-read per ShipTargeted.
+- Untapped journal data (Session 30): `CarrierLocation`, `FSDTarget` star class, `NavRoute` per-hop `StarClass`.
+- Inara integration wired but blocked pending app registration (external).
+- pygame not installable on Python 3.14 — audio disabled in dev/local builds; CI uses 3.12.
+
+---
+*Session 32 complete — 2026-07-02*

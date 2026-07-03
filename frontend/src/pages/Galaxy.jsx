@@ -1070,50 +1070,63 @@ function gxToCanvas(edX, edZ, W, H) {
 // The 42 official galactic regions (Universal Cartographics, Dec 3304), with
 // centroid coords derived by sampling the community region-boundary grid
 // (klightspeed/EliteDangerousRegionMap) — approximate label placement only.
+// Bounding boxes computed from the same community boundary grid (2048² cells
+// of 4096/83 ly, origin -49985/-24105) — used to fit each sector detail map.
 const GALACTIC_REGIONS = [
-  { name: 'Galactic Centre',                edX: -98,    edZ: 27279 },
-  { name: 'Empyrean Straits',                edX: 3553,   edZ: 25617 },
-  { name: "Ryker's Hope",                    edX: 1912,   edZ: 34338 },
-  { name: "Odin's Hold",                     edX: -6188,  edZ: 24863 },
-  { name: 'Norma Arm',                       edX: 337,    edZ: 16341 },
-  { name: 'Arcadian Stream',                 edX: 10176,  edZ: 30624 },
-  { name: 'Izanami',                         edX: -5273,  edZ: 36852 },
-  { name: 'Inner Orion-Perseus Conflux',     edX: -12181, edZ: 28556 },
-  { name: 'Inner Scutum-Centaurus Arm',      edX: -7571,  edZ: 14609 },
-  { name: 'Norma Expanse',                   edX: 12963,  edZ: 16743 },
-  { name: 'Trojan Belt',                     edX: 19977,  edZ: 31525 },
-  { name: 'The Veils',                       edX: 14176,  edZ: 44466 },
-  { name: "Newton's Vault",                  edX: -5983,  edZ: 45010 },
-  { name: 'The Conduit',                     edX: -20410, edZ: 42403 },
-  { name: 'Outer Orion-Perseus Conflux',     edX: -15685, edZ: 34306 },
-  { name: 'Orion-Cygnus Arm',                edX: -16985, edZ: 19339 },
-  { name: 'Temple',                          edX: -12140, edZ: 9097 },
-  { name: 'Inner Orion Spur',                edX: -2433,  edZ: 3799 },
-  { name: "Hawking's Gap",                   edX: 17327,  edZ: 9498 },
-  { name: "Dryman's Point",                  edX: 29772,  edZ: 23019 },
-  { name: 'Sagittarius-Carina Arm',          edX: 31874,  edZ: 35514 },
-  { name: 'Mare Somnia',                     edX: 31624,  edZ: 49028 },
-  { name: 'Acheron',                         edX: 19969,  edZ: 60433 },
-  { name: 'Formorian Frontier',              edX: -246,   edZ: 54188 },
-  { name: 'Hieronymus Delta',                edX: -15931, edZ: 55945 },
-  { name: 'Outer Scutum-Centaurus Arm',      edX: -29760, edZ: 54244 },
-  { name: 'Outer Arm',                       edX: -30527, edZ: 29076 },
-  { name: "Aquila's Halo",                   edX: -40966, edZ: 22331 },
-  { name: 'Errant Marches',                  edX: -31331, edZ: 3314 },
-  { name: 'Perseus Arm',                     edX: -23463, edZ: 25302 },
-  { name: 'Formidine Rift',                  edX: -13492, edZ: -11145 },
-  { name: 'Vulcan Gate',                     edX: -21167, edZ: 9017 },
-  { name: 'Elysian Shore',                   edX: -9100,  edZ: -1693 },
-  { name: 'Sanguineous Rim',                 edX: 7652,   edZ: -5395 },
-  { name: 'Outer Orion Spur',                edX: 10154,  edZ: 1727 },
-  { name: "Achilles's Altar",                edX: 21419,  edZ: -750 },
-  { name: 'Xibalba',                         edX: 33398,  edZ: -3147 },
-  { name: "Lyra's Song",                     edX: 31930,  edZ: 7434 },
-  { name: 'Tenebrae',                        edX: 41461,  edZ: 23533 },
-  { name: 'The Abyss',                       edX: -891,   edZ: 66991 },
-  { name: "Kepler's Crest",                  edX: 10338,  edZ: -15023 },
-  { name: 'The Void',                        edX: -41138, edZ: 38742 },
+  { name: 'Galactic Centre',                edX: -98,    edZ: 27279, minX: -2906,  maxX: 3608,   minZ: 23616,  maxZ: 30278 },
+  { name: 'Empyrean Straits',                edX: 3553,   edZ: 25617, minX: -4781,  maxX: 10123,  minZ: 18582,  maxZ: 35805 },
+  { name: "Ryker's Hope",                    edX: 1912,   edZ: 34338, minX: -5028,  maxX: 8001,   minZ: 29636,  maxZ: 39901 },
+  { name: "Odin's Hold",                     edX: -6188,  edZ: 24863, minX: -11196, maxX: -1623,  minZ: 16559,  maxZ: 33239 },
+  { name: 'Norma Arm',                       edX: 337,    edZ: 16341, minX: -6459,  maxX: 6471,   minZ: 13598,  maxZ: 19816 },
+  { name: 'Arcadian Stream',                 edX: 10176,  edZ: 30624, minX: 3559,   maxX: 16291,  minZ: 15078,  maxZ: 44787 },
+  { name: 'Izanami',                         edX: -5273,  edZ: 36852, minX: -13466, maxX: 3510,   minZ: 31956,  maxZ: 41727 },
+  { name: 'Inner Orion-Perseus Conflux',     edX: -12181, edZ: 28556, minX: -16279, maxX: -5817,  minZ: 21741,  maxZ: 33584 },
+  { name: 'Inner Scutum-Centaurus Arm',      edX: -7571,  edZ: 14609, minX: -14305, maxX: 401,    minZ: 7676,   maxZ: 24405 },
+  { name: 'Norma Expanse',                   edX: 12963,  edZ: 16743, minX: -1623,  maxX: 23694,  minZ: 8564,   maxZ: 25689 },
+  { name: 'Trojan Belt',                     edX: 19977,  edZ: 31525, minX: 14663,  maxX: 25273,  minZ: 24998,  maxZ: 39457 },
+  { name: 'The Veils',                       edX: 14176,  edZ: 44466, minX: 2276,   maxX: 23496,  minZ: 36151,  maxZ: 52584 },
+  { name: "Newton's Vault",                  edX: -5983,  edZ: 45010, minX: -16970, maxX: 4694,   minZ: 39605,  maxZ: 51794 },
+  { name: 'The Conduit',                     edX: -20410, edZ: 42403, minX: -29505, maxX: -11542, minZ: 35756,  maxZ: 49524 },
+  { name: 'Outer Orion-Perseus Conflux',     edX: -15685, edZ: 34306, minX: -21264, maxX: -6903,  minZ: 26577,  maxZ: 41530 },
+  { name: 'Orion-Cygnus Arm',                edX: -16985, edZ: 19339, minX: -21264, maxX: -11690, minZ: 10834,  maxZ: 27860 },
+  { name: 'Temple',                          edX: -12140, edZ: 9097,  minX: -17710, maxX: -7495,  minZ: 3925,   maxZ: 14289 },
+  { name: 'Inner Orion Spur',                edX: -2433,  edZ: 3799,  minX: -10111, maxX: 4003,   minZ: -1404,  maxZ: 9255 },
+  { name: "Hawking's Gap",                   edX: 17327,  edZ: 9498,  minX: 2918,   maxX: 30109,  minZ: 3185,   maxZ: 17348 },
+  { name: "Dryman's Point",                  edX: 29772,  edZ: 23019, minX: 21720,  maxX: 37117,  minZ: 14634,  maxZ: 31265 },
+  { name: 'Sagittarius-Carina Arm',          edX: 31874,  edZ: 35514, minX: 22114,  maxX: 40374,  minZ: 28205,  maxZ: 43849 },
+  { name: 'Mare Somnia',                     edX: 31624,  edZ: 49028, minX: 18907,  maxX: 43631,  minZ: 38717,  maxZ: 61418 },
+  { name: 'Acheron',                         edX: 19969,  edZ: 60433, minX: 5681,   maxX: 35488,  minZ: 48439,  maxZ: 70448 },
+  { name: 'Formorian Frontier',              edX: -246,   edZ: 54188, minX: -11098, maxX: 13182,  minZ: 46563,  maxZ: 63441 },
+  { name: 'Hieronymus Delta',                edX: -15931, edZ: 55945, minX: -23534, maxX: -9074,  minZ: 45971,  maxZ: 65119 },
+  { name: 'Outer Scutum-Centaurus Arm',      edX: -29760, edZ: 54244, minX: -44507, maxX: -14108, minZ: 40197,  maxZ: 68919 },
+  { name: 'Outer Arm',                       edX: -30527, edZ: 29076, minX: -39474, maxX: -20573, minZ: 16510,  maxZ: 42369 },
+  { name: "Aquila's Halo",                   edX: -40966, edZ: 22331, minX: -46234, maxX: -36019, minZ: 7775,   maxZ: 32449 },
+  { name: 'Errant Marches',                  edX: -31331, edZ: 3314,  minX: -43718, maxX: -14799, minZ: -12755, maxZ: 19273 },
+  { name: 'Perseus Arm',                     edX: -23463, edZ: 25302, minX: -27926, maxX: -19092, minZ: 16016,  maxZ: 37236 },
+  { name: 'Formidine Rift',                  edX: -13492, edZ: -11145, minX: -27728, maxX: -1919, minZ: -19664, maxZ: -2786 },
+  { name: 'Vulcan Gate',                     edX: -21167, edZ: 9017,  minX: -27728, maxX: -13911, minZ: -417,   maxZ: 17645 },
+  { name: 'Elysian Shore',                   edX: -9100,  edZ: -1693, minX: -18648, maxX: 401,    minZ: -8066,  maxZ: 6393 },
+  { name: 'Sanguineous Rim',                 edX: 7652,   edZ: -5395, minX: -1721,  maxX: 17870,  minZ: -10040, maxZ: -664 },
+  { name: 'Outer Orion Spur',                edX: 10154,  edZ: 1727,  minX: 2227,   maxX: 19203,  minZ: -2441,  maxZ: 6097 },
+  { name: "Achilles's Altar",                edX: 21419,  edZ: -750,  minX: 12294,  maxX: 29418,  minZ: -8708,  maxZ: 6689 },
+  { name: 'Xibalba',                         edX: 33398,  edZ: -3147, minX: 18660,  maxX: 46049,  minZ: -14630, maxZ: 11871 },
+  { name: "Lyra's Song",                     edX: 31930,  edZ: 7434,  minX: 24829,  maxX: 38696,  minZ: -1750,  maxZ: 15917 },
+  { name: 'Tenebrae',                        edX: 41461,  edZ: 23533, minX: 33267,  maxX: 48763,  minZ: 6541,   maxZ: 43356 },
+  { name: 'The Abyss',                       edX: -891,   edZ: 66991, minX: -15934, maxX: 13873,  minZ: 58210,  maxZ: 73607 },
+  { name: "Kepler's Crest",                  edX: 10338,  edZ: -15023, minX: -2856, maxX: 28974,  minZ: -22082, maxZ: -7228 },
+  { name: 'The Void',                        edX: -41138, edZ: 38742, minX: -49245, maxX: -32022, minZ: 31068,  maxZ: 48981 },
 ]
+
+// Viewport that fits a region's full bounding box with a small margin
+function sectorViewport(region) {
+  const spanX = region.maxX - region.minX
+  const spanZ = region.maxZ - region.minZ
+  return {
+    cx0: (region.minX + region.maxX) / 2,
+    cz0: (region.minZ + region.maxZ) / 2,
+    span: Math.max(spanX, spanZ) * 1.08,
+  }
+}
 
 // Region boundary segments in 600×600 canvas-pixel space, pre-computed by sampling
 // the same region-boundary grid at a 3px step and run-length-merging collinear runs.
@@ -1149,24 +1162,6 @@ function drawTopDown(ctx, W, H) {
   ctx.beginPath()
   ctx.ellipse(gcx, gcy, discR, discR * 0.97, 0, 0, Math.PI * 2)
   ctx.fill()
-
-  // Spiral arm hints — 4 arms at 90° offsets, layered arcs
-  const armAngles = [0.2, Math.PI * 0.5 + 0.2, Math.PI + 0.2, Math.PI * 1.5 + 0.2]
-  ctx.save()
-  ctx.globalCompositeOperation = 'lighter'
-  for (const base of armAngles) {
-    for (let i = 0; i < 7; i++) {
-      const t = i / 6
-      const r = (0.10 + t * 0.60) * discR
-      const a = base + t * 0.85
-      ctx.beginPath()
-      ctx.arc(gcx, gcy, r, a, a + 0.75)
-      ctx.strokeStyle = `rgba(200,120,40,${(0.06 - t * 0.006).toFixed(3)})`
-      ctx.lineWidth = discR * 0.065
-      ctx.stroke()
-    }
-  }
-  ctx.restore()
 
   // Sgr A* centre dot
   ctx.fillStyle = 'rgba(255,240,100,0.95)'
@@ -1233,91 +1228,6 @@ function drawTopDown(ctx, W, H) {
   ctx.fillText('10,000 ly', 12, H - 10)
 }
 
-function drawEdgeOn(ctx, W, H) {
-  ctx.fillStyle = '#050510'
-  ctx.fillRect(0, 0, W, H)
-
-  for (const s of BG_STARS.slice(0, 100)) {
-    ctx.fillStyle = `rgba(200,215,255,${(0.15 + s.r * 0.25).toFixed(2)})`
-    ctx.beginPath()
-    ctx.arc(s.x * W, s.y * H, s.r * 0.6, 0, Math.PI * 2)
-    ctx.fill()
-  }
-
-  // Non-uniform scale: X covers 110,000 ly, Y shows ±2000 ly (exaggerated ~11×)
-  const SX = 110000 / W
-  const SY = 4000   / H
-  const CX = W / 2
-  const CY = H / 2
-  const gcx = CX + 25 / SX  // galactic centre ≈ same X as Sol
-
-  // Disc glow — three layers of increasing thickness
-  for (const [halfLy, alpha] of [[100, 0.55], [400, 0.22], [800, 0.08]]) {
-    const hp = halfLy / SY
-    const g = ctx.createLinearGradient(0, CY - hp, 0, CY + hp)
-    g.addColorStop(0,    'rgba(0,0,0,0)')
-    g.addColorStop(0.35, `rgba(180,100,30,${(alpha * 0.5).toFixed(2)})`)
-    g.addColorStop(0.50, `rgba(220,150,50,${alpha.toFixed(2)})`)
-    g.addColorStop(0.65, `rgba(180,100,30,${(alpha * 0.5).toFixed(2)})`)
-    g.addColorStop(1,    'rgba(0,0,0,0)')
-    ctx.fillStyle = g
-    ctx.fillRect(0, CY - hp, W, hp * 2)
-  }
-
-  // Left/right edge fades
-  const fl = ctx.createLinearGradient(0, 0, W * 0.07, 0)
-  fl.addColorStop(0, '#050510'); fl.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.fillStyle = fl; ctx.fillRect(0, 0, W * 0.07, H)
-  const fr = ctx.createLinearGradient(W * 0.93, 0, W, 0)
-  fr.addColorStop(0, 'rgba(0,0,0,0)'); fr.addColorStop(1, '#050510')
-  ctx.fillStyle = fr; ctx.fillRect(W * 0.93, 0, W * 0.07, H)
-
-  // Galactic bulge (ellipse, taller than disc)
-  const bgW = 7000 / SX, bgH = 3000 / SY
-  const bg = ctx.createRadialGradient(gcx, CY, 0, gcx, CY, Math.max(bgW, bgH))
-  bg.addColorStop(0,    'rgba(255,230,100,0.85)')
-  bg.addColorStop(0.25, 'rgba(220,150, 40,0.35)')
-  bg.addColorStop(0.60, 'rgba(180, 90, 20,0.12)')
-  bg.addColorStop(1,    'rgba(  0,  0,  0,0.00)')
-  ctx.fillStyle = bg
-  ctx.beginPath(); ctx.ellipse(gcx, CY, bgW, bgH, 0, 0, Math.PI * 2); ctx.fill()
-
-  // 500 ly bands — alternating tint + dashed boundary lines, covering the full ±2000 ly view
-  const BAND_LY = 500
-  const maxLy = Math.floor((H / 2) * SY / BAND_LY) * BAND_LY
-  for (let ly = -maxLy, i = 0; ly < maxLy; ly += BAND_LY, i++) {
-    const pyTop = CY - (ly + BAND_LY) / SY
-    const pyBot = CY - ly / SY
-    ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.04)'
-    ctx.fillRect(0, pyTop, W, pyBot - pyTop)
-  }
-  ctx.strokeStyle = 'rgba(255,255,255,0.10)'
-  ctx.lineWidth = 1
-  ctx.setLineDash([3, 8])
-  for (let ly = -maxLy; ly <= maxLy; ly += BAND_LY) {
-    const py = CY - ly / SY
-    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke()
-  }
-  ctx.setLineDash([])
-
-  // Sol dot
-  ctx.fillStyle = '#5599ff'
-  ctx.beginPath(); ctx.arc(CX, CY, 3, 0, Math.PI * 2); ctx.fill()
-  ctx.fillStyle = '#5599ff'
-  ctx.font = '9px monospace'
-  ctx.fillText('Sol', CX + 5, CY - 4)
-
-  // Band labels (skip 0 — Sol label sits there)
-  ctx.fillStyle = 'rgba(200,200,200,0.4)'
-  ctx.font = '8px monospace'
-  for (let ly = -maxLy; ly <= maxLy; ly += BAND_LY) {
-    if (ly === 0) continue
-    const py = CY - ly / SY
-    const label = `${ly > 0 ? '+' : ''}${ly} ly`
-    ctx.fillText(label, 5, py + (ly > 0 ? 9 : -3))
-  }
-}
-
 function drawCoverage(ctx, W, H, coverage) {
   const cells = coverage?.cells ?? []
   if (cells.length === 0) return
@@ -1333,16 +1243,141 @@ function drawCoverage(ctx, W, H, coverage) {
   }
 }
 
+// Key locations drawn on sector detail maps when in view
+const KEY_LOCATIONS = [
+  { name: 'Sol',          edX: 0,     edZ: 0,     color: '#5599ff' },
+  { name: 'Sgr A*',       edX: 25,    edZ: 25900, color: '#ffee66' },
+  { name: 'Colonia',      edX: -9530, edZ: 19808, color: '#ff9944' },
+  { name: 'Beagle Point', edX: -1112, edZ: 65270, color: '#ff4499' },
+]
+
+const MAIN_HALF = 300          // half-size of the 600px canvas the border data was sampled for
+
+function drawSectorDetail(ctx, W, H, region, coverage, pos) {
+  const { cx0, cz0, span } = sectorViewport(region)
+  const SC = span / W  // ly per px
+  const toC = (edX, edZ) => [W / 2 + (edX - cx0) / SC, H / 2 - (edZ - cz0) / SC]
+  const gridStep = span > 24000 ? 5000 : 2000
+
+  ctx.fillStyle = '#050510'
+  ctx.fillRect(0, 0, W, H)
+  for (const s of BG_STARS) {
+    ctx.fillStyle = `rgba(200,215,255,${(0.20 + s.r * 0.35).toFixed(2)})`
+    ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill()
+  }
+
+  // Grid lines aligned to absolute galactic coords
+  const minX = cx0 - span / 2, maxX = cx0 + span / 2
+  const minZ = cz0 - span / 2, maxZ = cz0 + span / 2
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  for (let x = Math.ceil(minX / gridStep) * gridStep; x <= maxX; x += gridStep) {
+    const [cx] = toC(x, 0); ctx.moveTo(cx, 0); ctx.lineTo(cx, H)
+  }
+  for (let z = Math.ceil(minZ / gridStep) * gridStep; z <= maxZ; z += gridStep) {
+    const [, cy] = toC(0, z); ctx.moveTo(0, cy); ctx.lineTo(W, cy)
+  }
+  ctx.stroke()
+
+  // Coverage heat cells
+  if (coverage?.cells?.length) {
+    const cellLy = coverage.cell_ly ?? 300
+    const px = Math.max(2, cellLy / SC)
+    for (const [gx, gz, count] of coverage.cells) {
+      const [cx, cy] = toC(gx * cellLy + cellLy / 2, gz * cellLy + cellLy / 2)
+      if (cx < -px || cx > W + px || cy < -px || cy > H + px) continue
+      const a = Math.min(0.75, 0.15 + 0.18 * Math.log10(count + 1))
+      ctx.fillStyle = `rgba(255,60,60,${a.toFixed(2)})`
+      ctx.fillRect(cx - px / 2, cy - px / 2, px, px)
+    }
+  }
+
+  // Region boundary segments (stored in main-map 600px space → ED coords → here)
+  const pxToEdX = x => (x - MAIN_HALF) * GX_SCALE + SGR_AX
+  const pyToEdZ = y => (MAIN_HALF - y) * GX_SCALE + SGR_AZ
+  ctx.strokeStyle = 'rgba(210,190,150,0.35)'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  for (const [x, y1, y2] of REGION_BORDERS_V) {
+    const edX = pxToEdX(x)
+    if (edX < minX - 500 || edX > maxX + 500) continue
+    const [cx, cy1] = toC(edX, pyToEdZ(y1))
+    const [, cy2] = toC(edX, pyToEdZ(y2))
+    if (Math.max(cy1, cy2) < 0 || Math.min(cy1, cy2) > H) continue
+    ctx.moveTo(cx, cy1); ctx.lineTo(cx, cy2)
+  }
+  for (const [y, x1, x2] of REGION_BORDERS_H) {
+    const edZ = pyToEdZ(y)
+    if (edZ < minZ - 500 || edZ > maxZ + 500) continue
+    const [cx1, cy] = toC(pxToEdX(x1), edZ)
+    const [cx2] = toC(pxToEdX(x2), edZ)
+    if (Math.max(cx1, cx2) < 0 || Math.min(cx1, cx2) > W) continue
+    ctx.moveTo(cx1, cy); ctx.lineTo(cx2, cy)
+  }
+  ctx.stroke()
+
+  // Region labels — selected bright, neighbours dim
+  ctx.font = '10px monospace'
+  ctx.textAlign = 'center'
+  for (const r of GALACTIC_REGIONS) {
+    const [cx, cy] = toC(r.edX, r.edZ)
+    if (cx < 20 || cx > W - 20 || cy < 12 || cy > H - 12) continue
+    ctx.fillStyle = r.name === region.name ? 'rgba(240,220,170,0.9)' : 'rgba(210,190,150,0.35)'
+    ctx.fillText(r.name, cx, cy)
+  }
+  ctx.textAlign = 'left'
+
+  // Key locations in view
+  ctx.font = '10px monospace'
+  for (const loc of KEY_LOCATIONS) {
+    const [cx, cy] = toC(loc.edX, loc.edZ)
+    if (cx < 4 || cx > W - 4 || cy < 4 || cy > H - 4) continue
+    ctx.fillStyle = loc.color
+    ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill()
+    ctx.fillText(loc.name, cx + 6, cy - 4)
+  }
+
+  // Current position marker
+  if (pos?.x != null) {
+    const [cx, cy] = toC(pos.x, pos.z)
+    if (cx >= 0 && cx <= W && cy >= 0 && cy <= H) {
+      ctx.strokeStyle = '#22ddcc'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(cx, cy - 7); ctx.lineTo(cx + 7, cy); ctx.lineTo(cx, cy + 7); ctx.lineTo(cx - 7, cy)
+      ctx.closePath(); ctx.stroke()
+      ctx.fillStyle = '#22ddcc'
+      ctx.font = '10px monospace'
+      ctx.fillText(`YOU · ${pos.system}`, cx + 10, cy + 4)
+    }
+  }
+
+  // Scale bar — one grid step
+  const barPx = gridStep / SC
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(12, H - 22); ctx.lineTo(12 + barPx, H - 22); ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(12, H - 26); ctx.lineTo(12, H - 18)
+  ctx.moveTo(12 + barPx, H - 26); ctx.lineTo(12 + barPx, H - 18)
+  ctx.stroke()
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.font = '8px monospace'
+  ctx.fillText(`${gridStep.toLocaleString()} ly`, 12, H - 10)
+}
+
 function GalaxyMapTab() {
   const topRef  = useRef(null)
-  const edgeRef = useRef(null)
-  const [view,    setView]    = useState('topdown')
   const [stats,   setStats]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
   const [overlay,  setOverlay]  = useState('off')
   const [coverage, setCoverage] = useState(null)
   const [covInfo,  setCovInfo]  = useState('')
+  const [sector,        setSector]        = useState(null)
+  const [sectorCov,     setSectorCov]     = useState(null)
+  const [pos,           setPos]           = useState(null)
 
   async function loadStats() {
     setLoading(true); setError(null)
@@ -1360,36 +1395,78 @@ function GalaxyMapTab() {
     if (!r || r.cells.length === 0) {
       setCovInfo(layer === 'live'
         ? 'No live data yet — accumulates from the player network while EDTC runs.'
-        : 'Weekly data not downloaded yet — refreshes automatically shortly after launch.')
+        : 'Data not loaded yet — it imports automatically shortly after launch.')
     } else {
       const total = r.cells.reduce((s, c) => s + c[2], 0)
       setCovInfo(`${total.toLocaleString()} reports in ${r.cells.length.toLocaleString()} sectors`)
     }
   }
 
+  async function loadSectorCoverage(region, layer) {
+    const cell = 300
+    const { cx0, cz0, span } = sectorViewport(region)
+    const bounds = [
+      Math.floor((cx0 - span / 2) / cell),
+      Math.floor((cx0 + span / 2) / cell),
+      Math.floor((cz0 - span / 2) / cell),
+      Math.floor((cz0 + span / 2) / cell),
+    ]
+    const r = await api()?.get_galaxy_coverage(layer, bounds)
+    setSectorCov(r ?? null)
+  }
+
+  function openSector(region) {
+    const layer = overlay === 'off' ? 'week' : overlay
+    if (overlay === 'off') setOverlay('week')
+    setSector(region)
+    setSectorCov(null)
+    loadSectorCoverage(region, layer)
+    api()?.get_current_position?.().then(p => setPos(p ?? null))
+  }
+
   // Load coverage when the overlay layer changes; poll every 60s on live
   useEffect(() => {
     if (overlay === 'off') { setCoverage(null); setCovInfo(''); return }
     loadCoverage(overlay)
+    if (sector) loadSectorCoverage(sector, overlay)
     if (overlay === 'live') {
-      const t = setInterval(() => loadCoverage('live'), 60000)
+      const t = setInterval(() => {
+        loadCoverage('live')
+        if (sector) loadSectorCoverage(sector, 'live')
+      }, 60000)
       return () => clearInterval(t)
     }
   }, [overlay])
 
-  // Redraw base map + coverage overlay together
+  // Redraw: sector detail when a sector is open, otherwise galaxy + overlay
   useEffect(() => {
     const c = topRef.current
     if (!c) return
     const ctx = c.getContext('2d')
-    drawTopDown(ctx, c.width, c.height)
-    if (overlay !== 'off' && coverage) drawCoverage(ctx, c.width, c.height, coverage)
-  }, [overlay, coverage])
+    if (sector) {
+      drawSectorDetail(ctx, c.width, c.height, sector, sectorCov, pos)
+    } else {
+      drawTopDown(ctx, c.width, c.height)
+      if (overlay !== 'off' && coverage) drawCoverage(ctx, c.width, c.height, coverage)
+    }
+  }, [overlay, coverage, sector, sectorCov, pos])
 
-  useEffect(() => {
-    const c = edgeRef.current
-    if (c) drawEdgeOn(c.getContext('2d'), c.width, c.height)
-  }, [])
+  // Click a region label on the galaxy view to open its sector map
+  function handleCanvasClick(e) {
+    if (sector) return
+    const c = topRef.current
+    if (!c) return
+    const rect = c.getBoundingClientRect()
+    const px = (e.clientX - rect.left) * (c.width / rect.width)
+    const py = (e.clientY - rect.top) * (c.height / rect.height)
+    let best = null, bestD = 40
+    for (const r of GALACTIC_REGIONS) {
+      const [cx, cy] = gxToCanvas(r.edX, r.edZ, c.width, c.height)
+      const d = Math.hypot(cx - px, cy - py)
+      if (d < bestD) { best = r; bestD = d }
+    }
+    if (best) openSector(best)
+  }
 
   return (
     <div className="space-y-4">
@@ -1420,69 +1497,78 @@ function GalaxyMapTab() {
         )}
       </div>
 
-      {/* Projection toggle */}
+      {/* Controls */}
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-ed-muted text-xs font-mono">Projection:</span>
+        {sector ? (
+          <>
+            <button className="btn-ghost text-xs" onClick={() => { setSector(null); setSectorCov(null) }}>
+              ← Back to galaxy
+            </button>
+            <span className="text-ed-orange font-ui font-semibold text-sm">{sector.name}</span>
+          </>
+        ) : (
+          <select
+            className="input font-mono text-xs py-1"
+            value=""
+            onChange={e => {
+              const r = GALACTIC_REGIONS.find(x => x.name === e.target.value)
+              if (r) openSector(r)
+            }}
+          >
+            <option value="">Open sector map…</option>
+            {[...GALACTIC_REGIONS].sort((a, b) => a.name.localeCompare(b.name)).map(r => (
+              <option key={r.name} value={r.name}>{r.name}</option>
+            ))}
+          </select>
+        )}
+        <span className="text-ed-muted text-xs font-mono ml-4">Scan activity:</span>
         {[
-          { id: 'topdown', label: 'Top-Down' },
-          { id: 'edgeon',  label: 'Edge-On'  },
+          { id: 'off',     label: 'Off' },
+          { id: 'alltime', label: 'All Time' },
+          { id: 'week',    label: 'Last 7 Days' },
+          { id: 'live',    label: 'Live (EDDN)' },
         ].map(v => (
           <button
             key={v.id}
-            onClick={() => setView(v.id)}
+            onClick={() => setOverlay(v.id)}
             className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
-              view === v.id
-                ? 'bg-ed-orange/20 border-ed-orange text-ed-orange'
+              overlay === v.id
+                ? 'bg-red-500/20 border-red-500 text-red-400'
                 : 'border-ed-border text-ed-muted hover:border-ed-text hover:text-ed-text'
             }`}
           >
             {v.label}
           </button>
         ))}
-        {view === 'topdown' && (
-          <>
-            <span className="text-ed-muted text-xs font-mono ml-4">Scan activity:</span>
-            {[
-              { id: 'off',  label: 'Off' },
-              { id: 'week', label: 'Last 7 Days' },
-              { id: 'live', label: 'Live (EDDN)' },
-            ].map(v => (
-              <button
-                key={v.id}
-                onClick={() => setOverlay(v.id)}
-                className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
-                  overlay === v.id
-                    ? 'bg-red-500/20 border-red-500 text-red-400'
-                    : 'border-ed-border text-ed-muted hover:border-ed-text hover:text-ed-text'
-                }`}
-              >
-                {v.label}
-              </button>
-            ))}
-          </>
-        )}
       </div>
 
-      {overlay !== 'off' && view === 'topdown' && (
+      {overlay !== 'off' && (
         <p className="text-xs font-mono text-ed-muted">
-          <span className="text-red-400">■</span> = systems recently visited/scanned by players
-          (EDSM weekly submissions{overlay === 'live' ? ' · live EDDN journal traffic' : ''}) —
-          avoid these areas for first discoveries.
-          {covInfo && <span className="text-ed-text ml-2">{covInfo}</span>}
+          <span className="text-red-400">■</span> = {
+            overlay === 'alltime' ? 'every system ever catalogued by players (EDSM all-time)'
+            : overlay === 'live'  ? 'systems players are visiting right now (live EDDN traffic)'
+            : 'systems players visited/scanned in the last 7 days (EDSM submissions)'
+          } — avoid these areas for first discoveries.
+          {covInfo && !sector && <span className="text-ed-text ml-2">{covInfo}</span>}
         </p>
       )}
 
       {/* Canvas */}
       <div className="rounded border border-ed-border overflow-hidden bg-[#050510]">
-        <canvas ref={topRef}  width={600} height={600} className={`w-full block ${view === 'topdown' ? '' : 'hidden'}`} />
-        <canvas ref={edgeRef} width={600} height={250} className={`w-full block ${view === 'edgeon'  ? '' : 'hidden'}`} />
+        <canvas
+          ref={topRef}
+          width={600}
+          height={600}
+          onClick={handleCanvasClick}
+          className={`w-full block ${sector ? '' : 'cursor-pointer'}`}
+        />
       </div>
 
       <div className="flex justify-between text-xs font-mono text-ed-muted">
         <span>
-          {view === 'topdown'
-            ? 'Galactic north = up · Sgr A* at centre · ~155 ly/px · 42 named regions'
-            : 'Side view · 500 ly bands from galactic midplane · Y scale ~11× exaggerated'}
+          {sector
+            ? `${sector.name} · ${Math.round(sectorViewport(sector).span).toLocaleString()} ly viewport · full region`
+            : 'Galactic north = up · Sgr A* at centre · ~155 ly/px · click a region name to open its sector map'}
         </span>
         <span>map: stylized</span>
       </div>

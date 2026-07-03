@@ -932,11 +932,15 @@ def bump_coverage_cells(layer: str, cells: dict) -> None:
         """, [(layer, gx, gz, c) for (gx, gz), c in cells.items()])
 
 
-def get_coverage_layer(layer: str) -> list:
+def get_coverage_layer(layer: str, bounds: list | None = None) -> list:
+    """bounds: [min_gx, max_gx, min_gz, max_gz] to fetch a viewport only."""
+    q = "SELECT gx, gz, count FROM galaxy_coverage WHERE layer = ?"
+    params: list = [layer]
+    if bounds:
+        q += " AND gx BETWEEN ? AND ? AND gz BETWEEN ? AND ?"
+        params += [bounds[0], bounds[1], bounds[2], bounds[3]]
     with _conn() as conn:
-        rows = conn.execute(
-            "SELECT gx, gz, count FROM galaxy_coverage WHERE layer = ?", (layer,)
-        ).fetchall()
+        rows = conn.execute(q, params).fetchall()
         return [[r["gx"], r["gz"], r["count"]] for r in rows]
 
 
