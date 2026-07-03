@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.44"  # bump this with every release
+APP_VERSION = "0.3.45"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -141,6 +141,9 @@ class API:
         # ShipTargeted fires constantly in busy space — keep the watchlist in
         # memory instead of hitting the DB per event (invalidated on edits)
         self._watchlist_cache: set[str] | None = None
+        # Last FSDTarget payload — re-pushed when the route overlay opens
+        # mid-route so the scoopable warning isn't lost until the next target
+        self._last_fsd_target: dict | None = None
         # get_market_stats() full-scans the markets table; Trading.jsx polls it
         self._market_stats_cache: dict | None = None
         self._market_stats_time: float = 0.0
@@ -357,6 +360,23 @@ class API:
                     logging.info(f"Pushed construction project to overlay: {match.get('name')}")
         threading.Thread(target=_push, daemon=True).start()
 
+    def _push_route_to_overlay(self):
+        """Push the active route (and last locked jump target) to the route
+        overlay after it has time to initialize. The overlay window has no
+        working API bridge, so it can't fetch this itself on mount."""
+        def _push():
+            import time
+            time.sleep(2.5)
+            self._overlay_manager.emit_to_overlay("route", "route_update", {
+                "route": self._active_route,
+                "current_system": self._current_system,
+            })
+            # after route_update — the overlay resets its target info on route change
+            if self._active_route and self._last_fsd_target:
+                self._overlay_manager.emit_to_overlay("route", "fsd_target", self._last_fsd_target)
+            logging.info(f"Pushed route to overlay: {(self._active_route or {}).get('name', 'none')}")
+        threading.Thread(target=_push, daemon=True).start()
+
     def get_journal_path(self) -> str:
         from core.journal import journal_path
         return str(journal_path())
@@ -464,8 +484,12 @@ class API:
         from core.database import save_route
         save_route(route)
         self._active_route = route
+        self._last_fsd_target = None  # old target is stale for the new route
         if self._overlay_manager.is_user_enabled("route"):
             self._overlay_manager.show("route")
+            # if show() just created the window, the immediate emit below is
+            # dropped — the delayed push catches the fresh window
+            self._push_route_to_overlay()
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": route,
             "current_system": self._current_system,
@@ -474,6 +498,7 @@ class API:
 
     def _handle_nav_route_clear(self):
         self._active_route = None
+        self._last_fsd_target = None
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": None,
             "current_system": self._current_system,
@@ -493,6 +518,7 @@ class API:
             "scoopable": star_class in self._SCOOPABLE_CLASSES if star_class else None,
             "remaining_jumps": event.get("RemainingJumpsInRoute"),
         }
+        self._last_fsd_target = payload
         self._overlay_manager.emit_to_overlay("route", "fsd_target", payload)
         self._emit("fsd_target", payload)
 
@@ -985,10 +1011,13 @@ class API:
         self._active_route = get_active_route()
         if self._active_route:
             self._overlay_manager.show("route")
+            # immediate emit covers an already-open window; the delayed push
+            # covers a window show() is still creating (emit drops silently)
             self._overlay_manager.emit_to_overlay("route", "route_update", {
                 "route": self._active_route,
                 "current_system": self._current_system,
             })
+            self._push_route_to_overlay()
         return True
 
     def get_active_route(self) -> dict | None:
@@ -1060,6 +1089,8 @@ class API:
         self._overlay_manager.show(name)
         if name == "construction":
             self._push_cargo_to_overlay()
+        elif name == "route":
+            self._push_route_to_overlay()
 
     def hide_overlay(self, name: str):
         self._overlay_manager.hide(name)
@@ -1070,6 +1101,8 @@ class API:
         set_pref(f"overlay_auto_{name}", new_state)
         if new_state and name == "construction":
             self._push_cargo_to_overlay()
+        elif new_state and name == "route":
+            self._push_route_to_overlay()
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref

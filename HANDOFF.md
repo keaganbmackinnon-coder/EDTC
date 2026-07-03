@@ -1578,11 +1578,62 @@ with any data, which is usually a single lone-explorer system).
 
 ## Known issues / notes for next session
 
-- User still to confirm in-game: yellow cargo bar filling on pickup + auto-draining on delivery (pipeline verified in code + logs; purchase test pending).
+- ~~User still to confirm in-game: yellow cargo bar filling on pickup + auto-draining on delivery~~ — confirmed working in-game 2026-07-03.
 - `sync_construction_depot` matches projects by system — two depots in one system would cross-sync (link projects to market_id if it bites).
-- Route overlay's `copy_next_destination` button + `Route.jsx`'s `get_active_route()` on mount rely on the dead overlay bridge — audit ALL overlay components for `api()` calls and convert to pushes.
+- ~~Route overlay's `copy_next_destination` button + `Route.jsx`'s `get_active_route()` on mount rely on the dead overlay bridge~~ — fixed in Session 34 (overlay bridge audit).
 - Perf backlog: `_emit("journal", ...)` still pushes every journal event to the frontend.
 - Inara blocked pending app registration (external).
 
 ---
 *Session 33 final — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 12:59:20*
+
+---
+*Session checkpoint: 2026-07-03 15:46:26*
+
+---
+*Session checkpoint: 2026-07-03 16:04:29*
+
+---
+
+## Build status — Session 34 — Overlay bridge audit (released as v0.3.45)
+
+Focus: audit ALL overlay components for dead `api()` bridge calls (Session 33
+carryover) and convert to backend pushes. Yellow cargo bar confirmed working
+in-game by user before starting.
+
+| Item | Status | File |
+|---|---|---|
+| Audit result: only `Route.jsx`, `Construction.jsx`, and App.jsx's overlay ErrorBoundary had bridge calls; CmdrPing/FssValues/SystemPreview/ExoTracker are pure push-listeners (clean) | — | — |
+| `_push_route_to_overlay()` — delayed (2.5s) push of active route + cached last `fsd_target`, mirrors `_push_cargo_to_overlay` | DONE | `main.py` |
+| Wired into `show_overlay`/`toggle_overlay` for `route` (same pattern as construction) | DONE | `main.py` |
+| `set_active_route`/`_handle_nav_route`: emits right after `show()` were silently dropped when the window was still being created (threaded, 1.5s) — the delayed push now covers the fresh-window case; immediate emit kept for already-open windows | DONE | `main.py` |
+| `_last_fsd_target` cached in `_handle_fsd_target`, cleared on NavRoute/NavRouteClear — scoopable warning survives opening the overlay mid-route | DONE | `main.py` |
+| `Route.jsx`: dead `get_active_route()` mount fetch removed; dead Copy button replaced with "Ctrl+Shift+C copies next" hint (global hotkey works even with game focus — clicking the overlay would steal focus anyway) | DONE | `frontend/src/overlays/Route.jsx` |
+| `Construction.jsx`: dead `loadInitial` (get_construction_projects/get_ship_cargo) + dead ResizeObserver `resize_overlay` path removed — backend pushes + `resize_to_content` already do both; `id="overlay-panel"` kept (backend measures it) | DONE | `frontend/src/overlays/Construction.jsx` |
+| App.jsx overlay ErrorBoundary: dead `log_frontend_error`/`resize_overlay` calls skipped in overlay windows; error div gets `id="overlay-panel"` in overlay mode so `resize_to_content` can still measure it | DONE | `frontend/src/App.jsx` |
+| Local build swapped + verified via log: cargo push (2 items), project push, resize 460×625 all working on the new build | DONE | — |
+
+## Session 34 continued — Route overlay wide-strip redesign (v0.3.45)
+
+| Item | Status | File |
+|---|---|---|
+| Route overlay redesigned as a wide horizontal strip (user request: "longer than it is tall") — single row: `ROUTE 12/91 · Current → Next · CLASS/scoopable · N jumps left · hotkey hint`, progress bar underneath | DONE | `frontend/src/overlays/Route.jsx` |
+| Route window 360×170 → 680×92 | DONE | `core/overlay.py` |
+| Route overlay added to the `resize_to_content` auto-fit path (alongside construction); both route panel states carry `id="overlay-panel"` | DONE | `core/overlay.py`, `frontend/src/overlays/Route.jsx` |
+| User play-tested the bridge-audit fix in-game: route overlay populates on open ("it works") | VERIFIED | — |
+| `APP_VERSION` bumped to `0.3.45`, tagged for CI release | DONE | `main.py` |
+
+## Notes
+
+- `resize_overlay(name, w, h)` API method in main.py is now unused by the frontend (kept — harmless, callable from main window).
+- Local install runs the 0.3.44-labelled build containing all Session 34 changes; it will offer the identical v0.3.45 CI build via the in-app updater once CI finishes.
+- Wide-strip layout swapped in right before session end — visual check in-game still pending (data pipeline verified).
+
+---
+*Session 34 complete — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 16:19:07*

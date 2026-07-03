@@ -18,8 +18,9 @@ OVERLAYS = {
     "route": {
         "title": "EDTC — Route",
         "key": "route",
-        "width": 360,
-        "height": 170,
+        # wide strip, not a card — single row + progress bar (user request)
+        "width": 680,
+        "height": 92,
     },
     "construction": {
         "title": "EDTC — Construction",
@@ -202,12 +203,12 @@ class OverlayManager:
             win.evaluate_js(js)
         except Exception:
             pass
-        # The construction overlay grows/shrinks with its commodity list. Its
-        # own JS can't drive the resize — overlay windows are created without
-        # js_api, so window.pywebview.api is an empty object there. Measure and
-        # resize from this side instead; evaluate_js provably works (it's how
-        # the data gets in).
-        if name == "construction":
+        # Content-sized overlays grow/shrink with their data. Their own JS
+        # can't drive the resize — overlay windows are created without js_api,
+        # so window.pywebview.api is an empty object there. Measure and resize
+        # from this side instead; evaluate_js provably works (it's how the
+        # data gets in). Both overlays carry id="overlay-panel" for measuring.
+        if name in ("construction", "route"):
             self.resize_to_content(name)
 
     def resize_to_content(self, name: str, pad: int = 24, delay: float = 0.4):

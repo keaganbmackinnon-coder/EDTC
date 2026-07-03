@@ -4,15 +4,14 @@ class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
   static getDerivedStateFromError(e) { return { error: e } }
   componentDidCatch(error) {
-    // Overlay windows are tiny and hard to read on screen — log to edtc_debug.log
-    // (retrying once the pywebview bridge is ready, since a crash this early can
-    // happen before window.pywebview.api exists) and grow the overlay window so
-    // the error is actually legible in place.
+    // Overlay windows have no API bridge (created without js_api), so neither
+    // log_frontend_error nor resize_overlay can work there — the error can only
+    // render in place (the error div carries id="overlay-panel" so the backend's
+    // resize_to_content can still measure it). Main window logs via the bridge,
+    // retrying once pywebviewready fires for crashes before the bridge exists.
+    if (this.props.overlayName) return
     const report = () => {
       window?.pywebview?.api?.log_frontend_error?.(error?.message ?? '', error?.stack ?? '')
-      if (this.props.overlayName) {
-        window?.pywebview?.api?.resize_overlay?.(this.props.overlayName, 700, 400)
-      }
     }
     if (window.pywebview?.api) report()
     else window.addEventListener('pywebviewready', report, { once: true })
@@ -25,7 +24,7 @@ class ErrorBoundary extends Component {
   }
   render() {
     if (this.state.error) return (
-      <div className="p-8 text-red-400 font-mono text-sm">
+      <div id={this.props.overlayName ? 'overlay-panel' : undefined} className="p-8 text-red-400 font-mono text-sm">
         <div className="text-ed-orange font-semibold mb-2">Page error</div>
         <pre className="whitespace-pre-wrap">{this.state.error?.message}</pre>
         <pre className="whitespace-pre-wrap text-xs text-ed-muted mt-2 max-h-40 overflow-auto">{this.state.error?.stack}</pre>

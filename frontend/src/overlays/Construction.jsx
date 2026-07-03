@@ -1,31 +1,16 @@
-import { useEffect, useLayoutEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
-const api = () => window?.pywebview?.api
-
+// NOTE: overlay windows have no pywebview API bridge — all data arrives via
+// backend pushes (window.__edtc events): _push_cargo_to_overlay() sends cargo,
+// ship_info and the active project when this window opens. Window sizing is
+// also backend-driven: emit_to_overlay triggers resize_to_content(), which
+// measures the #overlay-panel node below — keep that id on the panel div.
 export default function Construction() {
   const [project, setProject] = useState(null)
   const [shipCargo, setShipCargo] = useState({})
   const [shipInfo, setShipInfo] = useState(null)
-  const panelRef = useRef(null)
 
   useEffect(() => {
-    // window.pywebview.api isn't guaranteed to exist yet on mount — a fresh
-    // overlay window is a cold WebView2 start, so this race loses often enough
-    // to matter. Wait for pywebviewready like App.jsx does.
-    function loadInitial() {
-      api()?.get_construction_projects?.(true)?.then(projects => {
-        if (projects?.length > 0) setProject(projects[0])
-      })
-      api()?.get_ship_cargo?.()?.then(cargo => {
-        if (cargo) setShipCargo(buildCargoMap(cargo))
-      })
-    }
-    if (window.pywebview?.api) {
-      loadInitial()
-    } else {
-      window.addEventListener('pywebviewready', loadInitial)
-    }
-
     const off1 = window.__edtc?.on('construction_update', (payload) => {
       setProject(payload ?? null)
     })
@@ -36,34 +21,14 @@ export default function Construction() {
       if (payload) setShipInfo(payload)
     })
     return () => {
-      window.removeEventListener('pywebviewready', loadInitial)
       off1?.(); off2?.(); off3?.()
     }
   }, [])
 
-  // Resize the pywebview window to fit content. A plain post-render measurement
-  // can miss changes (e.g. commodity rows added/removed after the initial project
-  // load), so use a ResizeObserver tied to the actual DOM node instead — it fires
-  // on every real layout change regardless of why the content changed.
-  useLayoutEffect(() => {
-    if (!panelRef.current) return
-    const el = panelRef.current
-    const applySize = (h) => {
-      if (h < 20) return  // guard against zero-height on first paint
-      api()?.resize_overlay?.('construction', 460, Math.ceil(h) + 24)
-    }
-    applySize(el.offsetHeight)
-    const ro = new ResizeObserver(entries => {
-      for (const entry of entries) applySize(entry.contentRect.height)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [project, shipCargo])
-
   if (!project) {
     return (
       <div className="w-full flex items-start justify-center pt-3 select-none">
-        <div ref={panelRef} id="overlay-panel" className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+        <div id="overlay-panel" className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
           <p className="text-ed-muted text-xs font-mono">No active construction project</p>
         </div>
       </div>
@@ -84,7 +49,7 @@ export default function Construction() {
 
   return (
     <div className="w-full flex items-start justify-center pt-3 select-none">
-      <div ref={panelRef} id="overlay-panel" className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+      <div id="overlay-panel" className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
