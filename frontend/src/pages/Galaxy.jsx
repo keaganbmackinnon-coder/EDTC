@@ -1436,8 +1436,10 @@ function GalaxyMapTab() {
   function stepBand(dir) {
     if (bandList.length === 0) return
     if (yBand === null) {
-      // Entering slice mode: ▼ starts at the top of the disc, ▲ at the bottom
-      selectBand(dir > 0 ? bandList[bandList.length - 1] : bandList[0])
+      // Entering slice mode: start at the densest band (the galactic plane,
+      // in practice) — outlier bands hold single lone-explorer systems
+      const densest = sectorCov.y_bands.reduce((a, b) => (b[1] > a[1] ? b : a))
+      selectBand(densest[0])
       return
     }
     const i = bandList.indexOf(yBand)

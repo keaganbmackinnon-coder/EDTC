@@ -36,6 +36,103 @@ function matchDepotName(depotResource, commodityName) {
   return localized === target || fallback === target
 }
 
+function depotAgo(updated) {
+  if (!updated) return ''
+  const then = new Date(updated.replace(' ', 'T') + 'Z')
+  const mins = Math.round((Date.now() - then.getTime()) / 60000)
+  if (mins < 2) return 'just now'
+  if (mins < 60) return `${mins} min ago`
+  if (mins < 48 * 60) return `${Math.round(mins / 60)} h ago`
+  return `${Math.round(mins / 1440)} d ago`
+}
+
+function findMatchingProject(depot, projects) {
+  return projects.find(p =>
+    p.system && depot.system && p.system.toLowerCase() === depot.system.toLowerCase()
+  )
+}
+
+async function importDepotAsProject(depot, setProjects) {
+  const reqs = depot.resources.map(r => ({
+    commodity: depotCommodityName(r),
+    required: r.RequiredAmount,
+    delivered: r.ProvidedAmount,
+  }))
+  const proj = await api()?.save_construction_project({
+    name: depot.station || depot.system,
+    system: depot.system,
+    requirements: reqs,
+  })
+  if (proj) setProjects(prev => [proj, ...prev.filter(p => p.id !== proj.id)])
+  return proj
+}
+
+async function syncDepotToProject(depot, existing, setProjects) {
+  const requirements = existing.requirements.map(r => {
+    const match = depot.resources.find(d => matchDepotName(d, r.commodity))
+    return match ? { ...r, delivered: match.ProvidedAmount } : r
+  })
+  const proj = await api()?.save_construction_project({ ...existing, requirements })
+  if (proj) setProjects(prev => prev.map(p => p.id === proj.id ? proj : p))
+  return proj
+}
+
+// Greedy largest-remaining-first fill of one cargo hold
+function planNextLoad(list, capacity) {
+  if (!capacity) return null
+  const open = list.filter(r => r.remaining > 0).sort((a, b) => b.remaining - a.remaining)
+  if (open.length === 0) return null
+  const load = []
+  let space = capacity
+  for (const r of open) {
+    if (space <= 0) break
+    const take = Math.min(r.remaining, space)
+    load.push({ commodity: r.commodity, amount: take })
+    space -= take
+  }
+  return { load, tonnes: capacity - space }
+}
+
+function HaulPlanner({ list, shipInfo }) {
+  const capacity = shipInfo?.cargo_capacity ?? 0
+  const totalRemaining = list.reduce((s, r) => s + r.remaining, 0)
+  if (!totalRemaining) return null
+  const trips = capacity ? Math.ceil(totalRemaining / capacity) : null
+  const plan = planNextLoad(list, capacity)
+  return (
+    <div className="panel mb-4">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-ed-muted text-xs font-mono uppercase tracking-wider">Haul Planner</p>
+        <span className="text-xs font-mono text-ed-muted">
+          {capacity
+            ? `${shipInfo.ship ?? 'ship'} · ${capacity}T hold`
+            : 'ship cargo capacity unknown — launch the game'}
+        </span>
+      </div>
+      <p className="font-mono text-sm">
+        <span className="text-ed-orange font-semibold text-xl">{totalRemaining.toLocaleString()}T</span>
+        <span className="text-ed-muted ml-2">still to haul</span>
+        {trips != null && (
+          <span className="text-ed-text ml-3">
+            ≈ <span className="font-semibold">{trips}</span> {trips === 1 ? 'trip' : 'trips'} in this ship
+          </span>
+        )}
+      </p>
+      {plan && (
+        <p className="text-xs font-mono text-ed-muted mt-1.5">
+          Next load ({plan.tonnes.toLocaleString()}T):{' '}
+          {plan.load.map((l, i) => (
+            <span key={l.commodity} className="text-ed-text">
+              {i > 0 && <span className="text-ed-muted"> · </span>}
+              {l.amount.toLocaleString()} {l.commodity}
+            </span>
+          ))}
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ---- Shared UI ----
 
 function Bar({ pct }) {
@@ -52,39 +149,7 @@ function Bar({ pct }) {
 // ---- Depot Banner ----
 
 function DepotBanner({ depot, projects, setProjects, onDismiss, onAction }) {
-  const existing = projects.find(p =>
-    p.system && depot.system && p.system.toLowerCase() === depot.system.toLowerCase()
-  )
-
-  async function importProject() {
-    const reqs = depot.resources.map(r => ({
-      commodity: depotCommodityName(r),
-      required: r.RequiredAmount,
-      delivered: r.ProvidedAmount,
-    }))
-    const proj = await api()?.save_construction_project({
-      name: depot.system,
-      system: depot.system,
-      requirements: reqs,
-    })
-    if (proj) {
-      setProjects(prev => [proj, ...prev.filter(p => p.id !== proj.id)])
-    }
-    onAction()
-  }
-
-  async function syncProject() {
-    const requirements = existing.requirements.map(r => {
-      const match = depot.resources.find(d => matchDepotName(d, r.commodity))
-      return match ? { ...r, delivered: match.ProvidedAmount } : r
-    })
-    const proj = await api()?.save_construction_project({ ...existing, requirements })
-    if (proj) {
-      setProjects(prev => prev.map(p => p.id === proj.id ? proj : p))
-    }
-    onAction()
-  }
-
+  const existing = findMatchingProject(depot, projects)
   const progressVal = Math.round((depot.progress ?? 0) * 100)
 
   return (
@@ -92,7 +157,7 @@ function DepotBanner({ depot, projects, setProjects, onDismiss, onAction }) {
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="text-ed-orange font-ui font-semibold text-sm">
-            Construction Depot — {depot.system}
+            {depot.station || 'Construction Depot'} — {depot.system}
             <span className="text-ed-muted font-mono font-normal ml-2">{progressVal}% built</span>
             {depot.complete && <span className="text-ed-success font-mono font-normal ml-2">COMPLETE</span>}
           </div>
@@ -105,9 +170,15 @@ function DepotBanner({ depot, projects, setProjects, onDismiss, onAction }) {
         </div>
         <div className="flex gap-2 items-center shrink-0">
           {existing ? (
-            <button className="btn-ghost text-xs" onClick={syncProject}>Sync Delivered</button>
+            <button className="btn-ghost text-xs"
+              onClick={async () => { await syncDepotToProject(depot, existing, setProjects); onAction() }}>
+              Sync Delivered
+            </button>
           ) : (
-            <button className="btn-primary text-xs" onClick={importProject}>Import as Project</button>
+            <button className="btn-primary text-xs"
+              onClick={async () => { await importDepotAsProject(depot, setProjects); onAction() }}>
+              Import as Project
+            </button>
           )}
           <button className="text-ed-muted hover:text-ed-text text-sm px-1" onClick={onDismiss}>✕</button>
         </div>
@@ -295,9 +366,20 @@ function ProjectsTab({ projects, setProjects }) {
 
 // ---- Tab: Shopping List ----
 
-function ShoppingListTab({ projects }) {
+function ShoppingListTab({ projects, fcCargo, shipInfo }) {
   const list = aggregateShoppingList(projects)
   const totalRemaining = list.reduce((s, r) => s + r.remaining, 0)
+
+  const cargoMap = {}
+  for (const c of fcCargo) {
+    cargoMap[c.commodity.toLowerCase()] = c.count
+  }
+  const withFc = list.map(r => ({
+    ...r,
+    afterFc: Math.max(0, r.remaining - (cargoMap[r.commodity.toLowerCase()] ?? 0)),
+  }))
+  const totalAfterFc = withFc.reduce((s, r) => s + r.afterFc, 0)
+  const showFcCol = fcCargo.length > 0
 
   async function copyList() {
     const text = list
@@ -318,6 +400,8 @@ function ShoppingListTab({ projects }) {
         )}
       </div>
 
+      <HaulPlanner list={list} shipInfo={shipInfo} />
+
       {list.length === 0 ? (
         <p className="text-ed-muted text-sm font-mono">No active projects or all requirements met.</p>
       ) : (
@@ -329,11 +413,12 @@ function ShoppingListTab({ projects }) {
                 <th className="text-right pb-2 pr-4">Required</th>
                 <th className="text-right pb-2 pr-4">Delivered</th>
                 <th className="text-right pb-2 pr-4">Remaining</th>
+                {showFcCol && <th className="text-right pb-2 pr-4">After FC Stock</th>}
                 <th className="pb-2 w-32"></th>
               </tr>
             </thead>
             <tbody>
-              {list.map(r => (
+              {withFc.map(r => (
                 <tr
                   key={r.commodity}
                   className={`border-b border-ed-border/40 ${r.remaining === 0 ? 'opacity-40' : ''}`}
@@ -350,6 +435,13 @@ function ShoppingListTab({ projects }) {
                   }`}>
                     {r.remaining.toLocaleString()}
                   </td>
+                  {showFcCol && (
+                    <td className={`py-1.5 pr-4 text-right font-mono ${
+                      r.afterFc === 0 ? 'text-ed-success' : 'text-ed-text'
+                    }`}>
+                      {r.remaining === 0 ? '—' : r.afterFc === 0 ? 'ON FC' : r.afterFc.toLocaleString()}
+                    </td>
+                  )}
                   <td className="py-1.5">
                     <Bar pct={progressPct(r.delivered, r.required)} />
                   </td>
@@ -362,6 +454,11 @@ function ShoppingListTab({ projects }) {
                 <td className="pt-3 text-right font-semibold text-ed-orange">
                   {totalRemaining.toLocaleString()}
                 </td>
+                {showFcCol && (
+                  <td className="pt-3 text-right font-semibold text-ed-text">
+                    {totalAfterFc.toLocaleString()}
+                  </td>
+                )}
                 <td></td>
               </tr>
             </tfoot>
@@ -521,86 +618,159 @@ function FCCargoTab({ projects, fcCargo, setFcCargo }) {
   )
 }
 
-// ---- Tab: Depot View ----
+// ---- Tab: Depot View (all known sites) ----
 
-function DepotTab({ depot, fcCargo }) {
-  if (!depot) {
-    return (
-      <p className="text-ed-muted text-sm font-mono">
-        No depot data yet. Dock at a construction site in-game — the requirements will appear here automatically.
-      </p>
-    )
-  }
+function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, onRemove, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const existing = findMatchingProject(depot, projects)
+  const progressVal = Math.round((depot.progress ?? 0) * 100)
+  const capacity = shipInfo?.cargo_capacity ?? 0
+  const trips = capacity && depot.remaining ? Math.ceil(depot.remaining / capacity) : null
 
   const cargoMap = {}
   for (const c of fcCargo) {
     cargoMap[c.commodity.toLowerCase()] = c.count
   }
 
-  const progressVal = Math.round((depot.progress ?? 0) * 100)
+  // Incomplete commodities first (largest gap first), completed at the bottom
+  const sorted = [...depot.resources].sort((a, b) => {
+    const remA = Math.max(0, a.RequiredAmount - a.ProvidedAmount)
+    const remB = Math.max(0, b.RequiredAmount - b.ProvidedAmount)
+    if ((remA === 0) !== (remB === 0)) return remA === 0 ? 1 : -1
+    return remB - remA
+  })
+
+  return (
+    <div className="panel">
+      <div className="flex items-start justify-between gap-2">
+        <button className="text-left flex-1" onClick={() => setOpen(o => !o)}>
+          <div className="text-ed-text font-ui font-semibold text-sm">
+            <span className="text-ed-muted mr-1.5">{open ? '▾' : '▸'}</span>
+            {depot.station || 'Construction Depot'}
+            <span className="text-ed-muted font-mono font-normal text-xs ml-2">{depot.system}</span>
+            {depot.complete ? (
+              <span className="text-ed-success font-mono font-normal text-xs ml-2">COMPLETE</span>
+            ) : (
+              <span className="text-ed-orange font-mono font-normal text-xs ml-2">{progressVal}%</span>
+            )}
+          </div>
+          <p className="text-ed-muted text-xs font-mono mt-0.5">
+            updated {depotAgo(depot.updated)}
+            {depot.remaining > 0 && ` · ${depot.remaining.toLocaleString()}T remaining`}
+            {trips != null && ` · ~${trips} ${trips === 1 ? 'trip' : 'trips'}`}
+            {depot.rate_per_hour && ` · your pace ${depot.rate_per_hour.toLocaleString()} T/h`}
+            {depot.eta_hours && ` · ~${depot.eta_hours} h to finish`}
+          </p>
+        </button>
+        <div className="flex gap-2 items-center shrink-0">
+          {!depot.complete && (existing ? (
+            <button className="btn-ghost text-xs"
+              onClick={() => syncDepotToProject(depot, existing, setProjects)}>
+              Sync Delivered
+            </button>
+          ) : (
+            <button className="btn-primary text-xs"
+              onClick={() => importDepotAsProject(depot, setProjects)}>
+              Import as Project
+            </button>
+          ))}
+          <button className="text-ed-danger text-xs hover:underline" onClick={onRemove}>Remove</button>
+        </div>
+      </div>
+
+      <div className="mt-2">
+        <Bar pct={progressVal} />
+      </div>
+
+      {open && (
+        <div className="overflow-x-auto mt-3">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-ed-muted text-xs font-mono border-b border-ed-border">
+                <th className="text-left pb-2 pr-4">Commodity</th>
+                <th className="text-right pb-2 pr-4">Required</th>
+                <th className="text-right pb-2 pr-4">Delivered</th>
+                <th className="text-right pb-2 pr-4">Still Needed</th>
+                <th className="text-right pb-2 pr-4">FC Has</th>
+                <th className="pb-2 w-24"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map(r => {
+                const name = depotCommodityName(r)
+                const remaining = Math.max(0, r.RequiredAmount - r.ProvidedAmount)
+                const fcHas = cargoMap[name.toLowerCase()] ?? 0
+                const done = remaining === 0
+                const pct = r.RequiredAmount
+                  ? Math.min(100, Math.round((r.ProvidedAmount / r.RequiredAmount) * 100))
+                  : 0
+                return (
+                  <tr key={r.Name} className={`border-b border-ed-border/40 ${done ? 'opacity-50' : ''}`}>
+                    <td className="py-1.5 pr-4 font-mono text-ed-text">{name}</td>
+                    <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                      {r.RequiredAmount.toLocaleString()}
+                    </td>
+                    <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
+                      {r.ProvidedAmount.toLocaleString()}
+                    </td>
+                    <td className={`py-1.5 pr-4 text-right font-mono font-semibold ${
+                      done ? 'text-ed-success' : 'text-ed-orange'
+                    }`}>
+                      {remaining.toLocaleString()}
+                    </td>
+                    <td className={`py-1.5 pr-4 text-right font-mono ${
+                      fcHas > 0
+                        ? (fcHas >= remaining ? 'text-ed-success' : 'text-ed-text')
+                        : 'text-ed-muted'
+                    }`}>
+                      {fcHas > 0 ? fcHas.toLocaleString() : '—'}
+                    </td>
+                    <td className="py-1.5">
+                      <Bar pct={pct} />
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DepotTab({ depots, setDepots, fcCargo, projects, setProjects, shipInfo }) {
+  if (depots.length === 0) {
+    return (
+      <p className="text-ed-muted text-sm font-mono">
+        No depot data yet. Dock at a construction site in-game — the requirements are saved here automatically.
+      </p>
+    )
+  }
+
+  async function remove(marketId) {
+    await api()?.delete_construction_depot(marketId)
+    setDepots(prev => prev.filter(d => d.market_id !== marketId))
+  }
 
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex-1">
-          <Bar pct={progressVal} />
-        </div>
-        <span className="text-xs font-mono text-ed-muted shrink-0">
-          {depot.system} · {progressVal}% built
-          {depot.complete && ' · COMPLETE'}
-        </span>
-      </div>
-
-      <div className="panel overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-ed-muted text-xs font-mono border-b border-ed-border">
-              <th className="text-left pb-2 pr-4">Commodity</th>
-              <th className="text-right pb-2 pr-4">Required</th>
-              <th className="text-right pb-2 pr-4">Delivered</th>
-              <th className="text-right pb-2 pr-4">Still Needed</th>
-              <th className="text-right pb-2 pr-4">FC Has</th>
-              <th className="pb-2 w-24"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {depot.resources.map(r => {
-              const name = depotCommodityName(r)
-              const remaining = Math.max(0, r.RequiredAmount - r.ProvidedAmount)
-              const fcHas = cargoMap[name.toLowerCase()] ?? 0
-              const done = remaining === 0
-              const pct = r.RequiredAmount
-                ? Math.min(100, Math.round((r.ProvidedAmount / r.RequiredAmount) * 100))
-                : 0
-              return (
-                <tr key={r.Name} className={`border-b border-ed-border/40 ${done ? 'opacity-50' : ''}`}>
-                  <td className="py-1.5 pr-4 font-mono text-ed-text">{name}</td>
-                  <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
-                    {r.RequiredAmount.toLocaleString()}
-                  </td>
-                  <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
-                    {r.ProvidedAmount.toLocaleString()}
-                  </td>
-                  <td className={`py-1.5 pr-4 text-right font-mono font-semibold ${
-                    done ? 'text-ed-success' : 'text-ed-orange'
-                  }`}>
-                    {remaining.toLocaleString()}
-                  </td>
-                  <td className={`py-1.5 pr-4 text-right font-mono ${
-                    fcHas > 0
-                      ? (fcHas >= remaining ? 'text-ed-success' : 'text-ed-text')
-                      : 'text-ed-muted'
-                  }`}>
-                    {fcHas > 0 ? fcHas.toLocaleString() : '—'}
-                  </td>
-                  <td className="py-1.5">
-                    <Bar pct={pct} />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <p className="text-ed-muted text-sm mb-4">
+        Every construction site you dock at, saved with its latest progress. Data refreshes while you're docked.
+      </p>
+      <div className="space-y-3">
+        {depots.map((d, i) => (
+          <DepotCard
+            key={d.market_id}
+            depot={d}
+            fcCargo={fcCargo}
+            projects={projects}
+            setProjects={setProjects}
+            shipInfo={shipInfo}
+            onRemove={() => remove(d.market_id)}
+            defaultOpen={i === 0}
+          />
+        ))}
       </div>
     </div>
   )
@@ -614,6 +784,12 @@ function MarketFinderTab({ projects }) {
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    api()?.get_current_system?.().then(s => {
+      if (s) setSystem(prev => prev || s)
+    })
+  }, [])
 
   const shoppingList = aggregateShoppingList(projects).filter(r => r.remaining > 0)
 
@@ -757,12 +933,26 @@ export default function Colonisation() {
   const [tab, setTab] = useState('projects')
   const [projects, setProjects] = useState([])
   const [fcCargo, setFcCargo] = useState([])
-  const [depot, setDepot] = useState(null)
-  const [bannerOpen, setBannerOpen] = useState(false)
+  const [depots, setDepots] = useState([])
+  const [shipInfo, setShipInfo] = useState(null)
+  const [bannerId, setBannerId] = useState(null)      // market_id the banner shows
+  const [dismissedId, setDismissedId] = useState(null)
 
   useEffect(() => {
     api()?.get_construction_projects(false).then(r => setProjects(r ?? []))
     api()?.get_fc_cargo().then(r => setFcCargo(r ?? []))
+    api()?.get_ship_info?.().then(r => setShipInfo(r ?? null))
+    // Depots are persisted — docking events are no longer missed when this
+    // page isn't open. Surface the banner for a freshly-visited site.
+    api()?.get_construction_depots?.().then(r => {
+      const list = r ?? []
+      setDepots(list)
+      const latest = list[0]
+      if (latest && !latest.complete) {
+        const mins = (Date.now() - new Date(latest.updated.replace(' ', 'T') + 'Z').getTime()) / 60000
+        if (mins < 15) setBannerId(latest.market_id)
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -780,24 +970,32 @@ export default function Colonisation() {
       setFcCargo(payload?.cargo ?? [])
     })
     const off3 = window.__edtc?.on('construction_depot', payload => {
-      setDepot(payload)
-      setBannerOpen(true)
+      if (!payload?.market_id) return
+      setDepots(prev => [payload, ...prev.filter(d => d.market_id !== payload.market_id)])
+      setBannerId(payload.market_id)
     })
-    return () => { off1?.(); off2?.(); off3?.() }
+    const off4 = window.__edtc?.on('ship_changed', payload => {
+      if (payload) setShipInfo(payload)
+    })
+    return () => { off1?.(); off2?.(); off3?.(); off4?.() }
   }, [])
+
+  const bannerDepot = bannerId !== dismissedId
+    ? depots.find(d => d.market_id === bannerId)
+    : null
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-ui font-semibold text-ed-orange mb-1">Colonisation</h1>
       <p className="text-ed-muted text-sm mb-5">System planning, build tracking, and logistics.</p>
 
-      {bannerOpen && depot && (
+      {bannerDepot && (
         <DepotBanner
-          depot={depot}
+          depot={bannerDepot}
           projects={projects}
           setProjects={setProjects}
-          onDismiss={() => setBannerOpen(false)}
-          onAction={() => { setBannerOpen(false); setTab('projects') }}
+          onDismiss={() => setDismissedId(bannerId)}
+          onAction={() => { setDismissedId(bannerId); setTab('projects') }}
         />
       )}
 
@@ -821,13 +1019,14 @@ export default function Colonisation() {
         <ProjectsTab projects={projects} setProjects={setProjects} />
       )}
       {tab === 'shopping' && (
-        <ShoppingListTab projects={projects} />
+        <ShoppingListTab projects={projects} fcCargo={fcCargo} shipInfo={shipInfo} />
       )}
       {tab === 'fc_cargo' && (
         <FCCargoTab projects={projects} fcCargo={fcCargo} setFcCargo={setFcCargo} />
       )}
       {tab === 'depot' && (
-        <DepotTab depot={depot} fcCargo={fcCargo} />
+        <DepotTab depots={depots} setDepots={setDepots} fcCargo={fcCargo}
+          projects={projects} setProjects={setProjects} shipInfo={shipInfo} />
       )}
       {tab === 'market' && (
         <MarketFinderTab projects={projects} />

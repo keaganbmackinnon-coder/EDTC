@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import threading
 from pathlib import Path
 from typing import Callable
@@ -68,14 +69,41 @@ class OverlayManager:
         return f"{base}#overlay={key}"
 
     def _apply_opacity(self, name: str):
+        """Whole-window alpha via the Win32 layered-window API — unlike CSS
+        opacity (which fades the page but leaves the window slab opaque), this
+        makes the overlay genuinely see-through to the game underneath.
+        Per-pixel transparency stays off the table (unreliable in WebView2)."""
         win = self._windows.get(name)
         if win is None:
             return
         opacity = self._opacity.get(name, 1.0)
-        try:
-            win.evaluate_js(f"document.documentElement.style.opacity = '{opacity}'")
-        except Exception:
-            pass
+        cfg = OVERLAYS.get(name)
+        applied = False
+        if os.name == "nt" and cfg:
+            try:
+                import ctypes
+                user32 = ctypes.windll.user32
+                # Exact unique title match — safer than enumerating (Session 29)
+                hwnd = user32.FindWindowW(None, cfg["title"])
+                if hwnd:
+                    GWL_EXSTYLE = -20
+                    WS_EX_LAYERED = 0x00080000
+                    LWA_ALPHA = 0x2
+                    style = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+                    user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED)
+                    alpha = max(25, min(255, int(opacity * 255)))
+                    user32.SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA)
+                    applied = True
+                    logging.info(f"overlay: '{name}' window alpha set to {alpha}/255")
+                else:
+                    logging.warning(f"overlay: hwnd not found for '{cfg['title']}'")
+            except Exception as e:
+                logging.warning(f"overlay: layered alpha failed for '{name}': {e}")
+        if not applied:
+            try:
+                win.evaluate_js(f"document.documentElement.style.opacity = '{opacity}'")
+            except Exception:
+                pass
 
     def show(self, name: str):
         if not self._enabled:
@@ -174,6 +202,36 @@ class OverlayManager:
             win.evaluate_js(js)
         except Exception:
             pass
+        # The construction overlay grows/shrinks with its commodity list. Its
+        # own JS can't drive the resize — overlay windows are created without
+        # js_api, so window.pywebview.api is an empty object there. Measure and
+        # resize from this side instead; evaluate_js provably works (it's how
+        # the data gets in).
+        if name == "construction":
+            self.resize_to_content(name)
+
+    def resize_to_content(self, name: str, pad: int = 24, delay: float = 0.4):
+        """Fit an overlay window to its rendered panel height. Delayed so the
+        just-pushed payload has rendered before we measure."""
+        win = self._windows.get(name)
+        if win is None:
+            return
+        width = OVERLAYS.get(name, {}).get("width", 400)
+
+        def _measure():
+            try:
+                h = win.evaluate_js(
+                    "(document.getElementById('overlay-panel') || document.body).offsetHeight"
+                )
+                if isinstance(h, (int, float)) and h >= 20:
+                    win.resize(width, int(h) + pad)
+                    logging.info(f"overlay: resized '{name}' to {width}x{int(h) + pad}")
+            except Exception as e:
+                logging.warning(f"overlay: resize_to_content '{name}': {e}")
+
+        timer = threading.Timer(delay, _measure)
+        timer.daemon = True
+        timer.start()
 
     def hide_after(self, name: str, seconds: float):
         existing = self._hide_timers.pop(name, None)

@@ -180,6 +180,23 @@ def init_db():
                 count INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY (layer, gx, gy, gz)
             );
+
+            CREATE TABLE IF NOT EXISTS depots (
+                market_id INTEGER PRIMARY KEY,
+                system    TEXT DEFAULT '',
+                station   TEXT DEFAULT '',
+                progress  REAL DEFAULT 0,
+                complete  INTEGER DEFAULT 0,
+                resources TEXT NOT NULL,
+                updated   TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS depot_deliveries (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                market_id INTEGER NOT NULL,
+                ts        TEXT NOT NULL,
+                amount    INTEGER NOT NULL
+            );
         """)
         # Migrations for columns added after initial release
         for sql in [
@@ -515,6 +532,78 @@ def sync_construction_depot(system: str, resources: list) -> dict | None:
         d = dict(project_row)
         d["requirements"] = reqs
         return d
+
+
+# --- Construction depots (persistent, keyed by market) ---
+
+def upsert_depot(market_id: int, system: str, station: str, progress: float,
+                 complete: bool, resources: list) -> dict:
+    """Store the latest ColonisationConstructionDepot snapshot for a site.
+    Keeps existing system/station when the caller has none (startup replay)."""
+    with _conn() as conn:
+        existing = conn.execute(
+            "SELECT system, station FROM depots WHERE market_id=?", (market_id,)
+        ).fetchone()
+        if existing:
+            system = system or existing["system"]
+            station = station or existing["station"]
+        conn.execute("""
+            INSERT INTO depots (market_id, system, station, progress, complete, resources, updated)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(market_id) DO UPDATE SET
+              system=excluded.system, station=excluded.station,
+              progress=excluded.progress, complete=excluded.complete,
+              resources=excluded.resources, updated=excluded.updated
+        """, (market_id, system, station, progress, int(complete), json.dumps(resources)))
+        row = conn.execute("SELECT * FROM depots WHERE market_id=?", (market_id,)).fetchone()
+        d = dict(row)
+        d["resources"] = json.loads(d["resources"])
+        return d
+
+
+def get_depots() -> list:
+    with _conn() as conn:
+        rows = conn.execute("SELECT * FROM depots ORDER BY updated DESC, rowid DESC").fetchall()
+        out = []
+        for r in rows:
+            d = dict(r)
+            d["resources"] = json.loads(d["resources"])
+            out.append(d)
+        return out
+
+
+def delete_depot(market_id: int) -> bool:
+    with _conn() as conn:
+        conn.execute("DELETE FROM depots WHERE market_id=?", (market_id,))
+        conn.execute("DELETE FROM depot_deliveries WHERE market_id=?", (market_id,))
+    return True
+
+
+def add_depot_delivery(market_id: int, amount: int) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "INSERT INTO depot_deliveries (market_id, ts, amount) VALUES (?, datetime('now'), ?)",
+            (market_id, amount),
+        )
+
+
+def get_depot_rate(market_id: int, hours: float = 6.0) -> float | None:
+    """Your delivery pace at this site in tonnes/hour, from deliveries within
+    the window. None until there are at least two deliveries to span."""
+    with _conn() as conn:
+        rows = conn.execute("""
+            SELECT ts, amount FROM depot_deliveries
+            WHERE market_id=? AND ts >= datetime('now', ?)
+            ORDER BY ts
+        """, (market_id, f"-{hours} hours")).fetchall()
+        if len(rows) < 2:
+            return None
+        from datetime import datetime
+        first = datetime.fromisoformat(rows[0]["ts"])
+        last = datetime.fromisoformat(rows[-1]["ts"])
+        span_h = max((last - first).total_seconds() / 3600, 0.25)
+        total = sum(r["amount"] for r in rows)
+        return total / span_h
 
 
 # --- FC Cargo ---

@@ -54,7 +54,7 @@ class JournalWatcher:
             return
         STARTUP_EVENTS = {"Location", "FSDJump", "LoadGame", "Commander",
                           "Rank", "Progress", "Statistics", "Powerplay", "Loadout",
-                          "Materials"}
+                          "Materials", "ColonisationConstructionDepot"}
         # Material deltas after the login 'Materials' snapshot must be re-applied
         # so counts stay exact when EDTC is launched mid-session.
         MATERIAL_DELTAS = {"MaterialCollected", "MaterialDiscarded", "MaterialTrade",

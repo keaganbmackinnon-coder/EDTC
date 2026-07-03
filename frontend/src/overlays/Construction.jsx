@@ -5,6 +5,7 @@ const api = () => window?.pywebview?.api
 export default function Construction() {
   const [project, setProject] = useState(null)
   const [shipCargo, setShipCargo] = useState({})
+  const [shipInfo, setShipInfo] = useState(null)
   const panelRef = useRef(null)
 
   useEffect(() => {
@@ -31,9 +32,12 @@ export default function Construction() {
     const off2 = window.__edtc?.on('ship_cargo_update', (payload) => {
       setShipCargo(buildCargoMap(payload?.cargo ?? []))
     })
+    const off3 = window.__edtc?.on('ship_info', (payload) => {
+      if (payload) setShipInfo(payload)
+    })
     return () => {
       window.removeEventListener('pywebviewready', loadInitial)
-      off1?.(); off2?.()
+      off1?.(); off2?.(); off3?.()
     }
   }, [])
 
@@ -59,7 +63,7 @@ export default function Construction() {
   if (!project) {
     return (
       <div className="w-full flex items-start justify-center pt-3 select-none">
-        <div ref={panelRef} className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+        <div ref={panelRef} id="overlay-panel" className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
           <p className="text-ed-muted text-xs font-mono">No active construction project</p>
         </div>
       </div>
@@ -74,9 +78,13 @@ export default function Construction() {
     ? Math.round(reqs.reduce((s, r) => s + Math.min(r.delivered ?? 0, r.required) / r.required, 0) / reqs.length * 100)
     : 0
 
+  const totalRemaining = pending.reduce((s, r) => s + Math.max(0, r.required - (r.delivered ?? 0)), 0)
+  const capacity = shipInfo?.cargo_capacity ?? 0
+  const trips = capacity && totalRemaining ? Math.ceil(totalRemaining / capacity) : null
+
   return (
     <div className="w-full flex items-start justify-center pt-3 select-none">
-      <div ref={panelRef} className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
+      <div ref={panelRef} id="overlay-panel" className="bg-ed-panel/95 border border-ed-orange/40 rounded-lg px-4 py-3 shadow-2xl min-w-[400px]">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
@@ -89,12 +97,24 @@ export default function Construction() {
         )}
 
         {/* Overall progress bar */}
-        <div className="h-1 bg-ed-border rounded-full overflow-hidden mb-3">
+        <div className="h-1 bg-ed-border rounded-full overflow-hidden mb-1.5">
           <div
             className="h-full bg-ed-orange rounded-full transition-all duration-500"
             style={{ width: `${totalPct}%` }}
           />
         </div>
+
+        {totalRemaining > 0 && (
+          <div className="flex items-center justify-between text-[10px] font-mono text-ed-muted mb-2">
+            <span>{totalRemaining.toLocaleString()}T remaining</span>
+            {trips != null && (
+              <span>
+                ~<span className="text-ed-orange font-semibold">{trips}</span>{' '}
+                {trips === 1 ? 'trip' : 'trips'} · {capacity}T hold
+              </span>
+            )}
+          </div>
+        )}
 
         {pending.length === 0 ? (
           <p className="text-ed-success text-xs font-mono text-center py-1">

@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.43"  # bump this with every release
+APP_VERSION = "0.3.44"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -169,6 +169,9 @@ class API:
             self._handle_fsd_jump(event)
         elif event_name == "Location":
             self._current_system = event.get("StarSystem", "")
+            # Location fires at login and carries the docked station (if any) —
+            # without this, depot/trade events after a relog see no station
+            self._current_station = event.get("StationName", "") if event.get("Docked") else ""
             self._fss_bodies = []
             self._emit("system_changed", {"system": self._current_system})
             coords = event.get("StarPos")
@@ -308,11 +311,20 @@ class API:
     def _handle_cargo(self, event: dict):
         if event.get("Vessel", "Ship") != "Ship":
             return
-        self._ship_cargo = event.get("Inventory", [])
-        payload = {"cargo": self._ship_cargo}
-        self._emit("ship_cargo_update", payload)
-        self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
-        logging.info(f"Cargo event: {len(self._ship_cargo)} items")
+        if "Inventory" in event:
+            self._ship_cargo = event.get("Inventory", [])
+            payload = {"cargo": self._ship_cargo}
+            self._emit("ship_cargo_update", payload)
+            self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
+            logging.info(f"Cargo event: {len(self._ship_cargo)} items")
+        else:
+            # Mid-session Cargo events omit Inventory (only the login event has
+            # it) — the full list lives in Cargo.json. Reading the old Inventory
+            # key here was zeroing the overlay's cargo on every pickup/delivery.
+            # Small delay dodges the race with the game still writing the file.
+            timer = threading.Timer(0.3, self._import_cargo_json)
+            timer.daemon = True
+            timer.start()
 
     def get_ship_cargo(self) -> list:
         if not self._ship_cargo:
@@ -322,13 +334,20 @@ class API:
     def _push_cargo_to_overlay(self):
         """Push current ship cargo and the active project for the current system
         to the construction overlay after it has time to initialize — otherwise the
-        overlay stays empty until the next dock/contribution event fires this session."""
+        overlay stays empty until the next dock/contribution event fires this session.
+        The overlay window has no working API bridge, so everything it shows
+        must be pushed from this side."""
         def _push():
             import time
             time.sleep(2.5)
             payload = {"cargo": self._ship_cargo}
             self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
             logging.info(f"Pushed cargo to overlay: {len(self._ship_cargo)} items")
+            if self._current_ship:
+                self._overlay_manager.emit_to_overlay("construction", "ship_info", {
+                    "ship": self._current_ship.get("ship", ""),
+                    "cargo_capacity": self._current_ship.get("cargo_capacity") or 0,
+                })
             if self._current_system:
                 from core.database import get_construction_projects
                 projects = get_construction_projects(active_only=True)
@@ -595,7 +614,12 @@ class API:
         contributions = event.get("Contributions", [])
         if not contributions:
             return
-        from core.database import record_construction_contribution
+        from core.database import record_construction_contribution, add_depot_delivery
+        # Log the delivery for the tonnes/hour + ETA estimate on the depot card
+        market_id = event.get("MarketID")
+        total = sum(int(c.get("Amount", 0)) for c in contributions)
+        if market_id and total > 0:
+            add_depot_delivery(market_id, total)
         updated = record_construction_contribution(self._current_system, contributions)
         if updated:
             for proj in updated:
@@ -615,14 +639,20 @@ class API:
             return
         self._last_depot_key = key
         if resources:
-            self._emit("construction_depot", {
-                "system": self._current_system,
-                "station": self._current_station,
-                "progress": event.get("ConstructionProgress", 0.0),
-                "complete": event.get("ConstructionComplete", False),
-                "resources": resources,
-            })
-            from core.database import sync_construction_depot
+            from core.database import upsert_depot, sync_construction_depot
+            depot = upsert_depot(
+                event.get("MarketID") or 0,
+                self._current_system,
+                self._current_station,
+                event.get("ConstructionProgress", 0.0),
+                bool(event.get("ConstructionComplete", False)),
+                resources,
+            )
+            depot["remaining"] = sum(
+                max(0, r.get("RequiredAmount", 0) - r.get("ProvidedAmount", 0))
+                for r in resources
+            )
+            self._emit("construction_depot", depot)
             project = sync_construction_depot(self._current_system, resources)
             if project:
                 self._overlay_manager.emit_to_overlay("construction", "construction_update", project)
@@ -858,6 +888,11 @@ class API:
             "max_fuel_per_jump": max_fuel_per_jump,
         }
         self._emit("ship_changed", self.get_ship_info())
+        # Ship swap changes the hold size — keep the overlay's trip count honest
+        self._overlay_manager.emit_to_overlay("construction", "ship_info", {
+            "ship": ship_type,
+            "cargo_capacity": event.get("CargoCapacity") or 0,
+        })
 
     def _handle_commander(self, event: dict):
         from core.database import set_cmdr_stat
@@ -1090,6 +1125,25 @@ class API:
         saved = save_construction_project(project)
         self._overlay_manager.emit_to_overlay("construction", "construction_update", saved)
         return saved
+
+    def get_construction_depots(self) -> list:
+        """All known construction sites with delivery pace + ETA attached."""
+        from core.database import get_depots, get_depot_rate
+        depots = get_depots()
+        for d in depots:
+            remaining = sum(
+                max(0, r.get("RequiredAmount", 0) - r.get("ProvidedAmount", 0))
+                for r in d["resources"]
+            )
+            rate = get_depot_rate(d["market_id"]) if not d.get("complete") else None
+            d["remaining"] = remaining
+            d["rate_per_hour"] = round(rate) if rate else None
+            d["eta_hours"] = round(remaining / rate, 1) if rate and remaining else None
+        return depots
+
+    def delete_construction_depot(self, market_id: int) -> bool:
+        from core.database import delete_depot
+        return delete_depot(market_id)
 
     def delete_construction_project(self, project_id: int) -> bool:
         from core.database import delete_construction_project, get_construction_projects

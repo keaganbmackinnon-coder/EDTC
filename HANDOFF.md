@@ -1491,3 +1491,98 @@ Focus: Y-height band slicer for sector maps, perf backlog, journal wiring
 
 ---
 *Session checkpoint: 2026-07-03 11:25:42*
+
+---
+*Session checkpoint: 2026-07-03 11:29:35*
+
+---
+*Session checkpoint: 2026-07-03 11:34:18*
+
+---
+*Session checkpoint: 2026-07-03 11:39:12*
+
+---
+*Session checkpoint: 2026-07-03 11:57:29*
+
+---
+
+## Session 33 continued — Colonisation overhaul (unreleased, local)
+
+Also: sector-map height cycle now enters at the densest band (was: topmost band
+with any data, which is usually a single lone-explorer system).
+
+| Item | Status | File |
+|---|---|---|
+| **Depot-import bug root cause**: `construction_depot` events only reached React if the Colonisation page was mounted at dock time; the Session-30 dedup then suppressed identical re-fires, and nothing was persisted — dock on another page = data gone forever. Confirmed against 12:00 journal/log evidence | FIXED | — |
+| `depots` table (PK market_id) + `upsert_depot` (keeps system/station when caller has none), `get_depots` (newest first), `delete_depot` | DONE | `core/database.py` |
+| `depot_deliveries` table + `add_depot_delivery`, `get_depot_rate(market_id, hours=6)` (t/h from own ColonisationContribution history, needs ≥2 deliveries) | DONE | `core/database.py` |
+| `_handle_construction_depot` upserts to DB and emits the full depot dict (market_id, station, updated, remaining) | DONE | `main.py` |
+| `ColonisationConstructionDepot` added to STARTUP_EVENTS — depot recovers from journal replay on launch (verified: recovered Chun Command Facility, 22 commodities, 5,684T) | DONE | `core/journal.py` |
+| **Location handler now sets `_current_station`** from StationName when docked — depot/trade events after a game relog were seeing an empty station | DONE | `main.py` |
+| API: `get_construction_depots()` (with remaining/rate_per_hour/eta_hours), `delete_construction_depot(market_id)` | DONE | `main.py` |
+| Depot View tab → list of all known sites: collapsible cards (newest expanded), progress, updated-ago, remaining T, trips estimate, your pace + ETA, per-depot Import/Sync/Remove, commodities sorted incomplete-first | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Banner now driven from the persisted depots list — shows on live dock AND on page open if a site was updated <15 min ago; dismissal tracked per market_id | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Haul Planner on Shopping List: total T remaining, trips in current ship (live cargo capacity via get_ship_info/ship_changed), greedy next-load suggestion | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Shopping List: "After FC Stock" column + total (shown when FC cargo exists) | DONE | `frontend/src/pages/Colonisation.jsx` |
+| Market Finder auto-fills current system on mount | DONE | `frontend/src/pages/Colonisation.jsx` |
+
+## Notes
+
+- Depot resources stored as raw journal `ResourcesRequired` JSON (Name/Name_Localised/RequiredAmount/ProvidedAmount) so existing name helpers keep working.
+- `sync_construction_depot` still matches projects by **system** — two depots in one system would cross-sync a project. Known limitation; link projects to market_id if it bites.
+- Delivery rate counts only YOUR contributions; depot `ProvidedAmount` (all players) still syncs totals. ETA = remaining/your-rate, so it's pessimistic on group builds.
+- **Local build is 0.3.43 + unreleased changes** (densest-band entry + colonisation overhaul). Bump to 0.3.44 and tag when play-tested.
+
+---
+*Session 33 continued — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 12:24:59*
+
+---
+*Session checkpoint: 2026-07-03 12:32:54*
+
+---
+*Session checkpoint: 2026-07-03 12:33:50*
+
+---
+*Session checkpoint: 2026-07-03 12:34:23*
+
+---
+*Session checkpoint: 2026-07-03 12:38:40*
+
+---
+*Session checkpoint: 2026-07-03 12:44:16*
+
+---
+*Session checkpoint: 2026-07-03 12:44:36*
+
+---
+
+## Session 33 final — Overlay fixes: resize, transparency, cargo bar, trips (v0.3.44)
+
+| Item | Status | File |
+|---|---|---|
+| **Overlay dynamic sizing root cause**: overlay windows are created without `js_api`, so `window.pywebview.api` is an EMPTY object in them — the overlay's own `resize_overlay()` calls have been silent no-ops all along (also explains Session 29's "method not attached" crash). Data displays only because the backend pushes via `evaluate_js` | FIXED | `core/overlay.py` |
+| `OverlayManager.resize_to_content(name)` — backend measures `#overlay-panel` height via `evaluate_js` (0.4s after push) and calls `win.resize()`; auto-runs on every `emit_to_overlay` for `construction`; every resize logged. Verified live: 460×715 → 460×732 | DONE | `core/overlay.py`, `frontend/src/overlays/Construction.jsx` |
+| **Opacity slider now does real transparency**: `_apply_opacity` sets whole-window alpha via Win32 layered-window API (`WS_EX_LAYERED` + `SetLayeredWindowAttributes`, hwnd via `FindWindowW` on the unique overlay title). CSS-opacity fallback kept for non-Windows. Per-pixel transparency remains off the table (WebView2). User confirmed slider works | DONE | `core/overlay.py` |
+| **Cargo yellow-bar bug**: journal `Cargo` events only include `Inventory` at login; mid-session events omit it — the handler read the missing key as `[]` and ZEROED the overlay's cargo on every pickup/delivery ("Cargo event: 0 items" spam). Now falls back to reading Cargo.json (0.3s delayed for the write race) | FIXED | `main.py` |
+| Trips-in-current-ship line on construction overlay: "5,684T remaining · ~89 trips · 64T hold" under the main bar; `ship_info` pushed to overlay on Loadout + overlay open (hold size updates on ship swap) | DONE | `main.py`, `frontend/src/overlays/Construction.jsx` |
+| `APP_VERSION` bumped to `0.3.44`, released via CI | DONE | `main.py` |
+
+## Key lessons from Session 33 final
+
+- **Overlay windows have NO working API bridge** (`js_api` not passed at creation). Anything an overlay needs must be PUSHED from Python via `emit_to_overlay`/`evaluate_js`; any `api()?.x()` call in overlay JSX is dead code. The optional-chaining that "fixed" Session 29's crash was masking this.
+- **Journal `Cargo` event**: `Inventory` only present in the login event; all later Cargo events require reading Cargo.json. Same family of trap as `Vessel` vs `Vehicle` (Session 30).
+- Win32 layered-window alpha (`LWA_ALPHA`) works fine on frameless pywebview windows and applies to the whole subtree incl. WebView2 child HWNDs (Win8+).
+
+## Known issues / notes for next session
+
+- User still to confirm in-game: yellow cargo bar filling on pickup + auto-draining on delivery (pipeline verified in code + logs; purchase test pending).
+- `sync_construction_depot` matches projects by system — two depots in one system would cross-sync (link projects to market_id if it bites).
+- Route overlay's `copy_next_destination` button + `Route.jsx`'s `get_active_route()` on mount rely on the dead overlay bridge — audit ALL overlay components for `api()` calls and convert to pushes.
+- Perf backlog: `_emit("journal", ...)` still pushes every journal event to the frontend.
+- Inara blocked pending app registration (external).
+
+---
+*Session 33 final — 2026-07-03*
