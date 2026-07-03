@@ -24,12 +24,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from core.database import COVERAGE_CELL_LY  # noqa: E402
+from core.database import COVERAGE_CELL_LY, COVERAGE_Y_BAND_LY  # noqa: E402
 
 DUMP_URL = "https://www.edsm.net/dump/systemsWithCoordinates.json.gz"
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "galaxy_density_alltime.json.gz"
 
-COORD_RE = re.compile(r'"coords"\s*:\s*\{\s*"x"\s*:\s*(-?[\d.eE+]+)\s*,\s*"y"\s*:\s*-?[\d.eE+]+\s*,\s*"z"\s*:\s*(-?[\d.eE+]+)')
+COORD_RE = re.compile(r'"coords"\s*:\s*\{\s*"x"\s*:\s*(-?[\d.eE+]+)\s*,\s*"y"\s*:\s*(-?[\d.eE+]+)\s*,\s*"z"\s*:\s*(-?[\d.eE+]+)')
 
 
 def main():
@@ -52,8 +52,10 @@ def main():
                     misses += 1
                 continue
             x = float(m.group(1))
-            z = float(m.group(2))
-            cell = (int(x // COVERAGE_CELL_LY), int(z // COVERAGE_CELL_LY))
+            y = float(m.group(2))
+            z = float(m.group(3))
+            cell = (int(x // COVERAGE_CELL_LY), int(y // COVERAGE_Y_BAND_LY),
+                    int(z // COVERAGE_CELL_LY))
             cells[cell] = cells.get(cell, 0) + 1
             n += 1
             if n % 5_000_000 == 0:
@@ -63,8 +65,9 @@ def main():
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "source": DUMP_URL,
         "cell_ly": COVERAGE_CELL_LY,
+        "y_band_ly": COVERAGE_Y_BAND_LY,
         "systems": n,
-        "cells": [[gx, gz, c] for (gx, gz), c in cells.items()],
+        "cells": [[gx, gy, gz, c] for (gx, gy, gz), c in cells.items()],
     }
     OUT_PATH.parent.mkdir(exist_ok=True)
     with gzip.open(OUT_PATH, "wt", encoding="utf-8") as f:

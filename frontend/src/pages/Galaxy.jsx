@@ -1377,6 +1377,7 @@ function GalaxyMapTab() {
   const [covInfo,  setCovInfo]  = useState('')
   const [sector,        setSector]        = useState(null)
   const [sectorCov,     setSectorCov]     = useState(null)
+  const [yBand,         setYBand]         = useState(null)  // null = all heights
   const [pos,           setPos]           = useState(null)
 
   async function loadStats() {
@@ -1402,7 +1403,7 @@ function GalaxyMapTab() {
     }
   }
 
-  async function loadSectorCoverage(region, layer) {
+  async function loadSectorCoverage(region, layer, band = yBand) {
     const cell = 300
     const { cx0, cz0, span } = sectorViewport(region)
     const bounds = [
@@ -1411,7 +1412,7 @@ function GalaxyMapTab() {
       Math.floor((cz0 - span / 2) / cell),
       Math.floor((cz0 + span / 2) / cell),
     ]
-    const r = await api()?.get_galaxy_coverage(layer, bounds)
+    const r = await api()?.get_galaxy_coverage(layer, bounds, band)
     setSectorCov(r ?? null)
   }
 
@@ -1420,9 +1421,36 @@ function GalaxyMapTab() {
     if (overlay === 'off') setOverlay('week')
     setSector(region)
     setSectorCov(null)
-    loadSectorCoverage(region, layer)
+    setYBand(null)
+    loadSectorCoverage(region, layer, null)
     api()?.get_current_position?.().then(p => setPos(p ?? null))
   }
+
+  // Height-band slicing (sector view): cycle through 400-ly-tall Y slices
+  function selectBand(band) {
+    setYBand(band)
+    if (sector) loadSectorCoverage(sector, overlay === 'off' ? 'week' : overlay, band)
+  }
+
+  const bandList = sectorCov?.y_bands?.map(b => b[0]) ?? []  // highest first
+  function stepBand(dir) {
+    if (bandList.length === 0) return
+    if (yBand === null) {
+      // Entering slice mode: ▼ starts at the top of the disc, ▲ at the bottom
+      selectBand(dir > 0 ? bandList[bandList.length - 1] : bandList[0])
+      return
+    }
+    const i = bandList.indexOf(yBand)
+    const next = i === -1 ? 0 : i - dir  // list is sorted DESC, so ▲(+1) = earlier index
+    if (next < 0 || next >= bandList.length) { selectBand(null); return }
+    selectBand(bandList[next])
+  }
+
+  const bandLy = sectorCov?.y_band_ly ?? 400
+  const fmtY = v => (v > 0 ? `+${v.toLocaleString()}` : v.toLocaleString())
+  const bandLabel = yBand === null
+    ? 'All heights'
+    : `${fmtY(yBand * bandLy)} to ${fmtY((yBand + 1) * bandLy)} ly`
 
   // Load coverage when the overlay layer changes; poll every 60s on live
   useEffect(() => {
@@ -1436,7 +1464,7 @@ function GalaxyMapTab() {
       }, 60000)
       return () => clearInterval(t)
     }
-  }, [overlay])
+  }, [overlay, yBand])
 
   // Redraw: sector detail when a sector is open, otherwise galaxy + overlay
   useEffect(() => {
@@ -1501,10 +1529,31 @@ function GalaxyMapTab() {
       <div className="flex flex-wrap gap-2 items-center">
         {sector ? (
           <>
-            <button className="btn-ghost text-xs" onClick={() => { setSector(null); setSectorCov(null) }}>
+            <button className="btn-ghost text-xs" onClick={() => { setSector(null); setSectorCov(null); setYBand(null) }}>
               ← Back to galaxy
             </button>
             <span className="text-ed-orange font-ui font-semibold text-sm">{sector.name}</span>
+            {overlay !== 'off' && (
+              <span className="flex items-center gap-1 ml-3">
+                <span className="text-ed-muted text-xs font-mono">Height:</span>
+                <button
+                  className="btn-ghost text-xs px-2"
+                  onClick={() => stepBand(1)}
+                  disabled={bandList.length === 0}
+                  title="Up one slice (toward galactic north)"
+                >▲</button>
+                <span className="text-xs font-mono text-ed-text w-36 text-center">{bandLabel}</span>
+                <button
+                  className="btn-ghost text-xs px-2"
+                  onClick={() => stepBand(-1)}
+                  disabled={bandList.length === 0}
+                  title="Down one slice (below the plane)"
+                >▼</button>
+                {yBand !== null && (
+                  <button className="btn-ghost text-xs" onClick={() => selectBand(null)}>All</button>
+                )}
+              </span>
+            )}
           </>
         ) : (
           <select
@@ -1567,7 +1616,8 @@ function GalaxyMapTab() {
       <div className="flex justify-between text-xs font-mono text-ed-muted">
         <span>
           {sector
-            ? `${sector.name} · ${Math.round(sectorViewport(sector).span).toLocaleString()} ly viewport · full region`
+            ? `${sector.name} · ${Math.round(sectorViewport(sector).span).toLocaleString()} ly viewport`
+              + (overlay !== 'off' ? ` · heat: ${yBand === null ? 'all heights' : bandLabel}` : '')
             : 'Galactic north = up · Sgr A* at centre · ~155 ly/px · click a region name to open its sector map'}
         </span>
         <span>map: stylized</span>

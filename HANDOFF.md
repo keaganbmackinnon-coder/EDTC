@@ -1431,3 +1431,63 @@ Session 28, now real.
 
 ---
 *Session 32 complete — 2026-07-02*
+
+---
+*Session checkpoint: 2026-07-02 20:30:55*
+
+---
+*Session checkpoint: 2026-07-03 09:55:14*
+
+---
+
+## Build status — Session 33 (COMPLETE)
+
+Focus: Y-height band slicer for sector maps, perf backlog, journal wiring
+(CarrierLocation / FSDTarget / NavRoute StarClass), ship data fixes.
+
+| Item | Status | File |
+|---|---|---|
+| Note: v0.3.42 was already released by CI overnight — the Session 32 "not tagged" note was stale | — | — |
+| **Height band slicer**: `galaxy_coverage` gained a `gy` column (400-ly Y bands, `COVERAGE_Y_BAND_LY`); PK now (layer,gx,gy,gz); one-time migration drops the old 2D table + clears refresh prefs so all layers rebuild | DONE | `core/database.py` |
+| `coverage_cell(x, y, z)`; `get_coverage_layer(layer, bounds, y_band)` aggregates over Y in SQL when y_band is None (main map payload shape unchanged); `get_coverage_y_bands()` lists bands with data for a viewport | DONE | `core/database.py` |
+| EDDN live binning + week refresh + alltime import all Y-aware; legacy 3-element snapshots import into band 0 | DONE | `main.py` |
+| `scripts/build_density.py` re-run on fresh EDSM full dump (96.9M systems): 409,051 3D cells, 1.9 MB bundled snapshot | DONE | `data/galaxy_density_alltime.json.gz` |
+| Sector map UI: Height ▲/▼ cycle + All button next to sector name; cycles only bands that hold data in the viewport; band label like "−400 to 0 ly"; footer shows active slice | DONE | `frontend/src/pages/Galaxy.jsx` |
+| **WAL mode** + 5s busy_timeout — fixes the `database is locked` storm when migration/EDDN/week-refresh collide | DONE | `core/database.py` |
+| **Rate limiter fixed**: state now class-level keyed by API class name — per-call `asyncio.run` + fresh client instances meant it NEVER limited before; verified 3 calls now take ≥1.0s at 0.5s interval | DONE | `api/base.py` |
+| Watchlist cached in memory (invalidated on add/remove) — was a DB read per ShipTargeted | DONE | `main.py` |
+| `get_market_stats()` cached 30s — was a full markets-table scan per 15s poll | DONE | `main.py` |
+| **CarrierLocation** handled — carrier location stays current without opening Carrier Management | DONE | `main.py`, `core/journal.py` |
+| **FSDTarget** handled — emits `fsd_target` (star class, scoopable, remaining jumps) to route overlay + main window | DONE | `main.py`, `core/journal.py` |
+| NavRoute per-hop `StarClass` kept (`route.star_classes`, in-memory; not persisted by save_route) | DONE | `main.py` |
+| Route overlay: "Class M · NOT SCOOPABLE — check fuel" warning under Next jump (amber); live FSDTarget beats plotted-route class | DONE | `frontend/src/overlays/Route.jsx` |
+| **Ship name fix**: `explorer_nx` = **Caspian Explorer** (Session 32 called it Nomad — wrong; the Nomad is the fighter `smallcombat01_nx`, now mapped too) | DONE | `main.py` |
+| **Jump range fix**: baseline mass = unladen + reserve capacity + max-fuel-per-jump (what Loadout's MaxJumpRange actually assumes) and current mass includes live reservoir fuel. Was 74.39 vs game 74.65; now computes 74.65 exactly | DONE | `main.py` |
+| `_FSD_MAX_FUEL` table (standard by size/class) + `_FSD_MAX_FUEL_SCO` + `_FSD_MAX_FUEL_OVERRIDES`; Deep Charge engineering modifier honored | DONE | `main.py` |
+| `APP_VERSION` bumped to `0.3.43`; local install swapped and verified | DONE | `main.py` |
+
+## Key notes from Session 33
+
+- **Ship naming lesson**: `explorer_nx` is the Caspian Explorer; `smallcombat01_nx` is the Nomad (fighter). User misspoke in Session 32 and the wrong name shipped — when a new ship appears, check `Ship_Localised` absence and confirm the name with the user before hardcoding.
+- **Jump range formula (final)**: `current = (MaxJumpRange − guardian_bonus) × (unladen + reserve_cap + max_fuel_per_jump) / (unladen + FuelMain + FuelReservoir + cargo) + guardian_bonus`. Frontier's Loadout doc: MaxJumpRange assumes zero cargo + just enough fuel for one jump.
+- **Caspian's FSD** (`int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii`) has no published max-fuel stat — the 5.5 T override was fitted against the live in-game readout (74.65). Panther's size-7 SCO observed burning up to 12.86 T/jump, consistent with the 13.1 table value.
+- **Height bands**: 400 ly per band. Alltime gy spans −74..+98 but the disc's mass is in gy −1/0 (Sol at y≈−21). The band cycle UI only offers bands with data in the current viewport.
+- **Live EDDN layer note**: pre-existing 2D live data was dropped by the migration (rebuilds from live traffic; week/alltime rebuild from their sources automatically).
+- **Do not swap the exe while the user is playing** without warning: the mid-session swap ran an old build without busy_timeout during the gy migration → `database is locked` storm → ship card broke until the next swap. Announce, swap fast, verify the log.
+
+## Known issues / notes for next session
+
+- Sector maps: possible future additions — clickable systems, route overlay on map.
+- `commodity_markets()` sort was fixed in Session 32; remaining Spansh caveat: `stations_near()` services filter is client-side.
+- Inara integration wired but blocked pending app registration (external).
+- pygame not installable on Python 3.14 — audio disabled in dev/local builds; CI uses 3.12.
+- If jump range drifts on other ships, their FSD may need a `_FSD_MAX_FUEL` entry (esp. new SCO Mk II variants) — ask user for the two readouts and fit.
+
+---
+*Session 33 complete — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 10:41:13*
+
+---
+*Session checkpoint: 2026-07-03 11:25:42*

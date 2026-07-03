@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 
 const api = () => window?.pywebview?.api
 
+const SCOOPABLE = new Set(['K', 'G', 'B', 'F', 'O', 'A', 'M'])
+
 export default function RouteOverlay() {
   const [state, setState] = useState(null)
+  const [fsd, setFsd] = useState(null)
 
   useEffect(() => {
     api()?.get_active_route().then(r => {
@@ -12,8 +15,12 @@ export default function RouteOverlay() {
 
     const off = window.__edtc?.on('route_update', (payload) => {
       setState(payload)
+      setFsd(null)  // stale target info from the previous route
     })
-    return off
+    const offFsd = window.__edtc?.on('fsd_target', (payload) => {
+      setFsd(payload)
+    })
+    return () => { off?.(); offFsd?.() }
   }, [])
 
   if (!state?.route) {
@@ -32,6 +39,10 @@ export default function RouteOverlay() {
   const remaining = systems.length - current - 1
   const next = systems[current + 1] ?? null
   const dest = systems[systems.length - 1] ?? ''
+
+  // Star class of the next jump: live FSDTarget beats the plotted route's data
+  const nextClass = fsd?.star_class || route.star_classes?.[current + 1] || ''
+  const scoopable = nextClass ? SCOOPABLE.has(nextClass.toUpperCase()) : null
 
   function copyNext() {
     api()?.copy_next_destination()
@@ -57,6 +68,13 @@ export default function RouteOverlay() {
             <div>
               <p className="text-[10px] text-ed-muted font-mono uppercase">Next jump</p>
               <p className="text-ed-orange font-mono text-sm font-bold leading-tight">{next}</p>
+              {nextClass && (
+                <p className={`text-[10px] font-mono leading-tight ${
+                  scoopable ? 'text-ed-muted' : 'text-amber-400 font-bold'
+                }`}>
+                  Class {nextClass.toUpperCase()} {scoopable ? '· scoopable' : '· NOT SCOOPABLE — check fuel'}
+                </p>
+              )}
             </div>
           )}
         </div>

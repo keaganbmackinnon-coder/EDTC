@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.42"  # bump this with every release
+APP_VERSION = "0.3.43"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -80,7 +80,8 @@ _SHIP_DISPLAY_NAMES = {
     "ferdelance": "Fer-de-Lance", "mamba": "Mamba", "anaconda": "Anaconda",
     "federation_corvette": "Federal Corvette", "cutter": "Imperial Cutter",
     "mandalay": "Mandalay", "corsair": "Corsair",
-    "panthermkii": "Panther Clipper Mk II", "explorer_nx": "Nomad",
+    "panthermkii": "Panther Clipper Mk II", "explorer_nx": "Caspian Explorer",
+    "smallcombat01_nx": "Nomad",
 }
 
 
@@ -137,6 +138,12 @@ class API:
         self._cov_buf: dict[tuple, int] = {}
         self._cov_last_flush: float = 0.0
         self._cov_lock = threading.Lock()
+        # ShipTargeted fires constantly in busy space — keep the watchlist in
+        # memory instead of hitting the DB per event (invalidated on edits)
+        self._watchlist_cache: set[str] | None = None
+        # get_market_stats() full-scans the markets table; Trading.jsx polls it
+        self._market_stats_cache: dict | None = None
+        self._market_stats_time: float = 0.0
 
     def set_window(self, window):
         self._window = window
@@ -231,6 +238,10 @@ class API:
             self._handle_nav_route(event)
         elif event_name == "NavRouteClear":
             self._handle_nav_route_clear()
+        elif event_name == "FSDTarget":
+            self._handle_fsd_target(event)
+        elif event_name == "CarrierLocation":
+            self._handle_carrier_location(event)
         elif event_name == "Loadout":
             self._handle_loadout(event)
         elif event_name == "Market":
@@ -350,8 +361,10 @@ class API:
             or ""
         )
 
-        from core.database import get_watchlist
-        watchlist = {r["cmdr"].upper() for r in get_watchlist()}
+        if self._watchlist_cache is None:
+            from core.database import get_watchlist
+            self._watchlist_cache = {r["cmdr"].upper() for r in get_watchlist()}
+        watchlist = self._watchlist_cache
         on_watchlist = bool(watchlist) and cmdr.upper() in watchlist
 
         # Always ping — watchlist filter can be toggled from UI pref
@@ -426,7 +439,9 @@ class API:
         systems = [s["StarSystem"] for s in raw if "StarSystem" in s]
         if not systems:
             return
-        route = {"systems": systems, "current": 0, "name": f"In-game route → {systems[-1]}"}
+        star_classes = [s.get("StarClass", "") for s in raw if "StarSystem" in s]
+        route = {"systems": systems, "star_classes": star_classes, "current": 0,
+                 "name": f"In-game route → {systems[-1]}"}
         from core.database import save_route
         save_route(route)
         self._active_route = route
@@ -445,6 +460,34 @@ class API:
             "current_system": self._current_system,
         })
         self._emit("route_update", {"route": None, "current_system": self._current_system})
+
+    # Fuel-scoopable main-sequence classes (exact match — "TTS"/"AEBE" etc are not)
+    _SCOOPABLE_CLASSES = {"K", "G", "B", "F", "O", "A", "M"}
+
+    def _handle_fsd_target(self, event: dict):
+        """FSDTarget fires when the next jump is locked in — carries the target
+        star's class, so the route overlay can warn before a fuel-starved jump."""
+        star_class = (event.get("StarClass") or "").upper()
+        payload = {
+            "name": event.get("Name", ""),
+            "star_class": star_class,
+            "scoopable": star_class in self._SCOOPABLE_CLASSES if star_class else None,
+            "remaining_jumps": event.get("RemainingJumpsInRoute"),
+        }
+        self._overlay_manager.emit_to_overlay("route", "fsd_target", payload)
+        self._emit("fsd_target", payload)
+
+    def _handle_carrier_location(self, event: dict):
+        """CarrierLocation fires at login and after carrier jumps — keeps the
+        carrier's location current without opening Carrier Management."""
+        if not event.get("CarrierID"):
+            return
+        from core.database import upsert_carrier
+        carrier = upsert_carrier({
+            "CarrierID": event.get("CarrierID"),
+            "location": event.get("StarSystem", ""),
+        })
+        self._emit("carrier_update", {"carrier": carrier})
 
     def _schedule_next_jump(self):
         if self._auto_jump_timer:
@@ -750,11 +793,32 @@ class API:
     # Guardian FSD Booster adds a flat range bonus (ly) that doesn't scale with mass.
     _GUARDIAN_BOOSTER_BONUS = {1: 4.0, 2: 6.0, 3: 7.75, 4: 9.25, 5: 10.5}
 
+    # Max fuel per jump in tonnes by (FSD size, class digit 1=E..5=A). Loadout's
+    # MaxJumpRange is computed with "just enough fuel for 1 jump" aboard, so
+    # this belongs in the baseline mass when scaling to current mass.
+    _FSD_MAX_FUEL = {
+        (2, 1): 0.6, (2, 2): 0.6, (2, 3): 0.6, (2, 4): 0.8, (2, 5): 0.9,
+        (3, 1): 1.2, (3, 2): 1.2, (3, 3): 1.2, (3, 4): 1.5, (3, 5): 1.8,
+        (4, 1): 2.0, (4, 2): 2.0, (4, 3): 2.0, (4, 4): 2.5, (4, 5): 3.0,
+        (5, 1): 3.3, (5, 2): 3.3, (5, 3): 3.3, (5, 4): 4.1, (5, 5): 5.0,
+        (6, 1): 5.3, (6, 2): 5.3, (6, 3): 5.3, (6, 4): 6.6, (6, 5): 8.0,
+        (7, 1): 8.5, (7, 2): 8.5, (7, 3): 8.5, (7, 4): 10.6, (7, 5): 12.8,
+    }
+    # SCO ('overcharge') A-rated drives run slightly hotter per jump
+    _FSD_MAX_FUEL_SCO = {(4, 5): 3.2, (5, 5): 5.2, (6, 5): 8.3, (7, 5): 13.1}
+    # New-generation drives with no published stats — fitted so the computed
+    # current range matches the in-game readout (74.65 ly on the live ship)
+    _FSD_MAX_FUEL_OVERRIDES = {
+        "int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii": 5.5,
+    }
+
     def _handle_loadout(self, event: dict):
+        import re
         ship_type = _ship_display_name(event)
         fuel = event.get("FuelCapacity", {})
 
         guardian_bonus = 0.0
+        max_fuel_per_jump = 0.0
         for module in (event.get("Modules") or []):
             item = module.get("Item", "").lower()
             if "guardianfsdbooster" in item:
@@ -764,7 +828,22 @@ class API:
                             guardian_bonus = self._GUARDIAN_BOOSTER_BONUS.get(int(part[4:]), 0.0)
                         except ValueError:
                             pass
-                break
+            elif module.get("Slot") == "FrameShiftDrive" and item.startswith("int_hyperdrive"):
+                max_fuel_per_jump = self._FSD_MAX_FUEL_OVERRIDES.get(item, 0.0)
+                if not max_fuel_per_jump:
+                    m = re.search(r"size(\d+)_class(\d+)", item)
+                    if m:
+                        key = (int(m.group(1)), int(m.group(2)))
+                        if "overcharge" in item:
+                            max_fuel_per_jump = self._FSD_MAX_FUEL_SCO.get(
+                                key, self._FSD_MAX_FUEL.get(key, 0.0))
+                        else:
+                            max_fuel_per_jump = self._FSD_MAX_FUEL.get(key, 0.0)
+                # Deep Charge engineering raises max fuel per jump
+                eng = module.get("Engineering") or {}
+                for mod in eng.get("Modifiers", []):
+                    if mod.get("Label") == "MaxFuelPerJump" and mod.get("Value"):
+                        max_fuel_per_jump = float(mod["Value"])
 
         self._current_ship = {
             "ship": ship_type,
@@ -773,8 +852,10 @@ class API:
             "max_jump_range": event.get("MaxJumpRange"),
             "unladen_mass": event.get("UnladenMass"),
             "fuel_capacity": fuel.get("Main") if isinstance(fuel, dict) else fuel,
+            "reserve_capacity": fuel.get("Reserve") if isinstance(fuel, dict) else 0.0,
             "cargo_capacity": event.get("CargoCapacity"),
             "guardian_booster_bonus": guardian_bonus,
+            "max_fuel_per_jump": max_fuel_per_jump,
         }
         self._emit("ship_changed", self.get_ship_info())
 
@@ -980,10 +1061,12 @@ class API:
 
     def add_to_watchlist(self, cmdr: str, note: str = "") -> dict:
         from core.database import add_to_watchlist
+        self._watchlist_cache = None
         return add_to_watchlist(cmdr, note)
 
     def remove_from_watchlist(self, cmdr: str) -> bool:
         from core.database import remove_from_watchlist
+        self._watchlist_cache = None
         return remove_from_watchlist(cmdr)
 
     # --- Exobiology ---
@@ -1179,7 +1262,7 @@ class API:
             return
         import time
         from core.database import coverage_cell, bump_coverage_cells
-        cell = coverage_cell(star_pos[0], star_pos[2])
+        cell = coverage_cell(star_pos[0], star_pos[1], star_pos[2])
         with self._cov_lock:
             self._cov_buf[cell] = self._cov_buf.get(cell, 0) + 1
             now = time.time()
@@ -1193,8 +1276,14 @@ class API:
             logging.warning(f"coverage flush failed: {e}")
 
     def get_market_stats(self) -> dict:
+        import time
+        now = time.time()
+        if self._market_stats_cache and now - self._market_stats_time < 30:
+            return self._market_stats_cache
         from core.database import get_market_stats
-        return get_market_stats()
+        self._market_stats_cache = get_market_stats()
+        self._market_stats_time = now
+        return self._market_stats_cache
 
     # --- Galaxy scan coverage ---
 
@@ -1229,7 +1318,7 @@ class API:
                     continue
                 try:
                     coords = json.loads(line).get("coords") or {}
-                    cell = coverage_cell(coords["x"], coords["z"])
+                    cell = coverage_cell(coords["x"], coords["y"], coords["z"])
                 except (KeyError, ValueError):
                     continue
                 cells[cell] = cells.get(cell, 0) + 1
@@ -1259,7 +1348,12 @@ class API:
             stamp = data.get("generated", "")
             if not stamp or get_pref("coverage_alltime_imported", "") == stamp:
                 return
-            cells = {(c[0], c[1]): c[2] for c in data.get("cells", [])}
+            raw = data.get("cells", [])
+            if raw and len(raw[0]) == 4:
+                cells = {(c[0], c[1], c[2]): c[3] for c in raw}
+            else:
+                # Legacy 2D snapshot (pre height bands) — flatten into band 0
+                cells = {(c[0], 0, c[1]): c[2] for c in raw}
             if cells:
                 replace_coverage_layer("alltime", cells)
                 set_pref("coverage_alltime_imported", stamp)
@@ -1267,8 +1361,11 @@ class API:
         except Exception as e:
             logging.warning(f"coverage: alltime import failed: {e}")
 
-    def get_galaxy_coverage(self, layer: str = "week", bounds: list | None = None) -> dict:
-        from core.database import get_coverage_layer, bump_coverage_cells, COVERAGE_CELL_LY, get_pref
+    def get_galaxy_coverage(self, layer: str = "week", bounds: list | None = None,
+                            y_band: int | None = None) -> dict:
+        from core.database import (get_coverage_layer, get_coverage_y_bands,
+                                   bump_coverage_cells, COVERAGE_CELL_LY,
+                                   COVERAGE_Y_BAND_LY, get_pref)
         if layer == "live":
             # Flush any buffered EDDN cells so the map is current
             with self._cov_lock:
@@ -1278,7 +1375,10 @@ class API:
                     bump_coverage_cells("live", buf)
                 except Exception:
                     pass
-        cells = get_coverage_layer(layer, bounds)
+        cells = get_coverage_layer(layer, bounds, y_band)
+        # Sector views (bounds given) also get the list of height bands with
+        # data so the UI can offer only meaningful levels to cycle through.
+        y_bands = get_coverage_y_bands(layer, bounds) if bounds else []
         cell_ly = COVERAGE_CELL_LY
         # The alltime layer can hold millions of 300-ly cells; for the full
         # galaxy view aggregate to keep the bridge payload reasonable. The
@@ -1295,6 +1395,8 @@ class API:
         return {
             "cells": cells,
             "cell_ly": cell_ly,
+            "y_band_ly": COVERAGE_Y_BAND_LY,
+            "y_bands": y_bands,
             "refreshed": refreshed,
         }
 
@@ -1572,10 +1674,18 @@ class API:
                 unladen = info.get("unladen_mass") or 0
                 max_range = info.get("max_jump_range") or 0
                 if unladen > 0 and max_range > 0:
-                    current_mass = unladen + fuel + cargo
+                    # Loadout's MaxJumpRange assumes zero cargo, a full reserve
+                    # tank, and just enough main fuel for one jump — scale from
+                    # that baseline mass, not bone-dry unladen, or the estimate
+                    # runs ~0.3% low. Current mass includes the live reservoir.
+                    reserve_cap = info.get("reserve_capacity") or 0.0
+                    reservoir = status.get("Fuel", {}).get("FuelReservoir", 0) or 0
+                    reservoir = min(reservoir, reserve_cap) if reserve_cap else reservoir
+                    base_mass = unladen + reserve_cap + (info.get("max_fuel_per_jump") or 0.0)
+                    current_mass = unladen + fuel + reservoir + cargo
                     guardian_bonus = info.get("guardian_booster_bonus", 0.0)
                     fsd_base = max_range - guardian_bonus
-                    current_fsd = fsd_base * (unladen / current_mass)
+                    current_fsd = fsd_base * (base_mass / current_mass)
                     info["current_jump_range"] = round(current_fsd + guardian_bonus, 2)
         except Exception:
             pass

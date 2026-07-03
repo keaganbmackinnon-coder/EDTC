@@ -13,11 +13,17 @@ else:
 def _conn() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # Many threads (journal watcher, EDDN listener, UI bridge) share this DB;
+    # wait for locks instead of raising "database is locked" immediately.
+    conn.execute("PRAGMA busy_timeout = 5000")
     return conn
 
 
 def init_db():
     with _conn() as conn:
+        # WAL lets the EDDN writer thread and UI readers overlap without
+        # blocking each other; the mode is persistent, set once per DB file.
+        conn.execute("PRAGMA journal_mode = WAL")
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS builds (
                 id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,9 +175,10 @@ def init_db():
             CREATE TABLE IF NOT EXISTS galaxy_coverage (
                 layer TEXT    NOT NULL,
                 gx    INTEGER NOT NULL,
+                gy    INTEGER NOT NULL,
                 gz    INTEGER NOT NULL,
                 count INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY (layer, gx, gz)
+                PRIMARY KEY (layer, gx, gy, gz)
             );
         """)
         # Migrations for columns added after initial release
@@ -203,6 +210,25 @@ def init_db():
             conn.execute(
                 "INSERT OR REPLACE INTO prefs (key, value) VALUES ('markets_symbol_migrated', '1')"
             )
+        # One-time migration: galaxy_coverage gained a gy (height band) column.
+        # The old 2D data can't be split by height, so drop and let every layer
+        # rebuild from its source (week: EDSM dump, alltime: bundled snapshot,
+        # live: re-accumulates from EDDN).
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(galaxy_coverage)")]
+        if "gy" not in cols:
+            conn.execute("DROP TABLE galaxy_coverage")
+            conn.execute("""
+                CREATE TABLE galaxy_coverage (
+                    layer TEXT    NOT NULL,
+                    gx    INTEGER NOT NULL,
+                    gy    INTEGER NOT NULL,
+                    gz    INTEGER NOT NULL,
+                    count INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY (layer, gx, gy, gz)
+                )
+            """)
+            conn.execute("DELETE FROM prefs WHERE key IN "
+                         "('coverage_week_refreshed', 'coverage_alltime_imported')")
 
 
 # --- Builds ---
@@ -907,41 +933,68 @@ def get_market_stats() -> dict:
 
 # Grid cell size in ly. The top-down map renders ~155 ly/px, so 300 ly ≈ 2 px.
 COVERAGE_CELL_LY = 300
+# Height (galactic Y) band thickness in ly — sector maps cycle through these.
+COVERAGE_Y_BAND_LY = 400
 
 
-def coverage_cell(x: float, z: float) -> tuple[int, int]:
-    return (int(x // COVERAGE_CELL_LY), int(z // COVERAGE_CELL_LY))
+def coverage_cell(x: float, y: float, z: float) -> tuple[int, int, int]:
+    return (
+        int(x // COVERAGE_CELL_LY),
+        int(y // COVERAGE_Y_BAND_LY),
+        int(z // COVERAGE_CELL_LY),
+    )
 
 
 def replace_coverage_layer(layer: str, cells: dict) -> None:
-    """Atomically replace a layer's whole grid. cells: {(gx, gz): count}"""
+    """Atomically replace a layer's whole grid. cells: {(gx, gy, gz): count}"""
     with _conn() as conn:
         conn.execute("DELETE FROM galaxy_coverage WHERE layer = ?", (layer,))
         conn.executemany(
-            "INSERT INTO galaxy_coverage (layer, gx, gz, count) VALUES (?, ?, ?, ?)",
-            [(layer, gx, gz, c) for (gx, gz), c in cells.items()],
+            "INSERT INTO galaxy_coverage (layer, gx, gy, gz, count) VALUES (?, ?, ?, ?, ?)",
+            [(layer, gx, gy, gz, c) for (gx, gy, gz), c in cells.items()],
         )
 
 
 def bump_coverage_cells(layer: str, cells: dict) -> None:
-    """Accumulate counts into a layer. cells: {(gx, gz): delta}"""
+    """Accumulate counts into a layer. cells: {(gx, gy, gz): delta}"""
     with _conn() as conn:
         conn.executemany("""
-            INSERT INTO galaxy_coverage (layer, gx, gz, count) VALUES (?, ?, ?, ?)
-            ON CONFLICT(layer, gx, gz) DO UPDATE SET count = count + excluded.count
-        """, [(layer, gx, gz, c) for (gx, gz), c in cells.items()])
+            INSERT INTO galaxy_coverage (layer, gx, gy, gz, count) VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(layer, gx, gy, gz) DO UPDATE SET count = count + excluded.count
+        """, [(layer, gx, gy, gz, c) for (gx, gy, gz), c in cells.items()])
 
 
-def get_coverage_layer(layer: str, bounds: list | None = None) -> list:
-    """bounds: [min_gx, max_gx, min_gz, max_gz] to fetch a viewport only."""
-    q = "SELECT gx, gz, count FROM galaxy_coverage WHERE layer = ?"
+def get_coverage_layer(layer: str, bounds: list | None = None,
+                       y_band: int | None = None) -> list:
+    """Returns [[gx, gz, count], ...].
+    bounds: [min_gx, max_gx, min_gz, max_gz] to fetch a viewport only.
+    y_band: a single gy band to slice on; None sums across all heights."""
+    q = "SELECT gx, gz, SUM(count) AS count FROM galaxy_coverage WHERE layer = ?"
     params: list = [layer]
     if bounds:
         q += " AND gx BETWEEN ? AND ? AND gz BETWEEN ? AND ?"
         params += [bounds[0], bounds[1], bounds[2], bounds[3]]
+    if y_band is not None:
+        q += " AND gy = ?"
+        params.append(y_band)
+    q += " GROUP BY gx, gz"
     with _conn() as conn:
         rows = conn.execute(q, params).fetchall()
         return [[r["gx"], r["gz"], r["count"]] for r in rows]
+
+
+def get_coverage_y_bands(layer: str, bounds: list | None = None) -> list:
+    """Which height bands hold data in this viewport: [[gy, count], ...] sorted
+    top of the disc first (highest gy first)."""
+    q = "SELECT gy, SUM(count) AS count FROM galaxy_coverage WHERE layer = ?"
+    params: list = [layer]
+    if bounds:
+        q += " AND gx BETWEEN ? AND ? AND gz BETWEEN ? AND ?"
+        params += [bounds[0], bounds[1], bounds[2], bounds[3]]
+    q += " GROUP BY gy ORDER BY gy DESC"
+    with _conn() as conn:
+        rows = conn.execute(q, params).fetchall()
+        return [[r["gy"], r["count"]] for r in rows]
 
 
 # --- Guardian ---
