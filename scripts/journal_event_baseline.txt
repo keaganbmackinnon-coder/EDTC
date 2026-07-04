@@ -59,6 +59,7 @@ Progress
 Promotion
 Rank
 ReceiveText
+RedeemVoucher
 RefuelAll
 RepairAll
 Reputation

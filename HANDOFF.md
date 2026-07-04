@@ -1841,3 +1841,74 @@ replay fix). All confirmed working in-game by the user. No known regressions.
 
 ---
 *Session 35 complete — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 00:57:17*
+
+---
+*Session checkpoint: 2026-07-04 16:56:44*
+
+---
+*Session checkpoint: 2026-07-04 17:24:25*
+
+---
+*Session checkpoint: 2026-07-04 17:25:06*
+
+---
+*Session checkpoint: 2026-07-04 17:46:53*
+
+---
+*Session checkpoint: 2026-07-04 17:47:35*
+
+---
+*Session checkpoint: 2026-07-04 19:05:15*
+
+---
+*Session checkpoint: 2026-07-04 19:14:40*
+
+---
+*Session checkpoint: 2026-07-04 19:19:23*
+
+---
+*Session checkpoint: 2026-07-04 19:26:45*
+
+---
+*Session checkpoint: 2026-07-04 19:29:52*
+
+---
+
+## Session 36 — Friend's install debugged + diagnostics hardening (v0.3.51)
+
+**Operations capture attempt:** user logged in with a live journal watcher running
+(baseline diff every 15s) but didn't reach an Operation — still ZERO Operations
+events captured. `scripts/journal_event_baseline.txt` gained `RedeemVoucher`
+(vanilla event, just never fired in the baseline journals). The Session 35 plan
+stands: diff journals against the baseline after the user plays one.
+
+**Friend's construction bug — RESOLVED, not an EDTC code bug:** friend (v0.3.50,
+helping the user's build) saw no depot data / no Import. Confirmed from his journal
+that `ColonisationConstructionDepot` DOES fire for non-architect helpers (identical
+payload). Root cause: **duplicate EDTC.exe** — he was launching a stale copy with
+its own empty `edtc.db` beside it (DB lives next to the exe). Removing the
+duplicate fixed it.
+
+Diagnostics hardening (released as v0.3.51, tagged same day):
+
+| Item | Status | File |
+|---|---|---|
+| Startup log line now includes `exe=` and `db=` paths — duplicate-exe cases visible from line 1 of the log | DONE | `main.py` |
+| `init_db()` failure now logs CRITICAL + Windows MessageBox ("move exe to a writable folder") + re-raises — was a silent no-persistence failure when run from a write-protected folder | DONE | `main.py` |
+| Depot handler logs each processed depot (station, market id, commodities, remaining T, progress) + warns on empty ResourcesRequired — was a total logging blind spot | DONE | `main.py` |
+| `RedeemVoucher` added to journal event baseline | DONE | `scripts/journal_event_baseline.txt` |
+
+**Facts confirmed this session:**
+- `ColonisationConstructionDepot` fires for ANY player docked at a construction
+  site, architect or helper — multi-player depot tracking needs no special-casing.
+- Contribution events are per-player journals, so "your pace"/ETA is per-install
+  by design; site totals stay correct via the depot snapshot's ProvidedAmount.
+
+---
+*Session 36 — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 19:42:07*

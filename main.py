@@ -19,7 +19,7 @@ def _log_exception(exc_type, exc_value, exc_tb):
 
 sys.excepthook = _log_exception
 
-from core.database import init_db
+from core.database import init_db, DB_PATH
 from core.journal import JournalWatcher
 from core.overlay import OverlayManager
 from core.tray import TrayIcon
@@ -30,9 +30,14 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.50"  # bump this with every release
+APP_VERSION = "0.3.51"  # bump this with every release
 
-logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
+# exe + db paths identify WHICH install is running — a stale duplicate exe
+# (with its own empty edtc.db beside it) looks identical from inside the app
+logging.info(
+    f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}, "
+    f"exe={sys.executable}, db={DB_PATH}"
+)
 
 # Approximate scan values by planet class (first-discovery estimates in Cr)
 _SCAN_VALUES = {
@@ -768,11 +773,21 @@ class API:
                 max(0, r.get("RequiredAmount", 0) - r.get("ProvidedAmount", 0))
                 for r in resources
             )
+            logging.info(
+                f"Depot: {depot.get('station') or depot.get('system') or 'unknown'} "
+                f"(market {event.get('MarketID')}) — {len(resources)} commodities, "
+                f"{depot['remaining']:,}T remaining, "
+                f"{event.get('ConstructionProgress', 0):.1%} complete"
+            )
             self._emit("construction_depot", depot)
             project = sync_construction_depot(self._current_system, resources)
             if project:
                 self._overlay_manager.emit_to_overlay("construction", "construction_update", project)
                 self._emit("construction_update", project)
+        else:
+            logging.warning(
+                f"Depot event (market {event.get('MarketID')}) had no ResourcesRequired — skipped"
+            )
 
     def _handle_cargo_transfer(self, event: dict):
         transfers = event.get("Transfers", [])
@@ -2451,7 +2466,24 @@ def _prune_markets():
 
 
 def main():
-    init_db()
+    # The DB lives next to the exe — running from a write-protected folder
+    # (Program Files, a zip preview, …) makes every write fail silently and
+    # the app looks like it "just doesn't track anything". Fail loudly instead.
+    try:
+        init_db()
+    except Exception as e:
+        logging.critical(f"Database init failed at {DB_PATH}: {e}")
+        if sys.platform == "win32":
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(
+                None,
+                f"EDTC can't create or write its database:\n{DB_PATH}\n\n{e}\n\n"
+                "Move EDTC.exe to a writable folder (e.g. "
+                "C:\\Users\\<you>\\AppData\\Local\\EDTC) and launch it again.",
+                "EDTC — database error",
+                0x10,  # MB_ICONERROR
+            )
+        raise
     _create_desktop_shortcut()
     threading.Thread(target=_prune_markets, daemon=True).start()
 
