@@ -639,6 +639,192 @@ function MaterialsTab({ materials, setMaterials }) {
   )
 }
 
+// ---- Tab: Material Traders & Tech Brokers ----
+
+const SEARCH_KINDS = [
+  { id: 'traders', label: 'Material Traders' },
+  { id: 'brokers', label: 'Tech Brokers' },
+]
+
+const KIND_TYPES = {
+  traders: [
+    { id: '',             label: 'All Traders' },
+    { id: 'Raw',          label: 'Raw' },
+    { id: 'Manufactured', label: 'Manufactured' },
+    { id: 'Encoded',      label: 'Encoded' },
+  ],
+  brokers: [
+    { id: '',         label: 'All Brokers' },
+    { id: 'Guardian', label: 'Guardian' },
+    { id: 'Human',    label: 'Human' },
+  ],
+}
+
+const TRADER_COLORS = {
+  Raw:          'text-amber-400 border-amber-400/40',
+  Manufactured: 'text-sky-400 border-sky-400/40',
+  Encoded:      'text-emerald-400 border-emerald-400/40',
+  Guardian:     'text-violet-400 border-violet-400/40',
+  Human:        'text-ed-orange border-ed-orange/40',
+}
+
+function TradersTab() {
+  const [system, setSystem] = useState('')
+  const [kind, setKind] = useState('traders')
+  const [traderType, setTraderType] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    api()?.get_current_system?.().then(s => { if (s) setSystem(s) }).catch(() => {})
+  }, [])
+
+  async function search(type = traderType, searchKind = kind) {
+    setSearching(true)
+    setError('')
+    const r = searchKind === 'brokers'
+      ? await api()?.find_tech_brokers(system, type)
+      : await api()?.find_material_traders(system, type)
+    setSearching(false)
+    if (r?.error) {
+      setError(r.error)
+      setResult(null)
+    } else {
+      setResult(r)
+    }
+  }
+
+  function pickKind(k) {
+    setKind(k)
+    setTraderType('')
+    if (result || system) search('', k)
+  }
+
+  function pickType(type) {
+    setTraderType(type)
+    if (result || system) search(type)
+  }
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-4">
+        Find the nearest material traders and technology brokers. Raw traders sit at
+        Extraction/Refinery stations, Manufactured at Industrial, Encoded at High Tech/Military.
+      </p>
+
+      <div className="panel mb-4">
+        <div className="flex gap-3 items-end flex-wrap">
+          <div className="flex gap-2">
+            {SEARCH_KINDS.map(k => (
+              <button
+                key={k.id}
+                onClick={() => pickKind(k.id)}
+                className={`text-xs font-mono border rounded px-3 py-2 transition-colors ${
+                  kind === k.id
+                    ? 'border-ed-orange text-ed-orange bg-ed-orange/10'
+                    : 'border-ed-border text-ed-muted hover:text-ed-text'
+                }`}
+              >
+                {k.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 min-w-[220px]">
+            <label className="text-xs text-ed-muted font-ui mb-1 block">Near system</label>
+            <input
+              value={system}
+              onChange={e => setSystem(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') search() }}
+              placeholder="Reference system"
+              className="w-full bg-ed-dark border border-ed-border rounded px-3 py-2 text-ed-text text-sm font-mono focus:outline-none focus:border-ed-orange/60"
+            />
+          </div>
+          <button
+            onClick={() => search()}
+            disabled={searching}
+            className="btn-primary disabled:opacity-40"
+          >
+            {searching ? 'Searching…' : 'Search'}
+          </button>
+        </div>
+        <div className="flex gap-2 mt-3">
+          {KIND_TYPES[kind].map(t => (
+            <button
+              key={t.id}
+              onClick={() => pickType(t.id)}
+              className={`text-xs font-mono border rounded px-3 py-1.5 transition-colors ${
+                traderType === t.id
+                  ? 'border-ed-orange text-ed-orange bg-ed-orange/10'
+                  : 'border-ed-border text-ed-muted hover:text-ed-text'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && <p className="text-red-400 text-xs font-mono mb-3">{error}</p>}
+
+      {result && (
+        <div className="panel overflow-x-auto">
+          <p className="text-ed-muted text-xs font-mono mb-2">
+            {result.results.length} results near {result.reference}
+          </p>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-ed-muted text-xs font-mono border-b border-ed-border">
+                <th className="text-left pb-2 pr-4">Trader</th>
+                <th className="text-left pb-2 pr-4">Station</th>
+                <th className="text-left pb-2 pr-4">System</th>
+                <th className="text-right pb-2 pr-4">Distance</th>
+                <th className="text-right pb-2 pr-4">Arrival</th>
+                <th className="text-left pb-2 pr-4">Pad</th>
+                <th className="pb-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.results.map((s, i) => (
+                <tr key={i} className="border-b border-ed-border/40">
+                  <td className="py-1.5 pr-4">
+                    <span className={`text-xs font-mono border rounded px-2 py-0.5 ${
+                      TRADER_COLORS[s.trader] ?? 'text-ed-muted border-ed-border'
+                    }`}>
+                      {s.trader || '?'}
+                    </span>
+                  </td>
+                  <td className="py-1.5 pr-4 font-mono text-ed-text">
+                    {s.station}
+                    {s.planetary && <span className="text-ed-muted text-xs ml-1.5" title="Planetary">🜨</span>}
+                  </td>
+                  <td className="py-1.5 pr-4 font-mono text-ed-muted">{s.system}</td>
+                  <td className="py-1.5 pr-4 text-right font-mono text-ed-text">{s.distance.toLocaleString()} ly</td>
+                  <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">{s.arrival.toLocaleString()} ls</td>
+                  <td className="py-1.5 pr-4 font-mono text-xs">
+                    {s.large_pad === true ? <span className="text-ed-success">L</span>
+                      : s.large_pad === false ? <span className="text-amber-400">M</span>
+                      : <span className="text-ed-muted">?</span>}
+                  </td>
+                  <td className="py-1.5 text-right">
+                    <button
+                      className="btn-ghost text-xs"
+                      onClick={() => api()?.copy_to_clipboard(s.system)}
+                      title="Copy system name"
+                    >
+                      Copy
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ---- Main ----
 
 const TABS = [
@@ -647,6 +833,7 @@ const TABS = [
   { id: 'synthesis',   label: 'Synthesis' },
   { id: 'tech_broker', label: 'Tech Broker' },
   { id: 'materials',   label: 'Materials' },
+  { id: 'traders',     label: 'Traders & Brokers' },
 ]
 
 export default function Engineering() {
@@ -693,6 +880,7 @@ export default function Engineering() {
       {tab === 'synthesis'   && <SynthesisTab materials={materials} />}
       {tab === 'tech_broker' && <TechBrokerTab materials={materials} />}
       {tab === 'materials'   && <MaterialsTab materials={materials} setMaterials={setMaterials} />}
+      {tab === 'traders'     && <TradersTab />}
     </div>
   )
 }

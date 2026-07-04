@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.48"  # bump this with every release
+APP_VERSION = "0.3.50"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -1490,6 +1490,54 @@ class API:
 
     def get_tech_broker_items(self) -> list:
         return self._load_json("tech_brokers.json").get("items", [])
+
+    def find_material_traders(self, system: str = "", trader_type: str = "") -> dict:
+        """Nearest material traders via Spansh. trader_type '' = all,
+        else 'Raw' | 'Manufactured' | 'Encoded'."""
+        return self._find_station_service("material_trader", system, trader_type)
+
+    def find_tech_brokers(self, system: str = "", broker_type: str = "") -> dict:
+        """Nearest technology brokers via Spansh. broker_type '' = all,
+        else 'Guardian' | 'Human'."""
+        return self._find_station_service("technology_broker", system, broker_type)
+
+    def _find_station_service(self, kind: str, system: str, type_filter: str) -> dict:
+        import asyncio
+        from api.spansh import SpanshAPI
+        ref = system.strip() or self._current_system
+        if not ref:
+            return {"error": "No reference system — enter one or launch the game.", "results": []}
+
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                if kind == "material_trader":
+                    stations = await spansh.material_traders(ref, type_filter or None)
+                else:
+                    stations = await spansh.tech_brokers(ref, type_filter or None)
+                return {
+                    "reference": ref,
+                    "results": [
+                        {
+                            "system": s.get("system_name", ""),
+                            "station": s.get("name", ""),
+                            # badge shown in the UI: trader or broker type
+                            "trader": s.get(kind, "") or "",
+                            "distance": round(s.get("distance") or 0, 1),
+                            "arrival": round(s.get("distance_to_arrival") or 0),
+                            "station_type": s.get("type", ""),
+                            "large_pad": s.get("has_large_pad", None),
+                            "planetary": s.get("is_planetary", False),
+                        }
+                        for s in stations
+                    ],
+                }
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "results": []}
 
     def get_materials(self) -> list:
         from core.database import get_materials

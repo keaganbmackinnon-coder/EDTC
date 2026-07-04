@@ -170,6 +170,51 @@ class SpanshAPI(BaseAPI):
         resp.raise_for_status()
         return resp.json().get("results", [])
 
+    # --- Material traders / tech brokers ---
+
+    async def _filtered_stations(self, system: str, filters: dict, size: int = 30) -> list[dict]:
+        """Nearest-first station search with a nested filter dict (Session 32:
+        filters MUST be nested and sort must be the array form — top-level
+        variants are silently ignored)."""
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post("/stations/search", json={
+            "reference_system": system,
+            "filters": filters,
+            "sort": [{"distance": {"direction": "asc"}}],
+            "size": size,
+        })
+        resp.raise_for_status()
+        return resp.json().get("results", [])
+
+    async def material_traders(
+        self, system: str, trader_type: str | None = None, size: int = 30
+    ) -> list[dict]:
+        """Stations with a material trader, nearest-first. trader_type: 'Raw' |
+        'Manufactured' | 'Encoded' — SERVER-side via {"material_trader":
+        {"value": [...]}} (the [{"name": ...}] shape used by services/market
+        400s on this field; verified live: Raw=372 vs 1633 any). None = all."""
+        filters = (
+            {"material_trader": {"value": [trader_type]}}
+            if trader_type
+            else {"services": [{"name": "Material Trader"}]}
+        )
+        return await self._filtered_stations(system, filters, size)
+
+    async def tech_brokers(
+        self, system: str, broker_type: str | None = None, size: int = 30
+    ) -> list[dict]:
+        """Stations with a technology broker, nearest-first. broker_type:
+        'Guardian' | 'Human' — same {"value": [...]} filter shape as
+        material_trader (verified live: Guardian=808, Human=1532). None = all
+        (service filter; note some stations report broker type None)."""
+        filters = (
+            {"technology_broker": {"value": [broker_type]}}
+            if broker_type
+            else {"services": [{"name": "Technology Broker"}]}
+        )
+        return await self._filtered_stations(system, filters, size)
+
     # --- Exobiology route ---
 
     async def exobiology_route(

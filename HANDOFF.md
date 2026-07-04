@@ -1750,3 +1750,53 @@ out" report to date.
 
 ---
 *Session checkpoint: 2026-07-04 00:04:28*
+
+---
+*Session checkpoint: 2026-07-04 00:06:42*
+
+---
+
+## Session 35 continued — Traders & Brokers search on Engineering (v0.3.49)
+
+| Item | Status | File |
+|---|---|---|
+| Engineering gets a 6th tab **Traders & Brokers**: kind toggle (Material Traders / Tech Brokers), type filter chips (All/Raw/Manufactured/Encoded · All/Guardian/Human), near-system input auto-filled from current system, nearest-first results with colored type badge, station, system+Copy, distance ly, arrival ls, pad size, planetary marker | DONE | `frontend/src/pages/Engineering.jsx` |
+| `material_traders()` / `tech_brokers()` + shared `_filtered_stations()` — Spansh /stations/search returns per-station `material_trader` ('Raw'/'Manufactured'/'Encoded') and `technology_broker` ('Guardian'/'Human'/None) fields, BOTH server-side filterable with shape `{"field": {"value": [...]}}` (the `[{"name":...}]` shape 400s on these fields). Verified live: MT 1633 total / Raw 372; TB 6811 total / Guardian 808 / Human 1532 | DONE | `api/spansh.py` |
+| `find_material_traders(system, type)` / `find_tech_brokers(system, type)` API + shared `_find_station_service()`; blank system falls back to current system | DONE | `main.py` |
+| `APP_VERSION` = `0.3.49` | DONE | `main.py` |
+
+## Notes
+
+- Spansh station-search filter shapes now known: list-of-name dicts (`services`, `market`) vs `{"value": [...]}` (`material_trader`, `technology_broker`) — probe with known-negative before trusting any new field.
+- "All Brokers" service-filter results include stations whose `technology_broker` is None (badge shows '?').
+
+---
+*Session 35 continued (traders & brokers) — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 00:19:42*
+
+---
+*Session checkpoint: 2026-07-04 00:24:11*
+
+---
+
+## Session 35 continued — dock-state replay fix (v0.3.50)
+
+User lost the blue buyable-here highlight after an app restart. Log showed no
+"Station market:" push after relaunch: they had docked at Ranganathan Plant
+AFTER game login, and `_replay_startup` only recovers the docked station from
+`Location` (login) — `Docked`/`Undocked` weren't replayed, so `_current_station`
+came back stale/empty on every mid-session app restart.
+
+| Item | Status | File |
+|---|---|---|
+| Replay now tracks the last dock-AFFECTING event (Location/Docked/Undocked/FSDJump) separately — can't use `seen` (last-per-kind loses ordering). After the normal replay: last=Docked → replay it (sets station + pushes station market); last=Undocked/FSDJump → synthesize Undocked to clear any stale station the login Location set | DONE | `core/journal.py` |
+| Also verified from the user's system: nearest material trader really is 1,034.8 ly (Helgrind Gateway, NGC 6530 / Lagoon) — Trifid colonisation stations have no Material Trader service in Spansh; search is correct, the frontier is just empty | — | — |
+| `APP_VERSION` = `0.3.50`; frontend unchanged from 0.3.49 | DONE | `main.py` |
+
+---
+*Session 35 continued (dock-state replay) — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 00:28:16*

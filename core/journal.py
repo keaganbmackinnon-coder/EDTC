@@ -59,6 +59,15 @@ class JournalWatcher:
         # so counts stay exact when EDTC is launched mid-session.
         MATERIAL_DELTAS = {"MaterialCollected", "MaterialDiscarded", "MaterialTrade",
                            "EngineerCraft", "Synthesis"}
+        # Docked/Undocked can't go in STARTUP_EVENTS: `seen` keeps only the last
+        # event per kind and replays in first-seen order, which loses whether
+        # the final dock or undock came last. Track the last dock-AFFECTING
+        # event separately and resolve the true end state after the replay —
+        # without this, relaunching EDTC while docked at a station visited
+        # after login left _current_station stale/empty (no station market,
+        # no buyable-here highlight).
+        DOCK_EVENTS = {"Location", "Docked", "Undocked", "FSDJump"}
+        dock_state = None
         seen = {}
         material_deltas = []
         try:
@@ -70,6 +79,8 @@ class JournalWatcher:
                     try:
                         event = json.loads(line)
                         kind = event.get("event")
+                        if kind in DOCK_EVENTS:
+                            dock_state = event
                         if kind in STARTUP_EVENTS:
                             seen[kind] = event
                             if kind == "Materials":
@@ -86,6 +97,14 @@ class JournalWatcher:
         if "Materials" in seen:
             for event in material_deltas:
                 self._on_event(event)
+        if dock_state:
+            kind = dock_state.get("event")
+            if kind == "Docked":
+                self._on_event(dock_state)
+            elif kind != "Location":
+                # last dock-affecting event was Undocked/FSDJump — clear any
+                # stale station the replayed login Location may have set
+                self._on_event({"event": "Undocked"})
 
     def run(self):
         if not self._path.exists():
