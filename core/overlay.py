@@ -113,6 +113,9 @@ class OverlayManager:
             self._windows[name].show()
             self._shown[name] = True
             self._apply_opacity(name)
+            # size may be stale — pushes while hidden skip the auto-fit
+            if name in ("construction", "route"):
+                self.resize_to_content(name)
             return
 
         cfg = OVERLAYS.get(name)
@@ -168,6 +171,7 @@ class OverlayManager:
         if win is not None:
             try:
                 win.hide()
+                logging.info(f"overlay: hid '{name}'")
             except Exception as e:
                 logging.warning(f"overlay: hide '{name}' failed: {e}")
 
@@ -230,18 +234,26 @@ class OverlayManager:
 
     def resize_to_content(self, name: str, pad: int = 24, delay: float = 0.4):
         """Fit an overlay window to its rendered panel height. Delayed so the
-        just-pushed payload has rendered before we measure."""
+        just-pushed payload has rendered before we measure.
+
+        NEVER runs on a hidden overlay: pywebview's resize() re-shows a hidden
+        window (verified empirically) — this was why disabled overlays kept
+        popping back up on every route/cargo push."""
         win = self._windows.get(name)
-        if win is None:
+        if win is None or not self._shown.get(name, False):
             return
         width = OVERLAYS.get(name, {}).get("width", 400)
 
         def _measure():
+            if not self._shown.get(name, False):
+                return  # hidden while the delay timer was pending
             try:
                 h = win.evaluate_js(
                     "(document.getElementById('overlay-panel') || document.body).offsetHeight"
                 )
                 if isinstance(h, (int, float)) and h >= 20:
+                    if not self._shown.get(name, False):
+                        return  # hidden while we were measuring
                     win.resize(width, int(h) + pad)
                     logging.info(f"overlay: resized '{name}' to {width}x{int(h) + pad}")
             except Exception as e:

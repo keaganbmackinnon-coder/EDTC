@@ -1686,3 +1686,67 @@ in-game by user before starting.
 
 ---
 *Session checkpoint: 2026-07-03 20:47:28*
+
+---
+*Session checkpoint: 2026-07-03 20:50:49*
+
+---
+
+## Session 35 continued — Galaxy Plotter "Every Jump" mode (v0.3.47)
+
+User: "the route plotter doesnt work — it just tells me to jump to target system even
+if its 600ly away." Root cause: NOT a bug — Spansh `/route` is the NEUTRON plotter;
+its waypoints are neutron boost stops only. A trip with no useful neutron detour
+legitimately returns origin→destination with a jumps count. Verified live: the user's
+exact 65.7 ly plot returns 2 waypoints, `jumps: 3` on the destination.
+
+| Item | Status | File |
+|---|---|---|
+| `galaxy_route(params)` — Spansh `/generic/route` (the site's Galaxy Plotter): POST form + poll job, returns EVERY jump with name/distance/fuel_used/fuel_in_tank/is_scoopable/has_neutron/must_refuel. Params reverse-engineered from Auto_Neutron's ExactTab (endpoint is undocumented) | DONE | `api/spansh.py` |
+| `plan_galaxy_route(origin, destination)` — builds the FSD fuel model from the live Loadout: fuel_power/fuel_multiplier tables by drive size/rating; **optimal_mass derived by inverting the fuel equation against MaxJumpRange** (`opt = range × (base_mass + max_fuel) / (max_fuel/mult)^(1/power)`) so engineering is automatically included, no per-module optimal-mass tables needed | DONE | `main.py` |
+| `_handle_loadout` now stores `fsd_size`/`fsd_class` | DONE | `main.py` |
+| Navigation Route Planner: mode toggle **Every Jump** (default) / **Neutron Waypoints**; range+efficiency inputs hidden in Every Jump mode (uses live loadout); result rows show ☀ scoopable, ⚡ neutron, amber "⛽ REFUEL" (must_refuel) | DONE | `frontend/src/pages/Navigation.jsx` |
+| Verified live with Caspian numbers (80.11 ly, 5.5T max fuel, size8 class5 → opt mass 13,656): Trifid → Lagoon ~800 ly = 4 jumps incl. 3 neutron-boosted ~250 ly hops | VERIFIED | — |
+| `APP_VERSION` = `0.3.47` | DONE | `main.py` |
+
+## Notes
+
+- Size-8 fuel_power (2.90) is extrapolated (+0.15/size); only mid-curve fuel estimates shift — max range stays exact because optimal_mass is fitted to the journal's MaxJumpRange.
+- `/generic/route` quirks: empty-body 400 on wrong params; jobs poll via the same `/results/{job}` endpoint as the neutron plotter.
+- Neutron mode kept for long-haul waypoint planning (plot each leg in the galaxy map).
+
+---
+*Session 35 continued — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 23:48:44*
+
+---
+
+## Session 35 continued — THE overlay won't-hide root cause (v0.3.48)
+
+User: route overlay still wouldn't disappear on Disable (after the v0.3.46 gating
+fixes). Isolated with a standalone pywebview repro checking Win32 IsWindowVisible:
+
+- `window.hide()` works fine, even with WS_EX_LAYERED applied
+- **`window.resize()` RE-SHOWS a hidden pywebview window** (visible=False → resize → visible=True)
+
+Since Session 34, `emit_to_overlay` auto-runs `resize_to_content` for route +
+construction — and pushes fire constantly with an active route (route_update per
+FSDJump, fsd_target per star targeted). Disable hid the window; the next push
+resized it and pywebview brought it right back. Explains every "overlay bugging
+out" report to date.
+
+| Item | Status | File |
+|---|---|---|
+| `resize_to_content` now bails when `_shown` is False — checked at call, after the 0.4s render delay, and again after the evaluate_js measure (hide can land in any gap) | DONE | `core/overlay.py` |
+| `show()` on an existing window re-runs `resize_to_content` (pushes while hidden skip the auto-fit, so size may be stale) | DONE | `core/overlay.py` |
+| `hide()` logs "overlay: hid 'name'" so future won't-hide reports are diagnosable from the log | DONE | `core/overlay.py` |
+| Repro script kept at scratchpad test_hide.py pattern (pywebview + IsWindowVisible) — rebuild it if pywebview is ever upgraded, to re-verify this behaviour | — | — |
+| `APP_VERSION` = `0.3.48`; frontend unchanged from 0.3.47 | DONE | `main.py` |
+
+---
+*Session 35 continued (won't-hide root cause) — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 00:04:28*

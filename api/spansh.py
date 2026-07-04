@@ -63,6 +63,27 @@ class SpanshAPI(BaseAPI):
             for s in result.get("system_jumps", [])
         ]
 
+    # --- Galaxy plotter (every jump) ---
+
+    async def galaxy_route(self, params: dict) -> list[dict]:
+        """Spansh Galaxy Plotter (/generic/route) — unlike the neutron plotter,
+        this returns EVERY individual jump. Needs a full FSD fuel model in
+        `params` (field names per Auto_Neutron's ExactTab: source, destination,
+        fuel_power, fuel_multiplier, optimal_mass, base_mass, tank_size,
+        internal_tank_size, max_fuel_per_jump, range_boost, cargo,
+        is_supercharged/use_supercharge/use_injections/exclude_secondary).
+        Returns result['jumps']: dicts with name/distance/distance_to_destination/
+        fuel_used/fuel_in_tank/is_scoopable/has_neutron/must_refuel (verified live)."""
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post("/generic/route", data=params)
+        resp.raise_for_status()
+        job_id = resp.json().get("job")
+        if not job_id:
+            return []
+        result = await self._poll_job(job_id)
+        return result.get("jumps", [])
+
     # --- Road to Riches ---
 
     async def road_to_riches(

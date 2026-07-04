@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.46"  # bump this with every release
+APP_VERSION = "0.3.48"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -965,6 +965,7 @@ class API:
 
         guardian_bonus = 0.0
         max_fuel_per_jump = 0.0
+        fsd_size, fsd_class = 0, 0
         for module in (event.get("Modules") or []):
             item = module.get("Item", "").lower()
             if "guardianfsdbooster" in item:
@@ -975,16 +976,17 @@ class API:
                         except ValueError:
                             pass
             elif module.get("Slot") == "FrameShiftDrive" and item.startswith("int_hyperdrive"):
+                m = re.search(r"size(\d+)_class(\d+)", item)
+                if m:
+                    fsd_size, fsd_class = int(m.group(1)), int(m.group(2))
                 max_fuel_per_jump = self._FSD_MAX_FUEL_OVERRIDES.get(item, 0.0)
-                if not max_fuel_per_jump:
-                    m = re.search(r"size(\d+)_class(\d+)", item)
-                    if m:
-                        key = (int(m.group(1)), int(m.group(2)))
-                        if "overcharge" in item:
-                            max_fuel_per_jump = self._FSD_MAX_FUEL_SCO.get(
-                                key, self._FSD_MAX_FUEL.get(key, 0.0))
-                        else:
-                            max_fuel_per_jump = self._FSD_MAX_FUEL.get(key, 0.0)
+                if not max_fuel_per_jump and m:
+                    key = (fsd_size, fsd_class)
+                    if "overcharge" in item:
+                        max_fuel_per_jump = self._FSD_MAX_FUEL_SCO.get(
+                            key, self._FSD_MAX_FUEL.get(key, 0.0))
+                    else:
+                        max_fuel_per_jump = self._FSD_MAX_FUEL.get(key, 0.0)
                 # Deep Charge engineering raises max fuel per jump
                 eng = module.get("Engineering") or {}
                 for mod in eng.get("Modifiers", []):
@@ -1002,6 +1004,8 @@ class API:
             "cargo_capacity": event.get("CargoCapacity"),
             "guardian_booster_bonus": guardian_bonus,
             "max_fuel_per_jump": max_fuel_per_jump,
+            "fsd_size": fsd_size,
+            "fsd_class": fsd_class,
         }
         self._emit("ship_changed", self.get_ship_info())
         # Ship swap changes the hold size — keep the overlay's trip count honest
@@ -1323,6 +1327,87 @@ class API:
                         for s in systems
                     ],
                     "total_jumps": total_jumps,
+                    "total_distance": round(total_dist, 1),
+                }
+            finally:
+                await spansh.close()
+        try:
+            return asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "systems": [], "total_jumps": 0, "total_distance": 0}
+
+    # FSD fuel-curve constants (by drive size / rating class digit 1=E..5=A).
+    # Size 8 power is extrapolated (+0.15 per size); the small error only shifts
+    # mid-curve fuel estimates — max range stays exact because optimal_mass is
+    # fitted to the journal's MaxJumpRange below.
+    _FSD_FUEL_POWER = {2: 2.00, 3: 2.15, 4: 2.30, 5: 2.45, 6: 2.60, 7: 2.75, 8: 2.90}
+    _FSD_FUEL_MULT = {1: 0.011, 2: 0.010, 3: 0.008, 4: 0.010, 5: 0.012}
+
+    def plan_galaxy_route(self, origin: str, destination: str) -> dict:
+        """Spansh Galaxy Plotter — every individual jump (incl. neutron boosts
+        when worthwhile), not just neutron waypoints. Builds the FSD fuel model
+        from the live Loadout; optimal_mass is derived from MaxJumpRange so
+        engineering is automatically accounted for."""
+        import asyncio
+        from api.spansh import SpanshAPI
+
+        ship = self._current_ship
+        needed = ("max_jump_range", "unladen_mass", "fuel_capacity", "max_fuel_per_jump")
+        if not ship or not all(ship.get(k) for k in needed) or not ship.get("fsd_size"):
+            return {"error": "Ship loadout unknown — launch the game so EDTC can read your FSD.",
+                    "systems": [], "total_jumps": 0, "total_distance": 0}
+
+        power = self._FSD_FUEL_POWER.get(ship["fsd_size"], 2.45)
+        mult = self._FSD_FUEL_MULT.get(ship["fsd_class"], 0.012)
+        boost = ship.get("guardian_booster_bonus") or 0.0
+        max_fuel = ship["max_fuel_per_jump"]
+        reserve = ship.get("reserve_capacity") or 0.0
+        base_mass = ship["unladen_mass"] + reserve
+        # fuel = mult × (dist × mass / opt)^power  →  at max range (baseline mass,
+        # full max_fuel burn):  opt = range × mass / (max_fuel / mult)^(1/power)
+        optimal_mass = (ship["max_jump_range"] - boost) * (base_mass + max_fuel) \
+            / (max_fuel / mult) ** (1.0 / power)
+        cargo = sum(int(c.get("Count", 0)) for c in self._ship_cargo)
+
+        params = {
+            "source": origin,
+            "destination": destination,
+            "is_supercharged": 0,
+            "use_supercharge": 1,
+            "use_injections": 0,
+            "exclude_secondary": 0,
+            "fuel_power": power,
+            "fuel_multiplier": mult,
+            "optimal_mass": round(optimal_mass, 2),
+            "supercharge_multiplier": 4.0,
+            "base_mass": round(base_mass, 2),
+            "tank_size": ship["fuel_capacity"],
+            "internal_tank_size": reserve,
+            "max_fuel_per_jump": max_fuel,
+            "range_boost": boost,
+            "cargo": cargo,
+        }
+
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                jumps = await spansh.galaxy_route(params)
+                total_dist = sum(j.get("distance", 0) for j in jumps)
+                return {
+                    "systems": [
+                        {
+                            "system": j.get("name", ""),
+                            "distance_jumped": round(j.get("distance", 0), 2),
+                            "distance_remaining": round(j.get("distance_to_destination", 0), 2),
+                            "jumps": 1,
+                            "neutron_star": j.get("has_neutron", False),
+                            "scoopable": j.get("is_scoopable", False),
+                            "must_refuel": j.get("must_refuel", False),
+                            "fuel_used": round(j.get("fuel_used", 0), 2),
+                        }
+                        for j in jumps
+                    ],
+                    "total_jumps": max(0, len(jumps) - 1),
                     "total_distance": round(total_dist, 1),
                 }
             finally:

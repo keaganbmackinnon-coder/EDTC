@@ -20,6 +20,9 @@ export default function Navigation() {
   const [toSystem, setToSystem] = useState('')
   const [jumpRange, setJumpRange] = useState('')
   const [efficiency, setEfficiency] = useState(60)
+  // 'exact' = Spansh Galaxy Plotter (every jump, uses live ship loadout);
+  // 'neutron' = neutron plotter (waypoints are boost stops only)
+  const [plotMode, setPlotMode] = useState('exact')
   const [planning, setPlanning] = useState(false)
   const [planResult, setPlanResult] = useState(null)
   const [planError, setPlanError] = useState('')
@@ -69,11 +72,14 @@ export default function Navigation() {
 
   async function planRoute() {
     const range = parseFloat(jumpRange)
-    if (!fromSystem || !toSystem || !range) return
+    if (!fromSystem || !toSystem) return
+    if (plotMode === 'neutron' && !range) return
     setPlanning(true)
     setPlanResult(null)
     setPlanError('')
-    const result = await api()?.plan_neutron_route(fromSystem, toSystem, range, efficiency)
+    const result = plotMode === 'exact'
+      ? await api()?.plan_galaxy_route(fromSystem, toSystem)
+      : await api()?.plan_neutron_route(fromSystem, toSystem, range, efficiency)
     setPlanning(false)
     if (result?.error) {
       setPlanError(result.error)
@@ -218,6 +224,30 @@ export default function Navigation() {
             </div>
           )}
           <div className="panel mb-4">
+            <div className="flex gap-2 mb-4">
+              {[
+                ['exact', 'Every Jump', 'Full jump-by-jump route from your live ship loadout'],
+                ['neutron', 'Neutron Waypoints', 'Boost stops only — plot each leg in the galaxy map'],
+              ].map(([val, label, hint]) => (
+                <button
+                  key={val}
+                  onClick={() => setPlotMode(val)}
+                  title={hint}
+                  className={`flex-1 text-xs font-mono border rounded px-2 py-1.5 transition-colors ${
+                    plotMode === val
+                      ? 'border-ed-orange text-ed-orange bg-ed-orange/10'
+                      : 'border-ed-border text-ed-muted hover:text-ed-text'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {plotMode === 'exact' && (
+              <p className="text-ed-muted text-xs font-mono mb-3">
+                Plots every jump using your live ship loadout (range, fuel, tank) — includes neutron boosts when they help.
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
                 <label className="text-xs text-ed-muted font-ui mb-1 block">From</label>
@@ -238,7 +268,7 @@ export default function Navigation() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className={`grid grid-cols-2 gap-3 mb-4 ${plotMode === 'exact' ? 'hidden' : ''}`}>
               <div>
                 <label className="text-xs text-ed-muted font-ui mb-1 block">
                   Jump range (ly)
@@ -280,7 +310,7 @@ export default function Navigation() {
             </div>
             <button
               onClick={planRoute}
-              disabled={planning || !fromSystem || !toSystem || !jumpRange}
+              disabled={planning || !fromSystem || !toSystem || (plotMode === 'neutron' && !jumpRange)}
               className="btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {planning ? 'Planning route… (this can take 10–30s)' : 'Plan Route'}
@@ -295,7 +325,9 @@ export default function Navigation() {
             <div className="panel">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <span className="text-ed-text font-semibold text-sm">{planResult.systems.length} waypoints</span>
+                  <span className="text-ed-text font-semibold text-sm">
+                    {planResult.systems.length} {planResult.systems.some(s => s.scoopable != null) ? 'systems' : 'waypoints'}
+                  </span>
                   <span className="text-ed-muted text-xs font-mono ml-3">{planResult.total_jumps} jumps · {planResult.total_distance.toLocaleString()} ly</span>
                 </div>
                 <button
@@ -313,9 +345,15 @@ export default function Navigation() {
                     {s.neutron_star && (
                       <span className="text-yellow-400 text-xs shrink-0" title="Neutron star boost">⚡</span>
                     )}
+                    {s.scoopable && !s.neutron_star && (
+                      <span className="text-ed-orange/70 text-xs shrink-0" title="Scoopable star">☀</span>
+                    )}
                     <span className={`text-sm font-mono flex-1 ${s.neutron_star ? 'text-yellow-300' : 'text-ed-text'}`}>
                       {s.system}
                     </span>
+                    {s.must_refuel && (
+                      <span className="text-amber-400 text-xs font-mono shrink-0" title="Scoop fuel here or you won't make the next jumps">⛽ REFUEL</span>
+                    )}
                     <span className="text-ed-muted text-xs font-mono shrink-0">{s.distance_jumped} ly</span>
                     <span className="text-ed-muted text-xs font-mono shrink-0 w-20 text-right">{s.distance_remaining.toLocaleString()} ly left</span>
                   </div>
