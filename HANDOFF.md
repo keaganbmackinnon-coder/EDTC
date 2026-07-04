@@ -1800,3 +1800,44 @@ came back stale/empty on every mid-session app restart.
 
 ---
 *Session checkpoint: 2026-07-04 00:28:16*
+
+---
+*Session checkpoint: 2026-07-04 00:46:07*
+
+---
+*Session checkpoint: 2026-07-04 00:54:22*
+
+---
+
+## Session 35 wrap-up — NEXT SESSION: Operations update support
+
+**Game update "Operations" landed 2026-06-30** (after Session 33/34): 6 multi-stage
+challenge scenarios for squads up to 4 CMDRs (solo possible), space + on-foot,
+plus a networking/balancing beta.
+
+**State of research (2026-07-04):**
+- Official patch notes / wiki / elitedangerous.com all 403-block automated fetches.
+- No public docs of the new journal events yet; EDMC (EDCD) has shipped NO
+  Operations support as of tonight — nobody knows the event shapes publicly.
+- User's journals (2026-07-01..04) contain ZERO Operations events — he hasn't
+  played one yet.
+
+**The plan (agreed with user):**
+1. User plays one Operation (any, solo ok, partial ok). The game journals
+   everything regardless of EDTC's watcher — no code needed beforehand.
+2. Diff the new journal's event types against
+   **`scripts/journal_event_baseline.txt`** (89 known types, committed tonight)
+   → the Operation* events + payloads fall out.
+3. Design from real payloads (do NOT guess field shapes — see the "NaN" lesson,
+   Session 32). Likely shape: an Operations tab (Commander page or own page)
+   with active op / stage progress / squad; maybe a stage-objectives overlay;
+   new events into WATCHED_EVENTS + handlers in main.py.
+
+**Where everything else stands:** all work through v0.3.50 is released and the
+local install matches. Releases tonight: v0.3.46 (blue buyable highlight +
+overlay pref gating), v0.3.48 (Galaxy Plotter every-jump mode + pywebview
+resize-reshows-hidden fix), v0.3.50 (Traders & Brokers search + dock-state
+replay fix). All confirmed working in-game by the user. No known regressions.
+
+---
+*Session 35 complete — 2026-07-04*
