@@ -9,6 +9,7 @@ export default function Construction() {
   const [project, setProject] = useState(null)
   const [shipCargo, setShipCargo] = useState({})
   const [shipInfo, setShipInfo] = useState(null)
+  const [stationMarket, setStationMarket] = useState(null)
 
   useEffect(() => {
     const off1 = window.__edtc?.on('construction_update', (payload) => {
@@ -20,10 +21,15 @@ export default function Construction() {
     const off3 = window.__edtc?.on('ship_info', (payload) => {
       if (payload) setShipInfo(payload)
     })
+    const off4 = window.__edtc?.on('station_market_update', (payload) => {
+      setStationMarket(payload ?? null)
+    })
     return () => {
-      off1?.(); off2?.(); off3?.()
+      off1?.(); off2?.(); off3?.(); off4?.()
     }
   }, [])
+
+  const marketMap = buildMarketLookup(stationMarket)
 
   if (!project) {
     return (
@@ -101,10 +107,13 @@ export default function Construction() {
                 const onShip = Math.min(shipCargo[r.commodity.toLowerCase()] ?? 0, remaining)
                 const deliveredPct = Math.min(100, Math.round((delivered / r.required) * 100))
                 const onShipPct = Math.min(100 - deliveredPct, Math.round((onShip / r.required) * 100))
+                const buyHere = !!marketMap[normName(r.commodity)]
                 return (
                   <div key={i}>
                     <div className="flex items-center gap-2 text-xs font-mono">
-                      <span className="flex-1 truncate text-ed-text">{r.commodity}</span>
+                      <span className={`flex-1 truncate ${buyHere ? 'text-blue-400 font-semibold' : 'text-ed-text'}`}>
+                        {r.commodity}
+                      </span>
                       <span className="w-24 text-right shrink-0 text-ed-muted">
                         {delivered.toLocaleString()}
                         {onShip > 0 && (
@@ -149,6 +158,19 @@ function buildCargoMap(inventory) {
   for (const c of inventory) {
     const name = (c.Name_Localised || c.Name || '').toLowerCase()
     if (name) map[name] = (map[name] ?? 0) + (c.Count ?? 0)
+  }
+  return map
+}
+
+// Market names arrive as symbols ('ceramiccomposites') and/or display names —
+// normalize both to bare alphanumerics so either form matches the project's
+const normName = s => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+function buildMarketLookup(stationMarket) {
+  const map = {}
+  for (const c of (stationMarket?.commodities ?? [])) {
+    map[normName(c.name)] = true
+    if (c.display) map[normName(c.display)] = true
   }
   return map
 }

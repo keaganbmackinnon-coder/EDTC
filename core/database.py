@@ -952,6 +952,23 @@ def _commodity_symbol(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
+def get_station_commodities(system: str, station: str) -> list[dict]:
+    """Cached commodity list for a single station (seeded by EDDN traffic,
+    Spansh seed, and our own Market.json imports). Only rows with stock —
+    used to flag which shopping-list items are buyable where we're docked."""
+    with _conn() as conn:
+        rows = conn.execute("""
+            SELECT commodity, buy_price, supply, updated_at FROM markets
+            WHERE LOWER(system) = LOWER(?) AND LOWER(station) = LOWER(?)
+              AND supply > 0 AND buy_price > 0
+        """, (system, station)).fetchall()
+    return [
+        {"name": r["commodity"], "buyPrice": r["buy_price"],
+         "stock": r["supply"], "updated": r["updated_at"]}
+        for r in rows
+    ]
+
+
 def search_local_markets(commodity: str, ref_system: str | None = None) -> list[dict]:
     import math
     with _conn() as conn:

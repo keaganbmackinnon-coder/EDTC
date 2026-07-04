@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.45"  # bump this with every release
+APP_VERSION = "0.3.46"  # bump this with every release
 
 logging.info(f"EDTC starting — version {APP_VERSION}, frozen={getattr(sys, 'frozen', False)}")
 
@@ -147,6 +147,11 @@ class API:
         # get_market_stats() full-scans the markets table; Trading.jsx polls it
         self._market_stats_cache: dict | None = None
         self._market_stats_time: float = 0.0
+        # Buyable commodities at the station we're docked at — pushed to the
+        # Colonisation shopping list so it can highlight what's sold here
+        self._station_market: dict | None = None
+        # commodity symbol → display name, built lazily from data/commodities.json
+        self._commodity_names: dict[str, str] | None = None
 
     def set_window(self, window):
         self._window = window
@@ -232,8 +237,10 @@ class API:
         elif event_name == "Docked":
             self._current_station = event.get("StationName", "")
             self._current_system = event.get("StarSystem", self._current_system)
+            self._push_station_market()
         elif event_name == "Undocked":
             self._current_station = ""
+            self._push_station_market()
         elif event_name == "MarketBuy":
             self._handle_market_buy(event)
         elif event_name == "MarketSell":
@@ -252,6 +259,7 @@ class API:
             self._handle_loadout(event)
         elif event_name == "Market":
             self._import_market_json()
+            self._push_station_market()
         elif event_name == "Cargo":
             self._handle_cargo(event)
 
@@ -289,6 +297,84 @@ class API:
                 logging.info(f"Market.json: {len(commodities)} commodities from {station} / {system}")
         except Exception as e:
             logging.warning(f"Market.json import error: {e}")
+
+    def _commodity_display(self, symbol: str) -> str:
+        """Display name for a market/EDDN commodity symbol ('ceramiccomposites'
+        → 'Ceramic Composites'), from data/commodities.json. '' if unknown."""
+        import re
+        if self._commodity_names is None:
+            names = {}
+            for c in self._load_json("commodities.json").get("commodities", []):
+                key = re.sub(r"[^a-z0-9]", "", (c.get("id") or "").lower())
+                if key:
+                    names[key] = c.get("name", "")
+            self._commodity_names = names
+        return self._commodity_names.get(re.sub(r"[^a-z0-9]", "", symbol.lower()), "")
+
+    def _push_station_market(self):
+        """Emit the buyable-commodity list for the station we're docked at.
+        A Market.json written at this station wins (live data — the game writes
+        it when the commodities screen is opened); otherwise the local
+        EDDN/visit cache is used so the list is available right at touchdown.
+        Emits None when not docked / nothing known."""
+        payload = None
+        if self._current_station:
+            commodities, source = [], None
+            live_match = False  # Market.json is for THIS station — don't fall back to cache
+            try:
+                from core.journal import journal_path
+                market_file = journal_path() / "Market.json"
+                if market_file.exists():
+                    data = json.loads(market_file.read_text(encoding="utf-8"))
+                    if data.get("StationName", "").lower() == self._current_station.lower():
+                        live_match = True
+                        for item in data.get("Items", []):
+                            if item.get("Rare") or item.get("Stock", 0) <= 0 or item.get("BuyPrice", 0) <= 0:
+                                continue
+                            raw = item.get("Name", "")
+                            name = raw.lstrip("$").split("_name;")[0] if raw else ""
+                            if not name:
+                                continue
+                            commodities.append({
+                                "name": name,
+                                "display": item.get("Name_Localised") or self._commodity_display(name) or name,
+                                "buyPrice": item.get("BuyPrice", 0),
+                                "stock": item.get("Stock", 0),
+                            })
+                        source = "market"
+            except Exception as e:
+                logging.warning(f"Station market (Market.json) error: {e}")
+            if not commodities and not live_match:
+                try:
+                    from core.database import get_station_commodities
+                    for c in get_station_commodities(self._current_system, self._current_station):
+                        commodities.append({
+                            "name": c["name"],
+                            "display": self._commodity_display(c["name"]) or c["name"],
+                            "buyPrice": c["buyPrice"],
+                            "stock": c["stock"],
+                        })
+                    source = "cache" if commodities else None
+                except Exception as e:
+                    logging.warning(f"Station market (cache) error: {e}")
+            if commodities:
+                payload = {
+                    "system": self._current_system,
+                    "station": self._current_station,
+                    "source": source,
+                    "commodities": commodities,
+                }
+                logging.info(f"Station market: {len(commodities)} buyable at {self._current_station} ({source})")
+        self._station_market = payload
+        self._emit("station_market_update", payload)
+        # construction overlay colors buyable-here commodities blue
+        self._overlay_manager.emit_to_overlay("construction", "station_market_update", payload)
+
+    def get_station_market(self) -> dict | None:
+        """Current station's buyable commodities (None when not docked)."""
+        if self._station_market is None and self._current_station:
+            self._push_station_market()
+        return self._station_market
 
     def _import_cargo_json(self):
         from core.journal import journal_path
@@ -346,6 +432,8 @@ class API:
             payload = {"cargo": self._ship_cargo}
             self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
             logging.info(f"Pushed cargo to overlay: {len(self._ship_cargo)} items")
+            if self._station_market:
+                self._overlay_manager.emit_to_overlay("construction", "station_market_update", self._station_market)
             if self._current_ship:
                 self._overlay_manager.emit_to_overlay("construction", "ship_info", {
                     "ship": self._current_ship.get("ship", ""),
@@ -419,9 +507,10 @@ class API:
             "on_watchlist": on_watchlist,
             "event": event.get("event"),
         }
-        self._overlay_manager.show("cmdr_ping")
-        self._overlay_manager.emit_to_overlay("cmdr_ping", "cmdr_detected", payload)
-        self._overlay_manager.hide_after("cmdr_ping", 8)
+        if self._overlay_manager.is_user_enabled("cmdr_ping"):
+            self._overlay_manager.show("cmdr_ping")
+            self._overlay_manager.emit_to_overlay("cmdr_ping", "cmdr_detected", payload)
+            self._overlay_manager.hide_after("cmdr_ping", 8)
 
     def _handle_fsd_jump(self, event: dict):
         system = event.get("StarSystem", "")
@@ -633,8 +722,9 @@ class API:
             "scan_type": scan_type,
         }
         self._emit("exo_scan", payload)
-        self._overlay_manager.show("exo_tracker")
-        self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
+        if self._overlay_manager.is_user_enabled("exo_tracker"):
+            self._overlay_manager.show("exo_tracker")
+            self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
 
     def _handle_construction_contribution(self, event: dict):
         contributions = event.get("Contributions", [])
@@ -1009,7 +1099,7 @@ class API:
         from core.database import set_active_route, get_active_route
         set_active_route(route_id)
         self._active_route = get_active_route()
-        if self._active_route:
+        if self._active_route and self._overlay_manager.is_user_enabled("route"):
             self._overlay_manager.show("route")
             # immediate emit covers an already-open window; the delayed push
             # covers a window show() is still creating (emit drops silently)
@@ -2245,7 +2335,22 @@ def main():
         min_size=(900, 600),
     )
     api.set_window(window)
-    window.events.closed += api._overlay_manager.close_all
+
+    def _shutdown_overlays():
+        # User request: overlays always start disabled on launch — a stuck or
+        # misbehaving overlay is then always recoverable by restarting the app,
+        # at the cost of re-enabling the ones you want each session.
+        try:
+            from core.database import set_pref
+            from core.overlay import OVERLAYS
+            for name in OVERLAYS:
+                set_pref(f"overlay_auto_{name}", False)
+            logging.info("shutdown: all overlay auto-enable prefs cleared")
+        except Exception as e:
+            logging.warning(f"shutdown: failed clearing overlay prefs: {e}")
+        api._overlay_manager.close_all()
+
+    window.events.closed += _shutdown_overlays
 
     watcher = JournalWatcher(on_event=api.on_journal_event)
     threading.Thread(target=watcher.run, daemon=True).start()
@@ -2270,6 +2375,9 @@ def main():
             time.sleep(1.5)
             api._import_market_json()
             api._import_cargo_json()
+            if api._current_station:
+                # launched while docked — seed and push the station market
+                api._push_station_market()
             if api._current_ship:
                 api._emit("ship_changed", api.get_ship_info())
             if api._current_system:

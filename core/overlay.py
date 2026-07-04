@@ -120,6 +120,9 @@ class OverlayManager:
             return
 
         url = self._url(cfg["key"])
+        # mark shown BEFORE the creation thread runs so a hide() arriving
+        # mid-creation flips it back and _create can honour it below
+        self._shown[name] = True
 
         def _create():
             import time
@@ -140,19 +143,33 @@ class OverlayManager:
                     easy_drag=True,
                 )
                 self._windows[name] = win
-                self._shown[name] = True
                 logging.info(f"overlay: window '{name}' created")
                 time.sleep(1.5)
-                self._apply_opacity(name)
+                if not self._shown.get(name, False):
+                    # user disabled the overlay while the window was still
+                    # being created — the earlier hide() had nothing to hide
+                    win.hide()
+                    logging.info(f"overlay: '{name}' hidden post-create (disabled during creation)")
+                else:
+                    self._apply_opacity(name)
             except Exception as e:
                 logging.error(f"overlay: failed to create window '{name}': {e}")
 
         threading.Thread(target=_create, daemon=True).start()
 
     def hide(self, name: str):
-        if name in self._windows:
-            self._windows[name].hide()
-            self._shown[name] = False
+        # flip the flag even when the window doesn't exist yet — show()'s
+        # creation thread checks it after the window comes up
+        self._shown[name] = False
+        timer = self._hide_timers.pop(name, None)
+        if timer:
+            timer.cancel()
+        win = self._windows.get(name)
+        if win is not None:
+            try:
+                win.hide()
+            except Exception as e:
+                logging.warning(f"overlay: hide '{name}' failed: {e}")
 
     def load_user_enabled(self, name: str, value: bool):
         self._user_enabled[name] = value

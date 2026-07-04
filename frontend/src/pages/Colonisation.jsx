@@ -25,6 +25,23 @@ function aggregateShoppingList(projects) {
     .sort((a, b) => a.commodity.localeCompare(b.commodity))
 }
 
+// Market names arrive as symbols ('ceramiccomposites') and/or display names —
+// normalize both sides to bare alphanumerics so either form matches
+const normName = s => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+function buildMarketLookup(stationMarket) {
+  const map = {}
+  for (const c of (stationMarket?.commodities ?? [])) {
+    const entry = { stock: c.stock, buyPrice: c.buyPrice }
+    map[normName(c.name)] = entry
+    if (c.display) map[normName(c.display)] = entry
+  }
+  return map
+}
+
+// Commodity names buyable at the docked station render blue everywhere
+const BUY_HERE_CLASS = 'text-blue-400 font-semibold'
+
 function depotCommodityName(r) {
   return r.Name_Localised || r.Name.replace(/^\$/, '').replace(/_name;$/i, '').replace(/_/g, ' ')
 }
@@ -366,7 +383,7 @@ function ProjectsTab({ projects, setProjects }) {
 
 // ---- Tab: Shopping List ----
 
-function ShoppingListTab({ projects, fcCargo, shipInfo }) {
+function ShoppingListTab({ projects, fcCargo, shipInfo, stationMarket }) {
   const list = aggregateShoppingList(projects)
   const totalRemaining = list.reduce((s, r) => s + r.remaining, 0)
 
@@ -374,9 +391,12 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
   for (const c of fcCargo) {
     cargoMap[c.commodity.toLowerCase()] = c.count
   }
+  const marketMap = buildMarketLookup(stationMarket)
+  const showHereCol = !!stationMarket
   const withFc = list.map(r => ({
     ...r,
     afterFc: Math.max(0, r.remaining - (cargoMap[r.commodity.toLowerCase()] ?? 0)),
+    here: marketMap[normName(r.commodity)] ?? null,
   }))
   const totalAfterFc = withFc.reduce((s, r) => s + r.afterFc, 0)
   const showFcCol = fcCargo.length > 0
@@ -400,6 +420,16 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
         )}
       </div>
 
+      {showHereCol && (
+        <p className="text-sm font-mono mb-3">
+          <span className="text-blue-400">◉ Docked at {stationMarket.station}</span>
+          <span className="text-ed-muted ml-2">
+            — blue commodities are sold at this station
+            {stationMarket.source === 'cache' && ' (cached market data — open the commodities screen for live stock)'}
+          </span>
+        </p>
+      )}
+
       <HaulPlanner list={list} shipInfo={shipInfo} />
 
       {list.length === 0 ? (
@@ -414,6 +444,7 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
                 <th className="text-right pb-2 pr-4">Delivered</th>
                 <th className="text-right pb-2 pr-4">Remaining</th>
                 {showFcCol && <th className="text-right pb-2 pr-4">After FC Stock</th>}
+                {showHereCol && <th className="text-right pb-2 pr-4">Sold Here</th>}
                 <th className="pb-2 w-32"></th>
               </tr>
             </thead>
@@ -423,7 +454,11 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
                   key={r.commodity}
                   className={`border-b border-ed-border/40 ${r.remaining === 0 ? 'opacity-40' : ''}`}
                 >
-                  <td className="py-1.5 pr-4 font-mono text-ed-text">{r.commodity}</td>
+                  <td className={`py-1.5 pr-4 font-mono ${
+                    r.here && r.remaining > 0 ? BUY_HERE_CLASS : 'text-ed-text'
+                  }`}>
+                    {r.commodity}
+                  </td>
                   <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
                     {r.required.toLocaleString()}
                   </td>
@@ -440,6 +475,18 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
                       r.afterFc === 0 ? 'text-ed-success' : 'text-ed-text'
                     }`}>
                       {r.remaining === 0 ? '—' : r.afterFc === 0 ? 'ON FC' : r.afterFc.toLocaleString()}
+                    </td>
+                  )}
+                  {showHereCol && (
+                    <td className="py-1.5 pr-4 text-right font-mono">
+                      {r.here ? (
+                        <span className="text-blue-400">
+                          {r.here.stock.toLocaleString()}
+                          <span className="text-ed-muted"> @ {r.here.buyPrice.toLocaleString()} cr</span>
+                        </span>
+                      ) : (
+                        <span className="text-ed-muted">—</span>
+                      )}
                     </td>
                   )}
                   <td className="py-1.5">
@@ -459,6 +506,7 @@ function ShoppingListTab({ projects, fcCargo, shipInfo }) {
                     {totalAfterFc.toLocaleString()}
                   </td>
                 )}
+                {showHereCol && <td></td>}
                 <td></td>
               </tr>
             </tfoot>
@@ -620,7 +668,7 @@ function FCCargoTab({ projects, fcCargo, setFcCargo }) {
 
 // ---- Tab: Depot View (all known sites) ----
 
-function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, onRemove, defaultOpen }) {
+function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, stationMarket, onRemove, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen)
   const existing = findMatchingProject(depot, projects)
   const progressVal = Math.round((depot.progress ?? 0) * 100)
@@ -631,6 +679,7 @@ function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, onRemove, 
   for (const c of fcCargo) {
     cargoMap[c.commodity.toLowerCase()] = c.count
   }
+  const marketMap = buildMarketLookup(stationMarket)
 
   // Incomplete commodities first (largest gap first), completed at the bottom
   const sorted = [...depot.resources].sort((a, b) => {
@@ -706,7 +755,11 @@ function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, onRemove, 
                   : 0
                 return (
                   <tr key={r.Name} className={`border-b border-ed-border/40 ${done ? 'opacity-50' : ''}`}>
-                    <td className="py-1.5 pr-4 font-mono text-ed-text">{name}</td>
+                    <td className={`py-1.5 pr-4 font-mono ${
+                      !done && marketMap[normName(name)] ? BUY_HERE_CLASS : 'text-ed-text'
+                    }`}>
+                      {name}
+                    </td>
                     <td className="py-1.5 pr-4 text-right font-mono text-ed-muted">
                       {r.RequiredAmount.toLocaleString()}
                     </td>
@@ -739,7 +792,7 @@ function DepotCard({ depot, fcCargo, projects, setProjects, shipInfo, onRemove, 
   )
 }
 
-function DepotTab({ depots, setDepots, fcCargo, projects, setProjects, shipInfo }) {
+function DepotTab({ depots, setDepots, fcCargo, projects, setProjects, shipInfo, stationMarket }) {
   if (depots.length === 0) {
     return (
       <p className="text-ed-muted text-sm font-mono">
@@ -767,6 +820,7 @@ function DepotTab({ depots, setDepots, fcCargo, projects, setProjects, shipInfo 
             projects={projects}
             setProjects={setProjects}
             shipInfo={shipInfo}
+            stationMarket={stationMarket}
             onRemove={() => remove(d.market_id)}
             defaultOpen={i === 0}
           />
@@ -935,6 +989,7 @@ export default function Colonisation() {
   const [fcCargo, setFcCargo] = useState([])
   const [depots, setDepots] = useState([])
   const [shipInfo, setShipInfo] = useState(null)
+  const [stationMarket, setStationMarket] = useState(null)
   const [bannerId, setBannerId] = useState(null)      // market_id the banner shows
   const [dismissedId, setDismissedId] = useState(null)
 
@@ -942,6 +997,7 @@ export default function Colonisation() {
     api()?.get_construction_projects(false).then(r => setProjects(r ?? []))
     api()?.get_fc_cargo().then(r => setFcCargo(r ?? []))
     api()?.get_ship_info?.().then(r => setShipInfo(r ?? null))
+    api()?.get_station_market?.().then(r => setStationMarket(r ?? null))
     // Depots are persisted — docking events are no longer missed when this
     // page isn't open. Surface the banner for a freshly-visited site.
     api()?.get_construction_depots?.().then(r => {
@@ -977,7 +1033,10 @@ export default function Colonisation() {
     const off4 = window.__edtc?.on('ship_changed', payload => {
       if (payload) setShipInfo(payload)
     })
-    return () => { off1?.(); off2?.(); off3?.(); off4?.() }
+    const off5 = window.__edtc?.on('station_market_update', payload => {
+      setStationMarket(payload ?? null)
+    })
+    return () => { off1?.(); off2?.(); off3?.(); off4?.(); off5?.() }
   }, [])
 
   const bannerDepot = bannerId !== dismissedId
@@ -1019,14 +1078,16 @@ export default function Colonisation() {
         <ProjectsTab projects={projects} setProjects={setProjects} />
       )}
       {tab === 'shopping' && (
-        <ShoppingListTab projects={projects} fcCargo={fcCargo} shipInfo={shipInfo} />
+        <ShoppingListTab projects={projects} fcCargo={fcCargo} shipInfo={shipInfo}
+          stationMarket={stationMarket} />
       )}
       {tab === 'fc_cargo' && (
         <FCCargoTab projects={projects} fcCargo={fcCargo} setFcCargo={setFcCargo} />
       )}
       {tab === 'depot' && (
         <DepotTab depots={depots} setDepots={setDepots} fcCargo={fcCargo}
-          projects={projects} setProjects={setProjects} shipInfo={shipInfo} />
+          projects={projects} setProjects={setProjects} shipInfo={shipInfo}
+          stationMarket={stationMarket} />
       )}
       {tab === 'market' && (
         <MarketFinderTab projects={projects} />

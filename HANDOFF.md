@@ -1637,3 +1637,52 @@ in-game by user before starting.
 
 ---
 *Session checkpoint: 2026-07-03 16:19:07*
+
+---
+*Session checkpoint: 2026-07-03 16:43:52*
+
+---
+*Session checkpoint: 2026-07-03 16:44:44*
+
+---
+*Session checkpoint: 2026-07-03 17:50:30*
+
+---
+*Session checkpoint: 2026-07-03 18:48:25*
+
+---
+
+## Build status — Session 35 — Station-market highlight + overlay discipline (v0.3.46)
+
+| Item | Status | File |
+|---|---|---|
+| **Buyable-here = blue letters** (user request: "simple, so I know what I'm picking up"): on Docked, backend pushes `station_market_update`; commodity names buyable at the docked station render blue (text-blue-400) in the **construction overlay**, **Depot View cards**, and **Shopping List** (which also gets a Sold Here stock@price column + "Docked at X" banner); clears on Undocked. First iteration was green rows on Shopping List only — user was looking at the overlay/Depot View and saw nothing | DONE | `main.py`, `frontend/src/pages/Colonisation.jsx`, `frontend/src/overlays/Construction.jsx` |
+| Data source order: Market.json wins when its StationName matches the current station (live, refreshed on the `Market` event when the commodities screen opens); otherwise the local EDDN/Spansh `markets` cache via new `get_station_commodities()` — so the highlight works right at touchdown. A live Market.json match with nothing buyable does NOT fall back to cache (consumer-only stations show honestly empty) | DONE | `core/database.py`, `main.py` |
+| Name matching: market symbols ('ceramiccomposites') and display names both normalized to bare alphanumerics; backend enriches entries with `display` via commodities.json id→name map (`_commodity_display`) | DONE | `main.py`, `frontend/src/pages/Colonisation.jsx` |
+| `get_station_market()` API — page-mount fetch, self-heals if the push predates the window | DONE | `main.py` |
+| **"Route overlay won't close" root cause**: `set_active_route` force-`show("route")`ed ignoring the user's Enable/Disable pref; same bug in `_handle_cmdr_event` (cmdr_ping) and `_handle_scan_organic` (exo_tracker). All three now gated on `is_user_enabled()` | FIXED | `main.py` |
+| Hide-during-creation race: `hide()` now flips `_shown` even when the window doesn't exist yet and cancels pending hide-timers; `show()`'s creation thread checks `_shown` after the 1.5s init and hides the fresh window if the user disabled it meanwhile | FIXED | `core/overlay.py` |
+| **All overlays disabled on app close** (user request): `window.events.closed` handler wipes every `overlay_auto_*` pref — overlays always start disabled, so a stuck overlay is recoverable by restarting; user re-enables per session | DONE | `main.py` |
+| `APP_VERSION` = `0.3.46`; frontend built, exe built from venv, local install swapped and verified running (log: v0.3.46, no errors) | DONE | `main.py` |
+
+## Notes
+
+- Station market payload: `{system, station, source: "market"|"cache", commodities: [{name, display, buyPrice, stock}]}`; only Stock>0 && BuyPrice>0, rares skipped. Also emitted to the construction overlay; `_push_cargo_to_overlay` re-sends it when the overlay opens; `_push_startup` seeds it when launched while docked.
+- Backend verified live: "Station market: 58 buyable at YusufibnAyyub Landing (market)" in log.
+- Blue commodity highlight confirmed working in-game by user 2026-07-03 ("it works!"); v0.3.46 committed and tagged for CI release same day.
+- Still to watch in-game: a disabled route overlay staying closed through route activation.
+
+---
+*Session 35 — 2026-07-03*
+
+---
+*Session checkpoint: 2026-07-03 18:51:43*
+
+---
+*Session checkpoint: 2026-07-03 19:55:24*
+
+---
+*Session checkpoint: 2026-07-03 19:58:18*
+
+---
+*Session checkpoint: 2026-07-03 20:47:28*
