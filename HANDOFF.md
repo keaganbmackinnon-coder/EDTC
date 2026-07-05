@@ -1935,7 +1935,7 @@ Diagnostics hardening (released as v0.3.51, tagged same day):
 
 ## Known issues / notes for next session
 
-- v0.3.52 is local only — tag for CI release once the user confirms the overlay sort in-game.
+- ~~v0.3.52 is local only~~ — user confirmed the overlay market-order sort in-game 2026-07-04; v0.3.52 tagged for CI release same day.
 - Operations support still blocked on the user playing one Operation (Session 35 plan stands; diff journals vs `scripts/journal_event_baseline.txt`).
 - If the user wants the same market-order sort on the Colonisation page (Shopping List / Depot View cards), the category map is already available backend-side via `_commodity_category_map()` — page has a working API bridge so it could just be an API method.
 - Inara integration wired but blocked pending app registration (external).
@@ -1943,3 +1943,6 @@ Diagnostics hardening (released as v0.3.51, tagged same day):
 
 ---
 *Session 37 — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 21:28:15*
