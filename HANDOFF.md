@@ -2076,11 +2076,14 @@ and not ping AI".
 
 ## Known issues / notes for next session
 
-- v0.3.54/55/56 all unreleased — one v0.3.56 tag ships engineering tracker,
-  carrier ownership, and overlay/ping fixes together after play-testing.
+- ~~v0.3.54/55/56 unreleased~~ — v0.3.56 tagged 2026-07-05; one release ships
+  the engineering tracker, carrier ownership tabs, and overlay/ping fixes.
 - CMDR ping still needs an in-game encounter with a real player to confirm
   end-to-end (filter verified against journal data, beep verified audibly).
 - Operations support still blocked on the user playing one Operation.
 
 ---
 *Session 37 continued (overlay audit + cmdr ping) — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 00:29:14*
