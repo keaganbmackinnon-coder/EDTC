@@ -1,43 +1,2413 @@
 {
-  "_source": "EDCD/Coriolis-Data — replace with full dataset from https://github.com/EDCD/coriolis-data",
+  "_source": "github.com/EDCD/coriolis-data (ships/)",
   "ships": [
     {
-      "id": "sidewinder",
-      "name": "Sidewinder Mk I",
-      "manufacturer": "Faulcon DeLacy",
-      "cost": 32000,
-      "mass": 25,
-      "cargo_capacity": 4,
-      "max_cargo": 16,
-      "fuel_capacity": 2,
-      "jump_range": 7.73,
+      "id": "adder",
+      "name": "Adder",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 1,
+      "crew": 2,
+      "cost": 87808,
+      "hull_mass": 35,
       "speed": 220,
       "boost": 320,
-      "maneuverability": 5,
-      "shields": 40,
-      "hull": 180,
-      "hardpoints": [2, 2],
+      "shields": 60,
+      "armour": 90,
+      "core_slots": [
+        3,
+        3,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "hardpoint_sizes": [
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 1,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        3,
+        3,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "alliance_challenger",
+      "name": "Alliance Challenger",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 30472252,
+      "hull_mass": 450,
+      "speed": 204,
+      "boost": 310,
+      "shields": 220,
+      "armour": 300,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 3,
+        "Small": 3
+      },
       "utility_slots": 4,
-      "internal_slots": [3, 3, 1, 1, 1]
+      "optional_slots": [
+        6,
+        6,
+        3,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "alliance_chieftain",
+      "name": "Alliance Chieftain",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 19382252,
+      "hull_mass": 400,
+      "speed": 230,
+      "boost": 330,
+      "shields": 200,
+      "armour": 280,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 1,
+        "Small": 3
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        4,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "alliance_crusader",
+      "name": "Alliance Crusader",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 4,
+      "cost": 22866341,
+      "hull_mass": 500,
+      "speed": 180,
+      "boost": 300,
+      "shields": 200,
+      "armour": 300,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 2,
+        "Small": 3
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        3,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
     },
     {
       "id": "anaconda",
       "name": "Anaconda",
       "manufacturer": "Faulcon DeLacy",
+      "pad_size": 3,
+      "crew": 4,
       "cost": 146969451,
-      "mass": 400,
-      "cargo_capacity": 114,
-      "max_cargo": 468,
-      "fuel_capacity": 32,
-      "jump_range": 9.81,
+      "hull_mass": 400,
       "speed": 180,
       "boost": 240,
-      "maneuverability": 1,
-      "shields": 297,
-      "hull": 945,
-      "hardpoints": [8, 8, 4, 4, 4, 3, 3],
+      "shields": 350,
+      "armour": 525,
+      "core_slots": [
+        8,
+        7,
+        6,
+        5,
+        8,
+        8,
+        5
+      ],
+      "hardpoint_sizes": [
+        4,
+        3,
+        3,
+        3,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 1,
+        "Large": 3,
+        "Medium": 2,
+        "Small": 2
+      },
       "utility_slots": 8,
-      "internal_slots": [7, 7, 6, 6, 5, 5, 4, 3, 3, 2, 1, 1]
+      "optional_slots": [
+        7,
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        4,
+        4,
+        4,
+        2,
+        1
+      ],
+      "military_slots": [
+        5
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "asp",
+      "name": "Asp Explorer",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 6661154,
+      "hull_mass": 280,
+      "speed": 250,
+      "boost": 340,
+      "shields": 140,
+      "armour": 210,
+      "core_slots": [
+        5,
+        5,
+        5,
+        4,
+        4,
+        5,
+        5
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 4
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        3,
+        3,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "asp_scout",
+      "name": "Asp Scout",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 3961154,
+      "hull_mass": 150,
+      "speed": 220,
+      "boost": 300,
+      "shields": 120,
+      "armour": 180,
+      "core_slots": [
+        4,
+        4,
+        4,
+        3,
+        4,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        5,
+        4,
+        3,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "beluga",
+      "name": "Beluga Liner",
+      "manufacturer": "Saud Kruger",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 84532764,
+      "hull_mass": 950,
+      "speed": 200,
+      "boost": 280,
+      "shields": 280,
+      "armour": 280,
+      "core_slots": [
+        6,
+        7,
+        7,
+        8,
+        6,
+        5,
+        7
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 5,
+        "Small": 0
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        6,
+        6,
+        6,
+        6,
+        5,
+        5,
+        4,
+        3,
+        3,
+        3,
+        3,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "explorer_nx",
+      "name": "Caspian Explorer",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 194861290,
+      "hull_mass": 950,
+      "speed": 210,
+      "boost": 290,
+      "shields": 500,
+      "armour": 345,
+      "core_slots": [
+        8,
+        7,
+        8,
+        5,
+        7,
+        8,
+        7
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 6,
+        "Small": 0
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        7,
+        6,
+        6,
+        5,
+        5,
+        5,
+        5,
+        4,
+        4,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "cobra_mk_iii",
+      "name": "Cobra Mk III",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 2,
+      "cost": 349718,
+      "hull_mass": 180,
+      "speed": 280,
+      "boost": 400,
+      "shields": 80,
+      "armour": 120,
+      "core_slots": [
+        4,
+        4,
+        4,
+        3,
+        3,
+        3,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "cobra_mk_iv",
+      "name": "Cobra Mk IV",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 2,
+      "cost": 764720,
+      "hull_mass": 210,
+      "speed": 200,
+      "boost": 300,
+      "shields": 120,
+      "armour": 120,
+      "core_slots": [
+        4,
+        4,
+        4,
+        3,
+        3,
+        3,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 3
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        4,
+        4,
+        4,
+        4,
+        3,
+        3,
+        2,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "cobramkv",
+      "name": "Cobra Mk V",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 3,
+      "cost": 1989461,
+      "hull_mass": 150,
+      "speed": 291,
+      "boost": 412,
+      "shields": 160,
+      "armour": 180,
+      "core_slots": [
+        4,
+        4,
+        4,
+        3,
+        4,
+        3,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 3,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        5,
+        4,
+        4,
+        4,
+        3,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "imperial_corsair",
+      "name": "Corsair",
+      "manufacturer": "Gutamaya",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 79304750,
+      "hull_mass": 265,
+      "speed": 280,
+      "boost": 355,
+      "shields": 235,
+      "armour": 270,
+      "core_slots": [
+        7,
+        7,
+        5,
+        4,
+        7,
+        6,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 3,
+        "Medium": 3,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "diamondback_explorer",
+      "name": "Diamondback Explorer",
+      "manufacturer": "Lakon",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 1894760,
+      "hull_mass": 260,
+      "speed": 260,
+      "boost": 340,
+      "shields": 150,
+      "armour": 150,
+      "core_slots": [
+        4,
+        4,
+        5,
+        3,
+        4,
+        3,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        4,
+        4,
+        3,
+        3,
+        2,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "diamondback",
+      "name": "Diamondback Scout",
+      "manufacturer": "Lakon",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 564329,
+      "hull_mass": 170,
+      "speed": 280,
+      "boost": 380,
+      "shields": 120,
+      "armour": 120,
+      "core_slots": [
+        4,
+        4,
+        4,
+        2,
+        3,
+        2,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        3,
+        3,
+        3,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "manufacturer": "Saud Kruger",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 1337323,
+      "hull_mass": 140,
+      "speed": 250,
+      "boost": 350,
+      "shields": 110,
+      "armour": 110,
+      "core_slots": [
+        4,
+        5,
+        4,
+        4,
+        3,
+        3,
+        4
+      ],
+      "hardpoint_sizes": [
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 2
+      },
+      "utility_slots": 3,
+      "optional_slots": [
+        5,
+        4,
+        4,
+        3,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "eagle",
+      "name": "Eagle",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 44800,
+      "hull_mass": 50,
+      "speed": 240,
+      "boost": 350,
+      "shields": 60,
+      "armour": 40,
+      "core_slots": [
+        2,
+        3,
+        3,
+        1,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_sizes": [
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 3
+      },
+      "utility_slots": 1,
+      "optional_slots": [
+        3,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [
+        2
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "federal_assault_ship",
+      "name": "Federal Assault Ship",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 19814210,
+      "hull_mass": 480,
+      "speed": 210,
+      "boost": 350,
+      "shields": 200,
+      "armour": 300,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        5,
+        5,
+        4,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "federal_corvette",
+      "name": "Federal Corvette",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 187969450,
+      "hull_mass": 900,
+      "speed": 200,
+      "boost": 260,
+      "shields": 555,
+      "armour": 370,
+      "core_slots": [
+        8,
+        7,
+        6,
+        5,
+        8,
+        8,
+        5
+      ],
+      "hardpoint_sizes": [
+        4,
+        4,
+        3,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 2,
+        "Large": 1,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 8,
+      "optional_slots": [
+        7,
+        7,
+        7,
+        6,
+        6,
+        5,
+        5,
+        4,
+        4,
+        3,
+        1
+      ],
+      "military_slots": [
+        5,
+        5
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "federal_dropship",
+      "name": "Federal Dropship",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 14314210,
+      "hull_mass": 580,
+      "speed": 180,
+      "boost": 300,
+      "shields": 200,
+      "armour": 300,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        4,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 4,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        5,
+        4,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "federal_gunship",
+      "name": "Federal Gunship",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 35814210,
+      "hull_mass": 580,
+      "speed": 170,
+      "boost": 280,
+      "shields": 250,
+      "armour": 350,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        7,
+        5,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 4,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        5,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4,
+        4,
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "fer_de_lance",
+      "name": "Fer-de-Lance",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 51567040,
+      "hull_mass": 250,
+      "speed": 260,
+      "boost": 350,
+      "shields": 300,
+      "armour": 225,
+      "core_slots": [
+        6,
+        5,
+        4,
+        4,
+        6,
+        4,
+        3
+      ],
+      "hardpoint_sizes": [
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 1,
+        "Large": 0,
+        "Medium": 4,
+        "Small": 0
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        5,
+        4,
+        4,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "hauler",
+      "name": "Hauler",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 52720,
+      "hull_mass": 14,
+      "speed": 200,
+      "boost": 300,
+      "shields": 50,
+      "armour": 100,
+      "core_slots": [
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2
+      ],
+      "hardpoint_sizes": [
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 1
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        3,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "imperial_clipper",
+      "name": "Imperial Clipper",
+      "manufacturer": "Gutamaya",
+      "pad_size": 3,
+      "crew": 2,
+      "cost": 22295860,
+      "hull_mass": 400,
+      "speed": 300,
+      "boost": 380,
+      "shields": 180,
+      "armour": 270,
+      "core_slots": [
+        6,
+        6,
+        5,
+        5,
+        6,
+        5,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        7,
+        6,
+        4,
+        4,
+        3,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "imperial_courier",
+      "name": "Imperial Courier",
+      "manufacturer": "Gutamaya",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 2542931,
+      "hull_mass": 35,
+      "speed": 280,
+      "boost": 380,
+      "shields": 200,
+      "armour": 80,
+      "core_slots": [
+        4,
+        3,
+        3,
+        1,
+        3,
+        2,
+        3
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 3,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        3,
+        3,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "imperial_cutter",
+      "name": "Imperial Cutter",
+      "manufacturer": "Gutamaya",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 208969451,
+      "hull_mass": 1100,
+      "speed": 200,
+      "boost": 320,
+      "shields": 600,
+      "armour": 400,
+      "core_slots": [
+        8,
+        8,
+        7,
+        7,
+        7,
+        7,
+        6
+      ],
+      "hardpoint_sizes": [
+        4,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 1,
+        "Large": 2,
+        "Medium": 4,
+        "Small": 0
+      },
+      "utility_slots": 8,
+      "optional_slots": [
+        8,
+        8,
+        6,
+        6,
+        6,
+        5,
+        5,
+        4,
+        3,
+        1
+      ],
+      "military_slots": [
+        5,
+        5
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "imperial_eagle",
+      "name": "Imperial Eagle",
+      "manufacturer": "Gutamaya",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 110830,
+      "hull_mass": 50,
+      "speed": 300,
+      "boost": 400,
+      "shields": 80,
+      "armour": 60,
+      "core_slots": [
+        3,
+        3,
+        3,
+        1,
+        2,
+        2,
+        2
+      ],
+      "hardpoint_sizes": [
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 1,
+        "Small": 2
+      },
+      "utility_slots": 1,
+      "optional_slots": [
+        3,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [
+        2
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "keelback",
+      "name": "Keelback",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 3126154,
+      "hull_mass": 180,
+      "speed": 200,
+      "boost": 300,
+      "shields": 135,
+      "armour": 270,
+      "core_slots": [
+        4,
+        4,
+        4,
+        1,
+        3,
+        2,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 3,
+      "optional_slots": [
+        5,
+        5,
+        4,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "kestrel",
+      "name": "Kestrel Mk II",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 14273820,
+      "hull_mass": 190,
+      "speed": 271,
+      "boost": 360,
+      "shields": 225,
+      "armour": 70,
+      "core_slots": [
+        5,
+        5,
+        4,
+        1,
+        5,
+        2,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 3,
+        "Medium": 0,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        5,
+        4,
+        3,
+        2,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [
+        4
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "krait_mkii",
+      "name": "Krait Mk II",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 2,
+      "crew": 3,
+      "cost": 45814205,
+      "hull_mass": 320,
+      "speed": 240,
+      "boost": 330,
+      "shields": 220,
+      "armour": 220,
+      "core_slots": [
+        7,
+        6,
+        5,
+        4,
+        7,
+        6,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 3,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        5,
+        5,
+        4,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "krait_phantom",
+      "name": "Krait Phantom",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 37472252,
+      "hull_mass": 270,
+      "speed": 250,
+      "boost": 350,
+      "shields": 200,
+      "armour": 180,
+      "core_slots": [
+        7,
+        6,
+        5,
+        4,
+        7,
+        6,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        5,
+        5,
+        3,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "mamba",
+      "name": "Mamba",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 55867040,
+      "hull_mass": 250,
+      "speed": 310,
+      "boost": 380,
+      "shields": 270,
+      "armour": 230,
+      "core_slots": [
+        6,
+        5,
+        4,
+        4,
+        6,
+        4,
+        3
+      ],
+      "hardpoint_sizes": [
+        4,
+        3,
+        3,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 1,
+        "Large": 2,
+        "Medium": 0,
+        "Small": 2
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        5,
+        4,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "mandalay",
+      "name": "Mandalay",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 17639220,
+      "hull_mass": 230,
+      "speed": 280,
+      "boost": 350,
+      "shields": 220,
+      "armour": 230,
+      "core_slots": [
+        5,
+        5,
+        5,
+        4,
+        5,
+        5,
+        5
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 4,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        4,
+        4,
+        3,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "orca",
+      "name": "Orca",
+      "manufacturer": "Saud Kruger",
+      "pad_size": 3,
+      "crew": 2,
+      "cost": 48539887,
+      "hull_mass": 290,
+      "speed": 300,
+      "boost": 380,
+      "shields": 220,
+      "armour": 220,
+      "core_slots": [
+        5,
+        6,
+        5,
+        6,
+        5,
+        4,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        5,
+        5,
+        5,
+        4,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "panthermkii",
+      "name": "Panther Clipper Mk II",
+      "manufacturer": "Zorgon Peterson",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 301348586,
+      "hull_mass": 1200,
+      "speed": 181,
+      "boost": 250,
+      "shields": 350,
+      "armour": 620,
+      "core_slots": [
+        8,
+        8,
+        7,
+        5,
+        7,
+        5,
+        7
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 4,
+        "Small": 4
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        8,
+        8,
+        7,
+        7,
+        6,
+        6,
+        6,
+        5,
+        5,
+        4,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "python",
+      "name": "Python",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 56978179,
+      "hull_mass": 350,
+      "speed": 230,
+      "boost": 300,
+      "shields": 260,
+      "armour": 260,
+      "core_slots": [
+        7,
+        6,
+        5,
+        4,
+        7,
+        6,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 3,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        6,
+        5,
+        5,
+        4,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "python_nx",
+      "name": "Python Mk II",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 2,
+      "crew": 2,
+      "cost": 67527359,
+      "hull_mass": 450,
+      "speed": 256,
+      "boost": 345,
+      "shields": 335,
+      "armour": 280,
+      "core_slots": [
+        6,
+        6,
+        5,
+        4,
+        6,
+        5,
+        4
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        3,
+        2,
+        2
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 4,
+        "Medium": 2,
+        "Small": 0
+      },
+      "utility_slots": 6,
+      "optional_slots": [
+        6,
+        4,
+        3,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "sidewinder",
+      "name": "Sidewinder",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 32000,
+      "hull_mass": 25,
+      "speed": 220,
+      "boost": 320,
+      "shields": 40,
+      "armour": 60,
+      "core_slots": [
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_sizes": [
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_10_defender",
+      "name": "Type-10 Defender",
+      "manufacturer": "Lakon",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 124755342,
+      "hull_mass": 1200,
+      "speed": 179,
+      "boost": 219,
+      "shields": 320,
+      "armour": 580,
+      "core_slots": [
+        8,
+        7,
+        7,
+        5,
+        7,
+        4,
+        6
+      ],
+      "hardpoint_sizes": [
+        3,
+        3,
+        3,
+        3,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 4,
+        "Medium": 3,
+        "Small": 2
+      },
+      "utility_slots": 8,
+      "optional_slots": [
+        8,
+        7,
+        6,
+        5,
+        4,
+        4,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [
+        5,
+        5
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_11_prospector",
+      "name": "Type-11 Prospector",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 3,
+      "cost": 67861850,
+      "hull_mass": 320,
+      "speed": 272,
+      "boost": 367,
+      "shields": 275,
+      "armour": 350,
+      "core_slots": [
+        6,
+        5,
+        5,
+        3,
+        7,
+        3,
+        5
+      ],
+      "hardpoint_sizes": [
+        3,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 1,
+        "Medium": 3,
+        "Small": 4
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        5,
+        4,
+        3,
+        2,
+        1,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_6_transporter",
+      "name": "Type-6 Transporter",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 1,
+      "cost": 1045945,
+      "hull_mass": 155,
+      "speed": 220,
+      "boost": 350,
+      "shields": 90,
+      "armour": 180,
+      "core_slots": [
+        3,
+        4,
+        4,
+        2,
+        3,
+        2,
+        4
+      ],
+      "hardpoint_sizes": [
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 2
+      },
+      "utility_slots": 3,
+      "optional_slots": [
+        5,
+        5,
+        4,
+        4,
+        3,
+        2,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_7_transport",
+      "name": "Type-7 Transporter",
+      "manufacturer": "Lakon",
+      "pad_size": 3,
+      "crew": 1,
+      "cost": 17472252,
+      "hull_mass": 350,
+      "speed": 180,
+      "boost": 300,
+      "shields": 155,
+      "armour": 340,
+      "core_slots": [
+        5,
+        5,
+        5,
+        4,
+        4,
+        3,
+        5
+      ],
+      "hardpoint_sizes": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 0,
+        "Small": 4
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_8_transport",
+      "name": "Type-8 Transporter",
+      "manufacturer": "Lakon",
+      "pad_size": 2,
+      "crew": 1,
+      "cost": 38453970,
+      "hull_mass": 400,
+      "speed": 200,
+      "boost": 340,
+      "shields": 228,
+      "armour": 440,
+      "core_slots": [
+        5,
+        5,
+        5,
+        3,
+        4,
+        3,
+        5
+      ],
+      "hardpoint_sizes": [
+        2,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 1,
+        "Small": 5
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        7,
+        6,
+        6,
+        6,
+        5,
+        5,
+        4,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "type_9_heavy",
+      "name": "Type-9 Heavy",
+      "manufacturer": "Lakon",
+      "pad_size": 3,
+      "crew": 4,
+      "cost": 76555842,
+      "hull_mass": 850,
+      "speed": 130,
+      "boost": 200,
+      "shields": 240,
+      "armour": 480,
+      "core_slots": [
+        6,
+        7,
+        6,
+        5,
+        6,
+        4,
+        6
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 3,
+        "Small": 2
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        8,
+        8,
+        7,
+        6,
+        5,
+        4,
+        4,
+        3,
+        3,
+        2,
+        1
+      ],
+      "military_slots": [],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "viper",
+      "name": "Viper",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 142931,
+      "hull_mass": 50,
+      "speed": 320,
+      "boost": 400,
+      "shields": 105,
+      "armour": 70,
+      "core_slots": [
+        3,
+        3,
+        3,
+        2,
+        3,
+        3,
+        2
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        3,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [
+        3
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "viper_mk_iv",
+      "name": "Viper Mk IV",
+      "manufacturer": "Faulcon DeLacy",
+      "pad_size": 1,
+      "crew": 1,
+      "cost": 437931,
+      "hull_mass": 190,
+      "speed": 270,
+      "boost": 340,
+      "shields": 150,
+      "armour": 150,
+      "core_slots": [
+        4,
+        4,
+        4,
+        2,
+        3,
+        3,
+        4
+      ],
+      "hardpoint_sizes": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 0,
+        "Medium": 2,
+        "Small": 2
+      },
+      "utility_slots": 2,
+      "optional_slots": [
+        4,
+        4,
+        3,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [
+        3
+      ],
+      "planetary_slots": [
+        1
+      ]
+    },
+    {
+      "id": "vulture",
+      "name": "Vulture",
+      "manufacturer": "Core Dynamics",
+      "pad_size": 1,
+      "crew": 2,
+      "cost": 4925615,
+      "hull_mass": 230,
+      "speed": 210,
+      "boost": 340,
+      "shields": 240,
+      "armour": 160,
+      "core_slots": [
+        4,
+        5,
+        4,
+        3,
+        5,
+        4,
+        3
+      ],
+      "hardpoint_sizes": [
+        3,
+        3
+      ],
+      "hardpoint_counts": {
+        "Huge": 0,
+        "Large": 2,
+        "Medium": 0,
+        "Small": 0
+      },
+      "utility_slots": 4,
+      "optional_slots": [
+        5,
+        4,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "military_slots": [
+        5
+      ],
+      "planetary_slots": [
+        1
+      ]
     }
   ]
 }

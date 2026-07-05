@@ -532,6 +532,85 @@ def build_tech_brokers():
     print(f"  OK  {len(TECH_BROKER_ITEMS)} tech broker items")
 
 
+# ── Ships ────────────────────────────────────────────────────────────────────
+
+SHIPS_TREE_URL = "https://api.github.com/repos/EDCD/coriolis-data/contents/ships"
+SHIP_RAW_BASE = "https://raw.githubusercontent.com/EDCD/coriolis-data/master/ships/"
+
+# coriolis-data slots.standard is a fixed-order array of the 7 core internals.
+CORE_SLOT_NAMES = [
+    "Power Plant", "Thrusters", "Frame Shift Drive", "Life Support",
+    "Power Distributor", "Sensors", "Fuel Tank",
+]
+# hardpoint slot size codes (0 = utility mount)
+HARDPOINT_SIZE_NAMES = {1: "Small", 2: "Medium", 3: "Large", 4: "Huge"}
+
+
+def _internal_class(entry):
+    """internal slot entry is either an int size or a {class, name} object."""
+    if isinstance(entry, dict):
+        return int(entry.get("class", 0)), entry.get("name", "")
+    return int(entry), ""
+
+
+def build_ships():
+    print("\n[6/6] Building ships.json …")
+    listing = json.loads(fetch(SHIPS_TREE_URL))
+    files = sorted(it["name"] for it in listing
+                   if it["name"].endswith(".json") and it["name"] != "index.js")
+
+    ships = []
+    for fname in files:
+        raw = json.loads(fetch(SHIP_RAW_BASE + fname))
+        # each file is {"<id>": {...}}
+        ship_id, s = next(iter(raw.items()))
+        p = s.get("properties", {}) or {}
+        slots = s.get("slots", {}) or {}
+
+        hp_raw = [_internal_class(h)[0] for h in (slots.get("hardpoints", []) or [])]
+        hardpoint_sizes = sorted((h for h in hp_raw if h > 0), reverse=True)
+        utility_slots = sum(1 for h in hp_raw if h == 0)
+        hp_counts = {"Huge": 0, "Large": 0, "Medium": 0, "Small": 0}
+        for h in hardpoint_sizes:
+            hp_counts[HARDPOINT_SIZE_NAMES[h]] += 1
+
+        optional, military, planetary = [], [], []
+        for entry in slots.get("internal", []) or []:
+            cls, name = _internal_class(entry)
+            if name == "Military":
+                military.append(cls)
+            elif name == "PlanetaryApproachSuite":
+                planetary.append(cls)
+            else:
+                optional.append(cls)
+
+        ships.append({
+            "id": ship_id,
+            "name": p.get("name", ship_id),
+            "manufacturer": p.get("manufacturer", ""),
+            "pad_size": int(p.get("class", 0)),          # 1=S 2=M 3=L landing pad
+            "crew": p.get("crew", 1),
+            "cost": s.get("retailCost") or p.get("hullCost", 0),
+            "hull_mass": p.get("hullMass", 0),
+            "speed": p.get("speed", 0),
+            "boost": p.get("boost", 0),
+            "shields": p.get("baseShieldStrength", 0),
+            "armour": p.get("baseArmour", 0),
+            "core_slots": [int(x) for x in slots.get("standard", [])],
+            "hardpoint_sizes": hardpoint_sizes,
+            "hardpoint_counts": hp_counts,
+            "utility_slots": utility_slots,
+            "optional_slots": sorted(optional, reverse=True),
+            "military_slots": sorted(military, reverse=True),
+            "planetary_slots": sorted(planetary, reverse=True),
+        })
+
+    ships.sort(key=lambda x: x["name"])
+    out = {"_source": "github.com/EDCD/coriolis-data (ships/)", "ships": ships}
+    (DATA_DIR / "ships.json").write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  OK  {len(ships)} ships")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -550,6 +629,7 @@ def main():
     build_engineers()
     build_synthesis()
     build_tech_brokers()
+    build_ships()
 
     print("\n" + "=" * 40)
     print("Done! All data files written to data/")

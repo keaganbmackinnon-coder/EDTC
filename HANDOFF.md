@@ -2087,3 +2087,64 @@ and not ping AI".
 
 ---
 *Session checkpoint: 2026-07-05 00:29:14*
+
+---
+*Session checkpoint: 2026-07-05 00:32:07*
+
+---
+*Session checkpoint: 2026-07-05 09:31:36*
+
+---
+
+## Session 38 — Ships reference tab (v0.3.57)
+
+User request: a Ships tab listing every ship, click a ship to see its modules
+(slot sizing + how many), and show the ship as an outline/framework.
+
+| Item | Status | File |
+|---|---|---|
+| `build_ships()` added — fetches all 47 ships from EDCD/coriolis-data `ships/*.json`, transforms to slot layout (core/hardpoints/utility/optional/military/planetary), writes `data/ships.json`. Wired into `main()` as [6/6] | DONE | `scripts/build_data.py` |
+| `data/ships.json` — full 47-ship dataset (replaces the 2-ship stub) incl. Corsair, Mandalay, Panther Clipper Mk II, Type-11 Prospector, Caspian Explorer, Nomad, Kestrel | DONE | `data/ships.json` |
+| `get_ships()` API method — serves ships.json, flags `is_current` by display-name match against the flown ship (`_SHIP_DISPLAY_NAMES[_current_ship.ship]`) | DONE | `main.py` |
+| `Ships.jsx` — searchable + pad-filterable ship list -> detail panel; **generated angled 3D "roll-cage" wireframe** (lofted hull: octagonal cross-section hoops + longitudinal rails per family, 3/4 projection with depth-dimmed far edges) + **size-scaled hardpoint chip rack** (one chip per mount, bigger chip = bigger size, off the ship) + utility chips + full slot breakdown (7 labelled core internals, optional slots as size pills, military/planetary slots). Reviewed via standalone Artifact preview before build | DONE | `frontend/src/pages/Ships.jsx` |
+| Sidebar nav item + route wired (`/ships`, between Navigation and Trading) | DONE | `frontend/src/App.jsx` |
+| `APP_VERSION` = `0.3.57`; frontend built (51 modules OK), exe built, local install swapped + verified (log: v0.3.57 frozen, no errors) | DONE | `main.py` |
+
+## Notes / next session
+
+- **No real ship images exist in the EDCD ecosystem** (Coriolis renders 3D
+  models, no bundled SVGs; real OBJ/STL meshes exist on Cults3D/Sketchfab but
+  need three.js + licensing). So the ship is a *procedurally generated* angled
+  3D wireframe — a lofted hull from a per-family `[z, halfWidth, halfHeight]`
+  profile (`FAMILY_PROFILES`), octagonal cross-section (`K=8`), projected at
+  `YAW=-0.62 / PITCH=0.34`, depth-dimmed. Not a literal likeness. Families are
+  mapped per ship in `SHIP_FAMILY` (fallback by pad size). To fix a ship that
+  looks wrong: tweak its family's station profile, add a new family, or remap
+  it. A standalone preview generator lives at
+  `scratchpad/gen_static.py` (bakes all 47 to static SVG for eyeballing).
+- **coriolis `slots.standard` order** is fixed: Power Plant, Thrusters, FSD,
+  Life Support, Power Distributor, Sensors, Fuel Tank (see `CORE_SLOT_NAMES` in
+  build_data.py and `CORE_NAMES` in Ships.jsx — keep them in sync).
+- Hardpoint array uses 0 = utility mount, 1/2/3/4 = S/M/L/H.
+- v0.3.57 is **local only** — tag for CI release after the user play-tests the
+  Ships tab (silhouettes + slot data need an eyeball in-app).
+- To regenerate ship data later: `python scripts/build_data.py` (or just the
+  `build_ships()` fn) — pulls live from coriolis-data.
+
+---
+*Session 38 — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 09:51:38*
+
+---
+*Session checkpoint: 2026-07-05 10:03:31*
+
+---
+*Session checkpoint: 2026-07-05 10:05:47*
+
+---
+*Session checkpoint: 2026-07-05 10:07:55*
+
+---
+*Session checkpoint: 2026-07-05 10:12:04*

@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.56"  # bump this with every release
+APP_VERSION = "0.3.57"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -2168,6 +2168,21 @@ class API:
 
     def get_commodities(self) -> list:
         return self._load_json("commodities.json").get("commodities", [])
+
+    def get_ships(self) -> list:
+        """Full ship reference (slots/modules per ship). Flags the ship the
+        commander is currently flying via display-name match against the
+        active Loadout, so the Ships page can highlight it."""
+        ships = self._load_json("ships.json").get("ships", [])
+        current = ""
+        if self._current_ship:
+            current = _SHIP_DISPLAY_NAMES.get(
+                str(self._current_ship.get("ship", "")).lower(), ""
+            )
+        cur_norm = current.strip().lower()
+        for s in ships:
+            s["is_current"] = bool(cur_norm) and s.get("name", "").strip().lower() == cur_norm
+        return ships
 
     # --- Guardian ---
 

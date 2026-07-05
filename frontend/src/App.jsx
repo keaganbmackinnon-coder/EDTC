@@ -36,6 +36,7 @@ class ErrorBoundary extends Component {
 }
 import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
 import Navigation from './pages/Navigation'
+import Ships from './pages/Ships'
 import Trading from './pages/Trading'
 import Exploration from './pages/Exploration'
 import Engineering from './pages/Engineering'
@@ -63,6 +64,7 @@ const OVERLAY_MAP = {
 
 const NAV_ITEMS = [
   { path: '/navigation',   label: 'Navigation' },
+  { path: '/ships',        label: 'Ships' },
   { path: '/trading',      label: 'Trading' },
   { path: '/exploration',  label: 'Exploration' },
   { path: '/engineering',  label: 'Engineering' },
@@ -195,6 +197,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/navigation" replace />} />
           <Route path="/navigation"   element={<Navigation />} />
+          <Route path="/ships"        element={<Ships />} />
           <Route path="/trading"      element={<Trading />} />
           <Route path="/exploration"  element={<Exploration />} />
           <Route path="/engineering"  element={<Engineering />} />
