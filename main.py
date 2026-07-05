@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.53"  # bump this with every release
+APP_VERSION = "0.3.54"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -1454,6 +1454,25 @@ class API:
 
     def get_blueprints(self) -> list:
         return self._load_json("blueprints.json").get("blueprints", [])
+
+    def get_pinned_blueprints(self) -> list:
+        from core.database import get_pinned_blueprints
+        return get_pinned_blueprints()
+
+    def pin_blueprint(self, blueprint_id: str, grade: str) -> list:
+        from core.database import pin_blueprint, get_pinned_blueprints
+        pin_blueprint(blueprint_id, grade)
+        return get_pinned_blueprints()
+
+    def unpin_blueprint(self, blueprint_id: str, grade: str) -> list:
+        from core.database import unpin_blueprint, get_pinned_blueprints
+        unpin_blueprint(blueprint_id, grade)
+        return get_pinned_blueprints()
+
+    def set_pin_rolls(self, blueprint_id: str, grade: str, rolls: int) -> list:
+        from core.database import set_pin_rolls, get_pinned_blueprints
+        set_pin_rolls(blueprint_id, grade, rolls)
+        return get_pinned_blueprints()
 
     def get_synthesis_recipes(self) -> list:
         return self._load_json("synthesis.json").get("synthesis", [])

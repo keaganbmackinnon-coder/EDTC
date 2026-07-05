@@ -1975,3 +1975,38 @@ for bulk text surgery on repo files, never PS 5.1 cmdlets.
 
 ---
 *Session 37 continued (auto-jump removal) — 2026-07-04*
+
+---
+*Session checkpoint: 2026-07-04 23:43:14*
+
+---
+
+## Session 37 continued — Engineering: unlock tracker + pinned blueprints (v0.3.54)
+
+User request: track who's unlocked / who's next, pin blueprints, and see what
+materials are missing to engineer parts.
+
+| Item | Status | File |
+|---|---|---|
+| Engineers tab overhaul: summary bar (X/23 unlocked + progress bar + "N invites waiting"), engineers grouped by journal progress in action order — **Next up (Invited)** / **Working towards an invite (Known)** / **Locked** / **Unlocked** — with the requirement that matters next highlighted (→ Unlock for invited, → Invite for known/locked); unlocked engineers below max grade show a rank-up hint | DONE | `frontend/src/pages/Engineering.jsx` |
+| `pinned_blueprints` table (PK blueprint_id+grade, `rolls` multiplier) + CRUD; API: `get_pinned_blueprints` / `pin_blueprint` / `unpin_blueprint` / `set_pin_rolls` (all return the updated pin list) | DONE | `core/database.py`, `main.py` |
+| Blueprints tab: 📌 Pin/Pinned button per grade block, 📌 marker on the blueprint header when any grade is pinned | DONE | `frontend/src/pages/Engineering.jsx` |
+| New **Pinned** tab (count in tab label): top panel aggregates **materials still needed across all pins** (shortfall = Σ need×rolls − have, grouped w/ Raw/Manufactured/Encoded badges, pointer to Traders & Brokers tab); per-pin cards show grade, applies-to, rolls +/- stepper, per-material have/need with shortfall, "✓ ready to craft" state | DONE | `frontend/src/pages/Engineering.jsx` |
+| Pins state lifted to the Engineering parent so Blueprints ↔ Pinned stay in sync; empty state links to the Blueprints tab | DONE | `frontend/src/pages/Engineering.jsx` |
+| `APP_VERSION` = `0.3.54`; built, local install swapped, verified (log clean; pinned_blueprints table created; 129 materials + 29 engineer_progress rows live) | DONE | `main.py` |
+
+## Notes
+
+- Material matching between blueprints.json (display names) and the materials
+  table (lowercased journal names) uses `.toLowerCase()` — same convention as
+  the existing craftable checks.
+- `engineer_progress` has 29 rows vs 23 in engineers.json — the extras are
+  Odyssey on-foot engineers from the journal; they simply don't render (ship
+  engineers only in engineers.json). Add an on-foot dataset later if wanted.
+- Rolls default to 1 per pin; the stepper multiplies material needs (a grade
+  realistically takes several rolls to max).
+- v0.3.54 is local only — tag for CI release once the user has play-tested
+  pinning.
+
+---
+*Session 37 continued (engineering tracker) — 2026-07-05*

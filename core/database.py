@@ -103,6 +103,14 @@ def init_db():
                 updated  TEXT DEFAULT (datetime('now'))
             );
 
+            CREATE TABLE IF NOT EXISTS pinned_blueprints (
+                blueprint_id TEXT NOT NULL,
+                grade        TEXT NOT NULL,
+                rolls        INTEGER DEFAULT 1,
+                created      TEXT DEFAULT (datetime('now')),
+                PRIMARY KEY (blueprint_id, grade)
+            );
+
             CREATE TABLE IF NOT EXISTS carriers (
                 carrier_id   TEXT PRIMARY KEY,
                 name         TEXT DEFAULT '',
@@ -814,6 +822,40 @@ def upsert_engineer_progress(engineer: str, status: str, rank: int) -> None:
               status=excluded.status, rank=excluded.rank,
               updated=excluded.updated
         """, (engineer, status, rank))
+
+
+# --- Pinned blueprints ---
+
+def get_pinned_blueprints() -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT blueprint_id, grade, rolls FROM pinned_blueprints ORDER BY created DESC"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def pin_blueprint(blueprint_id: str, grade: str) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO pinned_blueprints (blueprint_id, grade) VALUES (?, ?)",
+            (blueprint_id, str(grade)),
+        )
+
+
+def unpin_blueprint(blueprint_id: str, grade: str) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "DELETE FROM pinned_blueprints WHERE blueprint_id=? AND grade=?",
+            (blueprint_id, str(grade)),
+        )
+
+
+def set_pin_rolls(blueprint_id: str, grade: str, rolls: int) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "UPDATE pinned_blueprints SET rolls=? WHERE blueprint_id=? AND grade=?",
+            (max(1, int(rolls)), blueprint_id, str(grade)),
+        )
 
 
 # --- CMDR Stats ---

@@ -54,6 +54,64 @@ function progressBadge(status, rank) {
   return null
 }
 
+// Progress buckets, in "what should I do next" order
+const ENGINEER_GROUPS = [
+  { key: 'Invited',  title: 'Next up — invited, go unlock them', hint: 'You have the invite; deliver the unlock requirement to gain access.' },
+  { key: 'Known',    title: 'Working towards an invite', hint: 'You know of them; meet the invite requirement to get invited.' },
+  { key: 'Locked',   title: 'Locked — not discovered yet', hint: 'Meet the invite requirement (some need another engineer at G3-4 first).' },
+  { key: 'Unlocked', title: 'Unlocked', hint: '' },
+]
+
+function engineerBucket(e) {
+  if (e.progress_status === 'Unlocked') return 'Unlocked'
+  if (e.progress_status === 'Invited') return 'Invited'
+  if (e.progress_status === 'Known') return 'Known'
+  return 'Locked'
+}
+
+function EngineerCard({ e }) {
+  const bucket = engineerBucket(e)
+  // The requirement that matters NEXT for this engineer gets the highlight
+  const nextIsUnlock = bucket === 'Invited'
+  const nextIsInvite = bucket === 'Known' || bucket === 'Locked'
+  return (
+    <div className={`panel ${bucket === 'Invited' ? 'border border-ed-gold/40' : ''}`}>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <span className="text-ed-text font-semibold font-ui">{e.name}</span>
+          <p className="text-ed-muted text-xs font-mono mt-0.5">{e.location}</p>
+        </div>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {progressBadge(e.progress_status, e.progress_rank)}
+          {e.max_grade && (
+            <span className="text-xs font-mono text-ed-muted">Max G{e.max_grade}</span>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {(e.specialties ?? []).map(s => (
+          <Tag key={s} label={s} color={SPECIALTY_COLORS[s] ?? 'border-ed-border text-ed-muted'} />
+        ))}
+      </div>
+      {e.invitation && bucket !== 'Unlocked' && (
+        <p className={`text-xs font-mono ${nextIsInvite ? 'text-ed-text' : 'text-ed-muted'}`}>
+          <span className="text-ed-gold">{nextIsInvite ? '→ Invite: ' : 'Invite: '}</span>{e.invitation}
+        </p>
+      )}
+      {e.unlock && bucket !== 'Unlocked' && (
+        <p className={`text-xs font-mono mt-0.5 ${nextIsUnlock ? 'text-ed-text' : 'text-ed-muted'}`}>
+          <span className="text-ed-orange">{nextIsUnlock ? '→ Unlock: ' : 'Unlock: '}</span>{e.unlock}
+        </p>
+      )}
+      {bucket === 'Unlocked' && e.progress_rank < (e.max_grade ?? 5) && (
+        <p className="text-ed-muted text-xs font-mono">
+          Craft or contribute to raise access G{e.progress_rank} → G{e.max_grade ?? 5}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function EngineersTab() {
   const [engineers, setEngineers] = useState([])
   const [search, setSearch] = useState('')
@@ -79,8 +137,34 @@ function EngineersTab() {
     return matchSearch && matchSpec
   })
 
+  const unlockedCount = engineers.filter(e => engineerBucket(e) === 'Unlocked').length
+  const invitedCount = engineers.filter(e => engineerBucket(e) === 'Invited').length
+
   return (
     <div>
+      {engineers.length > 0 && (
+        <div className="panel mb-4 flex items-center gap-6">
+          <div>
+            <p className="text-ed-muted text-xs font-mono mb-0.5">Engineers unlocked</p>
+            <p className="text-ed-text font-semibold font-ui text-lg">
+              <span className="text-ed-success">{unlockedCount}</span>
+              <span className="text-ed-muted text-sm"> / {engineers.length}</span>
+            </p>
+          </div>
+          <div className="flex-1">
+            <div className="h-1.5 bg-ed-dark rounded-full overflow-hidden">
+              <div className="h-full bg-ed-success rounded-full transition-all duration-500"
+                style={{ width: `${(unlockedCount / engineers.length) * 100}%` }} />
+            </div>
+          </div>
+          {invitedCount > 0 && (
+            <p className="text-ed-gold text-xs font-mono shrink-0">
+              {invitedCount} invite{invitedCount === 1 ? '' : 's'} waiting
+            </p>
+          )}
+        </div>
+      )}
+
       <SearchBar value={search} onChange={setSearch} placeholder="Search by name, system, specialty…" />
 
       {allSpecialties.length > 0 && (
@@ -106,38 +190,24 @@ function EngineersTab() {
       {filtered.length === 0 ? (
         <EmptyState message="No engineers match. Full dataset comes from EDCD engineers.json." />
       ) : (
-        <div className="grid grid-cols-1 gap-3">
-          {filtered.map(e => (
-            <div key={e.id} className="panel">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div>
-                  <span className="text-ed-text font-semibold font-ui">{e.name}</span>
-                  <p className="text-ed-muted text-xs font-mono mt-0.5">{e.location}</p>
+        <div className="space-y-5">
+          {ENGINEER_GROUPS.map(group => {
+            const members = filtered.filter(e => engineerBucket(e) === group.key)
+            if (members.length === 0) return null
+            return (
+              <div key={group.key}>
+                <div className="mb-2">
+                  <h3 className="text-ed-text font-ui font-semibold text-sm">
+                    {group.title} <span className="text-ed-muted font-mono text-xs">({members.length})</span>
+                  </h3>
+                  {group.hint && <p className="text-ed-muted text-xs font-mono">{group.hint}</p>}
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  {progressBadge(e.progress_status, e.progress_rank)}
-                  {e.max_grade && (
-                    <span className="text-xs font-mono text-ed-muted">Max G{e.max_grade}</span>
-                  )}
+                <div className="grid grid-cols-1 gap-3">
+                  {members.map(e => <EngineerCard key={e.id} e={e} />)}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {(e.specialties ?? []).map(s => (
-                  <Tag key={s} label={s} color={SPECIALTY_COLORS[s] ?? 'border-ed-border text-ed-muted'} />
-                ))}
-              </div>
-              {e.invitation && (
-                <p className="text-ed-muted text-xs font-mono">
-                  <span className="text-ed-gold">Invite: </span>{e.invitation}
-                </p>
-              )}
-              {e.unlock && (
-                <p className="text-ed-muted text-xs font-mono mt-0.5">
-                  <span className="text-ed-orange">Unlock: </span>{e.unlock}
-                </p>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
@@ -148,7 +218,7 @@ function EngineersTab() {
 
 const EFFECT_COLOR = (positive) => positive ? 'text-ed-success' : 'text-ed-danger'
 
-function BlueprintsTab({ materials }) {
+function BlueprintsTab({ materials, isPinned, togglePin }) {
   const [blueprints, setBlueprints] = useState([])
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(null)
@@ -197,6 +267,9 @@ function BlueprintsTab({ materials }) {
                 >
                   <div>
                     <span className="text-ed-text font-semibold font-ui">{bp.name}</span>
+                    {grades.some(g => isPinned?.(bp.id, g)) && (
+                      <span className="ml-2 text-xs" title="Pinned">📌</span>
+                    )}
                     {craftable != null && (
                       <span className="ml-2 text-xs font-mono text-ed-success">
                         ✓ Can craft G{craftable}
@@ -237,10 +310,22 @@ function BlueprintsTab({ materials }) {
                       const craftable = canCraftGrade(bp, g)
                       return (
                         <div key={g} className={`rounded p-3 ${craftable ? 'bg-ed-success/5 border border-ed-success/20' : 'bg-ed-dark/50'}`}>
-                          <p className="text-ed-text font-semibold text-sm mb-2">
-                            Grade {g}
-                            {craftable && <span className="ml-2 text-ed-success text-xs font-mono">✓ craftable</span>}
-                          </p>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-ed-text font-semibold text-sm">
+                              Grade {g}
+                              {craftable && <span className="ml-2 text-ed-success text-xs font-mono">✓ craftable</span>}
+                            </p>
+                            <button
+                              className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
+                                isPinned?.(bp.id, g)
+                                  ? 'border-ed-orange text-ed-orange'
+                                  : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-orange'
+                              }`}
+                              onClick={() => togglePin?.(bp.id, g)}
+                            >
+                              {isPinned?.(bp.id, g) ? '📌 Pinned' : '📌 Pin'}
+                            </button>
+                          </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <p className="text-ed-muted text-xs font-mono mb-1">Materials</p>
@@ -276,6 +361,163 @@ function BlueprintsTab({ materials }) {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---- Tab: Pinned blueprints ----
+
+const MAT_CAT_COLORS = {
+  Raw: 'border-amber-500/50 text-amber-400',
+  Manufactured: 'border-sky-500/50 text-sky-400',
+  Encoded: 'border-emerald-500/50 text-emerald-400',
+}
+
+function PinnedTab({ materials, pins, togglePin, setPinRolls, goToBlueprints }) {
+  const [blueprints, setBlueprints] = useState([])
+
+  useEffect(() => {
+    api()?.get_blueprints().then(r => setBlueprints(r ?? []))
+  }, [])
+
+  const matMap = {}
+  for (const m of materials) matMap[m.name.toLowerCase()] = m.count
+
+  const bpMap = {}
+  for (const b of blueprints) bpMap[b.id] = b
+
+  // Join pins to blueprint data; drop pins whose blueprint vanished from the dataset
+  const entries = pins
+    .map(p => {
+      const bp = bpMap[p.blueprint_id]
+      const grade = bp?.grades?.[p.grade]
+      if (!bp || !grade) return null
+      const rolls = p.rolls ?? 1
+      const mats = (grade.materials ?? []).map(m => {
+        const need = m.amount * rolls
+        const have = matMap[m.name.toLowerCase()] ?? 0
+        return { ...m, need, have, missing: Math.max(0, need - have) }
+      })
+      return {
+        ...p, bp, rolls, mats,
+        ready: mats.length > 0 && mats.every(m => m.missing === 0),
+      }
+    })
+    .filter(Boolean)
+
+  // Shopping list: total shortfall per material across every pin
+  const missingByMat = {}
+  for (const e of entries) {
+    for (const m of e.mats) {
+      const key = m.name.toLowerCase()
+      missingByMat[key] ??= { name: m.name, category: m.category, need: 0 }
+      missingByMat[key].need += m.need
+    }
+  }
+  const shopping = Object.values(missingByMat)
+    .map(m => ({ ...m, have: matMap[m.name.toLowerCase()] ?? 0 }))
+    .map(m => ({ ...m, missing: Math.max(0, m.need - m.have) }))
+    .filter(m => m.missing > 0)
+    .sort((a, b) => (a.category + a.name).localeCompare(b.category + b.name))
+
+  if (entries.length === 0) {
+    return (
+      <div>
+        <EmptyState message="Nothing pinned yet." />
+        <p className="text-ed-muted text-sm text-center">
+          Pin blueprint grades from the{' '}
+          <button className="text-ed-orange hover:underline" onClick={goToBlueprints}>Blueprints tab</button>
+          {' '}to track the materials you still need.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Missing materials across all pins */}
+      <div className={`panel ${shopping.length === 0 ? 'border border-ed-success/30' : 'border border-ed-orange/30'}`}>
+        <p className="text-ed-muted text-xs font-mono uppercase tracking-wider mb-2">
+          Materials still needed
+        </p>
+        {shopping.length === 0 ? (
+          <p className="text-ed-success text-sm font-mono">
+            ✓ You have everything for all pinned blueprints
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+            {shopping.map(m => (
+              <div key={m.name} className="flex items-center justify-between text-xs font-mono">
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <Tag label={m.category} color={MAT_CAT_COLORS[m.category] ?? 'border-ed-border text-ed-muted'} />
+                  <span className="text-ed-text truncate">{m.name}</span>
+                </span>
+                <span className="shrink-0 ml-2">
+                  <span className="text-ed-danger font-semibold">need {m.missing}</span>
+                  <span className="text-ed-muted"> · {m.have}/{m.need}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {shopping.length > 0 && (
+          <p className="text-ed-muted text-[10px] font-mono mt-2">
+            Short on materials? Check the Traders &amp; Brokers tab for the nearest material trader.
+          </p>
+        )}
+      </div>
+
+      {/* One card per pinned blueprint grade */}
+      {entries.map(e => (
+        <div key={`${e.blueprint_id}|${e.grade}`}
+          className={`panel ${e.ready ? 'border border-ed-success/30' : ''}`}>
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <div>
+              <span className="text-ed-text font-semibold font-ui">{e.bp.name}</span>
+              <span className="ml-2 text-xs font-mono text-ed-orange">G{e.grade}</span>
+              {e.ready && <span className="ml-2 text-xs font-mono text-ed-success">✓ ready to craft</span>}
+            </div>
+            <button className="text-ed-danger text-xs font-mono hover:underline shrink-0"
+              onClick={() => togglePin(e.blueprint_id, e.grade)}>
+              Unpin
+            </button>
+          </div>
+          {(e.bp.applies_to?.length > 0) && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {e.bp.applies_to.map(m => <Tag key={m} label={m} />)}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-ed-muted text-xs font-mono">Rolls:</span>
+            <button className="text-ed-muted border border-ed-border rounded w-5 h-5 text-xs leading-none hover:text-ed-text"
+              onClick={() => setPinRolls(e.blueprint_id, e.grade, e.rolls - 1)} disabled={e.rolls <= 1}>−</button>
+            <span className="text-ed-text text-xs font-mono w-4 text-center">{e.rolls}</span>
+            <button className="text-ed-muted border border-ed-border rounded w-5 h-5 text-xs leading-none hover:text-ed-text"
+              onClick={() => setPinRolls(e.blueprint_id, e.grade, e.rolls + 1)}>+</button>
+            <span className="text-ed-muted text-[10px] font-mono">
+              (each grade usually takes several rolls to max)
+            </span>
+          </div>
+
+          <div className="space-y-0.5">
+            {e.mats.map(m => (
+              <div key={m.name} className="flex items-center justify-between text-xs font-mono">
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <Tag label={m.category} color={MAT_CAT_COLORS[m.category] ?? 'border-ed-border text-ed-muted'} />
+                  <span className={m.missing === 0 ? 'text-ed-success' : 'text-ed-text'}>{m.name}</span>
+                </span>
+                <span className="shrink-0 ml-2">
+                  <span className={m.missing === 0 ? 'text-ed-success' : 'text-ed-danger'}>
+                    {m.have}/{m.need}
+                  </span>
+                  {m.missing > 0 && <span className="text-ed-danger"> (−{m.missing})</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -830,6 +1072,7 @@ function TradersTab() {
 const TABS = [
   { id: 'engineers',   label: 'Engineers' },
   { id: 'blueprints',  label: 'Blueprints' },
+  { id: 'pinned',      label: 'Pinned' },
   { id: 'synthesis',   label: 'Synthesis' },
   { id: 'tech_broker', label: 'Tech Broker' },
   { id: 'materials',   label: 'Materials' },
@@ -839,10 +1082,28 @@ const TABS = [
 export default function Engineering() {
   const [tab, setTab] = useState('engineers')
   const [materials, setMaterials] = useState([])
+  const [pins, setPins] = useState([])
 
   useEffect(() => {
     api()?.get_materials().then(r => setMaterials(r ?? []))
+    api()?.get_pinned_blueprints?.().then(r => setPins(r ?? []))
   }, [])
+
+  const isPinned = (bpId, grade) =>
+    pins.some(p => p.blueprint_id === bpId && p.grade === String(grade))
+
+  async function togglePin(bpId, grade) {
+    const g = String(grade)
+    const next = isPinned(bpId, g)
+      ? await api()?.unpin_blueprint(bpId, g)
+      : await api()?.pin_blueprint(bpId, g)
+    if (next) setPins(next)
+  }
+
+  async function setPinRolls(bpId, grade, rolls) {
+    const next = await api()?.set_pin_rolls(bpId, String(grade), rolls)
+    if (next) setPins(next)
+  }
 
   useEffect(() => {
     const off1 = window.__edtc?.on('material_update', () => {
@@ -870,13 +1131,14 @@ export default function Engineering() {
                 : 'border-transparent text-ed-muted hover:text-ed-text'
             }`}
           >
-            {t.label}
+            {t.id === 'pinned' && pins.length > 0 ? `${t.label} (${pins.length})` : t.label}
           </button>
         ))}
       </div>
 
       {tab === 'engineers'   && <EngineersTab />}
-      {tab === 'blueprints'  && <BlueprintsTab materials={materials} />}
+      {tab === 'blueprints'  && <BlueprintsTab materials={materials} isPinned={isPinned} togglePin={togglePin} />}
+      {tab === 'pinned'      && <PinnedTab materials={materials} pins={pins} togglePin={togglePin} setPinRolls={setPinRolls} goToBlueprints={() => setTab('blueprints')} />}
       {tab === 'synthesis'   && <SynthesisTab materials={materials} />}
       {tab === 'tech_broker' && <TechBrokerTab materials={materials} />}
       {tab === 'materials'   && <MaterialsTab materials={materials} setMaterials={setMaterials} />}
