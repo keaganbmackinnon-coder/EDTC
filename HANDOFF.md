@@ -2044,3 +2044,43 @@ ability to remove unwanted entries.
 
 ---
 *Session 37 continued (carrier ownership) — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 00:12:08*
+
+---
+
+## Session 37 continued — Overlay audit + CMDR ping fixes (v0.3.56)
+
+Full audit of all 6 overlays (user request) plus "make the beep actually work
+and not ping AI".
+
+**Audit results:**
+- route / construction / system_preview / overlay manager: clean, no changes.
+- cmdr_ping: THREE bugs (below).
+- fss + exo_tracker: no seed-on-open — opened mid-session they showed
+  "Scanning…"/"No scans" despite existing data (same class of bug as the
+  Session 34 bridge audit; overlay windows have no API bridge to self-fetch).
+
+| Fix | Status | File |
+|---|---|---|
+| **NPC ping filter**: NPC pilots always have $-macro raw `PilotName` (`$npc_name_decorate:#name=...;`) — verified against live journals; real players are plain "Cmdr <name>". Handler now returns early on `$`-prefixed or missing raw PilotName. Every combat-zone pirate used to ping | DONE | `main.py` |
+| "Cmdr " prefix stripped from player names (display used to read "CMDR Cmdr X"); ship name resolved via `_SHIP_DISPLAY_NAMES` | DONE | `main.py` |
+| **Re-ping cooldown**: ShipTargeted re-fires per scan stage / re-lock — one ping per CMDR per 120s (`_cmdr_ping_times`) | DONE | `main.py` |
+| **Audio rewritten around winsound** (stdlib): synthesized decaying-sine WAV played via `SND_MEMORY` — works on Python 3.14 local builds where pygame never installs (beep has been silently dead in every local build). pygame kept as non-Windows fallback only. Custom `ping_sound_path` pref must be a .wav on Windows | DONE | `core/audio.py` |
+| `ScanBarCode` removed from WATCHED_EVENTS + dispatcher — not a real journal event (hallucinated in Session 1, never fired) | DONE | `core/journal.py`, `main.py` |
+| FSS overlay seeded on open with `_fss_bodies` (last body + all_bodies) | DONE | `main.py` |
+| Exo overlay seeded on open with current system's scans from `get_exo_scans(system)` (max 6, matches overlay cap) | DONE | `main.py` |
+| Seed dispatch unified in `_seed_overlay(name)` used by both `show_overlay` and `toggle_overlay` | DONE | `main.py` |
+| Audio verified audibly via winsound test script; NPC filter logic unit-checked; `APP_VERSION` = `0.3.56`, built, swapped, log clean | DONE | — |
+
+## Known issues / notes for next session
+
+- v0.3.54/55/56 all unreleased — one v0.3.56 tag ships engineering tracker,
+  carrier ownership, and overlay/ping fixes together after play-testing.
+- CMDR ping still needs an in-game encounter with a real player to confirm
+  end-to-end (filter verified against journal data, beep verified audibly).
+- Operations support still blocked on the user playing one Operation.
+
+---
+*Session 37 continued (overlay audit + cmdr ping) — 2026-07-05*

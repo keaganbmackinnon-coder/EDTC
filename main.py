@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.55"  # bump this with every release
+APP_VERSION = "0.3.56"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -154,6 +154,8 @@ class API:
         self._commodity_names: dict[str, str] | None = None
         # normalized commodity name/symbol → market category, same source
         self._commodity_categories: dict[str, str] | None = None
+        # CMDR ping cooldown: name → last ping monotonic-ish time
+        self._cmdr_ping_times: dict[str, float] = {}
 
     def set_window(self, window):
         self._window = window
@@ -172,7 +174,7 @@ class API:
     def on_journal_event(self, event: dict):
         event_name = event.get("event", "")
 
-        if event_name in ("ScanBarCode", "ShipTargeted"):
+        if event_name == "ShipTargeted":
             self._handle_cmdr_event(event)
         elif event_name == "FSDJump":
             self._handle_fsd_jump(event)
@@ -475,6 +477,49 @@ class API:
                     logging.info(f"Pushed construction project to overlay: {match.get('name')}")
         threading.Thread(target=_push, daemon=True).start()
 
+    def _push_fss_to_overlay(self):
+        """Seed the FSS overlay with this system's scans when it opens —
+        otherwise it shows 'Scanning…' until the next Scan event even though
+        _fss_bodies already has data. Same fresh-window pattern as the
+        construction/route pushes (no API bridge in overlay windows)."""
+        def _push():
+            import time
+            time.sleep(2.5)
+            if self._fss_bodies:
+                self._overlay_manager.emit_to_overlay("fss", "body_scanned", {
+                    "body": self._fss_bodies[-1],
+                    "all_bodies": self._fss_bodies,
+                })
+                logging.info(f"Pushed {len(self._fss_bodies)} FSS bodies to overlay")
+        threading.Thread(target=_push, daemon=True).start()
+
+    def _push_exo_to_overlay(self):
+        """Seed the exo overlay with the current system's in-progress scans."""
+        def _push():
+            import time
+            time.sleep(2.5)
+            if not self._current_system:
+                return
+            from core.database import get_exo_scans
+            try:
+                scans = get_exo_scans(self._current_system)
+            except Exception as e:
+                logging.warning(f"exo overlay seed: {e}")
+                return
+            for s in scans[:6]:
+                self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", {
+                    "system": s.get("system", ""),
+                    "body": s.get("body", ""),
+                    "species": s.get("species", ""),
+                    "genus": s.get("genus", ""),
+                    "scan_count": s.get("scan_count", 0),
+                    "completed": bool(s.get("completed")) or s.get("scan_count", 0) >= 3,
+                    "scan_type": "",
+                })
+            if scans:
+                logging.info(f"Pushed {min(len(scans), 6)} exo scans to overlay")
+        threading.Thread(target=_push, daemon=True).start()
+
     def _push_route_to_overlay(self):
         """Push the active route (and last locked jump target) to the route
         overlay after it has time to initialize. The overlay window has no
@@ -497,23 +542,29 @@ class API:
         return str(journal_path())
 
     def _handle_cmdr_event(self, event: dict):
-        cmdr = (
-            event.get("PilotName_Localised")
-            or event.get("PilotName")
-            or event.get("TargetPilotName_Localised")
-            or event.get("TargetPilotName")
-            or ""
-        )
+        # NPC pilots always carry a $-macro raw name ($npc_name_decorate:...,
+        # $ShipName_Police...); real players are plain "Cmdr <name>". Verified
+        # against live journals 2026-07-05 — without this every combat-zone
+        # pirate triggered a ping.
+        raw = event.get("PilotName") or ""
+        if not raw or raw.startswith("$"):
+            return
+        cmdr = event.get("PilotName_Localised") or raw
+        if cmdr.lower().startswith("cmdr "):
+            cmdr = cmdr[5:]
         if not cmdr:
             return
 
-        ship = (
-            event.get("Ship_Localised")
-            or event.get("Ship")
-            or event.get("TargetShip_Localised")
-            or event.get("TargetShip")
-            or ""
-        )
+        # Re-targeting the same player fires ShipTargeted repeatedly (each
+        # scan stage, every re-lock) — one ping per CMDR per 2 minutes
+        import time
+        now = time.time()
+        if now - self._cmdr_ping_times.get(cmdr.upper(), 0) < 120:
+            return
+        self._cmdr_ping_times[cmdr.upper()] = now
+
+        ship = event.get("Ship_Localised") or _SHIP_DISPLAY_NAMES.get(
+            (event.get("Ship") or "").lower(), event.get("Ship") or "")
 
         if self._watchlist_cache is None:
             from core.database import get_watchlist
@@ -1180,12 +1231,20 @@ class API:
             except Exception as e:
                 logging.warning(f"resize_overlay {name}: {e}")
 
-    def show_overlay(self, name: str):
-        self._overlay_manager.show(name)
+    def _seed_overlay(self, name: str):
+        """Push existing data into a just-opened overlay (no API bridge there)."""
         if name == "construction":
             self._push_cargo_to_overlay()
         elif name == "route":
             self._push_route_to_overlay()
+        elif name == "fss":
+            self._push_fss_to_overlay()
+        elif name == "exo_tracker":
+            self._push_exo_to_overlay()
+
+    def show_overlay(self, name: str):
+        self._overlay_manager.show(name)
+        self._seed_overlay(name)
 
     def hide_overlay(self, name: str):
         self._overlay_manager.hide(name)
@@ -1194,10 +1253,8 @@ class API:
         from core.database import set_pref
         new_state = self._overlay_manager.toggle(name)
         set_pref(f"overlay_auto_{name}", new_state)
-        if new_state and name == "construction":
-            self._push_cargo_to_overlay()
-        elif new_state and name == "route":
-            self._push_route_to_overlay()
+        if new_state:
+            self._seed_overlay(name)
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref

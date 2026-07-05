@@ -8,7 +8,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 WATCHED_EVENTS = {
-    "FSDJump", "Location", "Scan", "ScanBarCode", "CargoTransfer",
+    "FSDJump", "Location", "Scan", "CargoTransfer",
     "Docked", "Undocked", "ShipTargeted", "FSSDiscoveryScan",
     "SAAScanComplete", "SellExplorationData", "MultiSellExplorationData",
     "ScanOrganic", "SellOrganicData", "MarketBuy", "MarketSell",
