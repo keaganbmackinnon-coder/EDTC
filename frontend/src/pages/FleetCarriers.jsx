@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 const api = () => window?.pywebview?.api
 
@@ -343,200 +343,11 @@ function RoutePlannerTab() {
   )
 }
 
-// ---- Tab: Auto-Jump ----
-
-function AutoJumpTab() {
-  const [tosAccepted, setTosAccepted] = useState(false)
-  const [status, setStatus] = useState({ active: false, key: 'j', delay: 10 })
-  const [key, setKey] = useState('j')
-  const [delay, setDelay] = useState(10)
-  const [lastEvent, setLastEvent] = useState('')
-  const [countdown, setCountdown] = useState(null)
-  const countdownRef = useRef(null)
-
-  useEffect(() => {
-    api()?.get_auto_jump_status().then(s => {
-      if (s) {
-        setStatus(s)
-        setKey(s.key ?? 'j')
-        setDelay(s.delay ?? 10)
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    const off1 = window.__edtc?.on('auto_jump_status', s => setStatus(s ?? {}))
-    const off2 = window.__edtc?.on('auto_jump_countdown', payload => {
-      setLastEvent(`Jumping to ${payload.next_system} in ${payload.seconds}s…`)
-      setCountdown(payload.seconds)
-      if (countdownRef.current) clearInterval(countdownRef.current)
-      let remaining = payload.seconds
-      countdownRef.current = setInterval(() => {
-        remaining -= 1
-        setCountdown(remaining)
-        if (remaining <= 0) clearInterval(countdownRef.current)
-      }, 1000)
-    })
-    const off3 = window.__edtc?.on('auto_jump_fired', payload => {
-      setLastEvent(`Key "${payload.key}" sent → ${payload.next_system}`)
-      setCountdown(null)
-      if (countdownRef.current) clearInterval(countdownRef.current)
-    })
-    const off4 = window.__edtc?.on('auto_jump_error', payload => {
-      setLastEvent(`Error: ${payload.error}`)
-    })
-    const off5 = window.__edtc?.on('auto_jump_complete', () => {
-      setLastEvent('Route complete — auto-jump stopped.')
-      setStatus(s => ({ ...s, active: false }))
-    })
-    return () => { off1?.(); off2?.(); off3?.(); off4?.(); off5?.() }
-  }, [])
-
-  async function start() {
-    const s = await api()?.start_auto_jump(key, parseInt(delay, 10))
-    if (s) setStatus(s)
-  }
-
-  async function stop() {
-    const s = await api()?.stop_auto_jump()
-    if (s) setStatus(s)
-    setCountdown(null)
-    if (countdownRef.current) clearInterval(countdownRef.current)
-  }
-
-  if (!tosAccepted) {
-    return (
-      <div className="panel border border-ed-danger/60">
-        <div className="flex items-start gap-3">
-          <span className="text-ed-danger text-xl mt-0.5">⚠</span>
-          <div>
-            <h2 className="text-ed-danger font-semibold mb-2">
-              Auto-Jump — Frontier ToS Warning
-            </h2>
-            <p className="text-ed-text text-sm mb-2">
-              This feature automates in-game keypresses to initiate FSD jumps.
-              Frontier Developments may consider this a violation of the{' '}
-              <strong>Elite Dangerous Terms of Service</strong>, which could
-              result in your account being suspended or banned.
-            </p>
-            <p className="text-ed-text text-sm mb-4">
-              It requires an active route set in the{' '}
-              <span className="text-ed-orange font-mono">Navigation</span> page.
-              The game window must be in focus when the keypress fires.
-            </p>
-            <button
-              className="btn border border-ed-danger text-ed-danger hover:bg-ed-danger hover:text-black"
-              onClick={() => setTosAccepted(true)}
-            >
-              I understand and accept the risk
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="panel">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-ed-text font-semibold">Auto-Jump</h2>
-            <p className="text-ed-muted text-xs font-mono mt-0.5">
-              Requires an active route in Navigation. Game must be in focus.
-            </p>
-          </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-mono border ${
-            status.active
-              ? 'border-ed-success text-ed-success'
-              : 'border-ed-border text-ed-muted'
-          }`}>
-            {status.active ? 'ACTIVE' : 'INACTIVE'}
-          </div>
-        </div>
-
-        <div className="flex gap-3 mb-4 flex-wrap">
-          <div className="flex-1 min-w-28">
-            <label className="text-ed-muted text-xs font-mono block mb-1">Jump key</label>
-            <input
-              className="input font-mono text-sm"
-              value={key}
-              maxLength={10}
-              onChange={e => setKey(e.target.value)}
-              disabled={status.active}
-              placeholder="j"
-            />
-          </div>
-          <div className="flex-1 min-w-28">
-            <label className="text-ed-muted text-xs font-mono block mb-1">
-              Delay after jump (seconds)
-            </label>
-            <input
-              type="number"
-              className="input font-mono text-sm"
-              value={delay}
-              min={3}
-              max={120}
-              onChange={e => setDelay(e.target.value)}
-              disabled={status.active}
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          {!status.active ? (
-            <button className="btn-primary" onClick={start}>
-              Start Auto-Jump
-            </button>
-          ) : (
-            <button
-              className="btn border border-ed-danger text-ed-danger hover:bg-ed-danger hover:text-black"
-              onClick={stop}
-            >
-              Stop
-            </button>
-          )}
-        </div>
-      </div>
-
-      {(lastEvent || countdown != null) && (
-        <div className="panel">
-          <p className="text-ed-muted text-xs font-mono mb-1">Status</p>
-          {countdown != null && countdown > 0 && (
-            <div className="mb-2">
-              <div className="flex justify-between text-xs font-mono mb-1">
-                <span className="text-ed-text">Next jump in</span>
-                <span className="text-ed-orange">{countdown}s</span>
-              </div>
-              <Bar pct={((delay - countdown) / delay) * 100} />
-            </div>
-          )}
-          {lastEvent && (
-            <p className="text-ed-text text-sm font-mono">{lastEvent}</p>
-          )}
-        </div>
-      )}
-
-      <div className="panel border border-ed-danger/30">
-        <p className="text-ed-muted text-xs font-mono mb-1">How it works</p>
-        <ul className="text-ed-muted text-xs space-y-1 list-disc list-inside">
-          <li>Watches for FSDJump journal events on your active route</li>
-          <li>After each jump, waits the configured delay, then sends the key</li>
-          <li>Stops automatically when the route is complete</li>
-          <li>The game window must be in focus — keys go to the active window</li>
-          <li>Default key <span className="font-mono text-ed-orange">J</span> = engage FSD (standard ED binding)</li>
-        </ul>
-      </div>
-    </div>
-  )
-}
-
 // ---- Main ----
 
 const TABS = [
   { id: 'stats',  label: 'Carrier Stats' },
   { id: 'route',  label: 'Route Planner' },
-  { id: 'jump',   label: 'Auto-Jump' },
 ]
 
 export default function FleetCarriers() {
@@ -545,7 +356,7 @@ export default function FleetCarriers() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-ui font-semibold text-ed-orange mb-1">Fleet Carriers</h1>
-      <p className="text-ed-muted text-sm mb-5">Stats, fuel, route planning, and automation.</p>
+      <p className="text-ed-muted text-sm mb-5">Stats, fuel, and route planning.</p>
 
       <div className="flex gap-1 mb-6 border-b border-ed-border">
         {TABS.map(t => (
@@ -565,7 +376,6 @@ export default function FleetCarriers() {
 
       {tab === 'stats' && <StatsTab />}
       {tab === 'route' && <RoutePlannerTab />}
-      {tab === 'jump' && <AutoJumpTab />}
     </div>
   )
 }

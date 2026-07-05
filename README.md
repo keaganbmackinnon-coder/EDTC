@@ -11,7 +11,7 @@ A one-stop-shop Elite Dangerous companion app. Runs locally as a native desktop 
 - Exploration (exobiology, body scanning, codex tracker)
 - Engineering & outfitting (blueprints, ship builder, SLEF import/export)
 - Colonisation (system planner, build tracker, shopping lists)
-- Fleet carriers (stats, tritium calculator, auto-jump with ToS warning)
+- Fleet carriers (stats, tritium calculator, route planner)
 - Guardian & POI (ruins maps, Ram Tah tracker)
 - Galaxy & factions (GalNet, Powerplay, Thargoid War)
 - Commander & social (CMDR lookup, logbooks, screenshots)

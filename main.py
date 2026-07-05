@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.52"  # bump this with every release
+APP_VERSION = "0.3.53"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -127,12 +127,7 @@ class API:
         # exo state: (system, body, species) -> scan_count
         self._exo_state: dict[tuple, int] = {}
         self._fss_bodies: list[dict] = []
-        # auto-jump state
         self._current_station: str = ""
-        self._auto_jump_active: bool = False
-        self._auto_jump_key: str = "j"
-        self._auto_jump_delay: int = 10
-        self._auto_jump_timer: threading.Timer | None = None
         self._current_ship: dict = {}
         self._ship_cargo: list[dict] = []
         # ColonisationConstructionDepot re-fires every few seconds while docked
@@ -589,9 +584,6 @@ class API:
         self._overlay_manager.emit_to_overlay("fss", "system_jumped", {})
         self._overlay_manager.emit_to_overlay("exo_tracker", "system_jumped", {})
 
-        if self._auto_jump_active:
-            self._schedule_next_jump()
-
     def _handle_nav_route(self, event: dict):
         raw = event.get("Route", [])
         if not raw:
@@ -654,44 +646,6 @@ class API:
             "location": event.get("StarSystem", ""),
         })
         self._emit("carrier_update", {"carrier": carrier})
-
-    def _schedule_next_jump(self):
-        if self._auto_jump_timer:
-            self._auto_jump_timer.cancel()
-            self._auto_jump_timer = None
-
-        if not self._active_route:
-            self.stop_auto_jump()
-            return
-
-        systems = self._active_route.get("systems", [])
-        current = self._active_route.get("current", 0)
-        if current >= len(systems) - 1:
-            self.stop_auto_jump()
-            self._emit("auto_jump_complete", {})
-            return
-
-        next_system = systems[current + 1] if current + 1 < len(systems) else ""
-        self._emit("auto_jump_countdown", {
-            "seconds": self._auto_jump_delay,
-            "next_system": next_system,
-            "current": current,
-            "total": len(systems),
-        })
-
-        def _fire():
-            if not self._auto_jump_active:
-                return
-            try:
-                import keyboard as kb
-                kb.send(self._auto_jump_key)
-                self._emit("auto_jump_fired", {"key": self._auto_jump_key, "next_system": next_system})
-            except Exception as e:
-                self._emit("auto_jump_error", {"error": str(e)})
-
-        self._auto_jump_timer = threading.Timer(self._auto_jump_delay, _fire)
-        self._auto_jump_timer.daemon = True
-        self._auto_jump_timer.start()
 
     def _handle_fss_discovery(self, event: dict):
         payload = {
@@ -1478,32 +1432,6 @@ class API:
             return asyncio.run(_run())
         except Exception as e:
             return {"error": str(e), "jumps": [], "total_jumps": 0, "total_distance": 0}
-
-    # --- Auto-Jump ---
-
-    def start_auto_jump(self, key: str = "j", delay: int = 10) -> dict:
-        self._auto_jump_active = True
-        self._auto_jump_key = key
-        self._auto_jump_delay = max(3, int(delay))
-        status = {"active": True, "key": key, "delay": self._auto_jump_delay}
-        self._emit("auto_jump_status", status)
-        return status
-
-    def stop_auto_jump(self) -> dict:
-        self._auto_jump_active = False
-        if self._auto_jump_timer:
-            self._auto_jump_timer.cancel()
-            self._auto_jump_timer = None
-        status = {"active": False}
-        self._emit("auto_jump_status", status)
-        return status
-
-    def get_auto_jump_status(self) -> dict:
-        return {
-            "active": self._auto_jump_active,
-            "key": self._auto_jump_key,
-            "delay": self._auto_jump_delay,
-        }
 
     # --- Engineering (static data loaders) ---
 

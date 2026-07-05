@@ -36,7 +36,7 @@ Drop `elite-companion-claude-code-brief.md` into the session and say:
 
 ## Pending decisions
 
-- [ ] **Auto-jump / autopilot** — include with ToS warning, or remove entirely?
+- [x] **Auto-jump / autopilot** — removed entirely (2026-07-04, user decision; had shipped with ToS warning through v0.3.52)
 - [ ] **Frontier CAPI / OAuth** — deferred to later phase
 - [ ] **Repo visibility** — private or public?
 
@@ -112,7 +112,7 @@ Drop `elite-companion-claude-code-brief.md` into the session and say:
   - [ ] Carrier stats dashboard
   - [ ] Multi-carrier management
   - [ ] Tritium calculator
-  - [ ] Auto-jump / autopilot (pending ToS decision)
+  - [x] ~~Auto-jump / autopilot~~ (removed 2026-07-04)
 
 - [ ] Guardian & POI
   - [ ] Guardian ruins interactive maps

@@ -1946,3 +1946,32 @@ Diagnostics hardening (released as v0.3.51, tagged same day):
 
 ---
 *Session checkpoint: 2026-07-04 21:28:15*
+
+---
+*Session checkpoint: 2026-07-04 21:47:56*
+
+---
+
+## Session 37 continued — Carrier Auto-Jump feature removed (v0.3.53)
+
+User decision: remove the fleet carrier Auto-Jump / autopilot entirely (the
+ToS-risky feature that fired keypresses to jump the carrier along a route).
+The Session-1 "include with ToS warning" decision is superseded.
+
+| Item | Status | File |
+|---|---|---|
+| `AutoJumpTab` component (ToS gate, key/delay config, countdown UI) deleted; TABS entry + render line removed; page subtitle updated; `useRef` import dropped (only Auto-Jump used it) | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| Backend removed: `_auto_jump_*` state, FSDJump `_schedule_next_jump()` hook, `_schedule_next_jump()` itself (the `keyboard.send` keypress path), `start_auto_jump`/`stop_auto_jump`/`get_auto_jump_status` API methods | DONE | `main.py` |
+| `keyboard` lib stays — still used by the Ctrl+Shift+C route-clipboard hotkey | — | `main.py` |
+| README feature list + EDT-checklist pending-decision items updated | DONE | `README.md`, `EDT-checklist.md` |
+| Fleet Carriers page now has 2 tabs: Carrier Stats / Route Planner | — | — |
+| `APP_VERSION` = `0.3.53`; built, local install swapped, verified running (log: v0.3.53, no errors) | DONE | `main.py` |
+
+**Encoding lesson (repeat offender risk)**: editing UTF-8 frontend files via
+PowerShell 5.1 `Get-Content`/`Set-Content` corrupts em-dashes/arrows to mojibake
+(reads as ANSI without BOM). File was reverted and re-edited with a Python
+script (`read_text/write_text encoding="utf-8"`). Use the Edit tool or Python
+for bulk text surgery on repo files, never PS 5.1 cmdlets.
+
+---
+*Session 37 continued (auto-jump removal) — 2026-07-04*
