@@ -201,6 +201,7 @@ def init_db():
         # Migrations for columns added after initial release
         for sql in [
             "ALTER TABLE markets ADD COLUMN has_large_pad INTEGER DEFAULT 0",
+            "ALTER TABLE construction_projects ADD COLUMN market_id INTEGER",
         ]:
             try:
                 conn.execute(sql)
@@ -436,13 +437,14 @@ def save_construction_project(project: dict) -> dict:
     with _conn() as conn:
         if project.get("id"):
             conn.execute(
-                "UPDATE construction_projects SET name=?, system=?, requirements=?, active=? WHERE id=?",
-                (project["name"], project.get("system", ""), reqs_json, project.get("active", 1), project["id"]),
+                "UPDATE construction_projects SET name=?, system=?, requirements=?, active=?, market_id=? WHERE id=?",
+                (project["name"], project.get("system", ""), reqs_json, project.get("active", 1),
+                 project.get("market_id"), project["id"]),
             )
         else:
             cur = conn.execute(
-                "INSERT INTO construction_projects (name, system, requirements) VALUES (?, ?, ?)",
-                (project["name"], project.get("system", ""), reqs_json),
+                "INSERT INTO construction_projects (name, system, requirements, market_id) VALUES (?, ?, ?, ?)",
+                (project["name"], project.get("system", ""), reqs_json, project.get("market_id")),
             )
             project["id"] = cur.lastrowid
         row = conn.execute(
@@ -467,15 +469,21 @@ def _normalize_contrib_name(raw: str) -> str:
     return s.lower()
 
 
-def record_construction_contribution(system: str, contributions: list) -> list:
-    """contributions: list of {Name, Count} dicts from journal event"""
+def record_construction_contribution(system: str, contributions: list,
+                                      market_id: int | None = None) -> list:
+    """contributions: list of {Name, Count} dicts from journal event.
+    market_id (from the event) matches a linked project exactly; projects
+    without a market_id fall back to the system match."""
     updated = []
     with _conn() as conn:
         projects = conn.execute(
             "SELECT * FROM construction_projects WHERE active=1",
         ).fetchall()
         for project_row in projects:
-            if project_row["system"] and project_row["system"].lower() != system.lower():
+            if project_row["market_id"] and market_id:
+                if project_row["market_id"] != market_id:
+                    continue
+            elif project_row["system"] and project_row["system"].lower() != system.lower():
                 continue
             reqs = json.loads(project_row["requirements"])
             changed = False
@@ -498,16 +506,35 @@ def record_construction_contribution(system: str, contributions: list) -> list:
     return updated
 
 
-def sync_construction_depot(system: str, resources: list) -> dict | None:
-    """Overwrite delivered counts for the active project in `system` from a
+def sync_construction_depot(system: str, resources: list,
+                            market_id: int | None = None) -> dict | None:
+    """Overwrite delivered counts for the matching active project from a
     ColonisationConstructionDepot event's ResourcesRequired (game's ground truth,
     includes deliveries from all players). resources: list of
-    {Name, Name_Localised, RequiredAmount, ProvidedAmount} dicts."""
+    {Name, Name_Localised, RequiredAmount, ProvidedAmount} dicts.
+    A project linked to this market_id wins; otherwise an UNLINKED project in
+    the same system matches and gets linked — a project linked to a different
+    depot in the same system is never touched (the old cross-sync bug)."""
     with _conn() as conn:
-        project_row = conn.execute(
-            "SELECT * FROM construction_projects WHERE active=1 AND LOWER(system)=LOWER(?)",
-            (system,),
-        ).fetchone()
+        project_row = None
+        if market_id:
+            project_row = conn.execute(
+                "SELECT * FROM construction_projects WHERE active=1 AND market_id=?",
+                (market_id,),
+            ).fetchone()
+        if not project_row:
+            project_row = conn.execute(
+                "SELECT * FROM construction_projects WHERE active=1 AND market_id IS NULL AND LOWER(system)=LOWER(?)",
+                (system,),
+            ).fetchone()
+            if project_row and market_id:
+                conn.execute(
+                    "UPDATE construction_projects SET market_id=? WHERE id=?",
+                    (market_id, project_row["id"]),
+                )
+                project_row = conn.execute(
+                    "SELECT * FROM construction_projects WHERE id=?", (project_row["id"],)
+                ).fetchone()
         if not project_row:
             return None
         reqs = json.loads(project_row["requirements"])

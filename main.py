@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.51"  # bump this with every release
+APP_VERSION = "0.3.52"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -157,6 +157,8 @@ class API:
         self._station_market: dict | None = None
         # commodity symbol → display name, built lazily from data/commodities.json
         self._commodity_names: dict[str, str] | None = None
+        # normalized commodity name/symbol → market category, same source
+        self._commodity_categories: dict[str, str] | None = None
 
     def set_window(self, window):
         self._window = window
@@ -173,7 +175,6 @@ class API:
     # --- Journal ---
 
     def on_journal_event(self, event: dict):
-        self._emit("journal", event)
         event_name = event.get("event", "")
 
         if event_name in ("ScanBarCode", "ShipTargeted"):
@@ -316,6 +317,27 @@ class API:
             self._commodity_names = names
         return self._commodity_names.get(re.sub(r"[^a-z0-9]", "", symbol.lower()), "")
 
+    def _commodity_category_map(self) -> dict[str, str]:
+        """Normalized commodity name/symbol → market category ('Metals', …),
+        from data/commodities.json. Keyed by both id and display name so it
+        resolves whichever form a project requirement or market entry uses.
+        The in-game market screen lists categories alphabetically with
+        commodities alphabetical inside each — sorting by (category, name)
+        reproduces that order."""
+        import re
+        if self._commodity_categories is None:
+            cats = {}
+            for c in self._load_json("commodities.json").get("commodities", []):
+                cat = c.get("category", "")
+                if not cat:
+                    continue
+                for form in (c.get("id"), c.get("name")):
+                    key = re.sub(r"[^a-z0-9]", "", (form or "").lower())
+                    if key:
+                        cats[key] = cat
+            self._commodity_categories = cats
+        return self._commodity_categories
+
     def _push_station_market(self):
         """Emit the buyable-commodity list for the station we're docked at.
         A Market.json written at this station wins (live data — the game writes
@@ -434,6 +456,11 @@ class API:
         def _push():
             import time
             time.sleep(2.5)
+            # static per session — lets the overlay sort commodities into the
+            # in-game market screen order (category, then name)
+            self._overlay_manager.emit_to_overlay(
+                "construction", "commodity_categories", self._commodity_category_map()
+            )
             payload = {"cargo": self._ship_cargo}
             self._overlay_manager.emit_to_overlay("construction", "ship_cargo_update", payload)
             logging.info(f"Pushed cargo to overlay: {len(self._ship_cargo)} items")
@@ -741,7 +768,7 @@ class API:
         total = sum(int(c.get("Amount", 0)) for c in contributions)
         if market_id and total > 0:
             add_depot_delivery(market_id, total)
-        updated = record_construction_contribution(self._current_system, contributions)
+        updated = record_construction_contribution(self._current_system, contributions, market_id)
         if updated:
             for proj in updated:
                 self._overlay_manager.emit_to_overlay("construction", "construction_update", proj)
@@ -780,7 +807,7 @@ class API:
                 f"{event.get('ConstructionProgress', 0):.1%} complete"
             )
             self._emit("construction_depot", depot)
-            project = sync_construction_depot(self._current_system, resources)
+            project = sync_construction_depot(self._current_system, resources, event.get("MarketID"))
             if project:
                 self._overlay_manager.emit_to_overlay("construction", "construction_update", project)
                 self._emit("construction_update", project)

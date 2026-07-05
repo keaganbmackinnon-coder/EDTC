@@ -64,9 +64,14 @@ function depotAgo(updated) {
 }
 
 function findMatchingProject(depot, projects) {
-  return projects.find(p =>
-    p.system && depot.system && p.system.toLowerCase() === depot.system.toLowerCase()
-  )
+  // A project linked to this depot's market wins; unlinked projects fall back
+  // to the system match. A project linked to a DIFFERENT depot in the same
+  // system never matches (two sites in one system used to cross-sync).
+  return projects.find(p => p.market_id && p.market_id === depot.market_id)
+    ?? projects.find(p =>
+      !p.market_id && p.system && depot.system &&
+      p.system.toLowerCase() === depot.system.toLowerCase()
+    )
 }
 
 async function importDepotAsProject(depot, setProjects) {
@@ -78,6 +83,7 @@ async function importDepotAsProject(depot, setProjects) {
   const proj = await api()?.save_construction_project({
     name: depot.station || depot.system,
     system: depot.system,
+    market_id: depot.market_id,
     requirements: reqs,
   })
   if (proj) setProjects(prev => [proj, ...prev.filter(p => p.id !== proj.id)])
@@ -89,7 +95,11 @@ async function syncDepotToProject(depot, existing, setProjects) {
     const match = depot.resources.find(d => matchDepotName(d, r.commodity))
     return match ? { ...r, delivered: match.ProvidedAmount } : r
   })
-  const proj = await api()?.save_construction_project({ ...existing, requirements })
+  const proj = await api()?.save_construction_project({
+    ...existing,
+    market_id: existing.market_id ?? depot.market_id,
+    requirements,
+  })
   if (proj) setProjects(prev => prev.map(p => p.id === proj.id ? proj : p))
   return proj
 }

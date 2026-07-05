@@ -10,6 +10,7 @@ export default function Construction() {
   const [shipCargo, setShipCargo] = useState({})
   const [shipInfo, setShipInfo] = useState(null)
   const [stationMarket, setStationMarket] = useState(null)
+  const [categories, setCategories] = useState({})
 
   useEffect(() => {
     const off1 = window.__edtc?.on('construction_update', (payload) => {
@@ -24,8 +25,11 @@ export default function Construction() {
     const off4 = window.__edtc?.on('station_market_update', (payload) => {
       setStationMarket(payload ?? null)
     })
+    const off5 = window.__edtc?.on('commodity_categories', (payload) => {
+      if (payload) setCategories(payload)
+    })
     return () => {
-      off1?.(); off2?.(); off3?.(); off4?.()
+      off1?.(); off2?.(); off3?.(); off4?.(); off5?.()
     }
   }, [])
 
@@ -42,7 +46,15 @@ export default function Construction() {
   }
 
   const reqs = project.requirements ?? []
-  const pending = reqs.filter(r => (r.delivered ?? 0) < r.required)
+  // Same order as the in-game station market screen: categories alphabetical,
+  // commodities alphabetical within each — so rows line up while buying
+  const marketSortKey = r => {
+    const cat = categories[normName(r.commodity)] || '￿'
+    return `${cat}|${r.commodity}`.toLowerCase()
+  }
+  const pending = reqs
+    .filter(r => (r.delivered ?? 0) < r.required)
+    .sort((a, b) => marketSortKey(a).localeCompare(marketSortKey(b)))
   const doneCount = reqs.length - pending.length
 
   const totalPct = reqs.length > 0

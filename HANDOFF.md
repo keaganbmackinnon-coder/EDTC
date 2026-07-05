@@ -1912,3 +1912,34 @@ Diagnostics hardening (released as v0.3.51, tagged same day):
 
 ---
 *Session checkpoint: 2026-07-04 19:42:07*
+
+---
+*Session checkpoint: 2026-07-04 19:48:47*
+
+---
+*Session checkpoint: 2026-07-04 21:13:26*
+
+---
+
+## Session 37 — Overlay market-order sort + market_id linking + journal-emit removal (v0.3.52)
+
+| Item | Status | File |
+|---|---|---|
+| **Construction overlay sorted in station-market order** (user request): pending commodities sort by (category, name) — the in-game market screen lists categories alphabetically with commodities alphabetical inside each, so rows line up while buying. Category map (both id and display-name keys, normalized to bare alphanumerics) built from `data/commodities.json` and pushed to the overlay as `commodity_categories` on open (overlays have no API bridge). Unknown commodities sort last | DONE | `main.py`, `frontend/src/overlays/Construction.jsx` |
+| Note: Market.json `Items[]` raw order is NOT the in-game screen order (categories interleaved) — category+name sort is the correct reproduction | — | — |
+| **Backlog: depot↔project cross-sync fixed** — `construction_projects` gained a `market_id` column (ALTER TABLE migration). Matching rules: a project linked to the event's market_id wins; unlinked projects fall back to the system match and get the market_id backfilled; a project linked to a DIFFERENT depot in the same system is never touched. Applied to `sync_construction_depot`, `record_construction_contribution`, and the page's `findMatchingProject`/Import/Sync buttons | DONE | `core/database.py`, `main.py`, `frontend/src/pages/Colonisation.jsx` |
+| Verified with scripted DB test (two depots in one system: no cross-sync, correct per-market contribution credit, legacy backfill) AND live: existing Chun Command Facility project auto-backfilled market_id 4375393795 on startup replay | DONE | — |
+| **Backlog: dead `_emit("journal", event)` removed** from `on_journal_event` — nothing in the frontend ever listened; it was an evaluate_js per journal event for nothing | DONE | `main.py` |
+| Inara: still externally blocked (app registration) — no action possible | — | — |
+| `APP_VERSION` = `0.3.52`; frontend + exe built, local install swapped and verified (log: v0.3.52, depot replay, overlay pushes + resize OK) | DONE | `main.py` |
+
+## Known issues / notes for next session
+
+- v0.3.52 is local only — tag for CI release once the user confirms the overlay sort in-game.
+- Operations support still blocked on the user playing one Operation (Session 35 plan stands; diff journals vs `scripts/journal_event_baseline.txt`).
+- If the user wants the same market-order sort on the Colonisation page (Shopping List / Depot View cards), the category map is already available backend-side via `_commodity_category_map()` — page has a working API bridge so it could just be an API method.
+- Inara integration wired but blocked pending app registration (external).
+- pygame not installable on Python 3.14 — audio disabled in dev/local builds; CI uses 3.12.
+
+---
+*Session 37 — 2026-07-04*
