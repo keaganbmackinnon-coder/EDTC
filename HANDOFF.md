@@ -2148,3 +2148,64 @@ User request: a Ships tab listing every ship, click a ship to see its modules
 
 ---
 *Session checkpoint: 2026-07-05 10:12:04*
+
+---
+*Session checkpoint: 2026-07-05 10:14:18*
+
+---
+*Session checkpoint: 2026-07-05 10:15:21*
+
+---
+*Session checkpoint: 2026-07-05 10:16:54*
+
+---
+*Session checkpoint: 2026-07-05 13:50:27*
+
+---
+*Session checkpoint: 2026-07-05 14:45:28*
+
+---
+
+## Session 39 — Ship Builder (outfitting + save builds + engineering tracking) (v0.3.58)
+
+User request: "add in ship building (like coriolis.io), and let me save a build
+so I can track each part and engineering level." Confirmed scope: import the live
+ship AND build from scratch; full coriolis-style stats with engineering applied.
+
+| Item | Status | File |
+|---|---|---|
+| `build_modules()` added — pulls every module from coriolis-data `modules/{standard,internal,hardpoints}` via the GitHub contents API (same pipeline as `build_ships`), classifies by dir (standard→core, hardpoints w/ `mount`→weapon else utility, internal→optional + `military_ok` by name), writes `data/modules.json` grouped core/hardpoint/utility/optional. Ran locally: core 297, hardpoint 177, utility 38, optional 458 | DONE | `scripts/build_data.py`, `data/modules.json` |
+| `core/outfitting.py` — pure-Python stat engine. `compute_stats(ship, fitted, unladen_override)` → mass, power (deployed/retracted vs plant), jump range (laden + max), shields (gen mass-curve + boosters + guardian reinf), armour (+HRP), speed/boost (thruster mass-curve), DPS, cargo, fuel, cost, rebuy. Engineering via effective-field overlay | DONE | `core/outfitting.py` |
+| **Units gotcha**: journal `Engineering.Modifiers` Values are MIXED units — most absolute real units (FSDOptimalMass tons, Mass, PowerDraw), but some are PERCENT while coriolis stores a fraction (`EngineOptPerformance` 133→1.33, `ShieldGenStrength` 217→2.17, `DefenceModifierShieldMultiplier` 26→0.26, resistances). `PERCENT_LABELS` set ÷100. Missing this gave 127× speed / 43M shields | DONE | `core/outfitting.py` |
+| Imported builds pass the journal's real `UnladenMass` as `unladen_override` → jump range matches the game exactly despite bulkhead mass not being in the module DB | DONE | `core/outfitting.py`, `main.py` |
+| API: `get_modules`, `compute_build` (expands from-scratch blueprint+grade → multipliers via `_blueprint_effects` using blueprints.json), `import_current_build` (maps journal Loadout → slot-keyed build w/ real modifiers). `_current_loadout` captured in `_handle_loadout` | DONE | `main.py` |
+| **Persistence reused the pre-existing (Session-1, never-wired) `builds` table** + `get_builds`/`save_build`/`delete_build` — build JSON stored in the `data` blob. No new table needed | DONE | `core/database.py`, `main.py` |
+| `Builder.jsx` — new page: builds library (Import current ship / New from hull / saved list), slot editor grouped by section (Hardpoints/Utility/Core/Optional/Military) with per-slot module picker (valid by family+size, searchable) + engineering editor (blueprint search + grade + experimental), live stats panel (debounced `compute_build`, power bar). Sidebar item "Ship Builder" between Ships and Trading | DONE | `frontend/src/pages/Builder.jsx`, `frontend/src/App.jsx` |
+| Validated engine vs ground truth: computed max jump range == game `MaxJumpRange` exactly for Anaconda/Caspian/Corvette/FdL/Panther/Sidewinder/Viper. `APP_VERSION`=0.3.58; frontend built (52 modules), exe built, local install swapped + verified (log v0.3.58 frozen, clean; user confirmed tab looks good) | DONE | `main.py` |
+
+## Notes / next session
+
+- **Jump range is exact for the common fleet**, but a few of the NEWEST ships
+  (Corsair, Type-8) read ~3-4% high — likely the SCO/overcharged FSD fuel model
+  (maxfuel/fuelmul) differs from what coriolis-data encodes. Verify their FSD
+  entries in `data/modules.json` and the SCO max-fuel handling if it matters.
+- **Bulkheads/armour grade are NOT modelled yet**: bulkheads live in the coriolis
+  *ship* files (not modules/), so they're not in `modules.json`. Imported builds
+  stay accurate via `unladen_override`; from-scratch builds slightly undercount
+  mass and use bulkhead multiplier = 1 (Lightweight) for armour. To fully model:
+  extract `bulkheads` into ships.json and add a bulkhead slot.
+- **From-scratch engineering is approximate**: it multiplies coriolis base fields
+  by blueprint grade multipliers (blueprints.json). Imported engineering is exact
+  (game's own modifiers). Shield-strength from-scratch only scales optmul, not the
+  min/max mass-curve points — minor.
+- Blueprint picker in the engineering editor is currently unfiltered (full list,
+  searchable) — could filter to blueprints whose `applies_to` matches the module
+  group for a tighter UX.
+- v0.3.58 is **local only** — tag for CI release after the user play-tests the
+  Ship Builder (import a couple of ships, build one from scratch, save/reload).
+
+---
+*Session 39 — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 14:48:00*

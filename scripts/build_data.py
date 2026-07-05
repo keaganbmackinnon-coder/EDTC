@@ -554,7 +554,7 @@ def _internal_class(entry):
 
 
 def build_ships():
-    print("\n[6/6] Building ships.json …")
+    print("\n[6/7] Building ships.json …")
     listing = json.loads(fetch(SHIPS_TREE_URL))
     files = sorted(it["name"] for it in listing
                    if it["name"].endswith(".json") and it["name"] != "index.js")
@@ -611,6 +611,133 @@ def build_ships():
     print(f"  OK  {len(ships)} ships")
 
 
+# ── Outfitting modules ───────────────────────────────────────────────────────
+
+MODULES_TREE_URL = "https://api.github.com/repos/EDCD/coriolis-data/contents/modules/{}"
+MODULE_RAW_BASE = "https://raw.githubusercontent.com/EDCD/coriolis-data/master/modules/{}/{}"
+
+# coriolis group code (grp) → friendly display name. Falls back to ukName/grp.
+GROUP_NAMES = {
+    # core / standard
+    "pp": "Power Plant", "t": "Thrusters", "fsd": "Frame Shift Drive",
+    "ls": "Life Support", "pd": "Power Distributor", "s": "Sensors", "ft": "Fuel Tank",
+    # optional internals
+    "cr": "Cargo Rack", "sg": "Shield Generator", "psg": "Prismatic Shield Generator",
+    "bsg": "Bi-Weave Shield Generator", "hr": "Hull Reinforcement Package",
+    "mrp": "Module Reinforcement Package", "scb": "Shield Cell Bank",
+    "fsi": "FSD Interdictor", "dss": "Detailed Surface Scanner", "fs": "Fuel Scoop",
+    "rf": "Refinery", "am": "Auto Field-Maintenance Unit", "fh": "Fighter Hangar",
+    "pv": "Planetary Vehicle Hangar", "pce": "Economy Class Passenger Cabin",
+    "pci": "Business Class Passenger Cabin", "pcm": "First Class Passenger Cabin",
+    "pcq": "Luxury Class Passenger Cabin", "dc": "Docking Computer",
+    "sua": "Supercruise Assist", "gfsb": "Guardian FSD Booster",
+    "ghrp": "Guardian Hull Reinforcement", "gmrp": "Guardian Module Reinforcement",
+    "gsrp": "Guardian Shield Reinforcement", "mahr": "Meta Alloy Hull Reinforcement",
+    "cc": "Collector Limpet Controller", "fx": "Fuel Transfer Limpet Controller",
+    "pc": "Prospector Limpet Controller", "hb": "Hatch Breaker Limpet Controller",
+    "rpl": "Recon Limpet Controller", "rsl": "Research Limpet Controller",
+    "dtc": "Decontamination Limpet Controller", "mrl": "Multi Limpet Controller",
+    # hardpoints (weapons)
+    "bl": "Beam Laser", "pl": "Pulse Laser", "ul": "Burst Laser", "mc": "Multi-cannon",
+    "c": "Cannon", "fc": "Fragment Cannon", "rg": "Rail Gun", "pa": "Plasma Accelerator",
+    "mr": "Missile Rack", "dtt": "Dumbfire Missile Rack", "tp": "Torpedo Pylon",
+    "nl": "Mine Launcher", "rfl": "Remote Release Flak Launcher", "axmc": "AX Multi-cannon",
+    "axmr": "AX Missile Rack", "rcpl": "Retributor Beam Laser", "gc": "Guardian Gauss Cannon",
+    "gpc": "Guardian Plasma Charger", "gsc": "Guardian Shard Cannon",
+    "scan": "Pulse Wave Analyser", "sfn": "Shock Cannon",
+    # utility mounts
+    "ch": "Chaff Launcher", "hs": "Heat Sink Launcher", "po": "Point Defence",
+    "ec": "Electronic Countermeasure", "sb": "Shield Booster", "kw": "Kill Warrant Scanner",
+    "cs": "Manifest Scanner", "ss": "Frame Shift Wake Scanner", "xs": "Xeno Scanner",
+    "pwa": "Pulse Wave Xeno Scanner", "csl": "Caustic Sink Launcher",
+    "tbrp": "Shutdown Field Neutraliser",
+}
+
+# core-slot ordering (matches ships.json core_slots order — see CORE_SLOT_NAMES)
+CORE_GROUP_ORDER = ["pp", "t", "fsd", "ls", "pd", "s", "ft"]
+
+# verbose source fields we don't need at runtime
+_DROP_FIELDS = {"ukDiscript", "edID", "eddbID"}
+
+
+def _clean_module(entry: dict, group: str, family: str, military_ok: bool) -> dict:
+    m = {k: v for k, v in entry.items() if k not in _DROP_FIELDS}
+    m["grp"] = group
+    m["family"] = family                     # core | hardpoint | utility | optional
+    m["group_name"] = GROUP_NAMES.get(group, entry.get("ukName") or group)
+    # variant label (e.g. "Bi-Weave", "Enhanced Low Power") — coriolis 'name' field
+    variant = entry.get("name")
+    base = m["group_name"]
+    m["display"] = f"{base} ({variant})" if variant and variant not in base else base
+    if military_ok:
+        m["military_ok"] = True
+    return m
+
+
+def _fetch_module_dir(subdir: str) -> list:
+    """Every module file in modules/<subdir>/, flattened to entry dicts with grp."""
+    listing = json.loads(fetch(MODULES_TREE_URL.format(subdir)))
+    files = sorted(it["name"] for it in listing
+                   if it["name"].endswith(".json"))
+    entries = []
+    for fname in files:
+        raw = json.loads(fetch(MODULE_RAW_BASE.format(subdir, fname)))
+        # module files are {"<grp>": [ {entry}, ... ]}; be defensive about shape
+        blocks = raw.values() if isinstance(raw, dict) else [raw]
+        for block in blocks:
+            if isinstance(block, list):
+                entries.extend(e for e in block if isinstance(e, dict))
+    return entries
+
+
+def build_modules():
+    print("\n[7/7] Building modules.json …")
+    core, hardpoint, utility, optional = {}, {}, {}, {}
+
+    # standard/ → core internals
+    for e in _fetch_module_dir("standard"):
+        grp = e.get("grp", "")
+        core.setdefault(grp, []).append(_clean_module(e, grp, "core", False))
+
+    # hardpoints/ → weapon (has a mount) or utility mount (no mount)
+    for e in _fetch_module_dir("hardpoints"):
+        grp = e.get("grp", "")
+        if e.get("mount") and int(e.get("class", 0)) >= 1:
+            hardpoint.setdefault(grp, []).append(_clean_module(e, grp, "hardpoint", False))
+        else:
+            utility.setdefault(grp, []).append(_clean_module(e, grp, "utility", False))
+
+    # internal/ → optional; tag military-slot eligibility by name
+    for e in _fetch_module_dir("internal"):
+        grp = e.get("grp", "")
+        name = f"{GROUP_NAMES.get(grp, '')} {e.get('ukName','')} {e.get('name','')}".lower()
+        mil = "reinforcement" in name
+        optional.setdefault(grp, []).append(_clean_module(e, grp, "optional", mil))
+
+    def _sort(groups):
+        for g in groups.values():
+            g.sort(key=lambda m: (int(m.get("class", 0)), m.get("rating", "Z")))
+        return groups
+
+    out = {
+        "_source": "github.com/EDCD/coriolis-data (modules/)",
+        "core_group_order": CORE_GROUP_ORDER,
+        "group_names": GROUP_NAMES,
+        "modules": {
+            "core": _sort(core),
+            "hardpoint": _sort(hardpoint),
+            "utility": _sort(utility),
+            "optional": _sort(optional),
+        },
+    }
+    (DATA_DIR / "modules.json").write_text(
+        json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
+    counts = {k: sum(len(v) for v in out["modules"][k].values())
+              for k in out["modules"]}
+    print(f"  OK  modules — core {counts['core']}, hardpoint {counts['hardpoint']}, "
+          f"utility {counts['utility']}, optional {counts['optional']}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -630,6 +757,7 @@ def main():
     build_synthesis()
     build_tech_brokers()
     build_ships()
+    build_modules()
 
     print("\n" + "=" * 40)
     print("Done! All data files written to data/")

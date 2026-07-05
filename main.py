@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.57"  # bump this with every release
+APP_VERSION = "0.3.58"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -129,6 +129,7 @@ class API:
         self._fss_bodies: list[dict] = []
         self._current_station: str = ""
         self._current_ship: dict = {}
+        self._current_loadout: dict = {}   # full Loadout event, for build import
         self._ship_cargo: list[dict] = []
         # ColonisationConstructionDepot re-fires every few seconds while docked
         # at a construction site — remember the last payload to skip no-op re-fires
@@ -1014,6 +1015,10 @@ class API:
         import re
         ship_type = _ship_display_name(event)
         fuel = event.get("FuelCapacity", {})
+        # keep the full event so the ship builder can import the live loadout
+        # (every module + its real engineering modifiers)
+        if event.get("Modules"):
+            self._current_loadout = event
 
         guardian_bonus = 0.0
         max_fuel_per_jump = 0.0
@@ -1140,6 +1145,153 @@ class API:
     def delete_build(self, build_id: int) -> bool:
         from core.database import delete_build
         return delete_build(build_id)
+
+    # --- Ship builder / outfitting ---
+
+    def get_modules(self) -> dict:
+        """Full outfitting module reference (data/modules.json)."""
+        return self._load_json("modules.json")
+
+    def _module_symbol_index(self) -> dict:
+        """symbol(lower) → module entry, cached across calls."""
+        idx = getattr(self, "_mod_idx_cache", None)
+        if idx is None:
+            idx = {}
+            mods = self._load_json("modules.json").get("modules", {})
+            for groups in mods.values():
+                for entries in groups.values():
+                    for m in entries:
+                        sym = str(m.get("symbol", "")).lower()
+                        if sym:
+                            idx[sym] = m
+            self._mod_idx_cache = idx
+        return idx
+
+    def _ship_by_id(self, ship_id: str) -> dict:
+        for s in self._load_json("ships.json").get("ships", []):
+            if s.get("id") == ship_id:
+                return s
+        return {}
+
+    def _blueprint_effects(self, blueprint_id: str, grade) -> dict:
+        """Expand a from-scratch blueprint+grade into {coriolis_field: multiplier}
+        so the stat engine can apply it (imported builds already carry the game's
+        absolute modifiers instead)."""
+        from core.outfitting import LABEL_TO_FIELD
+        if not blueprint_id or grade is None:
+            return {}
+        bp = next((b for b in self.get_blueprints()
+                   if b.get("id") == blueprint_id or b.get("name") == blueprint_id), None)
+        if not bp:
+            return {}
+        grade_data = (bp.get("grades") or {}).get(str(grade)) or {}
+        out = {}
+        for e in grade_data.get("effects", []):
+            field = LABEL_TO_FIELD.get(e.get("attribute", ""))
+            if field and not field.startswith("_") and e.get("modifier") is not None:
+                out[field] = e["modifier"]
+        return out
+
+    def compute_build(self, build: dict) -> dict:
+        """coriolis-style stats for a build: {ship_id, slots:{key:{symbol,engineering}}}.
+        Engineering per slot is either {modifiers:{...}} (imported, absolute) or
+        {blueprint, grade, experimental} (from-scratch, expanded to multipliers)."""
+        from core.outfitting import compute_stats
+        ship = self._ship_by_id(build.get("ship_id", ""))
+        if not ship:
+            return {"error": "Unknown ship."}
+        idx = self._module_symbol_index()
+        fitted = []
+        for slot_key, slot in (build.get("slots") or {}).items():
+            if not slot or not slot.get("symbol"):
+                continue
+            mod = idx.get(str(slot["symbol"]).lower())
+            if not mod:
+                continue
+            eng = slot.get("engineering")
+            if eng and eng.get("blueprint") and not eng.get("modifiers"):
+                eng = dict(eng)
+                eng["blueprint_effects"] = self._blueprint_effects(
+                    eng.get("blueprint"), eng.get("grade"))
+            family = slot_key.split(":", 1)[0] if ":" in slot_key else mod.get("family")
+            fitted.append({"family": family, "module": mod, "engineering": eng})
+        return compute_stats(ship, fitted, unladen_override=build.get("unladen_mass"))
+
+    _CORE_JOURNAL_SLOT = {
+        "PowerPlant": "pp", "MainEngines": "t", "FrameShiftDrive": "fsd",
+        "LifeSupport": "ls", "PowerDistributor": "pd", "Radar": "s", "FuelTank": "ft",
+    }
+
+    def import_current_build(self) -> dict:
+        """Snapshot the live in-game loadout as a build (every module + its real
+        engineering). Falls back to scanning the latest journal for a Loadout."""
+        import re
+        if not self._current_loadout.get("Modules"):
+            self.get_ship_info()          # triggers journal self-heal → sets _current_loadout
+        event = self._current_loadout
+        if not event or not event.get("Modules"):
+            return {"error": "No loadout found — launch the game so EDTC can read your ship."}
+
+        idx = self._module_symbol_index()
+        disp = _ship_display_name(event)
+        ship_id = ""
+        for s in self._load_json("ships.json").get("ships", []):
+            if s.get("name", "").strip().lower() == disp.strip().lower():
+                ship_id = s.get("id", ""); break
+
+        core, weapons, utility, optional, military = {}, [], [], [], []
+        for module in (event.get("Modules") or []):
+            item = str(module.get("Item", "")).lower()
+            mod = idx.get(item)
+            if not mod:
+                continue
+            eng = module.get("Engineering") or {}
+            engineering = None
+            if eng:
+                engineering = {
+                    "blueprint": eng.get("BlueprintName", ""),
+                    "grade": eng.get("Level"),
+                    "quality": eng.get("Quality"),
+                    "experimental": eng.get("ExperimentalEffect_Localised")
+                                    or eng.get("ExperimentalEffect", ""),
+                    "modifiers": {m.get("Label"): m.get("Value")
+                                  for m in eng.get("Modifiers", []) if m.get("Label")},
+                }
+            fitted = {"symbol": mod.get("symbol"), "engineering": engineering}
+            slot = module.get("Slot", "")
+            cls = int(mod.get("class", 0))
+            if slot in self._CORE_JOURNAL_SLOT:
+                core[f"core:{self._CORE_JOURNAL_SLOT[slot]}"] = fitted
+            elif slot.startswith("TinyHardpoint"):
+                utility.append(fitted)
+            elif re.match(r"(Small|Medium|Large|Huge)Hardpoint", slot):
+                weapons.append((cls, fitted))
+            elif slot.startswith("Slot"):
+                m = re.search(r"Size(\d+)", slot)
+                optional.append((int(m.group(1)) if m else cls, fitted))
+            elif slot.startswith("Military"):
+                military.append(fitted)
+            # Armour/bulkheads, cosmetics, cockpit, cargo hatch → not fittable here
+
+        slots = dict(core)
+        for i, (_, f) in enumerate(sorted(weapons, key=lambda w: -w[0])):
+            slots[f"hardpoint:{i}"] = f
+        for i, f in enumerate(utility):
+            slots[f"utility:{i}"] = f
+        for i, (_, f) in enumerate(sorted(optional, key=lambda o: -o[0])):
+            slots[f"optional:{i}"] = f
+        for i, f in enumerate(military):
+            slots[f"military:{i}"] = f
+
+        return {
+            "ship_id": ship_id,
+            "ship_name": event.get("ShipName", ""),
+            "ship_ident": event.get("ShipIdent", ""),
+            "name": (event.get("ShipName") or disp or "Imported ship").strip(),
+            "source": "import",
+            "unladen_mass": event.get("UnladenMass"),
+            "slots": slots,
+        }
 
     # --- Routes ---
 
