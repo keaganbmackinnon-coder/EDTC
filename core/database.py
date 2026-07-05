@@ -112,17 +112,20 @@ def init_db():
             );
 
             CREATE TABLE IF NOT EXISTS carriers (
-                carrier_id   TEXT PRIMARY KEY,
-                name         TEXT DEFAULT '',
-                callsign     TEXT DEFAULT '',
-                location     TEXT DEFAULT '',
-                fuel         INTEGER DEFAULT 0,
-                jump_range   INTEGER DEFAULT 500,
-                finance      TEXT DEFAULT '{}',
-                space_usage  TEXT DEFAULT '{}',
-                services     TEXT DEFAULT '[]',
-                pending_jump TEXT DEFAULT '',
-                updated      TEXT DEFAULT (datetime('now'))
+                carrier_id     TEXT PRIMARY KEY,
+                name           TEXT DEFAULT '',
+                callsign       TEXT DEFAULT '',
+                location       TEXT DEFAULT '',
+                fuel           INTEGER DEFAULT 0,
+                jump_range     INTEGER DEFAULT 500,
+                finance        TEXT DEFAULT '{}',
+                space_usage    TEXT DEFAULT '{}',
+                services       TEXT DEFAULT '[]',
+                pending_jump   TEXT DEFAULT '',
+                owned          INTEGER DEFAULT 0,
+                owned_override INTEGER,
+                hidden         INTEGER DEFAULT 0,
+                updated        TEXT DEFAULT (datetime('now'))
             );
 
             CREATE TABLE IF NOT EXISTS trade_log (
@@ -235,6 +238,17 @@ def init_db():
                     )
             conn.execute(
                 "INSERT OR REPLACE INTO prefs (key, value) VALUES ('markets_symbol_migrated', '1')"
+            )
+        # One-time migration: carriers gained ownership + hidden flags. Rows
+        # with a name or finance data came from CarrierStats (owner-only
+        # event), so they backfill as owned.
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(carriers)")]
+        if "owned" not in cols:
+            conn.execute("ALTER TABLE carriers ADD COLUMN owned INTEGER DEFAULT 0")
+            conn.execute("ALTER TABLE carriers ADD COLUMN owned_override INTEGER")
+            conn.execute("ALTER TABLE carriers ADD COLUMN hidden INTEGER DEFAULT 0")
+            conn.execute(
+                "UPDATE carriers SET owned=1 WHERE name != '' OR finance != '{}'"
             )
         # One-time migration: galaxy_coverage gained a gy (height band) column.
         # The old 2D data can't be split by height, so drop and let every layer
@@ -695,17 +709,37 @@ def update_fc_cargo_transfer(transfers: list) -> list:
 
 # --- Carriers ---
 
-def get_carriers() -> list:
+def _carrier_dict(row) -> dict:
+    d = dict(row)
+    d["finance"] = json.loads(d["finance"])
+    d["space_usage"] = json.loads(d["space_usage"])
+    d["services"] = json.loads(d["services"])
+    # Manual override wins over the event-derived flag
+    d["is_mine"] = bool(d["owned_override"]) if d["owned_override"] is not None else bool(d["owned"])
+    return d
+
+
+def get_carriers(include_hidden: bool = False) -> list:
     with _conn() as conn:
-        rows = conn.execute("SELECT * FROM carriers ORDER BY updated DESC").fetchall()
-        result = []
-        for r in rows:
-            d = dict(r)
-            d["finance"] = json.loads(d["finance"])
-            d["space_usage"] = json.loads(d["space_usage"])
-            d["services"] = json.loads(d["services"])
-            result.append(d)
-        return result
+        where = "" if include_hidden else "WHERE hidden=0"
+        rows = conn.execute(f"SELECT * FROM carriers {where} ORDER BY updated DESC").fetchall()
+        return [_carrier_dict(r) for r in rows]
+
+
+def set_carrier_owned(carrier_id: str, mine: bool) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "UPDATE carriers SET owned_override=? WHERE carrier_id=?",
+            (1 if mine else 0, str(carrier_id)),
+        )
+
+
+def set_carrier_hidden(carrier_id: str, hidden: bool) -> None:
+    with _conn() as conn:
+        conn.execute(
+            "UPDATE carriers SET hidden=? WHERE carrier_id=?",
+            (1 if hidden else 0, str(carrier_id)),
+        )
 
 
 def upsert_carrier(data: dict) -> dict:
@@ -730,27 +764,27 @@ def upsert_carrier(data: dict) -> dict:
             for c in data.get("Crew", json.loads(base.get("services", "[]")))
         ] if "Crew" in data else json.loads(base.get("services", "[]")))
         pending_jump = data.get("pending_jump", base.get("pending_jump", ""))
+        # Owner-only events pass owned=1; never downgrades. Manual override
+        # and hidden flag are user-set and never touched by event upserts.
+        owned = max(base.get("owned", 0) or 0, 1 if data.get("owned") else 0)
 
         conn.execute("""
             INSERT INTO carriers
                 (carrier_id, name, callsign, location, fuel, jump_range,
-                 finance, space_usage, services, pending_jump, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                 finance, space_usage, services, pending_jump, owned, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
             ON CONFLICT(carrier_id) DO UPDATE SET
                 name=excluded.name, callsign=excluded.callsign,
                 location=excluded.location, fuel=excluded.fuel,
                 jump_range=excluded.jump_range, finance=excluded.finance,
                 space_usage=excluded.space_usage, services=excluded.services,
-                pending_jump=excluded.pending_jump, updated=excluded.updated
+                pending_jump=excluded.pending_jump, owned=excluded.owned,
+                updated=excluded.updated
         """, (carrier_id, name, callsign, location, fuel, jump_range,
-              finance, space_usage, services, pending_jump))
+              finance, space_usage, services, pending_jump, owned))
 
         row = conn.execute("SELECT * FROM carriers WHERE carrier_id=?", (carrier_id,)).fetchone()
-        d = dict(row)
-        d["finance"] = json.loads(d["finance"])
-        d["space_usage"] = json.loads(d["space_usage"])
-        d["services"] = json.loads(d["services"])
-        return d
+        return _carrier_dict(row)
 
 
 # --- Materials ---

@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.54"  # bump this with every release
+APP_VERSION = "0.3.55"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -779,8 +779,9 @@ class API:
         self._emit("fc_cargo_update", {"cargo": updated})
 
     def _handle_carrier_stats(self, event: dict):
+        # CarrierStats only fires from Carrier Management — owner-only
         from core.database import upsert_carrier
-        carrier = upsert_carrier(event)
+        carrier = upsert_carrier({**event, "owned": 1})
         self._emit("carrier_update", {"carrier": carrier})
 
     def _handle_carrier_jump(self, event: dict):
@@ -793,10 +794,12 @@ class API:
         self._emit("carrier_update", {"carrier": carrier})
 
     def _handle_carrier_jump_request(self, event: dict):
+        # Only the owner can request a jump — marks the carrier as ours
         from core.database import upsert_carrier
         carrier = upsert_carrier({
             "CarrierID": event.get("CarrierID"),
             "pending_jump": event.get("SystemName", ""),
+            "owned": 1,
         })
         self._emit("carrier_update", {"carrier": carrier})
 
@@ -805,6 +808,7 @@ class API:
         carrier = upsert_carrier({
             "CarrierID": event.get("CarrierID"),
             "pending_jump": "",
+            "owned": 1,
         })
         self._emit("carrier_update", {"carrier": carrier})
 
@@ -822,6 +826,7 @@ class API:
             "CarrierID": event.get("CarrierID") or event.get("BoughtAtMarket"),
             "Callsign": event.get("Callsign", ""),
             "location": event.get("Location", ""),
+            "owned": 1,
         })
         self._emit("carrier_update", {"carrier": carrier})
 
@@ -1298,9 +1303,27 @@ class API:
 
     # --- Fleet Carriers ---
 
-    def get_carriers(self) -> list:
+    def get_carriers(self, include_hidden: bool = False) -> list:
         from core.database import get_carriers
+        return get_carriers(include_hidden)
+
+    def set_carrier_owned(self, carrier_id: str, mine: bool) -> list:
+        """Manual 'this is / isn't my carrier' override; wins over auto-detect."""
+        from core.database import set_carrier_owned, get_carriers
+        set_carrier_owned(carrier_id, mine)
         return get_carriers()
+
+    def remove_carrier(self, carrier_id: str) -> list:
+        """Hide a carrier from all lists. Hidden, not deleted — journal events
+        for it keep updating the row silently and it can be restored."""
+        from core.database import set_carrier_hidden, get_carriers
+        set_carrier_hidden(carrier_id, True)
+        return get_carriers()
+
+    def restore_carrier(self, carrier_id: str) -> list:
+        from core.database import set_carrier_hidden, get_carriers
+        set_carrier_hidden(carrier_id, False)
+        return get_carriers(include_hidden=True)
 
     def plan_neutron_route(self, origin: str, destination: str, range_ly: float, efficiency: int = 60) -> dict:
         import asyncio

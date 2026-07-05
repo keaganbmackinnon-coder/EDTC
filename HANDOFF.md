@@ -2010,3 +2010,37 @@ materials are missing to engineer parts.
 
 ---
 *Session 37 continued (engineering tracker) — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 00:02:12*
+
+---
+
+## Session 37 continued — Carrier ownership + Visited Carriers tab (v0.3.55)
+
+User request: tell own carrier apart from visited ones; separate tab with the
+ability to remove unwanted entries.
+
+| Item | Status | File |
+|---|---|---|
+| **Ownership detection**: `CarrierStats` / `CarrierBuy` / `CarrierJumpRequest` / `CarrierJumpCancelled` are owner-only journal events → handlers pass `owned: 1`. `CarrierJump` / `CarrierLocation` / `CarrierDepositFuel` fire for ANY carrier you're docked on or donate to → never mark ownership | DONE | `main.py` |
+| `carriers` gained `owned` (event-derived, never downgrades), `owned_override` (manual, wins when set), `hidden` columns; PRAGMA-guarded migration backfills `owned=1` where name/finance exist (those fields only ever came from CarrierStats) | DONE | `core/database.py` |
+| `get_carriers(include_hidden)` returns computed `is_mine`; `set_carrier_owned` / `set_carrier_hidden`; API: `set_carrier_owned`, `remove_carrier` (hide, not delete — journal replay can't resurrect it), `restore_carrier` | DONE | `core/database.py`, `main.py` |
+| Stats tab → **My Carrier**: filters to `is_mine`, each card gets a "Not my carrier" link (moves it to Visited) | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| New **Visited Carriers** tab: docked-on/refuelled carriers with name/callsign/location/last-seen/fuel, per-card **This is mine** + **Remove** buttons, collapsible "Show removed" list with Restore | DONE | `frontend/src/pages/FleetCarriers.jsx` |
+| `APP_VERSION` = `0.3.55`; built, swapped, verified (log clean; migration: MACK HORIZON owned=1, REBUY DISTRIB. CENTER owned=1, anonymous fuel-only carrier owned=0 → Visited) | DONE | `main.py` |
+
+## Notes
+
+- **Remove = hide, not delete**: journal startup replay re-upserts carriers from
+  the latest journal every launch, so a hard delete would resurrect them. The
+  hidden flag survives upserts (event upserts never touch owned_override/hidden).
+- **REBUY DISTRIB. CENTER (RXDS) has CarrierStats data in the user's journal**,
+  meaning the owner-only event fired for it — either the user owns two carriers
+  or has management access to it. Ask the user; "Not my carrier" corrects it in
+  one click if needed.
+- v0.3.54 (engineering tracker) and v0.3.55 both unreleased — tag through CI
+  after play-testing (0.3.55 tag covers both).
+
+---
+*Session 37 continued (carrier ownership) — 2026-07-05*

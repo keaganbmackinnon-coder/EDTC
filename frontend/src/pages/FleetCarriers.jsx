@@ -48,12 +48,20 @@ function StatsTab() {
     })
   }, [])
 
-  if (carriers.length === 0) {
+  async function notMine(carrierId) {
+    const list = await api()?.set_carrier_owned(carrierId, false)
+    if (list) setCarriers(list)
+  }
+
+  const mine = carriers.filter(c => c.is_mine)
+
+  if (mine.length === 0) {
     return (
       <div className="panel">
         <p className="text-ed-muted text-sm">No carrier data yet.</p>
         <p className="text-ed-muted text-xs font-mono mt-1">
           Open Carrier Management in-game to populate carrier stats.
+          Carriers you dock on but don't own show under Visited Carriers.
         </p>
       </div>
     )
@@ -61,7 +69,7 @@ function StatsTab() {
 
   return (
     <div className="space-y-4">
-      {carriers.map(c => {
+      {mine.map(c => {
         const finance = c.finance ?? {}
         const space = c.space_usage ?? {}
         const services = c.services ?? []
@@ -152,12 +160,141 @@ function StatsTab() {
               </div>
             )}
 
-            <p className="text-ed-muted text-[10px] font-mono mt-3">
-              Updated: {c.updated}
-            </p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-ed-muted text-[10px] font-mono">
+                Updated: {c.updated}
+              </p>
+              <button
+                className="text-ed-muted text-[10px] font-mono hover:text-ed-danger"
+                title="Move to Visited Carriers"
+                onClick={() => notMine(c.carrier_id)}
+              >
+                Not my carrier
+              </button>
+            </div>
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// ---- Tab: Visited Carriers (docked-on, not owned) ----
+
+function VisitedTab() {
+  const [carriers, setCarriers] = useState([])
+  const [showRemoved, setShowRemoved] = useState(false)
+
+  function refresh(includeHidden = showRemoved) {
+    api()?.get_carriers(includeHidden).then(r => setCarriers(r ?? []))
+  }
+
+  useEffect(() => { refresh() }, [showRemoved])
+
+  async function markMine(carrierId) {
+    const list = await api()?.set_carrier_owned(carrierId, true)
+    if (list) refresh()
+  }
+
+  async function remove(carrierId) {
+    await api()?.remove_carrier(carrierId)
+    refresh()
+  }
+
+  async function restore(carrierId) {
+    await api()?.restore_carrier(carrierId)
+    refresh()
+  }
+
+  const visited = carriers.filter(c => !c.is_mine && !c.hidden)
+  const removed = carriers.filter(c => !c.is_mine && c.hidden)
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-4">
+        Carriers you've docked on or refuelled but don't own — tracked from
+        CarrierJump / CarrierLocation journal events. Remove any you don't care about.
+      </p>
+
+      {visited.length === 0 ? (
+        <div className="panel">
+          <p className="text-ed-muted text-sm">No visited carriers tracked.</p>
+          <p className="text-ed-muted text-xs font-mono mt-1">
+            Docking on someone else's carrier will add it here automatically.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {visited.map(c => (
+            <div key={c.carrier_id} className="panel">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="text-ed-text font-semibold font-ui">
+                    {c.name || c.callsign || `Carrier #${c.carrier_id}`}
+                  </span>
+                  {c.callsign && c.name && (
+                    <span className="ml-2 text-ed-muted text-xs font-mono">{c.callsign}</span>
+                  )}
+                  <p className="text-ed-muted text-xs font-mono mt-0.5">
+                    {c.location ? `Last seen in ${c.location}` : 'Location unknown'}
+                    {' · '}{c.updated}
+                  </p>
+                  {c.fuel > 0 && (
+                    <p className="text-ed-muted text-xs font-mono mt-0.5">
+                      Tritium last known: {c.fuel} T
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    className="text-xs font-mono px-2 py-1 rounded border border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-orange transition-colors"
+                    onClick={() => markMine(c.carrier_id)}
+                  >
+                    This is mine
+                  </button>
+                  <button
+                    className="text-xs font-mono px-2 py-1 rounded border border-ed-danger/40 text-ed-danger hover:bg-ed-danger hover:text-black transition-colors"
+                    onClick={() => remove(c.carrier_id)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4">
+        <button
+          className="text-ed-muted text-xs font-mono hover:text-ed-text"
+          onClick={() => setShowRemoved(v => !v)}
+        >
+          {showRemoved ? '▲ Hide removed' : `▼ Show removed${removed.length ? ` (${removed.length})` : ''}`}
+        </button>
+        {showRemoved && (
+          removed.length === 0 ? (
+            <p className="text-ed-muted text-xs font-mono mt-2">Nothing removed.</p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {removed.map(c => (
+                <div key={c.carrier_id} className="panel opacity-60 flex items-center justify-between">
+                  <span className="text-ed-muted text-xs font-mono">
+                    {c.name || c.callsign || `Carrier #${c.carrier_id}`}
+                    {c.location ? ` · ${c.location}` : ''}
+                  </span>
+                  <button
+                    className="text-ed-orange text-xs font-mono hover:underline shrink-0"
+                    onClick={() => restore(c.carrier_id)}
+                  >
+                    Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
     </div>
   )
 }
@@ -346,8 +483,9 @@ function RoutePlannerTab() {
 // ---- Main ----
 
 const TABS = [
-  { id: 'stats',  label: 'Carrier Stats' },
-  { id: 'route',  label: 'Route Planner' },
+  { id: 'stats',   label: 'My Carrier' },
+  { id: 'route',   label: 'Route Planner' },
+  { id: 'visited', label: 'Visited Carriers' },
 ]
 
 export default function FleetCarriers() {
@@ -374,8 +512,9 @@ export default function FleetCarriers() {
         ))}
       </div>
 
-      {tab === 'stats' && <StatsTab />}
-      {tab === 'route' && <RoutePlannerTab />}
+      {tab === 'stats'   && <StatsTab />}
+      {tab === 'route'   && <RoutePlannerTab />}
+      {tab === 'visited' && <VisitedTab />}
     </div>
   )
 }
