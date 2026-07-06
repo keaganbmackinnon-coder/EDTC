@@ -2380,3 +2380,263 @@ fix plus the full Commendations system (incl. Thargoid War).
 
 ---
 *Session checkpoint: 2026-07-05 20:54:43*
+
+---
+*Session checkpoint: 2026-07-05 20:57:29*
+
+---
+*Session checkpoint: 2026-07-06 09:20:48*
+
+---
+*Session checkpoint: 2026-07-06 09:31:20*
+
+---
+
+## Session 42 — Ship schematic mount locator in Ship Builder (v0.3.62)
+
+User request: "fix the models in the ship builder — make them look like the ship
+so when you click a hardpoint it shows where it's attached on the ship."
+
+| Item | Status | File |
+|---|---|---|
+| Extracted the procedural hull wireframe out of `Ships.jsx` into a **shared** `ShipSchematic` component; added `buildShipModel(ship)` pure geometry that returns hull edges **and** projected mount positions sharing one transform (so markers align to the hull) | DONE | `frontend/src/components/ShipSchematic.jsx` |
+| Mount placement: hardpoints on symmetric port/starboard anchors (`HP_ANCHORS`, big guns forward), utilities spread along the upper hull. Markers sit on the hull surface (profile sampled at the mount's hull-fraction, pushed out ~1.15×), colour/size-coded (H/L/M/S + grey U), depth-dimmed | DONE | `frontend/src/components/ShipSchematic.jsx` |
+| Interactive: `activeKey` prop pulses a marker + drops a leader-line label; `onSelectMount(key)` fires on marker click. Slot keys match the Builder (`hardpoint:<i>`, `utility:<i>`) | DONE | `frontend/src/components/ShipSchematic.jsx` |
+| Builder.jsx — sticky schematic at the top of the slot-editor column. **Hover a hardpoint/utility row → its mount lights up on the ship; click a marker → opens that slot's module picker.** Row also highlights when its mount is active | DONE | `frontend/src/pages/Builder.jsx` |
+| Ships.jsx — swapped its inline `ShipWireframe` for the shared `ShipSchematic` (deleted the duplicated FAMILY_PROFILES/projection); the Ships page schematic now also shows mount markers | DONE | `frontend/src/pages/Ships.jsx` |
+| `APP_VERSION` = `0.3.62`; frontend built (54 modules, clean), exe built, local install swapped + relaunched — log clean, v0.3.62 frozen, no tracebacks | DONE | `main.py` |
+
+## Notes / next session
+
+- **Still schematic, not a literal likeness.** There are no real ship meshes in
+  the EDCD/coriolis ecosystem and **no real hardpoint-coordinate data**, so mount
+  positions are *procedurally placed* (plausible symmetric layout), not the
+  actual in-game mount points. This is the honest ceiling without sourcing
+  external 3D models (three.js + licensing). To improve realism: hand-tune
+  `FAMILY_PROFILES` per family, add families, or add real mount coords per ship.
+- Geometry lives in `frontend/src/components/ShipSchematic.jsx` — `buildShipModel`
+  is a pure fn (edges + mounts), `ShipSchematic` is the SVG renderer. `HP_ANCHORS`
+  controls hardpoint placement order; utility placement is the loop below it.
+- Only **hardpoint + utility** slots get surface markers (internals aren't on the
+  skin). Selecting a core/optional slot just shows no active marker.
+- v0.3.62 is **local only** — tag for CI release after the user eyeballs the
+  schematic + mount highlighting in the Builder and Ships pages.
+
+---
+*Session 42 — 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 10:02:16*
+
+---
+
+## Session 42 continued — real 3D ship models (wireframe) (v0.3.62)
+
+User chose to make the hulls look like real ships by supplying **3D model
+files**, rendered as **wireframe** (their call: "they can still be wireframe, no
+hi-rez needed"), and "we can tune the hardpoints later."
+
+| Item | Status | File |
+|---|---|---|
+| Added `three`, `@react-three/fiber` (v8), `@react-three/drei` (v9) — React 18 compatible | DONE | `frontend/package.json` |
+| `ShipView` component — loads a per-ship mesh and renders it as orange **wireframe edges** (`EdgesGeometry`, 18° crease) with OrbitControls (drag-rotate, scroll-zoom, slow auto-rotate). Auto-centres + normalises scale | DONE | `frontend/src/components/ShipView.jsx` |
+| **Auto-detection**: `import.meta.glob('../ship-models/*.{glb,gltf,obj}')` → `{ id: url }`. Drop a file named `<ship_id>.glb/.gltf/.obj` in `frontend/src/ship-models/` and it's bundled on next build. `hasModel(id)` exported | DONE | `frontend/src/components/ShipView.jsx` |
+| **Graceful fallback**: any ship with no model file → 2D `ShipSchematic`; a model that fails to load (bad file, no WebGL, Draco) → caught by an error boundary + Suspense → also 2D. No blank panels | DONE | `frontend/src/components/ShipView.jsx` |
+| Builder + Ships now use `<ShipView>` instead of `<ShipSchematic>` directly. Builder caption switches to "drag to rotate · scroll to zoom" when a model exists | DONE | `frontend/src/pages/Builder.jsx`, `frontend/src/pages/Ships.jsx` |
+| Loaders: `GLTFLoader`/`OBJLoader` via `useLoader` (NOT drei `useGLTF`) to avoid drei's **Draco decoder CDN fetch** (would fail offline). No `Environment`/`Stage` for the same reason | DONE | `frontend/src/components/ShipView.jsx` |
+| Placeholder `sidewinder.obj` (low-poly lofted hull) generated so 3D-wireframe mode is verifiable immediately; `_README.txt` with the full id→name list added to the models folder | DONE | `frontend/src/ship-models/` |
+| `APP_VERSION` = `0.3.62`; frontend built (650 modules, bundle 369 KB gzip — three.js weight), exe rebuilt, install swapped + relaunched, log clean | DONE | `main.py` |
+
+## Notes / next session
+
+- **Bundle jumped to ~1.35 MB (369 KB gzip)** from three.js. Acceptable; could
+  code-split the 3D path with a dynamic import if load time becomes an issue.
+- **Models are bundled INTO the app** (via Vite → `frontend/dist` → PyInstaller
+  `--add-data`). 47 real glb files could add tens of MB to the exe. If that gets
+  too big, switch to loading models from an external folder next to the exe, or a
+  CDN/release asset, instead of bundling.
+- Small models (< 4 KB, like the placeholder) get **inlined as a data-URI** by
+  Vite; larger ones emit as hashed files in `dist/assets`. Both load fine.
+- **Hardpoint mount markers are NOT on the 3D model yet** (deferred per user).
+  The 2D schematic keeps click-to-locate. Next: place markers in 3D (procedural
+  along the longest bbox axis, or raycast onto the mesh) and re-wire
+  `activeKey`/`onSelectMount` so slot-row hover highlights on the 3D model too.
+- **To add a ship model**: name the file `<id>.glb` (ids in
+  `frontend/src/ship-models/_README.txt`), drop it in that folder, rebuild.
+  Prefer uncompressed glTF (no Draco). Replace the placeholder `sidewinder.obj`
+  with a real one.
+- **Verify 3D actually renders in WebView2**: open Ship Builder → "New build
+  from… Sidewinder Mk I" (or Ships → Sidewinder). A rotating orange wireframe =
+  3D works. The flat schematic with H/L/M/S chips = it fell back (report it).
+- v0.3.62 still **local only** — tag for CI release once real models are in and
+  the 3D path is confirmed working in-app.
+
+---
+*Session 42 continued — 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 10:22:02*
+
+---
+*Session checkpoint: 2026-07-06 10:25:18*
+
+---
+*Session checkpoint: 2026-07-06 10:32:32*
+
+---
+*Session checkpoint: 2026-07-06 11:01:17*
+
+---
+*Session checkpoint: 2026-07-06 11:06:07*
+
+---
+*Session checkpoint: 2026-07-06 11:11:33*
+
+---
+*Session checkpoint: 2026-07-06 11:23:08*
+
+---
+*Session checkpoint: 2026-07-06 11:38:30*
+
+---
+*Session checkpoint: 2026-07-06 11:42:20*
+
+---
+*Session checkpoint: 2026-07-06 11:44:41*
+
+---
+
+## Session 42 continued — real 3D models for the whole fleet (STL + Thingiverse) (v0.3.62)
+
+Followed the 3D-model route through: added STL support, sourced real ship meshes,
+and wired up 38 of 47 ships as rotatable 3D wireframes.
+
+| Item | Status | File |
+|---|---|---|
+| Added STL loader (STLLoader) alongside glb/gltf/obj; glob widened to *.{glb,gltf,obj,stl} | DONE | frontend/src/components/ShipView.jsx |
+| 3D mount markers restored on the model (procedural bbox placement; hover a slot row -> its marker highlights; click a marker -> opens the slot picker). Rough placement - "tune later" per user | DONE | frontend/src/components/ShipView.jsx |
+| Auto lay-flat: rotates each model's thinnest axis to vertical so stood-up print STLs sit level (fixes "spinning like a top") | DONE | frontend/src/components/ShipView.jsx |
+| FLIP_UPRIGHT set: rolls 180deg about the length axis for models that land belly-up. Populated with all 38 Kahnindustries ships. MODEL_ROTATION map available for full per-ship overrides | DONE | frontend/src/components/ShipView.jsx |
+| Sourced models: Kahnindustries Elite Dangerous set via the Thingiverse API (user supplied a temporary App Token). 38 EDTC ships matched; downloaded the full (non-split) STL each | DONE | frontend/src/ship-models/*.stl |
+| Decimated every mesh to ~12k faces (trimesh + fast-simplification) - wireframe only needs low poly. Bundle ~28 MB instead of ~150 MB. Files ~0.6-3 MB each | DONE | frontend/src/ship-models/ |
+| Attributions recorded (_ATTRIBUTIONS.txt, CC-BY 3.0, thing ids) | DONE | frontend/src/ship-models/_ATTRIBUTIONS.txt |
+| APP_VERSION = 0.3.62; frontend built (38 STL assets), exe rebuilt (50.7 MB), install swapped + relaunched, log clean | DONE | main.py |
+
+### The 9 ships with NO 3D model (still 2D schematic)
+
+Kahnindustries never modelled these (all newer ships): Cobra Mk V (cobramkv),
+Corsair (imperial_corsair), Caspian Explorer (explorer_nx), Kestrel Mk II (kestrel),
+Mandalay (mandalay), Panther Clipper Mk II (panthermkii), Python Mk II (python_nx),
+Type-8 (type_8_transport), Type-11 Prospector (type_11_prospector).
+They fall back to the 2D ShipSchematic automatically.
+
+### How the model pipeline works (repro)
+
+- Scratchpad scripts (ephemeral): tv_discover.py (list Kahnindustries things via
+  /users/Kahnindustries/things), tv_batch.py (map thing->ship id, download full STL
+  via /things/<id>/files -> download_url, decimate, install + attribute).
+- Thingiverse API needs a Bearer App Token (create at thingiverse.com/apps/create ->
+  Desktop app). The token used this session was the user's and can be revoked.
+- To add one of the 9 missing ships later: get any glb/stl/obj, name it <id>.stl
+  (ids in _README.txt), drop in frontend/src/ship-models/, add to FLIP_UPRIGHT if it
+  lands belly-up, rebuild.
+
+### Notes / next session
+
+- Verify orientation across the fleet: the 180deg flip was applied to all 38 on the
+  assumption of a single orientation convention. Spot-check big/odd hulls (Anaconda,
+  Corvette, Cutter, Type-9, Krait) - if any is belly-up or nose-wrong, remove it from
+  FLIP_UPRIGHT or add a MODEL_ROTATION entry.
+- Hardpoint marker placement on 3D models is still rough (bbox-based) - tune later.
+- Bundle/exe is ~50 MB now. Fine for GitHub Releases; if it grows, move models out of
+  the bundle to a downloaded-on-demand folder next to the exe.
+- Decimation target is 12k faces (TARGET_FACES in tv_batch.py); some hulls kept more
+  (topology-limited). Raise/lower if wireframes look too rough/dense.
+- v0.3.62 still local only - tag for CI release once orientation is confirmed.
+
+---
+*Session 42 continued - 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 11:57:45*
+
+---
+
+## Session 42 continued — 5 newer ships added (Pizza42) → 43/47 in 3D (v0.3.62)
+
+Searched the Thingiverse catalog (API) for the 9 previously-missing ships. Creator
+**Pizza42** has 5 of the newer hulls; downloaded + decimated + installed them:
+`cobramkv`, `imperial_corsair`, `mandalay`, `python_nx`, `type_8_transport`.
+
+- These 5 are a DIFFERENT creator, so NOT added to `FLIP_UPRIGHT` yet — pending the
+  user's orientation eyeball. Add any that render belly-up.
+- **4 ships still have no 3D model anywhere** (nobody's modelled the 2024 hulls):
+  `explorer_nx` (Caspian Explorer), `kestrel` (Kestrel Mk II),
+  `panthermkii` (Panther Clipper Mk II), `type_11_prospector` (Type-11 Prospector).
+  They stay on the 2D schematic.
+- Now 43/47 ships in 3D; exe 54 MB; batch script `tv_batch2.py` in scratchpad.
+
+---
+*Session 42 continued — 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 12:25:59*
+
+---
+*Session checkpoint: 2026-07-06 12:34:14*
+
+---
+*Session checkpoint: 2026-07-06 12:37:04*
+
+---
+
+## Session 42 continued — Caspian + Panther via Printables, 3D hardpoint raycasting (v0.3.62)
+
+- **Printables anonymous download works**: their GraphQL `getDownloadLink(printId,id,fileType,source)`
+  returns a public `files.printables.com` STL URL with NO login. Pulled the last 2
+  obtainable ships (Pizza42, Printables-only): **Caspian Explorer** (`explorer_nx`,
+  print 1540081) and **Panther Clipper Mk II** (`panthermkii`, print 1420758).
+  Decimated + installed + flipped. **Now 45/47 ships in 3D.**
+- **Still unmodelled anywhere**: `type_11_prospector`, `kestrel` (no STL exists on
+  Thingiverse/Printables/Cults/Sketchfab yet).
+- **3D hardpoint placement reworked** (was bbox-float): `buildWireframe` now also
+  builds a merged `raycastMesh` (position-only, same lay-flat/flip transform as the
+  wire). `computeMounts3D` raycasts each mount inward onto the hull skin, with
+  Y=up / longest-horizontal=length / other-horizontal=width axis mapping, and a
+  bbox fallback. Markers now sit on the surface and respect up/down.
+- Printables GraphQL enums: `DownloadFileTypeEnum` = stl/gcode/sla/other/pack;
+  `DownloadSourceEnum` = model_viewer/model_detail. File id via
+  `{ print(id){ stls { id name } } }`.
+- exe 55 MB; v0.3.62 local only.
+
+## Notes / next session
+
+- Verify the 2 new ships' orientation (flipped like the other Pizza42 set) and that
+  the raycast hardpoint markers sit sensibly across hulls. Tune `HP_ANCHORS` /
+  `place()` offsets if a ship's mounts look off.
+- If Type-11 / Kestrel models appear later, drop `type_11_prospector.stl` /
+  `kestrel.stl` in ship-models, add to FLIP_UPRIGHT if belly-up, rebuild.
+
+---
+*Session 42 continued — 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 12:46:08*
+
+---
+
+## ⚠ TODO — tweak 3D hardpoint marker placement
+
+Hardpoint/utility markers on the 3D models are placed **procedurally** and still
+need hand-tuning per ship. They are raycast onto the hull surface, but the *choice*
+of where along the hull (and which flank/top) comes from the generic `HP_ANCHORS`
+layout + `place()` in `frontend/src/components/ShipView.jsx`, NOT real in-game mount
+data (which doesn't exist in the model files). So on some hulls a marker can land in
+a spot that isn't the actual weapon hardpoint.
+
+To improve: adjust `HP_ANCHORS` (hull-fraction + cross-section angle per index),
+the `place()` length spread (`* 0.82`) / surface nudge, or add per-ship overrides.
+Best done with the app open, eyeballing each hull. This is a polish item, not a bug.
+
+---
+*Session 42 — 2026-07-06*

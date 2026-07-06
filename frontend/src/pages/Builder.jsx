@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import ShipView, { hasModel } from '../components/ShipView'
 
 const api = () => window?.pywebview?.api
 
@@ -212,6 +213,7 @@ export default function Builder() {
   const [build, setBuild] = useState(null)        // working build {id?, name, ship_id, source, unladen_mass?, slots:{}}
   const [stats, setStats] = useState(null)
   const [drawer, setDrawer] = useState(null)       // {slotKey, mode:'module'|'engineer'}
+  const [hoverSlot, setHoverSlot] = useState(null) // slot key highlighted on the schematic
   const [newShip, setNewShip] = useState('')
   const [busy, setBusy] = useState('')
   const debounce = useRef(null)
@@ -365,25 +367,43 @@ export default function Builder() {
         </div>
 
         {/* ── slot editor ── */}
-        <div className="overflow-y-auto pr-1 min-h-0">
+        <div className="flex flex-col min-h-0">
           {!build ? (
             <div className="panel h-full flex items-center justify-center text-ed-muted text-sm">
               Import your current ship or start a new build.
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <input className="input font-ui text-lg font-semibold flex-1" value={build.name}
-                  onChange={e => setBuild(b => ({ ...b, name: e.target.value }))} />
-                <button className="btn-primary" disabled={busy === 'save'} onClick={saveBuild}>
-                  {busy === 'save' ? 'Saving…' : '💾 Save'}
-                </button>
-              </div>
-              <div className="text-ed-muted text-sm">
-                {ship ? <>{ship.name} · {PAD[ship.pad_size]} pad{build.ship_ident ? ` · ${build.ship_ident}` : ''}</>
-                  : <span className="text-ed-danger">Ship type “{build.ship_id || 'unknown'}” not recognised — stats unavailable.</span>}
+            <>
+              {/* fixed header: name, ship, live schematic */}
+              <div className="space-y-2 mb-2 shrink-0">
+                <div className="flex items-center gap-2">
+                  <input className="input font-ui text-lg font-semibold flex-1" value={build.name}
+                    onChange={e => setBuild(b => ({ ...b, name: e.target.value }))} />
+                  <button className="btn-primary" disabled={busy === 'save'} onClick={saveBuild}>
+                    {busy === 'save' ? 'Saving…' : '💾 Save'}
+                  </button>
+                </div>
+                <div className="text-ed-muted text-sm">
+                  {ship ? <>{ship.name} · {PAD[ship.pad_size]} pad{build.ship_ident ? ` · ${build.ship_ident}` : ''}</>
+                    : <span className="text-ed-danger">Ship type “{build.ship_id || 'unknown'}” not recognised — stats unavailable.</span>}
+                </div>
+                {ship && (
+                  <div className="panel p-2 bg-gradient-to-b from-ed-panel to-ed-dark">
+                    <div className="w-full" style={{ aspectRatio: '340 / 240' }}>
+                      <ShipView ship={ship}
+                        activeKey={drawer?.slotKey || hoverSlot}
+                        onSelectMount={key => setDrawer({ slotKey: key, mode: 'module' })} />
+                    </div>
+                    <div className="text-center text-[10px] font-mono text-ed-muted mt-0.5">
+                      {hasModel(ship.id)
+                        ? 'drag to rotate · scroll to zoom · hover a hardpoint below to locate it'
+                        : 'hover a hardpoint below to locate it · click a marker to fit that slot'}
+                    </div>
+                  </div>
+                )}
               </div>
 
+              <div className="overflow-y-auto pr-1 min-h-0 space-y-3">
               {SECTIONS.map(section => {
                 const rows = slots.filter(s => s.section === section)
                 if (rows.length === 0) return null
@@ -395,8 +415,13 @@ export default function Builder() {
                         const fitted = build.slots?.[slot.key]
                         const mod = fitted && moduleBySymbol(fitted.symbol)
                         const eng = fitted?.engineering
+                        const locatable = slot.family === 'hardpoint' || slot.family === 'utility'
+                        const hi = (drawer?.slotKey || hoverSlot) === slot.key && locatable
                         return (
-                          <div key={slot.key} className="flex items-center gap-2 border-b border-ed-border/40 py-1.5">
+                          <div key={slot.key}
+                            onMouseEnter={() => locatable && setHoverSlot(slot.key)}
+                            onMouseLeave={() => setHoverSlot(h => (h === slot.key ? null : h))}
+                            className={`flex items-center gap-2 border-b border-ed-border/40 py-1.5 rounded px-1 -mx-1 ${hi ? 'bg-ed-orange/10' : ''}`}>
                             <span className="badge border border-ed-border text-ed-muted shrink-0 w-8 text-center font-mono">
                               {slot.size || 'U'}
                             </span>
@@ -427,7 +452,8 @@ export default function Builder() {
                   </section>
                 )
               })}
-            </div>
+              </div>
+            </>
           )}
         </div>
 

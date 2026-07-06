@@ -1,0 +1,53 @@
+Ship model attributions — Kahnindustries, CC-BY 3.0 (keep this file).
+Source: https://www.thingiverse.com  (Elite Dangerous fan models).
+Meshes decimated for wireframe display. ED trademarks (c) Frontier Developments.
+
+adder.stl  <-  "Adder 2 Part (Elite Dangerous)"  thing:3134574
+alliance_challenger.stl  <-  "Alliance Challenger 2 Part (Elite Dangerous)"  thing:3820766
+alliance_chieftain.stl  <-  "Alliance Chieftain 2 Part (Elite Dangerous)"  thing:3519242
+alliance_crusader.stl  <-  "Alliance Crusader 2 Part (Elite Dangerous)"  thing:3808647
+anaconda.stl  <-  "Anaconda 2 Part (Elite Dangerous)"  thing:2837535
+asp.stl  <-  "ASP Explorer 2 Part (Elite Dangerous)"  thing:3687930
+asp_scout.stl  <-  "ASP Scout 2 Part (Elite Dangerous)"  thing:3734519
+beluga.stl  <-  "Beluga Liner 2 Part (Elite Dangerous)"  thing:3542800
+cobra_mk_iii.stl  <-  "Cobra MKIII 2 Part (Elite Dangerous)"  thing:3382983
+cobra_mk_iv.stl  <-  "Cobra MKIV 2 Part (Elite Dangerous)"  thing:3788921
+diamondback.stl  <-  "Diamondback Scout 2 Part (Elite Dangerous)"  thing:3358052
+diamondback_explorer.stl  <-  "Diamondback Explorer 2 Part (Elite Dangerous)"  thing:3572407
+dolphin.stl  <-  "Dolphin 2 Part (Elite Dangerous)"  thing:3376313
+eagle.stl  <-  "Eagle 2 Part (Elite Dangerous)"  thing:3125546
+federal_assault_ship.stl  <-  "Federal Assault Ship 2 Part (Elite Dangerous)"  thing:3587778
+federal_corvette.stl  <-  "Federal Corvette 2 Part (Elite Dangerous)"  thing:3485024
+federal_dropship.stl  <-  "Federal Dropship 2 Part (Elite Dangerous)"  thing:3784073
+federal_gunship.stl  <-  "Federal Gunship 2 Part (Elite Dangerous)"  thing:3716927
+fer_de_lance.stl  <-  "Fer De Lance 2 Part (Elite Dangerous)"  thing:3424789
+hauler.stl  <-  "Hauler 2 Part (Elite Dangerous)"  thing:3182131
+imperial_clipper.stl  <-  "Imperial Clipper 2 Part (Elite Dangerous)"  thing:3673356
+imperial_courier.stl  <-  "Imperial Courier 2 Part (Elite Dangerous)"  thing:3663105
+imperial_cutter.stl  <-  "Imperial Cutter 2 Part (Elite Dangerous)"  thing:3548302
+imperial_eagle.stl  <-  "Imperial Eagle 2 Part (Elite Dangerous)"  thing:3381403
+keelback.stl  <-  "Keelback 2 Part (Elite Dangerous)"  thing:3493591
+krait_mkii.stl  <-  "Krait MKII 2 Part (Elite Dangerous)"  thing:3691238
+krait_phantom.stl  <-  "Krait Phantom 2 Part (Elite Dangerous)"  thing:3823396
+mamba.stl  <-  "Mamba 2 Part (Elite Dangerous)"  thing:3632426
+orca.stl  <-  "Orca 2 Part (Elite Dangerous)"  thing:3524233
+python.stl  <-  "Python 2 Part (Elite Dangerous)"  thing:3413730
+sidewinder.stl  <-  "Sidewinder 2 Part (Elite Dangerous)"  thing:3381354
+type_10_defender.stl  <-  "Type-10 Defender 2 Part (Elite Dangerous)"  thing:3845179
+type_6_transporter.stl  <-  "Type-6 2 Part (Elite Dangerous)"  thing:3365219
+type_7_transport.stl  <-  "Type-7 Transporter 2 Part (Elite Dangerous)"  thing:3655113
+type_9_heavy.stl  <-  "Type-9 Heavy 2 Part (Elite Dangerous)"  thing:3618927
+viper.stl  <-  "Viper Mk3 2 Part (Elite Dangerous)"  thing:3134544
+viper_mk_iv.stl  <-  "Viper Mk4 2 Part (Elite Dangerous)"  thing:3182123
+vulture.stl  <-  "Vulture 2 Part (Elite Dangerous)"  thing:3505015
+
+# Newer ships by Pizza42 (Thingiverse), CC-BY unless noted:
+cobramkv.stl  <-  thing:6994142  (Pizza42)
+imperial_corsair.stl  <-  thing:7040432  (Pizza42)
+mandalay.stl  <-  thing:6992990  (Pizza42)
+python_nx.stl  <-  thing:7007850  (Pizza42)
+type_8_transport.stl  <-  thing:7007331  (Pizza42)
+
+# Printables (Pizza42):
+explorer_nx.stl  <-  printables.com/model/1540081 (Caspian Explorer, Pizza42)
+panthermkii.stl  <-  printables.com/model/1420758 (Panther Clipper Mk II, Pizza42)
