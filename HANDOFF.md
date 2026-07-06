@@ -2278,3 +2278,96 @@ symptoms resolved.
 
 ---
 *Session checkpoint: 2026-07-05 20:10:35*
+
+---
+*Session checkpoint: 2026-07-05 20:12:31*
+
+---
+*Session checkpoint: 2026-07-05 20:14:05*
+
+---
+*Session checkpoint: 2026-07-05 20:15:28*
+
+---
+*Session checkpoint: 2026-07-05 20:15:51*
+
+---
+*Session checkpoint: 2026-07-05 20:17:36*
+
+---
+
+## Session 41 — Commendations: medals/awards system (v0.3.60)
+
+User request: a for-fun awards/medals system that grants something as you hit
+milestones (Inara-style, with latitude to invent/replace awards).
+
+| Item | Status | File |
+|---|---|---|
+| `core/awards.py` — pure catalogue (23 awards, 5 categories) + `evaluate(data)`; tiered ladders with Bronze/Silver/Gold/Elite/Legendary rarity, progress to next tier. Metrics read from the journal Statistics event + ranks + a few local counts | DONE | `core/awards.py` |
+| `awards_earned` table (PK award_id+tier, earned_at) added to schema; `record_awards(evaluated)` persists first-earned timestamps, annotates `earned_at`, returns `newly` — **suppressed on the very first run** so an established CMDR isn't buried in toasts (backfills silently) | DONE | `core/database.py` |
+| `get_awards()` API (evaluate+record → awards, categories, earned/total, medals, newly); `_assemble_award_data()` gathers stats/ranks/engineers-unlocked/own-carrier/logbook/guardian counts; `_refresh_awards()` re-evaluates + emits `awards_earned` toast event, hooked into `_handle_statistics` and `_handle_rank` | DONE | `main.py` |
+| `Awards.jsx` — Commendations page: summary (earned/total, medal count, % bar), All/Earned/In-Progress + category filters, medal cards with glowing rarity disc, tier pips, progress-to-next, earned date; on-page toast for newly earned (listens to `awards_earned`) | DONE | `frontend/src/pages/Awards.jsx` |
+| Sidebar item "Commendations" + `/awards` route (between Commander and Overlays) | DONE | `frontend/src/App.jsx` |
+| `APP_VERSION` = `0.3.60`; frontend built (53 modules), exe built, local install swapped + verified (log v0.3.60 clean; `awards_earned` backfilled 49 rows via the startup Statistics replay) | DONE | `main.py` |
+
+**Award catalogue** (tiers tuned so the current CMDR earns a satisfying spread —
+20/23, 49 medals — with motivating near-misses): Exploration (Pathfinder,
+Long Hauler, Stellar Cartographer, Trailblazer, The Far Reach, First Footfall),
+Exobiology (Xenobiologist, Codex Contributor, Bio Fortune), Combat (Bounty
+Hunter, Warzone Veteran, Assassin), Trade & Industry (Merchant Prince,
+Prospector, Trade Network), Wealth & Fleet (Tycoon, Shipwright, Engineer's
+Friend, Fleet Commander), Prestige (Veteran Commander, **Triple Elite**,
+Chronicler, Guardian Seeker). Chronicler + Guardian Seeker deliberately nudge
+the user toward EDTC's own logbook/Guardian pages; Triple Elite is a legendary
+near-miss (CMDR is Combat Dangerous, one rank short).
+
+**Verified:** award eval against the real DB (20/23, spread Bronze→Legendary);
+`record_awards` unit test — silent first-run backfill, idempotent, later
+milestone toasts exactly the 2 headline tiers with `earned_at` stamped;
+frontend build clean; app relaunch backfilled 49 rows with no errors.
+
+## Notes / next session
+
+- Awards populate/refresh from the periodic **Statistics** journal event (fires
+  on major stat changes + game events) and on **Rank** ups — both call
+  `_refresh_awards()`. The Awards page also re-evaluates live on the
+  `awards_earned` event.
+- Toast is currently **page-scoped** (Commendations page). A global toast in
+  App.jsx would double-fire there; if wanted app-wide, move the listener to
+  App.jsx and drop it from Awards.jsx.
+- Thresholds are all in `core/awards.py` CATALOG — trivial to retune or add
+  awards (each is a dict with a `metric` lambda + `tiers` ladder).
+- v0.3.60 is **local only** — tag for CI release once the user has eyeballed the
+  Commendations page in-app.
+
+---
+*Session 41 — 2026-07-05*
+
+---
+
+## Session 41 continued — Thargoid War awards (v0.3.61)
+
+User: "I don't see any Thargoid achievements — those would be cool." The
+Statistics event carries a `TG_ENCOUNTERS` block (CMDR has
+`TG_ENCOUNTER_KILLED=964`, `TG_ENCOUNTER_TOTAL=16`).
+
+| Item | Status | File |
+|---|---|---|
+| New **Thargoid War** category, 3 awards: **Xeno Hunter** (Thargoids destroyed [10/100/1000/5000]), **AX Combatant** (interceptor encounters [1/10/50/200]), **Scourge of the Maelstrom** (single legendary — destroy 1,000 Thargoids) | DONE | `core/awards.py` |
+| `APP_VERSION` = `0.3.61`; exe rebuilt (backend-only change — Awards page is data-driven, no frontend rebuild), swapped + relaunched, log clean; startup replay recorded xeno_hunter + ax_combatant at Silver, Scourge correctly unearned (964<1000) | DONE | `main.py` |
+
+Result for the current CMDR: Xeno Hunter **Silver** (96% to Gold) and Scourge
+**96% to Legendary** — both just ~36 kills away, so one AX sortie unlocks both.
+Now 25 awards total. Per-variant kills (Cyclops/Basilisk/Medusa/Hydra/Orthrus)
+weren't in this CMDR's Statistics block, so awards use the reliable aggregate
+`TG_ENCOUNTER_KILLED`/`_TOTAL`; add variant-specific medals later if a journal
+exposes those fields.
+
+---
+*Session 41 continued (Thargoid awards) — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 20:40:16*
+
+---
+*Session checkpoint: 2026-07-05 20:52:32*

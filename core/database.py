@@ -111,6 +111,13 @@ def init_db():
                 PRIMARY KEY (blueprint_id, grade)
             );
 
+            CREATE TABLE IF NOT EXISTS awards_earned (
+                award_id  TEXT NOT NULL,
+                tier      INTEGER NOT NULL,
+                earned_at TEXT DEFAULT (datetime('now')),
+                PRIMARY KEY (award_id, tier)
+            );
+
             CREATE TABLE IF NOT EXISTS carriers (
                 carrier_id     TEXT PRIMARY KEY,
                 name           TEXT DEFAULT '',
@@ -913,6 +920,50 @@ def get_cmdr_stats() -> dict:
             except Exception:
                 result[r["key"]] = r["value"]
         return result
+
+
+# --- Awards / Commendations ---
+
+def record_awards(evaluated: list) -> tuple[list, list]:
+    """Persist first-earned timestamps for every reached tier and annotate the
+    evaluated list with `earned_at` (of the current tier). Returns
+    (annotated, newly_earned). `newly_earned` lists tiers reached for the FIRST
+    time this call — but stays empty on the very first run so an established
+    commander isn't buried in a hundred toasts on day one."""
+    with _conn() as conn:
+        existing = {
+            (r["award_id"], r["tier"]): r["earned_at"]
+            for r in conn.execute("SELECT award_id, tier, earned_at FROM awards_earned")
+        }
+        first_run = not existing
+        newly = []
+        for a in evaluated:
+            earned = a.get("earned_tier", -1)
+            for tier in range(earned + 1):
+                if (a["id"], tier) not in existing:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO awards_earned (award_id, tier) VALUES (?, ?)",
+                        (a["id"], tier),
+                    )
+                    if not first_run and tier == earned:
+                        # Only toast the headline (current) tier, not every rung.
+                        newly.append({
+                            "id": a["id"], "name": a["name"], "icon": a["icon"],
+                            "tier": tier, "tier_label": a.get("tier_label"),
+                            "style": a.get("style"),
+                        })
+            # Stamp earned_at of the current tier onto the annotated award.
+            if earned >= 0:
+                a["earned_at"] = (
+                    existing.get((a["id"], earned))
+                    or conn.execute(
+                        "SELECT earned_at FROM awards_earned WHERE award_id=? AND tier=?",
+                        (a["id"], earned),
+                    ).fetchone()["earned_at"]
+                )
+            else:
+                a["earned_at"] = None
+    return evaluated, newly
 
 
 # --- Logbook ---

@@ -46,6 +46,7 @@ import FleetCarriers from './pages/FleetCarriers'
 import Guardian from './pages/Guardian'
 import Galaxy from './pages/Galaxy'
 import Commander from './pages/Commander'
+import Awards from './pages/Awards'
 import Overlays from './pages/Overlays'
 import CmdrPing from './overlays/CmdrPing'
 import RouteOverlay from './overlays/Route'
@@ -75,6 +76,7 @@ const NAV_ITEMS = [
   { path: '/guardian',     label: 'Guardian & POI' },
   { path: '/galaxy',       label: 'Galaxy' },
   { path: '/commander',    label: 'Commander' },
+  { path: '/awards',       label: 'Commendations' },
   { path: '/overlays',     label: 'Overlays' },
 ]
 
@@ -209,6 +211,7 @@ export default function App() {
           <Route path="/guardian"     element={<Guardian />} />
           <Route path="/galaxy"       element={<Galaxy />} />
           <Route path="/commander"    element={<Commander />} />
+          <Route path="/awards"        element={<Awards />} />
           <Route path="/overlays"     element={<Overlays />} />
         </Routes>
         </ErrorBoundary>

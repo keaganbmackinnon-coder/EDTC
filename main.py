@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.59"  # bump this with every release
+APP_VERSION = "0.3.61"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -1102,6 +1102,7 @@ class API:
         if ranks:
             set_cmdr_stat("ranks", ranks)
         self._emit("cmdr_stats_update", {})
+        self._refresh_awards()
 
     def _handle_progress(self, event: dict):
         from core.database import set_cmdr_stat
@@ -1116,6 +1117,7 @@ class API:
         if stats:
             set_cmdr_stat("statistics", stats)
         self._emit("cmdr_stats_update", {})
+        self._refresh_awards()
 
     def _handle_powerplay(self, event: dict):
         from core.database import set_pref
@@ -2162,6 +2164,56 @@ class API:
     def get_cmdr_stats(self) -> dict:
         from core.database import get_cmdr_stats
         return get_cmdr_stats()
+
+    # --- Awards / Commendations ---
+
+    def _assemble_award_data(self) -> dict:
+        """Gather everything the award catalogue evaluates against."""
+        from core.database import (get_cmdr_stats, get_engineer_progress,
+                                   get_carriers, get_logbook, get_guardian_visits)
+        stats = get_cmdr_stats()
+        eng = get_engineer_progress()
+        engineers_unlocked = sum(
+            1 for e in eng.values()
+            if (e.get("rank") or 0) > 0 or str(e.get("status", "")).lower() == "unlocked"
+        )
+        own_carrier = 1 if any(c.get("is_mine") for c in get_carriers()) else 0
+        return {
+            "stats": stats.get("statistics", {}) or {},
+            "ranks": stats.get("ranks", {}) or {},
+            "engineers_unlocked": engineers_unlocked,
+            "own_carrier": own_carrier,
+            "logbook_count": len(get_logbook()),
+            "guardian_visited": len(get_guardian_visits()),
+        }
+
+    def get_awards(self) -> dict:
+        """Evaluate + persist awards; returns the full catalogue with progress
+        plus a summary. Called by the Awards page on load."""
+        from core.awards import evaluate, CATEGORIES
+        from core.database import record_awards
+        awards, newly = record_awards(evaluate(self._assemble_award_data()))
+        earned = [a for a in awards if a["earned_tier"] >= 0]
+        return {
+            "awards": awards,
+            "categories": CATEGORIES,
+            "earned_count": len(earned),
+            "total_count": len(awards),
+            "medals": sum(a["earned_tier"] + 1 for a in earned),
+            "newly": newly,
+        }
+
+    def _refresh_awards(self):
+        """Re-evaluate after stat/rank changes; push a toast for anything newly
+        earned this session."""
+        try:
+            from core.awards import evaluate
+            from core.database import record_awards
+            _, newly = record_awards(evaluate(self._assemble_award_data()))
+            if newly:
+                self._emit("awards_earned", {"newly": newly})
+        except Exception as e:
+            logging.warning(f"award refresh failed: {e}")
 
     def get_current_system(self) -> str:
         return self._current_system
