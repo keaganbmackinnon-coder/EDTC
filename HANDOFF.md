@@ -2209,3 +2209,72 @@ ship AND build from scratch; full coriolis-style stats with engineering applied.
 
 ---
 *Session checkpoint: 2026-07-05 14:48:00*
+
+---
+*Session checkpoint: 2026-07-05 14:53:22*
+
+---
+*Session checkpoint: 2026-07-05 14:54:28*
+
+---
+*Session checkpoint: 2026-07-05 14:55:36*
+
+---
+*Session checkpoint: 2026-07-05 19:43:06*
+
+---
+
+## Session 40 — Journal watcher rotation/tailing fix (v0.3.59)
+
+User report: "the colonisation tab is broke — it won't update or show my cargo
+anymore." Confirmed symptoms (via AskUserQuestion): delivered counts don't move
++ in-game construction overlay shows wrong/zero cargo. User hauls **directly**
+(not via carrier), so stale FC cargo was a red herring.
+
+**Root cause — journal-file rotation was not handled reliably.** Diagnosed from
+the live data, not the code (every handler path *looked* correct end to end):
+- DB depot frozen at 71.3% (last updated at the 14:47 local dock) while the
+  game's current journal was at 83%+ and climbing — EDTC had processed **zero**
+  events since its 18:37 restart.
+- The current journal `Journal.2026-07-05T184027.01.log` was created at 18:40 —
+  **3 min after** EDTC launched at 18:37. EDTC latched onto the previous journal
+  at startup and never switched to the new session file.
+- `JournalWatcher` relied entirely on watchdog directory events to notice a new
+  journal. On Windows, ED appends to the journal without reliably firing
+  directory change notifications, and the game rotates to a fresh `Journal.*.log`
+  on every (re)start — so if EDTC starts before the game's session file exists,
+  the feed silently freezes. Compounding it, `run()` looped on
+  `while self._observer.is_alive()`, so a dead observer thread also killed
+  everything with no log.
+
+| Fix | File |
+|---|---|
+| Added a **1 s polling loop** in `run()` that (a) switches to a newer journal on rotation and (b) drains appended lines every tick — independent of watchdog and of observer liveness (`while self._running`, not `observer.is_alive()`) | `core/journal.py` |
+| `threading.Lock` serialises file-position access between the watchdog callback and the poll loop so appended lines are never read/emitted twice; `_read_new_lines_locked()` runs under the lock from both paths | `core/journal.py` |
+| File identity compared by `.name` (unique timestamp) not `Path` equality — avoids backslash/casing mismatches between glob results and `event.src_path` that would reset `_file_pos=0` and re-emit a whole file | `core/journal.py` |
+| Observer start wrapped in try/except; `stop()` method added; rotation logged (`journal rotation: switching to …`) | `core/journal.py` |
+| `APP_VERSION` = `0.3.59`; exe rebuilt (frontend unchanged, dist reused), local install swapped, relaunched | `main.py` |
+
+**Verified:** isolated rotation/append test (temp dir) — picks up rotated
+journal, reads appended lines exactly once, idle polls don't duplicate. Live:
+v0.3.59 relaunch replayed the current journal → depot 71.3% → **93.8%**,
+titanium delivered 18 → **2282**, ship cargo 0 → **titanium (1)**. Both user
+symptoms resolved.
+
+## Notes / next session
+
+- This bug hit any session where EDTC was started **before** ED created its
+  session journal (autostart, or restarting EDTC between play sessions). The
+  poll makes the feed self-healing regardless of watchdog reliability.
+- Guardian sites dataset is now **610 sites** (no longer a stub) — dropped from
+  the known-issues list per user.
+- v0.3.59 is **local only** — tag for CI release once the user confirms the
+  Colonisation page + overlay track live during a play session. A v0.3.59 tag
+  also carries the still-unreleased Session 37–39 work (engineering tracker,
+  carrier ownership, Ships tab, Ship Builder).
+
+---
+*Session 40 — 2026-07-05*
+
+---
+*Session checkpoint: 2026-07-05 20:10:35*

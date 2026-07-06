@@ -1,5 +1,7 @@
 import json
+import logging
 import os
+import threading
 import time
 from pathlib import Path
 from typing import Callable
@@ -47,6 +49,10 @@ class JournalWatcher:
         self._current_file: Path | None = None
         self._file_pos = 0
         self._observer = Observer()
+        # Serialises file-position access between the watchdog callback thread
+        # and the polling loop so appended lines are never read/emitted twice.
+        self._lock = threading.Lock()
+        self._running = False
 
     def _replay_startup(self):
         """Scan the latest journal from the start to seed initial state (system, cmdr, etc.)."""
@@ -116,17 +122,52 @@ class JournalWatcher:
             self._file_pos = self._current_file.stat().st_size
 
         handler = _JournalHandler(self)
-        self._observer.schedule(handler, str(self._path), recursive=False)
-        self._observer.start()
-
         try:
-            while self._observer.is_alive():
-                time.sleep(1)
-        finally:
-            self._observer.stop()
-            self._observer.join()
+            self._observer.schedule(handler, str(self._path), recursive=False)
+            self._observer.start()
+        except Exception:
+            # Watchdog can fail to start; the polling loop below is the
+            # authoritative reader either way, so keep going.
+            logging.exception("journal observer failed to start — polling only")
 
-    def _read_new_lines(self):
+        # Poll independently of watchdog. Elite appends to the journal without
+        # reliably triggering Windows directory-change notifications, and it
+        # rotates to a brand-new Journal.*.log whenever the game (re)starts —
+        # so relying on watchdog alone silently freezes the feed if EDTC was
+        # launched before the game's session file existed. The poll both picks
+        # up a newer journal (rotation) and drains appended lines every second,
+        # and it does NOT depend on the observer staying alive.
+        self._running = True
+        try:
+            while self._running:
+                time.sleep(1.0)
+                try:
+                    self._poll()
+                except Exception:
+                    logging.exception("journal poll error")
+        finally:
+            try:
+                self._observer.stop()
+                self._observer.join()
+            except Exception:
+                pass
+
+    def stop(self):
+        self._running = False
+
+    def _poll(self):
+        """Switch to a newer journal on rotation, then drain appended lines."""
+        with self._lock:
+            latest = _latest_journal(self._path)
+            if latest and (self._current_file is None
+                           or latest.name != self._current_file.name):
+                logging.info(f"journal rotation: switching to {latest.name}")
+                self._current_file = latest
+                self._file_pos = 0
+            self._read_new_lines_locked()
+
+    def _read_new_lines_locked(self):
+        # Caller must hold self._lock.
         if not self._current_file or not self._current_file.exists():
             return
 
@@ -147,10 +188,13 @@ class JournalWatcher:
     def _on_file_change(self, path: str):
         changed = Path(path)
         if changed.suffix == ".log" and "Journal." in changed.name:
-            if self._current_file != changed:
-                self._current_file = changed
-                self._file_pos = 0
-            self._read_new_lines()
+            with self._lock:
+                if (self._current_file is None
+                        or self._current_file.name != changed.name):
+                    logging.info(f"journal watchdog: switching to {changed.name}")
+                    self._current_file = changed
+                    self._file_pos = 0
+                self._read_new_lines_locked()
 
 
 class _JournalHandler(FileSystemEventHandler):

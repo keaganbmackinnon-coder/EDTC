@@ -30,7 +30,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.58"  # bump this with every release
+APP_VERSION = "0.3.59"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
