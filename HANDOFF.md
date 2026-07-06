@@ -2268,9 +2268,8 @@ symptoms resolved.
   poll makes the feed self-healing regardless of watchdog reliability.
 - Guardian sites dataset is now **610 sites** (no longer a stub) — dropped from
   the known-issues list per user.
-- v0.3.59 is **local only** — tag for CI release once the user confirms the
-  Colonisation page + overlay track live during a play session. A v0.3.59 tag
-  also carries the still-unreleased Session 37–39 work (engineering tracker,
+- ~~v0.3.59 is local only~~ — **v0.3.59 tagged + released 2026-07-05** (CI run
+  succeeded); it also carried the Session 37–39 work (engineering tracker,
   carrier ownership, Ships tab, Ship Builder).
 
 ---
@@ -2337,8 +2336,8 @@ frontend build clean; app relaunch backfilled 49 rows with no errors.
   App.jsx and drop it from Awards.jsx.
 - Thresholds are all in `core/awards.py` CATALOG — trivial to retune or add
   awards (each is a dict with a `metric` lambda + `tiers` ladder).
-- v0.3.60 is **local only** — tag for CI release once the user has eyeballed the
-  Commendations page in-app.
+- Commendations shipped in the **v0.3.61** release (see the Thargoid
+  continuation below) — v0.3.60 was the interim local build.
 
 ---
 *Session 41 — 2026-07-05*
@@ -2363,6 +2362,10 @@ weren't in this CMDR's Statistics block, so awards use the reliable aggregate
 `TG_ENCOUNTER_KILLED`/`_TOTAL`; add variant-specific medals later if a journal
 exposes those fields.
 
+**Released:** committed to `main` (`0d4ae88`) and **tagged v0.3.61 —
+released via CI 2026-07-05**. One release ships the Session 40 journal-watcher
+fix plus the full Commendations system (incl. Thargoid War).
+
 ---
 *Session 41 continued (Thargoid awards) — 2026-07-05*
 
@@ -2371,3 +2374,9 @@ exposes those fields.
 
 ---
 *Session checkpoint: 2026-07-05 20:52:32*
+
+---
+*Session checkpoint: 2026-07-05 20:53:52*
+
+---
+*Session checkpoint: 2026-07-05 20:54:43*
