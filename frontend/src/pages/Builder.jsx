@@ -51,49 +51,193 @@ function validModules(modules, slot) {
 const SECTIONS = ['Hardpoints', 'Utility Mounts', 'Core Internals', 'Optional Internals', 'Military Slots']
 
 // ── stat panel ───────────────────────────────────────────────────────────────
-function Stat({ label, value, unit, tone }) {
+function num(n) { return (n ?? 0).toLocaleString() }
+function resPct(v) {
+  const p = (v ?? 0) * 100
+  const r = Math.abs(p) < 10 ? +p.toFixed(1) : Math.round(p)
+  return (r > 0 ? '+' : '') + r + '%'
+}
+
+function Section({ title, right, children }) {
   return (
     <div className="panel py-2 px-3">
-      <div className="text-ed-muted text-[10px] uppercase tracking-wide">{label}</div>
-      <div className={`font-mono text-sm mt-0.5 ${tone || 'text-ed-text'}`}>
-        {value}{unit && <span className="text-ed-muted text-xs ml-0.5">{unit}</span>}
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-ed-orange text-[10px] uppercase tracking-widest">{title}</span>
+        {right}
       </div>
+      {children}
     </div>
   )
 }
 
-function StatsPanel({ stats, ship }) {
+function Row({ label, value, unit, tone }) {
+  return (
+    <div className="flex items-baseline justify-between py-0.5 text-sm">
+      <span className="text-ed-muted text-xs">{label}</span>
+      <span className={`font-mono ${tone || 'text-ed-text'}`}>
+        {value}{unit && <span className="text-ed-muted text-[10px] ml-0.5">{unit}</span>}
+      </span>
+    </div>
+  )
+}
+
+function ResGrid({ res, effective }) {
+  const TYPES = [['kinetic', 'Kin'], ['thermal', 'Thm'], ['explosive', 'Exp'], ['caustic', 'Cau']]
+  return (
+    <table className="w-full text-[11px] font-mono mt-1">
+      <thead>
+        <tr className="text-ed-muted">
+          <th className="text-left font-normal"></th>
+          {TYPES.filter(([k]) => res[k] !== undefined).map(([k, l]) => (
+            <th key={k} className="text-right font-normal px-1">{l}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="text-ed-muted">Resist</td>
+          {TYPES.filter(([k]) => res[k] !== undefined).map(([k]) => (
+            <td key={k} className={`text-right px-1 ${res[k] > 0 ? 'text-green-400' : res[k] < 0 ? 'text-red-400' : 'text-ed-muted'}`}>
+              {resPct(res[k])}
+            </td>
+          ))}
+        </tr>
+        {effective && (
+          <tr>
+            <td className="text-ed-muted">Effective</td>
+            {TYPES.filter(([k]) => res[k] !== undefined).map(([k]) => (
+              <td key={k} className="text-right px-1 text-ed-text">{num(effective[k])}</td>
+            ))}
+          </tr>
+        )}
+      </tbody>
+    </table>
+  )
+}
+
+const DMG_COLORS = { thermal: '#fb923c', kinetic: '#60a5fa', explosive: '#fbbf24', absolute: '#c084fc', caustic: '#4ade80', other: '#9ca3af' }
+
+function StatsPanel({ stats, ship, build, onBuild }) {
   if (!ship) return null
   if (!stats) return <div className="panel text-ed-muted text-sm">Computing…</div>
   if (stats.error) return <div className="panel text-ed-danger text-sm">{stats.error}</div>
-  const pct = stats.power_capacity ? Math.min(100, (stats.power_deployed / stats.power_capacity) * 100) : 0
+  const pctD = stats.power_capacity ? Math.min(100, (stats.power_deployed / stats.power_capacity) * 100) : 0
+  const pctR = stats.power_capacity ? Math.min(100, (stats.power_retracted / stats.power_capacity) * 100) : 0
+  const prios = Object.entries(stats.power_priorities || {}).filter(([, v]) => v.deployed > 0)
+  const dmgTypes = Object.entries(stats.dps_by_type || {}).sort((a, b) => b[1] - a[1])
+  const fuelVal = build?.fuel_t ?? stats.fuel_capacity
+  const cargoVal = build?.cargo_t ?? stats.cargo_capacity
+  const sliding = build?.fuel_t != null || build?.cargo_t != null
   return (
     <div className="space-y-2">
-      <div className="panel py-2 px-3">
-        <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-ed-muted">
-          <span>Power (deployed)</span>
-          <span className={stats.power_ok ? 'text-ed-success' : 'text-ed-danger'}>
-            {stats.power_deployed} / {stats.power_capacity} MW
-          </span>
+      {/* ── power ── */}
+      <Section title="Power"
+        right={<span className={`text-[10px] font-mono ${stats.power_ok ? 'text-ed-success' : 'text-ed-danger'}`}>
+          {stats.power_deployed} / {stats.power_capacity} MW
+        </span>}>
+        <div className="text-[10px] text-ed-muted flex justify-between"><span>Retracted</span><span className="font-mono">{stats.power_retracted} MW</span></div>
+        <div className="h-1.5 rounded bg-ed-dark overflow-hidden mb-1">
+          <div className="h-full rounded" style={{ width: `${pctR}%`, background: '#4ade80' }} />
         </div>
-        <div className="h-2 mt-1 rounded bg-ed-dark overflow-hidden">
-          <div className="h-full rounded" style={{ width: `${pct}%`, background: stats.power_ok ? '#4ade80' : '#f87171' }} />
+        <div className="text-[10px] text-ed-muted flex justify-between"><span>Deployed</span><span className="font-mono">{stats.power_deployed} MW</span></div>
+        <div className="h-1.5 rounded bg-ed-dark overflow-hidden">
+          <div className="h-full rounded" style={{ width: `${pctD}%`, background: stats.power_ok ? '#4ade80' : '#f87171' }} />
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Stat label="Jump (laden)" value={stats.jump_range_laden} unit="ly" tone="text-ed-orange" />
-        <Stat label="Jump (max)" value={stats.jump_range_max} unit="ly" />
-        <Stat label="Shields" value={cr(stats.shield_mj).replace(' CR', '')} unit="MJ" />
-        <Stat label="Armour" value={cr(stats.armour).replace(' CR', '')} />
-        <Stat label="Speed" value={stats.speed} unit="m/s" />
-        <Stat label="Boost" value={stats.boost} unit="m/s" />
-        <Stat label="DPS" value={stats.dps} />
-        <Stat label="Cargo" value={stats.cargo_capacity} unit="t" />
-        <Stat label="Unladen mass" value={stats.mass_unladen} unit="t" />
-        <Stat label="Fuel" value={stats.fuel_capacity} unit="t" />
-        <Stat label="Rebuy" value={cr(stats.rebuy)} tone="text-ed-gold" />
-        <Stat label="Total cost" value={cr(stats.total_cost)} tone="text-ed-gold" />
-      </div>
+        {prios.length > 1 && (
+          <div className="flex gap-3 mt-1.5 text-[10px] font-mono text-ed-muted">
+            {prios.map(([p, v]) => <span key={p}>P{p}: {v.deployed}</span>)}
+          </div>
+        )}
+      </Section>
+
+      {/* ── summary ── */}
+      <Section title="Summary">
+        <Row label="Jump (laden)" value={stats.jump_range_laden} unit="ly" tone="text-ed-orange" />
+        <Row label="Jump (max)" value={stats.jump_range_max} unit="ly" />
+        <Row label="Jump (total)" value={stats.jump_range_total} unit="ly" />
+        {sliding && <Row label="Jump (current)" value={stats.jump_range_current} unit="ly" tone="text-ed-gold" />}
+        <Row label="Mass (unladen)" value={stats.mass_unladen} unit="t" />
+        <Row label="Mass (laden)" value={stats.mass_laden} unit="t" />
+        <Row label="Cargo" value={stats.cargo_capacity} unit="t" />
+        <Row label="Fuel" value={stats.fuel_capacity} unit="t" />
+        <Row label="Cost" value={cr(stats.total_cost)} tone="text-ed-gold" />
+        <Row label="Rebuy" value={cr(stats.rebuy)} tone="text-ed-gold" />
+        {(stats.fuel_capacity > 0 || stats.cargo_capacity > 0) && (
+          <div className="mt-1.5 pt-1.5 border-t border-ed-border/40 space-y-1">
+            {stats.fuel_capacity > 0 && (
+              <div>
+                <div className="flex justify-between text-[10px] text-ed-muted">
+                  <span>Fuel</span><span className="font-mono">{fuelVal}t / {stats.fuel_capacity}t</span>
+                </div>
+                <input type="range" className="w-full accent-orange-500" min="0" max={stats.fuel_capacity} step="1"
+                  value={fuelVal}
+                  onChange={e => onBuild(b => ({ ...b, fuel_t: +e.target.value }))} />
+              </div>
+            )}
+            {stats.cargo_capacity > 0 && (
+              <div>
+                <div className="flex justify-between text-[10px] text-ed-muted">
+                  <span>Cargo</span><span className="font-mono">{cargoVal}t / {stats.cargo_capacity}t</span>
+                </div>
+                <input type="range" className="w-full accent-orange-500" min="0" max={stats.cargo_capacity} step="1"
+                  value={cargoVal}
+                  onChange={e => onBuild(b => ({ ...b, cargo_t: +e.target.value }))} />
+              </div>
+            )}
+          </div>
+        )}
+      </Section>
+
+      {/* ── offence ── */}
+      <Section title="Offence">
+        <Row label="DPS" value={stats.dps} tone="text-ed-orange" />
+        <Row label="Sustained DPS" value={stats.sustained_dps} />
+        <Row label="Energy / s" value={stats.eps} unit="MJ" />
+        <Row label="Heat / s" value={stats.hps} />
+        {stats.wep_drain_time != null && <Row label="WEP drains in" value={stats.wep_drain_time} unit="s" tone="text-ed-danger" />}
+        {dmgTypes.length > 0 && (
+          <>
+            <div className="flex h-1.5 rounded overflow-hidden mt-1.5">
+              {dmgTypes.map(([t, v]) => (
+                <div key={t} style={{ width: `${(v / stats.dps) * 100}%`, background: DMG_COLORS[t] || DMG_COLORS.other }} />
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-x-3 mt-1 text-[10px] font-mono">
+              {dmgTypes.map(([t, v]) => (
+                <span key={t} style={{ color: DMG_COLORS[t] || DMG_COLORS.other }}>{t} {v}</span>
+              ))}
+            </div>
+          </>
+        )}
+      </Section>
+
+      {/* ── defence ── */}
+      <Section title="Defence">
+        <Row label="Shields" value={num(stats.shield_mj)} unit="MJ" tone="text-ed-orange" />
+        {stats.shield_mj > 0 && (
+          <>
+            <ResGrid res={stats.shield_res || {}} effective={stats.shield_effective} />
+            {stats.shield_regen_time != null && <Row label="Regen 50→100%" value={stats.shield_regen_time} unit="s" />}
+            {stats.shield_broken_time != null && <Row label="Recover (broken)" value={stats.shield_broken_time} unit="s" />}
+            {stats.scb_total > 0 && <Row label="SCB reserve" value={num(stats.scb_total)} unit="MJ" tone="text-ed-success" />}
+          </>
+        )}
+        <div className="mt-1.5 pt-1.5 border-t border-ed-border/40">
+          <Row label={`Armour · ${stats.bulkhead_name || 'Lightweight'}`} value={num(stats.armour)} tone="text-ed-orange" />
+          <ResGrid res={stats.armour_res || {}} effective={stats.armour_effective} />
+          {stats.module_protection > 0 && <Row label="Module protection" value={resPct(stats.module_protection)} tone="text-ed-success" />}
+          <Row label="Hardness" value={stats.hardness} />
+        </div>
+      </Section>
+
+      {/* ── movement ── */}
+      <Section title="Movement">
+        <Row label="Speed" value={stats.speed} unit="m/s" />
+        <Row label="Boost" value={stats.boost} unit="m/s" tone={stats.can_boost ? undefined : 'text-ed-danger'} />
+        {!stats.can_boost && <div className="text-[10px] text-ed-danger">Distributor too small to boost ({stats.boost_energy} MJ needed)</div>}
+        <Row label="Pitch / Roll / Yaw" value={`${stats.pitch} / ${stats.roll} / ${stats.yaw}`} unit="°/s" />
+        <Row label="Mass lock" value={stats.masslock} />
+      </Section>
     </div>
   )
 }
@@ -140,7 +284,48 @@ function ModulePicker({ slot, modules, onPick, onClose }) {
   )
 }
 
+// ── right drawer: bulkhead picker ─────────────────────────────────────────────
+function BulkheadPicker({ ship, current, onPick, onClose }) {
+  const base = ship.armour || 0
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-ed-text font-ui font-semibold text-sm">Bulkheads</h3>
+        <button onClick={onClose} className="text-ed-muted hover:text-ed-text text-sm">✕</button>
+      </div>
+      <div className="overflow-y-auto flex-1 space-y-1 pr-1">
+        {(ship.bulkheads || []).map((b, i) => (
+          <button key={i} onClick={() => onPick(i)}
+            className={`w-full text-left px-3 py-2 rounded border ${current === i ? 'border-ed-orange bg-ed-dark' : 'border-ed-border hover:border-ed-orange/60'}`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-ed-text text-sm">{b.name}</span>
+              <span className="badge border border-ed-border text-ed-orange shrink-0 font-mono">
+                {Math.round(base * (1 + (b.hullboost || 0)))}
+              </span>
+            </div>
+            <div className="text-ed-muted text-[11px] font-mono flex gap-3">
+              <span>{b.mass || 0}t</span>
+              {b.cost ? <span className="text-ed-gold">{cr(b.cost)}</span> : <span>free</span>}
+              <span className={b.kinres > 0 ? 'text-green-400' : b.kinres < 0 ? 'text-red-400' : ''}>K {resPct(b.kinres)}</span>
+              <span className={b.thermres > 0 ? 'text-green-400' : b.thermres < 0 ? 'text-red-400' : ''}>T {resPct(b.thermres)}</span>
+              <span className={b.explres > 0 ? 'text-green-400' : b.explres < 0 ? 'text-red-400' : ''}>E {resPct(b.explres)}</span>
+            </div>
+          </button>
+        ))}
+        {(!ship.bulkheads || ship.bulkheads.length === 0) &&
+          <div className="text-ed-muted text-sm text-center py-6">No bulkhead data for this ship — re-run scripts/build_data.py.</div>}
+      </div>
+    </div>
+  )
+}
+
 // ── right drawer: engineering editor ──────────────────────────────────────────
+function fmtPct(modifier) {
+  const p = (modifier - 1) * 100
+  const r = Math.abs(p) < 10 ? +p.toFixed(1) : Math.round(p)
+  return (r > 0 ? '+' : '') + r + '%'
+}
+
 function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
   const eng = fitted?.engineering || {}
   const [bp, setBp] = useState(eng.blueprint || '')
@@ -153,6 +338,27 @@ function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
     return (blueprints || []).filter(b => !s || (b.name || '').toLowerCase().includes(s)).slice(0, 60)
   }, [blueprints, q])
   const selected = blueprints?.find(b => b.id === bp)
+  // grades this blueprint actually has (many are single-grade)
+  const availGrades = useMemo(() => (
+    selected ? Object.keys(selected.grades || {}).map(Number).sort((a, b) => a - b) : [1, 2, 3, 4, 5]
+  ), [selected])
+  // attribute → {grade: effect} across all grades, so every number is visible up front
+  const effectRows = useMemo(() => {
+    if (!selected) return []
+    const rows = new Map()
+    for (const g of availGrades) {
+      for (const e of (selected.grades?.[String(g)]?.effects || [])) {
+        if (!rows.has(e.attribute)) rows.set(e.attribute, {})
+        rows.get(e.attribute)[g] = e
+      }
+    }
+    return [...rows.entries()]
+  }, [selected, availGrades])
+  const pickBlueprint = (b) => {
+    setBp(b.id)
+    const gs = Object.keys(b.grades || {}).map(Number)
+    if (gs.length && !gs.includes(grade)) setGrade(Math.max(...gs))
+  }
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-2">
@@ -172,7 +378,7 @@ function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
           — No blueprint —
         </button>
         {list.map(b => (
-          <button key={b.id} onClick={() => setBp(b.id)}
+          <button key={b.id} onClick={() => pickBlueprint(b)}
             className={`w-full text-left px-3 py-1.5 rounded border text-sm ${bp === b.id ? 'border-ed-orange bg-ed-dark' : 'border-ed-border hover:border-ed-orange/50'}`}>
             <span className="text-ed-text">{b.name}</span>
             <span className="text-ed-muted text-[10px] ml-2">{(b.applies_to || []).join(', ')}</span>
@@ -180,9 +386,44 @@ function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
         ))}
       </div>
       <div className="mt-2 pt-2 border-t border-ed-border/50 space-y-2">
+        {selected && (effectRows.length ? (
+          <>
+            <div className="max-h-44 overflow-y-auto border border-ed-border/50 rounded">
+              <table className="w-full text-[11px] font-mono">
+                <thead>
+                  <tr className="text-ed-muted">
+                    <th className="text-left px-2 py-1 font-normal">Effect</th>
+                    {availGrades.map(g => (
+                      <th key={g} onClick={() => setGrade(g)}
+                        className={`px-1.5 py-1 text-right font-normal cursor-pointer ${grade === g ? 'text-ed-orange' : 'hover:text-ed-text'}`}>G{g}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {effectRows.map(([attr, byGrade]) => (
+                    <tr key={attr} className="border-t border-ed-border/30">
+                      <td className="px-2 py-0.5 text-ed-muted">{attr}</td>
+                      {availGrades.map(g => {
+                        const e = byGrade[g]
+                        return (
+                          <td key={g} className={`px-1.5 py-0.5 text-right ${grade === g ? 'bg-ed-dark' : ''} ${e ? (e.positive ? 'text-green-400' : 'text-red-400') : 'text-ed-muted'}`}>
+                            {e ? fmtPct(e.modifier) : '—'}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="text-[10px] text-ed-muted">Max-roll values per grade · green helps, red hurts · click a G column to pick it</div>
+          </>
+        ) : (
+          <div className="text-[11px] text-ed-muted">No stat numbers on file for this blueprint.</div>
+        ))}
         <div className="flex items-center gap-1.5">
           <span className="text-ed-muted text-xs mr-1">Grade</span>
-          {[1, 2, 3, 4, 5].map(g => (
+          {availGrades.map(g => (
             <button key={g} onClick={() => setGrade(g)}
               className={`badge border px-2 py-1 ${grade === g ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted'}`}>{g}</button>
           ))}
@@ -283,9 +524,19 @@ export default function Builder() {
     if (!mod) setSlot(slot.key, null)
     else {
       const existing = build.slots?.[slot.key]
-      setSlot(slot.key, { symbol: mod.symbol, engineering: existing?.engineering || null })
+      setSlot(slot.key, {
+        symbol: mod.symbol, engineering: existing?.engineering || null,
+        priority: existing?.priority || 1, enabled: existing?.enabled !== false,
+      })
     }
     setDrawer(null)
+  }
+
+  function patchSlot(key, patch) {
+    setBuild(b => {
+      const cur = b.slots?.[key]; if (!cur) return b
+      return { ...b, slots: { ...b.slots, [key]: { ...cur, ...patch } } }
+    })
   }
 
   function saveEngineering(slotKey, eng) {
@@ -404,6 +655,34 @@ export default function Builder() {
               </div>
 
               <div className="overflow-y-auto pr-1 min-h-0 space-y-3">
+              {/* bulkheads — armour grade slot */}
+              {(ship?.bulkheads?.length > 0) && (() => {
+                const bhI = build.bulkhead_index ?? 0
+                const bh = ship.bulkheads[bhI] || ship.bulkheads[0]
+                const bhEng = build.bulkhead_engineering
+                return (
+                  <section className="panel">
+                    <h3 className="text-ed-text font-ui font-semibold text-sm mb-2">Bulkheads</h3>
+                    <div className="flex items-center gap-2 py-1.5 rounded px-1 -mx-1">
+                      <span className="badge border border-ed-border text-ed-muted shrink-0 w-8 text-center font-mono">BH</span>
+                      <button onClick={() => setDrawer({ slotKey: 'bulkhead', mode: 'module' })}
+                        className="flex-1 text-left min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-ed-text text-sm truncate">{bh.name}</span>
+                          <span className="badge border border-ed-border text-ed-orange shrink-0 font-mono">
+                            {Math.round((ship.armour || 0) * (1 + (bh.hullboost || 0)))}
+                          </span>
+                        </div>
+                      </button>
+                      <button onClick={() => setDrawer({ slotKey: 'bulkhead', mode: 'engineer' })}
+                        className={`badge border shrink-0 ${bhEng ? 'border-ed-orange/60 text-ed-orange' : 'border-ed-border text-ed-muted hover:text-ed-text'}`}
+                        title="Engineering">
+                        {bhEng ? `🔧 ${bhEng.blueprint ? '' : 'G'}${bhEng.grade ?? ''}${bhEng.modifiers && !bhEng.blueprint ? ' ✓' : ''}` : '🔧'}
+                      </button>
+                    </div>
+                  </section>
+                )
+              })()}
               {SECTIONS.map(section => {
                 const rows = slots.filter(s => s.section === section)
                 if (rows.length === 0) return null
@@ -428,7 +707,7 @@ export default function Builder() {
                             <button onClick={() => setDrawer({ slotKey: slot.key, mode: 'module' })}
                               className="flex-1 text-left min-w-0">
                               {mod ? (
-                                <div className="flex items-center gap-2">
+                                <div className={`flex items-center gap-2 ${fitted.enabled === false ? 'opacity-40' : ''}`}>
                                   <span className="text-ed-text text-sm truncate">{mod.display || mod.group_name}</span>
                                   <span className="badge border border-ed-border text-ed-orange shrink-0 font-mono">{mod.class}{mod.rating}</span>
                                 </div>
@@ -438,6 +717,22 @@ export default function Builder() {
                                 <span className="text-ed-muted text-sm">— {slot.label} —</span>
                               )}
                             </button>
+                            {fitted && mod && (mod.power || 0) > 0 && (
+                              <>
+                                <button
+                                  onClick={() => patchSlot(slot.key, { priority: ((fitted.priority || 1) % 5) + 1 })}
+                                  className="badge border border-ed-border text-ed-muted hover:text-ed-text shrink-0 font-mono"
+                                  title="Power priority (click to cycle)">
+                                  P{fitted.priority || 1}
+                                </button>
+                                <button
+                                  onClick={() => patchSlot(slot.key, { enabled: fitted.enabled === false })}
+                                  className={`badge border shrink-0 ${fitted.enabled === false ? 'border-ed-border text-ed-muted' : 'border-ed-success/60 text-ed-success'}`}
+                                  title={fitted.enabled === false ? 'Module OFF — click to enable' : 'Module ON — click to disable'}>
+                                  ⏻
+                                </button>
+                              </>
+                            )}
                             {fitted && (
                               <button onClick={() => setDrawer({ slotKey: slot.key, mode: 'engineer' })}
                                 className={`badge border shrink-0 ${eng ? 'border-ed-orange/60 text-ed-orange' : 'border-ed-border text-ed-muted hover:text-ed-text'}`}
@@ -459,7 +754,18 @@ export default function Builder() {
 
         {/* ── right column: stats or drawer ── */}
         <div className="overflow-y-auto min-h-0">
-          {drawer && drawerSlot ? (
+          {drawer?.slotKey === 'bulkhead' && ship ? (
+            <div className="panel h-full">
+              {drawer.mode === 'module'
+                ? <BulkheadPicker ship={ship} current={build.bulkhead_index ?? 0}
+                    onPick={i => { setBuild(b => ({ ...b, bulkhead_index: i })); setDrawer(null) }}
+                    onClose={() => setDrawer(null)} />
+                : <EngineerEditor slot={{ label: 'Bulkheads' }}
+                    fitted={{ engineering: build.bulkhead_engineering }} blueprints={blueprints}
+                    onSave={eng => { setBuild(b => ({ ...b, bulkhead_engineering: eng })); setDrawer(null) }}
+                    onClose={() => setDrawer(null)} />}
+            </div>
+          ) : drawer && drawerSlot ? (
             <div className="panel h-full">
               {drawer.mode === 'module'
                 ? <ModulePicker slot={drawerSlot} modules={modules}
@@ -468,7 +774,7 @@ export default function Builder() {
                     onSave={eng => saveEngineering(drawer.slotKey, eng)} onClose={() => setDrawer(null)} />}
             </div>
           ) : (
-            <StatsPanel stats={stats} ship={ship} />
+            <StatsPanel stats={stats} ship={ship} build={build} onBuild={setBuild} />
           )}
         </div>
       </div>

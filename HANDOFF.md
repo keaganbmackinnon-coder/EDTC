@@ -2640,3 +2640,86 @@ Best done with the app open, eyeballing each hull. This is a polish item, not a 
 
 ---
 *Session 42 — 2026-07-06*
+
+---
+*Session checkpoint: 2026-07-06 12:50:15*
+
+---
+*Session checkpoint: 2026-07-06 15:55:22*
+
+---
+*Session checkpoint: 2026-07-06 18:17:00*
+
+---
+*Session checkpoint: 2026-07-07 01:09:17*
+
+---
+*Session checkpoint: 2026-07-08 00:37:46*
+
+---
+
+## Session 43 — Journal feed killed by startup DB contention + Coriolis-parity Ship Builder (v0.3.64)
+
+### Bug: colonisation not updating AGAIN (different root cause than Session 40)
+
+User delivered to a construction depot; DB depot stayed frozen at yesterday's
+57.6% while the journal showed 75.4%. **Not** the rotation bug — the v0.3.59
+poll loop never started:
+
+- `_prune_markets` (startup thread) ran one big DELETE over the now-673 MB
+  markets table and held the SQLite write lock ~7 s (00:29:17→:24).
+- Other threads hit the 5 s `busy_timeout` and logged "database is locked"
+  (caught). The journal watcher's `_replay_startup()` also writes to the DB
+  (stats/awards/materials/coords) but had NO exception guard — its write
+  raised, the exception propagated out of `run()`, and the watcher thread
+  died BEFORE the poll loop started. Thread exceptions bypass `sys.excepthook`
+  → totally silent in the frozen exe. Feed dead for the whole session.
+
+| Fix | File |
+|---|---|
+| `_replay_startup()` wrapped in try/except in `run()`; every `_on_event` goes through `_dispatch()` (per-event try/except) in both replay and live tail — a poison event/handler can never kill the feed or stall the file position | `core/journal.py` |
+| "journal watcher: live tail started on <file> pos=N" logged when the poll loop starts — a dead feed is now visible in the log | `core/journal.py` |
+| `threading.excepthook` installed → any uncaught background-thread exception is logged CRITICAL | `main.py` |
+| `busy_timeout` 5000 → 30000 — writers wait out long locks instead of raising | `core/database.py` |
+| `prune_markets()` rewritten: collect stale rowids with a read (never blocks in WAL), then DELETE in 5000-row chunks with 50 ms gaps — write lock held ms at a time | `core/database.py` |
+| `_prune_markets` delayed 120 s past the startup window | `main.py` |
+
+**Verified:** resilience test (raising handler in replay/live/rotation — feed
+survives, events dispatched exactly once); chunked-prune unit test; live: swap
++ relaunch → "live tail started" logged, depot jumped 57.6% → 75.4% instantly
+via startup replay (`ColonisationConstructionDepot` is a STARTUP_EVENT).
+
+### Coriolis parity: Ship Builder now shows everything coriolis.io shows
+
+| Item | Status | File |
+|---|---|---|
+| ships.json: bulkheads (5 grades × mass/cost/hullboost/kin/therm/expl/caus res), pitch/roll/yaw, hardness, masslock, boost_energy, heat_capacity, reserve_fuel for all 47 ships | DONE | `scripts/build_data.py`, `data/ships.json` |
+| Engine: bulkhead slot (armour = base × (1+hullboost) + HRP), shield + armour resistances with the game's diminishing-returns stacking (>30% stacked contribution halved, 0.7-multiplier breakpoint), regen/broken-regen times, SCB reserve (cells × reinforcement × duration), MRP module protection (capped 60%), DPS by damage type + EPS + HPS + sustained DPS vs distributor WEP recharge + capacitor drain time, per-weapon list, pitch/roll/yaw × thruster curve, boost-energy vs ENG cap check, per-module power priority (P1-5) + enabled flag (disabled = mass only), power split per priority, fuel_t/cargo_t current-state params, jump_range_current + jump_range_total (successive max-fuel jumps) | DONE | `core/outfitting.py` |
+| New engineering labels: DefenceModifierHealthMultiplier→hullboost, ModuleDefenceAbsorption→protection (both PERCENT), RegenRate, BrokenRegenRate, ShieldBank*, DistributorDraw, FSDJumpRangeBoost | DONE | `core/outfitting.py` |
+| `compute_build`: passes bulkhead_index/bulkhead_engineering, per-slot priority/enabled, fuel_t/cargo_t | DONE | `main.py` |
+| `import_current_build`: maps the Loadout Armour item (…_grade1/2/3/_mirrored/_reactive → bulkhead index 0-4) incl. its engineering; imports per-module `Priority` (0-based → P1-5) and `On` flag | DONE | `main.py` |
+| Builder UI: Bulkheads slot (picker shows armour value/mass/cost/res per grade + engineering), sectioned stats panel (Power w/ retracted+deployed bars + per-priority, Summary w/ fuel+cargo sliders driving jump-current, Offence w/ damage-type split bar + sustained/EPS/HPS/drain, Defence w/ shield+armour res grids + effective HP + regen/SCB/MRP/hardness, Movement w/ pitch/roll/yaw + boost check + masslock), per-slot P1-5 cycle + on/off toggle (dims row) | DONE | `frontend/src/pages/Builder.jsx` |
+
+**Verified:** jump-range parity preserved (engine 36.57 vs game 36.5747 on the
+live Panther Clipper Mk II import incl. bulkhead + priorities); synthetic
+Vulture combat build exercises booster DR stacking (matches manual formula),
+reactive-armour res, MRP cap, sustained DPS, disabled-module exclusion,
+priority power split. Frontend builds clean.
+
+### Notes / next session
+
+- The DB file is 673 MB (markets/EDDN + coverage). Deletes don't shrink it
+  (no VACUUM). Not urgent; a one-time `VACUUM` while EDTC is closed would
+  reclaim space if it becomes a problem.
+- Blueprint effects table in the engineering editor (uncommitted from last
+  session) shipped in this build too.
+- From-scratch bulkhead engineering uses blueprint multipliers (approximate);
+  imported armour engineering is exact (game modifiers).
+- ~~v0.3.64 is local only~~ — **v0.3.64 tagged + released via CI 2026-07-08**
+  after the user confirmed the new Builder panels in-app.
+
+---
+*Session 43 — 2026-07-08*
+
+---
+*Session checkpoint: 2026-07-08 01:27:30*

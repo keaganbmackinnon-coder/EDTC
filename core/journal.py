@@ -98,19 +98,27 @@ class JournalWatcher:
         except OSError:
             return
         for event in seen.values():
-            self._on_event(event)
+            self._dispatch(event)
         # Without a snapshot to reset from, re-applying deltas would double-count.
         if "Materials" in seen:
             for event in material_deltas:
-                self._on_event(event)
+                self._dispatch(event)
         if dock_state:
             kind = dock_state.get("event")
             if kind == "Docked":
-                self._on_event(dock_state)
+                self._dispatch(dock_state)
             elif kind != "Location":
                 # last dock-affecting event was Undocked/FSDJump — clear any
                 # stale station the replayed login Location may have set
-                self._on_event({"event": "Undocked"})
+                self._dispatch({"event": "Undocked"})
+
+    def _dispatch(self, event: dict):
+        """Hand one event to the app. One bad handler (DB lock, network,
+        anything) must never take down the feed or stall the file position."""
+        try:
+            self._on_event(event)
+        except Exception:
+            logging.exception(f"journal handler failed for {event.get('event')} — skipping")
 
     def run(self):
         if not self._path.exists():
@@ -118,8 +126,18 @@ class JournalWatcher:
 
         self._current_file = _latest_journal(self._path)
         if self._current_file:
-            self._replay_startup()
-            self._file_pos = self._current_file.stat().st_size
+            # A handler raising during replay (e.g. a DB busy-timeout while
+            # another thread holds the write lock at startup) must not kill
+            # this thread — the poll loop below is the app's only journal
+            # feed, and dying here silently freezes every tracker.
+            try:
+                self._replay_startup()
+            except Exception:
+                logging.exception("journal startup replay failed — continuing to live tail")
+            try:
+                self._file_pos = self._current_file.stat().st_size
+            except OSError:
+                self._file_pos = 0
 
         handler = _JournalHandler(self)
         try:
@@ -138,6 +156,10 @@ class JournalWatcher:
         # up a newer journal (rotation) and drains appended lines every second,
         # and it does NOT depend on the observer staying alive.
         self._running = True
+        logging.info(
+            f"journal watcher: live tail started on "
+            f"{self._current_file.name if self._current_file else '(no journal yet)'} pos={self._file_pos}"
+        )
         try:
             while self._running:
                 time.sleep(1.0)
@@ -179,10 +201,10 @@ class JournalWatcher:
                     continue
                 try:
                     event = json.loads(line)
-                    if event.get("event") in WATCHED_EVENTS:
-                        self._on_event(event)
                 except json.JSONDecodeError:
-                    pass
+                    continue
+                if event.get("event") in WATCHED_EVENTS:
+                    self._dispatch(event)
             self._file_pos = f.tell()
 
     def _on_file_change(self, path: str):

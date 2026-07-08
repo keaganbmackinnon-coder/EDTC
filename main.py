@@ -19,6 +19,17 @@ def _log_exception(exc_type, exc_value, exc_tb):
 
 sys.excepthook = _log_exception
 
+def _log_thread_exception(args):
+    # sys.excepthook does NOT fire for background threads — without this, a
+    # crashed daemon thread (journal watcher, EDDN listener, …) dies silently
+    # in the frozen windowed exe and a whole subsystem just stops working.
+    logging.critical(
+        f"Uncaught exception in thread {args.thread.name if args.thread else '?'}",
+        exc_info=(args.exc_type, args.exc_value, args.exc_traceback),
+    )
+
+threading.excepthook = _log_thread_exception
+
 from core.database import init_db, DB_PATH
 from core.journal import JournalWatcher
 from core.overlay import OverlayManager
@@ -30,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.62"  # bump this with every release
+APP_VERSION = "0.3.64"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -1195,7 +1206,8 @@ class API:
         return out
 
     def compute_build(self, build: dict) -> dict:
-        """coriolis-style stats for a build: {ship_id, slots:{key:{symbol,engineering}}}.
+        """coriolis-style stats for a build: {ship_id, bulkhead_index,
+        slots:{key:{symbol,engineering,priority,enabled}}, fuel_t?, cargo_t?}.
         Engineering per slot is either {modifiers:{...}} (imported, absolute) or
         {blueprint, grade, experimental} (from-scratch, expanded to multipliers)."""
         from core.outfitting import compute_stats
@@ -1216,8 +1228,29 @@ class API:
                 eng["blueprint_effects"] = self._blueprint_effects(
                     eng.get("blueprint"), eng.get("grade"))
             family = slot_key.split(":", 1)[0] if ":" in slot_key else mod.get("family")
-            fitted.append({"family": family, "module": mod, "engineering": eng})
-        return compute_stats(ship, fitted, unladen_override=build.get("unladen_mass"))
+            fitted.append({"family": family, "module": mod, "engineering": eng,
+                           "priority": slot.get("priority") or 1,
+                           "enabled": slot.get("enabled", True),
+                           "slot": slot_key})
+        bulkhead = None
+        bhs = ship.get("bulkheads") or []
+        bh_i = build.get("bulkhead_index")
+        if bhs and bh_i is not None and 0 <= int(bh_i) < len(bhs):
+            bulkhead = dict(bhs[int(bh_i)])
+            bh_eng = build.get("bulkhead_engineering")
+            if bh_eng:
+                if bh_eng.get("blueprint") and not bh_eng.get("modifiers"):
+                    bh_eng = dict(bh_eng)
+                    bh_eng["blueprint_effects"] = self._blueprint_effects(
+                        bh_eng.get("blueprint"), bh_eng.get("grade"))
+                bulkhead["engineering"] = bh_eng
+        return compute_stats(
+            ship, fitted,
+            unladen_override=build.get("unladen_mass"),
+            bulkhead=bulkhead,
+            fuel_t=build.get("fuel_t"),
+            cargo_t=build.get("cargo_t"),
+        )
 
     _CORE_JOURNAL_SLOT = {
         "PowerPlant": "pp", "MainEngines": "t", "FrameShiftDrive": "fsd",
@@ -1242,11 +1275,10 @@ class API:
                 ship_id = s.get("id", ""); break
 
         core, weapons, utility, optional, military = {}, [], [], [], []
+        bulkhead_index, bulkhead_engineering = None, None
         for module in (event.get("Modules") or []):
             item = str(module.get("Item", "")).lower()
-            mod = idx.get(item)
-            if not mod:
-                continue
+            slot = module.get("Slot", "")
             eng = module.get("Engineering") or {}
             engineering = None
             if eng:
@@ -1259,8 +1291,21 @@ class API:
                     "modifiers": {m.get("Label"): m.get("Value")
                                   for m in eng.get("Modifiers", []) if m.get("Label")},
                 }
-            fitted = {"symbol": mod.get("symbol"), "engineering": engineering}
-            slot = module.get("Slot", "")
+            if slot == "Armour":
+                # "<ship>_armour_grade1..3 / _mirrored / _reactive" → bulkhead index
+                for suffix, i in (("grade1", 0), ("grade2", 1), ("grade3", 2),
+                                  ("mirrored", 3), ("reactive", 4)):
+                    if item.endswith(suffix):
+                        bulkhead_index = i
+                        bulkhead_engineering = engineering
+                        break
+                continue
+            mod = idx.get(item)
+            if not mod:
+                continue
+            fitted = {"symbol": mod.get("symbol"), "engineering": engineering,
+                      "priority": (module.get("Priority") or 0) + 1,
+                      "enabled": module.get("On", True)}
             cls = int(mod.get("class", 0))
             if slot in self._CORE_JOURNAL_SLOT:
                 core[f"core:{self._CORE_JOURNAL_SLOT[slot]}"] = fitted
@@ -1273,7 +1318,7 @@ class API:
                 optional.append((int(m.group(1)) if m else cls, fitted))
             elif slot.startswith("Military"):
                 military.append(fitted)
-            # Armour/bulkheads, cosmetics, cockpit, cargo hatch → not fittable here
+            # cosmetics, cockpit, cargo hatch → not fittable here
 
         slots = dict(core)
         for i, (_, f) in enumerate(sorted(weapons, key=lambda w: -w[0])):
@@ -1292,6 +1337,8 @@ class API:
             "name": (event.get("ShipName") or disp or "Imported ship").strip(),
             "source": "import",
             "unladen_mass": event.get("UnladenMass"),
+            "bulkhead_index": bulkhead_index,
+            "bulkhead_engineering": bulkhead_engineering,
             "slots": slots,
         }
 
@@ -2729,6 +2776,10 @@ def _create_desktop_shortcut():
 
 
 def _prune_markets():
+    # Startup is the DB's busiest window (journal replay, coverage rebuild,
+    # Market.json import all write at once) — keep housekeeping out of it.
+    import time
+    time.sleep(120)
     try:
         from core.database import prune_markets
         n = prune_markets()

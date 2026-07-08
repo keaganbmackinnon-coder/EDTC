@@ -15,7 +15,10 @@ def _conn() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     # Many threads (journal watcher, EDDN listener, UI bridge) share this DB;
     # wait for locks instead of raising "database is locked" immediately.
-    conn.execute("PRAGMA busy_timeout = 5000")
+    # 30s: a long-held write lock (markets prune, coverage rebuild) must make
+    # writers WAIT, not raise — a raise inside the journal-watcher startup
+    # replay killed the whole feed for a session (2026-07-08).
+    conn.execute("PRAGMA busy_timeout = 30000")
     return conn
 
 
@@ -1171,14 +1174,32 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
 def prune_markets(days: int = 30) -> int:
     """Delete market rows older than `days` so the EDDN cache (and everything
     that scans it) stays bounded. Rows with an empty updated_at are kept.
-    Returns the number of rows deleted."""
+    Returns the number of rows deleted.
+
+    The stale rowids are collected with a plain read (never blocks writers in
+    WAL mode), then deleted in small chunks so the write lock is only held for
+    milliseconds at a time. A single DELETE used to scan the whole multi-hundred-
+    MB table inside one write transaction, starving every other writer for
+    ~7 seconds at startup (2026-07-08 journal-feed freeze)."""
+    import time
     with _conn() as conn:
-        cur = conn.execute(
-            "DELETE FROM markets WHERE updated_at != '' "
+        rowids = [r[0] for r in conn.execute(
+            "SELECT rowid FROM markets WHERE updated_at != '' "
             "AND substr(updated_at, 1, 10) < date('now', ?)",
             (f"-{int(days)} days",),
-        )
-        return cur.rowcount
+        )]
+    deleted = 0
+    CHUNK = 5000
+    for i in range(0, len(rowids), CHUNK):
+        chunk = rowids[i:i + CHUNK]
+        with _conn() as conn:
+            conn.execute(
+                f"DELETE FROM markets WHERE rowid IN ({','.join('?' * len(chunk))})",
+                chunk,
+            )
+        deleted += len(chunk)
+        time.sleep(0.05)  # let waiting writers in between chunks
+    return deleted
 
 
 def get_market_stats() -> dict:

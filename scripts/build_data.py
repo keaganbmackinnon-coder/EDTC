@@ -584,6 +584,22 @@ def build_ships():
             else:
                 optional.append(cls)
 
+        # 5 armour grades (Lightweight → Reactive). hullboost: armour =
+        # baseArmour × (1 + hullboost). Resistances are fractions (-0.4 = -40%).
+        bulkheads = []
+        for i, b in enumerate(s.get("bulkheads", []) or []):
+            bulkheads.append({
+                "index": i,
+                "name": b.get("name", f"Bulkhead {i}"),
+                "cost": b.get("cost", 0),
+                "mass": b.get("mass", 0),
+                "hullboost": b.get("hullboost", 0),
+                "kinres": b.get("kinres", 0),
+                "thermres": b.get("thermres", 0),
+                "explres": b.get("explres", 0),
+                "causres": b.get("causres", 0),
+            })
+
         ships.append({
             "id": ship_id,
             "name": p.get("name", ship_id),
@@ -596,6 +612,15 @@ def build_ships():
             "boost": p.get("boost", 0),
             "shields": p.get("baseShieldStrength", 0),
             "armour": p.get("baseArmour", 0),
+            "hardness": p.get("hardness", 0),
+            "masslock": p.get("masslock", 0),
+            "pitch": p.get("pitch", 0),
+            "roll": p.get("roll", 0),
+            "yaw": p.get("yaw", 0),
+            "boost_energy": p.get("boostEnergy", 0),
+            "heat_capacity": p.get("heatCapacity", 0),
+            "reserve_fuel": p.get("reserveFuelCapacity", 0),
+            "bulkheads": bulkheads,
             "core_slots": [int(x) for x in slots.get("standard", [])],
             "hardpoint_sizes": hardpoint_sizes,
             "hardpoint_counts": hp_counts,
