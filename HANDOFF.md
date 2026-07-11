@@ -2933,3 +2933,86 @@ the exobiology work). Two tools, modelled on these community sites:
 ### Scope reminder
 Full new page + overlay + backend handlers + data sourcing + build + screenshot
 verify. Start it fresh; read this section first.
+
+---
+*Session checkpoint: 2026-07-11 01:24:25*
+
+---
+*Session checkpoint: 2026-07-11 01:25:09*
+
+---
+
+## Session 45 — Mining tab (v0.3.67, local)
+
+Built the planned Mining page (see the PLANNED section above): hotspot finder
+(edtools.cc/miner model), Powerplay merit miner (meritminer.cc model), live
+session tracker, and a mining overlay.
+
+### Data source resolution (the open question from the plan)
+**Spansh covers everything — no bundled hotspot dataset needed.**
+- `POST /api/bodies/search` with `{"ring_signals": [{"name": <commodity>}]}`
+  returns bodies whose rings have that hotspot, with `rings[].signals`
+  (name+count), ring `type`, body `reserve_level`, `distance`,
+  `distance_to_arrival`, AND `system_controlling_power` + `system_power_state`
+  — the power fields make the merit tool possible with the same endpoint.
+- **`{"ring_type": {"value": [...]}}` is silently IGNORED** by /bodies/search.
+  The working ring-type filter is `{"rings": [{"type": "Metallic"}]}`
+  (verified: bogus type → count 0). It matches *bodies* having a ring of that
+  type, so `search_ring_hotspots` re-applies the type narrowing per-ring.
+- `reserve_level` / `system_controlling_power` / `system_power_state` use the
+  `{"value": [...]}` shape on both bodies and stations search (verified live).
+- Sell prices: `POST /api/stations/search` with per-commodity demand filter
+  `{"market": [{"name": X, "demand": {"comparison": ">=", "value": [lo, hi]}}]}`
+  and price sort `[{"market_sell_price": [{"name": X, "direction": "desc"}]}]`.
+- edtools.cc/pp was 404 in planning; never needed — Spansh power fields cover it.
+
+| Item | Status | File |
+|---|---|---|
+| `ring_hotspots()` + `mining_sell_stations()` (all filter shapes verified live) | DONE | `api/spansh.py` |
+| `ProspectedAsteroid`, `AsteroidCracked`, `PowerplayMerits` added to WATCHED_EVENTS | DONE | `core/journal.py` |
+| `MiningRefined` was watched but never dispatched — now handled (session tracker) | DONE | `main.py` |
+| Mining session state + handlers (`_handle_mining_refined/_prospected_asteroid/_asteroid_cracked/_powerplay_merits`), `_mining_payload()`, `_push_mining()` | DONE | `main.py` |
+| `PowerplayMerits` also persists pp_power/pp_merits prefs + emits `merits_update` | DONE | `main.py` |
+| API: `search_ring_hotspots`, `search_mining_sell`, `get_mining_session`, `reset_mining_session` | DONE | `main.py` |
+| `Mining.jsx` — 3-tab page (Hotspot Finder / Merit Miner / Session Tracker), sidebar entry after Trading | DONE | `frontend/src/pages/Mining.jsx`, `App.jsx` |
+| Merit Miner: goal presets (Reinforce = your power's systems, Undermine = rival powers, Acquire = Unoccupied), client-side join of hotspot systems × buyer stations → "mine & sell in the same system" table | DONE | `frontend/src/pages/Mining.jsx` |
+| `mining` overlay (tons, T/hr, refined breakdown, last prospect, merits) + config + auto-resize | DONE | `frontend/src/overlays/Mining.jsx`, `core/overlay.py`, `Overlays.jsx`, `App.jsx` |
+| Session value estimates use `average_price` from data/commodities.json | DONE | `main.py` |
+
+### Session tracker semantics
+- Session starts on the first ProspectedAsteroid / MiningRefined /
+  AsteroidCracked after launch (or reset) — in-memory only, resets on restart.
+- `PowerplayMerits` gained while a session is live count toward the session
+  merit tally (merits with no live session are ignored by the tracker but
+  still update the pp_merits pref + Galaxy Powerplay tab).
+- MiningRefined has no tonnage field — each event = 1 tonne (correct: it
+  fires once per refined tonne).
+
+### Verified
+- E2E harness (scratchpad test_mining.py): synthetic Log→refined/prospected/
+  cracked/merit events → payload correct (content split, motherlode tally,
+  avg-price values, pre-session merits ignored, reset). Live Spansh: ring
+  search near Sol returns Delkar (2× Pt Metallic Pristine) nearest — matches
+  edtools; power-filtered searches return only Kaine-space results.
+- CMDR's power auto-detected from journal PowerplayMerits (Nakato Kaine).
+
+### Notes / next session
+- **v0.3.67 is LOCAL ONLY** — tag for CI release after the user eyeballs the
+  Mining page + overlay in-app (a real mining run would fully exercise the
+  session tracker; code-path is harness-verified).
+- Merit miner shows merits context but NOT merits/tonne numbers — FDev doesn't
+  publish the formula (scales with sale value). The session tracker measures
+  actual merits/hr live instead.
+- Acquire goal lists Unoccupied-state systems but can't validate acquisition
+  range (needs the power's Stronghold/Fortified sphere math) — caveat shown in UI.
+- Hotspot data only exists for rings players have DSS-scanned (noted in UI).
+- Undermine goal passes the 11 rival powers server-side; the POWERS list in
+  Mining.jsx is the PP2.0 roster (Jerome Archer, no Zachary Hudson) — the
+  older POWERS table in Galaxy.jsx still has Hudson and lacks Archer.
+- Latent bug spotted (not fixed, separate concern): Trading.jsx and some
+  Galaxy.jsx listeners read `e?.payload?.X` but `__edtc.on` handlers receive
+  the payload directly — e.g. Trading's `system_changed` listener always sets
+  currentSystem to ''. Mining.jsx uses the correct form.
+
+---
+*Session 45 — 2026-07-11 (v0.3.67 local)*

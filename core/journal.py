@@ -25,6 +25,7 @@ WATCHED_EVENTS = {
     "Rank", "Progress", "Statistics", "Reputation",
     "Powerplay", "NavRoute", "NavRouteClear", "Loadout",
     "Market", "Cargo", "FSDTarget", "CarrierLocation",
+    "ProspectedAsteroid", "AsteroidCracked", "PowerplayMerits",
 }
 
 

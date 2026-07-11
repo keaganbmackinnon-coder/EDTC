@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.66"  # bump this with every release
+APP_VERSION = "0.3.67"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -177,6 +177,12 @@ class API:
         self._commodity_categories: dict[str, str] | None = None
         # CMDR ping cooldown: name → last ping monotonic-ish time
         self._cmdr_ping_times: dict[str, float] = {}
+        # Live mining session — in-memory only, starts on the first mining
+        # event after launch (or reset) so an idle app shows an empty tracker
+        self._mining_session: dict = self._new_mining_session()
+        # commodity display name (lowercased) → galactic average price,
+        # built lazily from data/commodities.json for session value estimates
+        self._commodity_avg_prices: dict[str, int] | None = None
 
     def set_window(self, window):
         self._window = window
@@ -279,6 +285,14 @@ class API:
             self._handle_market_sell(event)
         elif event_name == "Powerplay":
             self._handle_powerplay(event)
+        elif event_name == "PowerplayMerits":
+            self._handle_powerplay_merits(event)
+        elif event_name == "MiningRefined":
+            self._handle_mining_refined(event)
+        elif event_name == "ProspectedAsteroid":
+            self._handle_prospected_asteroid(event)
+        elif event_name == "AsteroidCracked":
+            self._handle_asteroid_cracked(event)
         elif event_name == "NavRoute":
             self._handle_nav_route(event)
         elif event_name == "NavRouteClear":
@@ -1256,6 +1270,131 @@ class API:
                                 self._current_station, self._current_system)
         self._emit("trade_log_update", {"entry": entry})
 
+    # --- Mining session (live journal tracker) ---
+
+    @staticmethod
+    def _new_mining_session() -> dict:
+        return {
+            "started_at": None,       # epoch seconds of the first mining event
+            "refined": {},            # display name -> tonnes refined
+            "prospected": 0,
+            "content": {"High": 0, "Medium": 0, "Low": 0},
+            "motherlodes": {},        # material display name -> asteroid count
+            "cracked": 0,
+            "merits": 0,              # PowerplayMerits gained while session live
+            "last_prospect": None,    # {content, materials, motherlode, remaining}
+        }
+
+    def _avg_price(self, name: str) -> int:
+        if self._commodity_avg_prices is None:
+            prices = {}
+            for c in self._load_json("commodities.json").get("commodities", []):
+                if c.get("name"):
+                    prices[c["name"].lower()] = int(c.get("average_price") or 0)
+            self._commodity_avg_prices = prices
+        return self._commodity_avg_prices.get(name.lower(), 0)
+
+    def _mining_payload(self) -> dict:
+        import time
+        ms = self._mining_session
+        duration = (time.time() - ms["started_at"]) if ms["started_at"] else 0
+        hours = duration / 3600
+        total = sum(ms["refined"].values())
+        refined = [
+            {"name": n, "tons": t, "value": t * self._avg_price(n)}
+            for n, t in sorted(ms["refined"].items(), key=lambda kv: -kv[1])
+        ]
+        # rates need a minute of data before they stop being noise
+        rates_ready = hours > (1 / 60)
+        return {
+            "active": ms["started_at"] is not None,
+            "duration": int(duration),
+            "total_tons": total,
+            "tons_per_hour": round(total / hours, 1) if rates_ready else None,
+            "est_value": sum(r["value"] for r in refined),
+            "refined": refined,
+            "prospected": ms["prospected"],
+            "content": ms["content"],
+            "motherlodes": ms["motherlodes"],
+            "cracked": ms["cracked"],
+            "merits": ms["merits"],
+            "merits_per_hour": round(ms["merits"] / hours) if rates_ready else None,
+            "last_prospect": ms["last_prospect"],
+        }
+
+    def _push_mining(self):
+        payload = self._mining_payload()
+        self._emit("mining_update", payload)
+        self._overlay_manager.emit_to_overlay("mining", "mining_update", payload)
+
+    def _touch_mining_session(self):
+        if self._mining_session["started_at"] is None:
+            import time
+            self._mining_session["started_at"] = time.time()
+
+    def _handle_mining_refined(self, event: dict):
+        self._touch_mining_session()
+        raw = event.get("Type", "")
+        symbol = raw.lstrip("$").split("_name;")[0] if raw else ""
+        name = event.get("Type_Localised") or self._commodity_display(symbol) or symbol
+        if not name:
+            return
+        refined = self._mining_session["refined"]
+        refined[name] = refined.get(name, 0) + 1
+        self._push_mining()
+
+    def _handle_prospected_asteroid(self, event: dict):
+        self._touch_mining_session()
+        ms = self._mining_session
+        ms["prospected"] += 1
+        # Content: "$AsteroidMaterialContent_High;" -> High
+        content = (event.get("Content") or "").split("_")[-1].rstrip(";")
+        if content in ms["content"]:
+            ms["content"][content] += 1
+        motherlode = ""
+        raw_ml = event.get("MotherlodeMaterial", "")
+        if raw_ml:
+            symbol = raw_ml.lstrip("$").split("_name;")[0]
+            motherlode = (event.get("MotherlodeMaterial_Localised")
+                          or self._commodity_display(symbol) or symbol)
+            ms["motherlodes"][motherlode] = ms["motherlodes"].get(motherlode, 0) + 1
+        ms["last_prospect"] = {
+            "content": content,
+            "motherlode": motherlode,
+            "remaining": round(event.get("Remaining", 100)),
+            "materials": [
+                {
+                    "name": m.get("Name_Localised") or m.get("Name", ""),
+                    "proportion": round(m.get("Proportion", 0), 1),
+                }
+                for m in sorted(event.get("Materials") or [],
+                                key=lambda m: -(m.get("Proportion") or 0))
+            ],
+        }
+        self._push_mining()
+
+    def _handle_asteroid_cracked(self, event: dict):
+        self._touch_mining_session()
+        self._mining_session["cracked"] += 1
+        self._push_mining()
+
+    def _handle_powerplay_merits(self, event: dict):
+        from core.database import set_pref
+        power = event.get("Power", "")
+        gained = int(event.get("MeritsGained", 0) or 0)
+        total = int(event.get("TotalMerits", 0) or 0)
+        if power:
+            set_pref("pp_power", power)
+        set_pref("pp_merits", total)
+        set_pref("pp_updated", event.get("timestamp", ""))
+        # merits earned mid-mining-session count toward the session tally —
+        # only while a session is live, so dropping off cargo hours later
+        # doesn't inflate a fresh tracker
+        if self._mining_session["started_at"] is not None:
+            self._mining_session["merits"] += gained
+            self._push_mining()
+        self._emit("merits_update", {"power": power, "gained": gained, "total": total})
+
     # Guardian FSD Booster adds a flat range bonus (ly) that doesn't scale with mass.
     _GUARDIAN_BOOSTER_BONUS = {1: 4.0, 2: 6.0, 3: 7.75, 4: 9.25, 5: 10.5}
 
@@ -1670,7 +1809,8 @@ class API:
 
     def _load_overlay_opacities(self):
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker", "construction"]
+        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker",
+                 "construction", "mining"]
         for name in names:
             val = get_pref(f"overlay_opacity_{name}", 1.0)
             try:
@@ -1698,6 +1838,8 @@ class API:
             self._push_fss_to_overlay()
         elif name == "exo_tracker":
             self._push_exo_to_overlay()
+        elif name == "mining":
+            self._push_mining()
 
     def show_overlay(self, name: str):
         self._overlay_manager.show(name)
@@ -1715,7 +1857,8 @@ class API:
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker", "construction"]
+        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker",
+                 "construction", "mining"]
         return {
             name: {
                 "shown": self._overlay_manager.is_shown(name),
@@ -2423,6 +2566,126 @@ class API:
                 merged.append(r)
                 seen.add(key)
         return merged
+
+    # --- Mining ---
+
+    def search_ring_hotspots(self, system: str, commodity: str,
+                             options: dict | None = None) -> dict:
+        """Rings with a hotspot of `commodity` near `system`, one row per ring.
+        options: ring_types[], reserve_levels[], powers[], power_states[], size."""
+        import asyncio
+        from api.spansh import SpanshAPI
+        opts = options or {}
+
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                return await spansh.ring_hotspots(
+                    system, commodity,
+                    ring_types=opts.get("ring_types") or None,
+                    reserve_levels=opts.get("reserve_levels") or None,
+                    controlling_powers=opts.get("powers") or None,
+                    power_states=opts.get("power_states") or None,
+                    size=int(opts.get("size") or 40),
+                )
+            finally:
+                await spansh.close()
+
+        try:
+            raw = asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "results": []}
+
+        needle = commodity.lower()
+        # Spansh's ring_type filter matches BODIES that have a ring of that
+        # type — the hotspot can be in a different ring of the same body, so
+        # the type narrowing has to be re-applied per-ring here
+        wanted_types = {t.lower() for t in (opts.get("ring_types") or [])}
+        rows = []
+        for body in raw:
+            for ring in body.get("rings") or []:
+                if wanted_types and (ring.get("type") or "").lower() not in wanted_types:
+                    continue
+                sig = next((s for s in ring.get("signals") or []
+                            if (s.get("name") or "").lower() == needle), None)
+                if not sig:
+                    continue
+                rows.append({
+                    "system":      body.get("system_name", ""),
+                    "body":        body.get("name", ""),
+                    "ring":        ring.get("name", ""),
+                    "ring_type":   ring.get("type", ""),
+                    "reserve":     body.get("reserve_level", ""),
+                    "count":       sig.get("count", 1),
+                    "signals":     ring.get("signals") or [],
+                    "distance":    round(body.get("distance", 0), 1),
+                    "arrival_ls":  round(body.get("distance_to_arrival") or 0),
+                    "power":       body.get("system_controlling_power"),
+                    "power_state": body.get("system_power_state"),
+                    "updated":     (ring.get("signals_updated_at") or "")[:10],
+                })
+        rows.sort(key=lambda r: (r["distance"], -r["count"]))
+        return {"results": rows}
+
+    def search_mining_sell(self, system: str, commodity: str,
+                           options: dict | None = None) -> dict:
+        """Stations buying `commodity`, best sell price first.
+        options: min_demand, max_distance, powers[], power_states[], size."""
+        import asyncio
+        from api.spansh import SpanshAPI
+        opts = options or {}
+
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                return await spansh.mining_sell_stations(
+                    system, commodity,
+                    min_demand=int(opts.get("min_demand") or 0),
+                    max_distance=opts.get("max_distance") or None,
+                    controlling_powers=opts.get("powers") or None,
+                    power_states=opts.get("power_states") or None,
+                    size=int(opts.get("size") or 40),
+                )
+            finally:
+                await spansh.close()
+
+        try:
+            raw = asyncio.run(_run())
+        except Exception as e:
+            return {"error": str(e), "results": []}
+
+        needle = commodity.lower()
+        rows = []
+        for s in raw:
+            entry = next((m for m in (s.get("market") or [])
+                          if (m.get("commodity") or "").lower() == needle), None)
+            if not entry:
+                continue
+            stype = (s.get("type") or "").lower()
+            rows.append({
+                "station":       s.get("name", ""),
+                "system":        s.get("system_name", ""),
+                "distance":      round(s.get("distance", 0), 1),
+                "arrival_ls":    round(s.get("distance_to_arrival") or 0),
+                "has_large_pad": s.get("has_large_pad", False),
+                "is_planetary":  s.get("is_planetary", False),
+                "is_carrier":    "carrier" in stype
+                                 or s.get("controlling_minor_faction") == "FleetCarrier",
+                "sell_price":    entry.get("sell_price", 0),
+                "demand":        entry.get("demand", 0),
+                "power":         s.get("system_controlling_power"),
+                "power_state":   s.get("system_power_state"),
+                "updated":       (s.get("market_updated_at") or "")[:10],
+            })
+        return {"results": rows}
+
+    def get_mining_session(self) -> dict:
+        return self._mining_payload()
+
+    def reset_mining_session(self) -> dict:
+        self._mining_session = self._new_mining_session()
+        self._push_mining()
+        return self._mining_payload()
 
     # --- Exploration ---
 

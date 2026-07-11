@@ -46,6 +46,12 @@ OVERLAYS = {
         "width": 360,
         "height": 280,
     },
+    "mining": {
+        "title": "EDTC — Mining",
+        "key": "mining",
+        "width": 340,
+        "height": 220,
+    },
 }
 
 
@@ -114,7 +120,7 @@ class OverlayManager:
             self._shown[name] = True
             self._apply_opacity(name)
             # size may be stale — pushes while hidden skip the auto-fit
-            if name in ("construction", "route"):
+            if name in ("construction", "route", "mining"):
                 self.resize_to_content(name)
             return
 
@@ -229,7 +235,7 @@ class OverlayManager:
         # so window.pywebview.api is an empty object there. Measure and resize
         # from this side instead; evaluate_js provably works (it's how the
         # data gets in). Both overlays carry id="overlay-panel" for measuring.
-        if name in ("construction", "route"):
+        if name in ("construction", "route", "mining"):
             self.resize_to_content(name)
 
     def resize_to_content(self, name: str, pad: int = 24, delay: float = 0.4):

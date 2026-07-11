@@ -9,6 +9,7 @@ const OVERLAYS = [
   { id: 'system_preview',label: 'System Preview on Jump',    badge: 'Live', desc: 'Star class, body count, economy and security shown on every FSD jump.' },
   { id: 'exo_tracker',   label: 'Exobiology Tracker',        badge: 'Live', desc: 'Tracks organic scan progress (1/3, 2/3, 3/3) per species on each body.' },
   { id: 'construction',  label: 'Construction Materials',    badge: 'Live', desc: 'Live delivery progress for active colonisation construction projects.' },
+  { id: 'mining',        label: 'Mining Session',            badge: 'Live', desc: 'Refined tonnage, tons/hr, last prospector result and Powerplay merits while mining.' },
 ]
 
 // --- Watchlist section ---

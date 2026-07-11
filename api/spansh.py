@@ -241,6 +241,84 @@ class SpanshAPI(BaseAPI):
             return []
         return await self._poll_job(job_id)
 
+    # --- Mining: ring hotspots + sell stations ---
+
+    async def ring_hotspots(
+        self,
+        system: str,
+        commodity: str,
+        ring_types: list[str] | None = None,
+        reserve_levels: list[str] | None = None,
+        controlling_powers: list[str] | None = None,
+        power_states: list[str] | None = None,
+        size: int = 40,
+    ) -> list[dict]:
+        """Bodies whose rings have a `commodity` hotspot, nearest-first (POST
+        /bodies/search). Verified live: ring_signals takes the [{"name": ...}]
+        shape; ring_type / reserve_level / system_controlling_power /
+        system_power_state all take {"value": [...]}. Results carry rings[]
+        (signals + type + name), reserve_level, distance, and the system's
+        controlling power + power state."""
+        filters: dict = {"ring_signals": [{"name": commodity}]}
+        if ring_types and len(ring_types) == 1:
+            # {"ring_type": {...}} is silently IGNORED by /bodies/search — the
+            # working shape is {"rings": [{"type": ...}]} (verified live: a
+            # bogus type returns count=0 this way, 10000 the other way).
+            # Multiple entries' semantics are unverified, so only one type is
+            # filtered server-side; callers narrow per-ring client-side anyway.
+            filters["rings"] = [{"type": ring_types[0]}]
+        if reserve_levels:
+            filters["reserve_level"] = {"value": reserve_levels}
+        if controlling_powers:
+            filters["system_controlling_power"] = {"value": controlling_powers}
+        if power_states:
+            filters["system_power_state"] = {"value": power_states}
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post("/bodies/search", json={
+            "reference_system": system,
+            "filters": filters,
+            "sort": [{"distance": {"direction": "asc"}}],
+            "size": size,
+        })
+        resp.raise_for_status()
+        return resp.json().get("results", [])
+
+    async def mining_sell_stations(
+        self,
+        system: str,
+        commodity: str,
+        min_demand: int = 1,
+        max_distance: float | None = None,
+        controlling_powers: list[str] | None = None,
+        power_states: list[str] | None = None,
+        size: int = 40,
+    ) -> list[dict]:
+        """Stations buying `commodity`, best sell price first. Verified live:
+        the market entry's demand filter is {"comparison": ">=", "value":
+        [lo, hi]}, distance is {"min": .., "max": ..}, and per-commodity price
+        sort is the [{"market_sell_price": [{"name", "direction"}]}] form."""
+        market: dict = {"name": commodity}
+        if min_demand > 0:
+            market["demand"] = {"comparison": ">=", "value": [min_demand, 10_000_000]}
+        filters: dict = {"market": [market]}
+        if max_distance:
+            filters["distance"] = {"min": 0, "max": max_distance}
+        if controlling_powers:
+            filters["system_controlling_power"] = {"value": controlling_powers}
+        if power_states:
+            filters["system_power_state"] = {"value": power_states}
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post("/stations/search", json={
+            "reference_system": system,
+            "filters": filters,
+            "sort": [{"market_sell_price": [{"name": commodity, "direction": "desc"}]}],
+            "size": size,
+        })
+        resp.raise_for_status()
+        return resp.json().get("results", [])
+
     # --- Commodity market search ---
 
     async def commodity_markets(self, system: str, commodity: str) -> list[dict]:

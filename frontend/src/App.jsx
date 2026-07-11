@@ -39,6 +39,7 @@ import Navigation from './pages/Navigation'
 import Ships from './pages/Ships'
 import Builder from './pages/Builder'
 import Trading from './pages/Trading'
+import Mining from './pages/Mining'
 import Exploration from './pages/Exploration'
 import Engineering from './pages/Engineering'
 import Colonisation from './pages/Colonisation'
@@ -54,6 +55,7 @@ import FssValues from './overlays/FssValues'
 import SystemPreview from './overlays/SystemPreview'
 import ExoTracker from './overlays/ExoTracker'
 import Construction from './overlays/Construction'
+import MiningOverlay from './overlays/Mining'
 
 const OVERLAY_MAP = {
   'cmdr-ping':      CmdrPing,
@@ -62,6 +64,7 @@ const OVERLAY_MAP = {
   'system-preview': SystemPreview,
   'exo-tracker':    ExoTracker,
   'construction':   Construction,
+  'mining':         MiningOverlay,
 }
 
 const NAV_ITEMS = [
@@ -69,6 +72,7 @@ const NAV_ITEMS = [
   { path: '/ships',        label: 'Ships' },
   { path: '/builder',      label: 'Ship Builder' },
   { path: '/trading',      label: 'Trading' },
+  { path: '/mining',       label: 'Mining' },
   { path: '/exploration',  label: 'Exploration' },
   { path: '/engineering',  label: 'Engineering' },
   { path: '/colonisation', label: 'Colonisation' },
@@ -204,6 +208,7 @@ export default function App() {
           <Route path="/ships"        element={<Ships />} />
           <Route path="/builder"      element={<Builder />} />
           <Route path="/trading"      element={<Trading />} />
+          <Route path="/mining"       element={<Mining />} />
           <Route path="/exploration"  element={<Exploration />} />
           <Route path="/engineering"  element={<Engineering />} />
           <Route path="/colonisation" element={<Colonisation />} />
