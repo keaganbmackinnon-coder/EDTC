@@ -2875,3 +2875,61 @@ Bronze; all four render in the Commendations page (screenshot).
 
 ---
 *Session checkpoint: 2026-07-11 00:45:30*
+
+---
+*Session checkpoint: 2026-07-11 00:58:09*
+
+---
+*Session checkpoint: 2026-07-11 00:59:49*
+
+---
+*Session checkpoint: 2026-07-11 01:05:19*
+
+---
+*Session checkpoint: 2026-07-11 01:18:10*
+
+---
+*Session checkpoint: 2026-07-11 01:19:36*
+
+---
+
+## PLANNED — Mining tab (next session)
+
+A new **Mining** page (sidebar), scoped as its own session (comparable size to
+the exobiology work). Two tools, modelled on these community sites:
+
+- **Mining tool** — model: https://edtools.cc/miner (CMDR VicTic, v1.5).
+  Input: current system + target commodity (platinum, painite, LTDs, void opals,
+  tritium, etc.). Output: best hotspot rings (with ring type/reserve) sorted by
+  distance, and best sell stations sorted by price/demand. Plus a **live session
+  tracker** from the journal: prospected asteroids, refined tonnage, cr/hr,
+  cargo fill.
+- **Merit tool** — model: https://meritminer.cc/ (the interactive one).
+  Powerplay-2.0 merit mining: pick Power + goal (acquire/reinforce/undermine) +
+  commodity + ring type/reserve/age + radius (≤200 ly) + pad size/system-state
+  filters → systems where the commodity spawns in hotspots AND a station buys it
+  for your Power, with merits/tonne. Live EDDN market status shown.
+- **Powerplay reference** — https://edtools.cc/pp returned 404 on fetch; verify
+  the real path (maybe needs a system param or is /powerplay) before relying on it.
+
+### Data / integration notes (what EDTC already has)
+- **Spansh** integration exists: `api/spansh.py` (`commodity_markets` POST,
+  nearest-service search) and `SpanshAPI` — reuse for sell-station lookup.
+- **Local EDDN market cache** exists: `core/database.py` `search_local_markets`,
+  `upsert_market_data`; live ZMQ listener `_eddn_listener` in main.py. Good for
+  live sell prices without hitting Spansh.
+- **Hotspot/ring data** is the gap — edtools/meritminer use their own hotspot
+  datasets. Options to research: Spansh `/rings` or bodies dump, the community
+  "hotspot" CSV, or EDSM/Canonn. Pick a source the next session can fetch +
+  bundle (like scripts/build_data.py does), or query live.
+- **Journal events for the live tracker**: `MiningRefined` (already WATCHED +
+  handled), plus add `ProspectedAsteroid` (per-asteroid material %), maybe
+  `AsteroidCracked`, and use existing `Cargo`/`Cargo.json`. Merits: Powerplay
+  merit gains come from `Powerplay` / delivery events — check the journal for
+  what actually reports merit deltas (may need a `PowerplayMerits` event).
+- **Powerplay**: EDTC already has a Powerplay tab in Galaxy (`get_powerplay_status`,
+  `get_system_power`, `api/edsm.py`) — reuse power/pledge data.
+
+### Scope reminder
+Full new page + overlay + backend handlers + data sourcing + build + screenshot
+verify. Start it fresh; read this section first.
