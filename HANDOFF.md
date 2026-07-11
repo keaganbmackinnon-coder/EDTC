@@ -2997,9 +2997,10 @@ session tracker, and a mining overlay.
 - CMDR's power auto-detected from journal PowerplayMerits (Nakato Kaine).
 
 ### Notes / next session
-- **v0.3.67 is LOCAL ONLY** — tag for CI release after the user eyeballs the
-  Mining page + overlay in-app (a real mining run would fully exercise the
-  session tracker; code-path is harness-verified).
+- ~~v0.3.67 is LOCAL ONLY~~ — **v0.3.67 tagged + pushed for CI release
+  2026-07-11** after the user confirmed the Mining page in-app. A real mining
+  run hasn't exercised the session tracker/overlay live yet (code-path is
+  harness-verified) — worth a look after the CMDR's next mining trip.
 - Merit miner shows merits context but NOT merits/tonne numbers — FDev doesn't
   publish the formula (scales with sale value). The session tracker measures
   actual merits/hr live instead.
