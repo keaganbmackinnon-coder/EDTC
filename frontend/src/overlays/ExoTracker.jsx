@@ -4,6 +4,7 @@ const SCAN_DOTS = [0, 1, 2]
 
 export default function ExoTracker() {
   const [scans, setScans] = useState([])
+  const [dist, setDist] = useState(null)
 
   useEffect(() => {
     const off = window.__edtc?.on('exo_scan', (payload) => {
@@ -16,11 +17,15 @@ export default function ExoTracker() {
         }
         return [updated, ...prev].slice(0, 6)
       })
+      // A completed species clears the distance helper for it
+      if (payload.completed) setDist(d => (d && d.species === payload.species ? null : d))
     })
 
+    const offDist = window.__edtc?.on('exo_distance', (payload) => setDist(payload))
+
     // Reset on new system
-    const offJump = window.__edtc?.on('system_jumped', () => setScans([]))
-    return () => { off(); offJump() }
+    const offJump = window.__edtc?.on('system_jumped', () => { setScans([]); setDist(null) })
+    return () => { off(); offDist(); offJump() }
   }, [])
 
   const active = scans.filter(s => !s.completed)
@@ -28,13 +33,15 @@ export default function ExoTracker() {
 
   return (
     <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
-      <div className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[310px]">
+      <div id="overlay-panel" className="bg-ed-panel/95 border border-ed-border rounded-lg px-4 py-3 shadow-2xl min-w-[310px]">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-ed-muted text-xs font-mono uppercase tracking-widest">Exobiology</span>
           {done.length > 0 && (
             <span className="ml-auto text-ed-success text-xs font-mono">{done.length} logged</span>
           )}
         </div>
+
+        {dist && <DistanceBar dist={dist} />}
 
         {scans.length === 0 ? (
           <p className="text-ed-muted text-xs font-mono">No scans in progress</p>
@@ -45,6 +52,27 @@ export default function ExoTracker() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function DistanceBar({ dist }) {
+  const pct = dist.required ? Math.min(100, (dist.distance / dist.required) * 100) : 100
+  const remaining = Math.max(0, (dist.required ?? 0) - (dist.distance ?? 0))
+  return (
+    <div className={`rounded px-2 py-1.5 mb-2 border ${dist.clear ? 'border-ed-success/50 bg-ed-success/10' : 'border-ed-orange/40 bg-ed-orange/10'}`}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[10px] font-mono text-ed-muted truncate">{dist.species}</span>
+        <span className={`text-[11px] font-mono font-semibold ${dist.clear ? 'text-ed-success' : 'text-ed-orange'}`}>
+          {dist.clear ? 'Sample here ✓' : `+${Math.round(remaining)} m`}
+        </span>
+      </div>
+      <div className="h-1.5 rounded-full bg-ed-dark overflow-hidden">
+        <div className={`h-full ${dist.clear ? 'bg-ed-success' : 'bg-ed-orange'}`} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-[9px] text-ed-muted font-mono mt-0.5">
+        {Math.round(dist.distance)}/{dist.required} m · sample {dist.samples}/3
+      </p>
     </div>
   )
 }

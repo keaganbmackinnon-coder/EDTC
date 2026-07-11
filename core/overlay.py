@@ -44,7 +44,7 @@ OVERLAYS = {
         "title": "EDTC — Exobiology",
         "key": "exo-tracker",
         "width": 360,
-        "height": 200,
+        "height": 280,
     },
 }
 

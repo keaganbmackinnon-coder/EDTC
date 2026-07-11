@@ -218,11 +218,30 @@ def init_db():
                 ts        TEXT NOT NULL,
                 amount    INTEGER NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS exo_sales (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                ts        TEXT DEFAULT '',
+                species   TEXT NOT NULL,
+                genus     TEXT DEFAULT '',
+                variant   TEXT DEFAULT '',
+                value     INTEGER DEFAULT 0,
+                bonus     INTEGER DEFAULT 0,
+                system    TEXT DEFAULT '',
+                recorded  TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS thargoid_kills (
+                type   TEXT PRIMARY KEY,
+                count  INTEGER DEFAULT 0
+            );
         """)
         # Migrations for columns added after initial release
         for sql in [
             "ALTER TABLE markets ADD COLUMN has_large_pad INTEGER DEFAULT 0",
             "ALTER TABLE construction_projects ADD COLUMN market_id INTEGER",
+            "ALTER TABLE exo_scans ADD COLUMN value INTEGER DEFAULT 0",
+            "ALTER TABLE exo_scans ADD COLUMN body_name TEXT DEFAULT ''",
         ]:
             try:
                 conn.execute(sql)
@@ -421,15 +440,17 @@ def get_exo_scans(system: str | None = None) -> list:
         return [dict(r) for r in rows]
 
 
-def upsert_exo_scan(system: str, body: str, species: str, genus: str, scan_count: int) -> dict:
+def upsert_exo_scan(system: str, body: str, species: str, genus: str,
+                    scan_count: int, value: int = 0, body_name: str = "") -> dict:
     completed = 1 if scan_count >= 3 else 0
     with _conn() as conn:
         conn.execute(
-            "INSERT INTO exo_scans (system, body, species, genus, scan_count, completed) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
+            "INSERT INTO exo_scans (system, body, species, genus, scan_count, completed, value, body_name) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(system, body, species) DO UPDATE SET "
-            "scan_count=excluded.scan_count, completed=excluded.completed, updated=datetime('now')",
-            (system, body, species, genus, scan_count, completed),
+            "scan_count=excluded.scan_count, completed=excluded.completed, "
+            "value=excluded.value, body_name=excluded.body_name, updated=datetime('now')",
+            (system, body, species, genus, scan_count, completed, value, body_name),
         )
         row = conn.execute(
             "SELECT * FROM exo_scans WHERE system=? AND body=? AND species=?",
@@ -438,10 +459,58 @@ def upsert_exo_scan(system: str, body: str, species: str, genus: str, scan_count
         return dict(row)
 
 
+def get_completed_exo_scans(limit: int = 500) -> list:
+    """Fully-sampled (3/3) species, newest first — the exobiology 'logged' history."""
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM exo_scans WHERE completed=1 ORDER BY updated DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
 def clear_exo_scans_for_system(system: str) -> bool:
     with _conn() as conn:
         conn.execute("DELETE FROM exo_scans WHERE system=?", (system,))
     return True
+
+
+# --- Exobiology sales (Vista Genomics) ---
+
+def record_exo_sales(entries: list, system: str = "") -> int:
+    """Insert one row per sold sample from a SellOrganicData event's BioData[]."""
+    if not entries:
+        return 0
+    with _conn() as conn:
+        conn.executemany(
+            "INSERT INTO exo_sales (ts, species, genus, variant, value, bonus, system) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [(e.get("ts", ""), e.get("species", ""), e.get("genus", ""),
+              e.get("variant", ""), int(e.get("value", 0) or 0),
+              int(e.get("bonus", 0) or 0), system) for e in entries],
+        )
+    return len(entries)
+
+
+def get_exo_sales(limit: int = 300) -> list:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM exo_sales ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_exo_sales_summary() -> dict:
+    """Lifetime Vista Genomics earnings: base + first-logged bonus + counts."""
+    with _conn() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS samples, "
+            "COALESCE(SUM(value), 0) AS base, "
+            "COALESCE(SUM(bonus), 0) AS bonus, "
+            "COALESCE(SUM(CASE WHEN bonus > 0 THEN 1 ELSE 0 END), 0) AS first_logged, "
+            "COUNT(DISTINCT species) AS species "
+            "FROM exo_sales"
+        ).fetchone()
+        return dict(row) if row else {}
 
 
 # --- Construction ---
@@ -899,6 +968,35 @@ def set_pin_rolls(blueprint_id: str, grade: str, rolls: int) -> None:
         conn.execute(
             "UPDATE pinned_blueprints SET rolls=? WHERE blueprint_id=? AND grade=?",
             (max(1, int(rolls)), blueprint_id, str(grade)),
+        )
+
+
+# --- Thargoid interceptor kills (per type, for Commendations) ---
+
+def add_thargoid_kill(kill_type: str, n: int = 1) -> int:
+    with _conn() as conn:
+        conn.execute(
+            "INSERT INTO thargoid_kills (type, count) VALUES (?, ?) "
+            "ON CONFLICT(type) DO UPDATE SET count = count + excluded.count",
+            (kill_type, n),
+        )
+        row = conn.execute("SELECT count FROM thargoid_kills WHERE type=?", (kill_type,)).fetchone()
+        return row["count"] if row else n
+
+
+def get_thargoid_kills() -> dict:
+    with _conn() as conn:
+        rows = conn.execute("SELECT type, count FROM thargoid_kills").fetchall()
+        return {r["type"]: r["count"] for r in rows}
+
+
+def set_thargoid_kills(counts: dict) -> None:
+    """Replace all per-type counts — used by the one-time journal backfill."""
+    with _conn() as conn:
+        conn.execute("DELETE FROM thargoid_kills")
+        conn.executemany(
+            "INSERT INTO thargoid_kills (type, count) VALUES (?, ?)",
+            [(t, int(c)) for t, c in counts.items()],
         )
 
 

@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.64"  # bump this with every release
+APP_VERSION = "0.3.66"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -137,6 +137,15 @@ class API:
         self._current_system: str = ""
         # exo state: (system, body, species) -> scan_count
         self._exo_state: dict[tuple, int] = {}
+        # Active clonal-colony sampling for the distance helper. None when not
+        # mid-sample; else {system, body, species, genus, required, radius,
+        # samples:[(lat,lon), ...]} — the distance loop reads this each second.
+        self._exo_active: dict | None = None
+        # Per-body biological signals this system: (system, body_id) -> info.
+        # confirmed=True once a DSS scan reveals the actual genera (Genuses[]).
+        self._body_bio: dict[tuple, dict] = {}
+        # Body scan parameters for species prediction: body_id -> params
+        self._body_params: dict[str, dict] = {}
         self._fss_bodies: list[dict] = []
         self._current_station: str = ""
         self._current_ship: dict = {}
@@ -207,6 +216,14 @@ class API:
             self._handle_scan(event)
         elif event_name == "ScanOrganic":
             self._handle_scan_organic(event)
+        elif event_name == "SellOrganicData":
+            self._handle_sell_organic(event)
+        elif event_name == "SAASignalsFound":
+            self._handle_saa_signals(event)
+        elif event_name == "FSSBodySignals":
+            self._handle_fss_body_signals(event)
+        elif event_name == "FactionKillBond":
+            self._handle_faction_kill_bond(event)
         elif event_name == "ColonisationContribution":
             self._handle_construction_contribution(event)
         elif event_name == "ColonisationConstructionDepot":
@@ -606,6 +623,10 @@ class API:
         system = event.get("StarSystem", "")
         self._current_system = system
         self._fss_bodies = []
+        # Body-scoped exo caches are keyed by BodyID, which repeats across
+        # systems — clear them on a jump so predictions don't leak between systems.
+        self._body_params = {}
+        self._exo_active = None
         self._emit("system_changed", {"system": system})
 
         coords = event.get("StarPos")
@@ -727,6 +748,20 @@ class API:
         value = _estimate_scan_value(event)
         terraformable = event.get("TerraformState") == "Terraformable"
 
+        # Cache landable-body parameters so species prediction can run when this
+        # body turns out to carry biological signals (FSSBodySignals arrives in a
+        # separate event, sometimes before, sometimes after, the detailed Scan).
+        if event.get("Landable") and event.get("BodyID") is not None:
+            grav = event.get("SurfaceGravity", 0) or 0
+            self._body_params[str(event.get("BodyID"))] = {
+                "atmosphere": event.get("AtmosphereType") or event.get("Atmosphere") or "None",
+                "gravity_g": grav / 9.80665 if grav else None,
+                "temperature": event.get("SurfaceTemperature", 0),
+                "pressure": event.get("SurfacePressure", 0),
+                "volcanism": event.get("Volcanism", ""),
+                "body_type": planet_class,
+            }
+
         body = {
             "body": body_name,
             "class": planet_class,
@@ -741,7 +776,13 @@ class API:
         })
         self._emit("scan_update", {"body": body, "all_bodies": self._fss_bodies})
 
+    # ScanOrganic ScanType progression: Log (1st sample) -> Sample (2nd) ->
+    # Analyse (3rd, completes the species). NOT "Analysed" — that value never
+    # fires, which silently pinned every tracker at 0/3 before this fix.
+    _EXO_SCAN_COUNT = {"Log": 1, "Sample": 2, "Analyse": 3}
+
     def _handle_scan_organic(self, event: dict):
+        from core import exobiology as exo
         scan_type = event.get("ScanType", "")
         species = event.get("Species_Localised") or event.get("Species", "")
         genus = event.get("Genus_Localised") or event.get("Genus", "")
@@ -749,31 +790,246 @@ class API:
         system = self._current_system
 
         key = (system, body_id, species)
-        current_count = self._exo_state.get(key, 0)
+        count = self._EXO_SCAN_COUNT.get(scan_type, self._exo_state.get(key, 0))
+        self._exo_state[key] = count
+        completed = count >= 3
 
-        if scan_type == "Analysed":
-            current_count = min(current_count + 1, 3)
-        elif scan_type == "StartScan" and current_count == 0:
-            current_count = 0  # just tracking that a scan started
-
-        self._exo_state[key] = current_count
+        value = exo.species_value(species)
+        required = exo.genus_distance(genus)
 
         from core.database import upsert_exo_scan
-        upsert_exo_scan(system, body_id, species, genus, current_count)
+        upsert_exo_scan(system, body_id, species, genus, count, value)
+
+        # Clonal-colony distance helper: record where each sample was taken so
+        # the live loop can tell the CMDR when they're far enough for the next.
+        if not completed:
+            pos = self._read_surface_position()
+            if pos:
+                lat, lon, radius = pos
+                if (not self._exo_active
+                        or self._exo_active.get("species") != species
+                        or self._exo_active.get("body") != body_id):
+                    self._exo_active = {
+                        "system": system, "body": body_id, "species": species,
+                        "genus": genus, "required": required,
+                        "radius": radius, "samples": [],
+                    }
+                self._exo_active["samples"].append((lat, lon))
+                if radius:
+                    self._exo_active["radius"] = radius
+        elif self._exo_active and self._exo_active.get("species") == species:
+            self._exo_active = None  # species done — stop nagging
 
         payload = {
             "system": system,
             "body": body_id,
             "species": species,
             "genus": genus,
-            "scan_count": current_count,
-            "completed": current_count >= 3,
+            "scan_count": count,
+            "completed": completed,
             "scan_type": scan_type,
+            "value": value,
+            "required_distance": required,
+            "samples_taken": len(self._exo_active["samples"]) if self._exo_active else count,
         }
         self._emit("exo_scan", payload)
         if self._overlay_manager.is_user_enabled("exo_tracker"):
             self._overlay_manager.show("exo_tracker")
             self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
+
+    def _read_surface_position(self) -> tuple | None:
+        """(latitude, longitude, planet_radius_m) from Status.json when the CMDR
+        is on/near a planet surface, else None. PlanetRadius is present on foot,
+        in the SRV, and when flying low over a body."""
+        try:
+            from core.journal import journal_path
+            status = json.loads((journal_path() / "Status.json").read_text(encoding="utf-8"))
+            lat = status.get("Latitude")
+            lon = status.get("Longitude")
+            if lat is None or lon is None:
+                return None
+            return (lat, lon, status.get("PlanetRadius"))
+        except Exception:
+            return None
+
+    def _exo_distance_loop(self):
+        """Every second, if a sample is in progress, report the CMDR's distance
+        to the nearest previous sample of the active genus versus the colony
+        range they must clear before the next sample counts."""
+        import time
+        from core import exobiology as exo
+        while True:
+            time.sleep(1.0)
+            active = self._exo_active
+            if not active or not active.get("samples"):
+                continue
+            pos = self._read_surface_position()
+            if not pos:
+                continue
+            lat, lon, radius = pos
+            radius = active.get("radius") or radius or 0
+            if not radius:
+                continue
+            dmin = min(exo.surface_distance(lat, lon, slat, slon, radius)
+                       for slat, slon in active["samples"])
+            required = active.get("required", 0)
+            payload = {
+                "genus": active.get("genus", ""),
+                "species": active.get("species", ""),
+                "distance": round(dmin),
+                "required": required,
+                "clear": (required == 0) or (dmin >= required),
+                "samples": len(active["samples"]),
+            }
+            self._emit("exo_distance", payload)
+            if self._overlay_manager.is_user_enabled("exo_tracker"):
+                self._overlay_manager.emit_to_overlay("exo_tracker", "exo_distance", payload)
+
+    def _handle_sell_organic(self, event: dict):
+        """Record a Vista Genomics sale. Bonus is the first-logged extra (4x the
+        base, so a first-logged sample pays 5x total)."""
+        from core.database import record_exo_sales
+        ts = event.get("timestamp", "")
+        entries = []
+        for b in event.get("BioData", []):
+            entries.append({
+                "ts": ts,
+                "species": b.get("Species_Localised") or b.get("Species", ""),
+                "genus": b.get("Genus_Localised") or b.get("Genus", ""),
+                "variant": b.get("Variant_Localised") or b.get("Variant", ""),
+                "value": b.get("Value", 0),
+                "bonus": b.get("Bonus", 0),
+            })
+        if not entries:
+            return
+        record_exo_sales(entries, self._current_system)
+        total = sum(e["value"] + e["bonus"] for e in entries)
+        self._emit("exo_sale", {"count": len(entries), "total": total})
+
+    def _predict_body(self, body_id: str, only_genera: list | None = None) -> list:
+        from core import exobiology as exo
+        params = self._body_params.get(str(body_id))
+        if not params:
+            # Body not scanned in detail this session — fall back to whole genera
+            if only_genera:
+                out = []
+                for g in exo.genera():
+                    if g["name"] in only_genera:
+                        for sp in g.get("species", []):
+                            out.append({"genus": g["name"], "name": sp["name"],
+                                        "value": sp.get("value", 0),
+                                        "colony_distance": g.get("colony_distance", 0)})
+                out.sort(key=lambda s: s["value"], reverse=True)
+                return out
+            return []
+        return exo.predict(params, only_genera)
+
+    def _handle_saa_signals(self, event: dict):
+        """DSS mapping result — reveals the actual genera present on a body."""
+        signals = event.get("Signals", [])
+        bio = next((s for s in signals
+                    if "Biolog" in (s.get("Type_Localised", "") + s.get("Type", ""))), None)
+        if not bio:
+            return
+        body_id = str(event.get("BodyID", ""))
+        genera = [g.get("Genus_Localised") or g.get("Genus", "") for g in event.get("Genuses", [])]
+        genera = [g for g in genera if g]
+        info = {
+            "system": self._current_system,
+            "body": event.get("BodyName", ""),
+            "body_id": body_id,
+            "count": bio.get("Count", 0),
+            "genera": genera,
+            "confirmed": True,
+            "predictions": self._predict_body(body_id, genera or None),
+        }
+        self._body_bio[(self._current_system, body_id)] = info
+        self._emit("bio_signals", info)
+
+    def _handle_fss_body_signals(self, event: dict):
+        """FSS reveals a body has N biological signals (but not which genera —
+        those need a DSS scan). Predict candidates from body parameters."""
+        signals = event.get("Signals", [])
+        bio = next((s for s in signals
+                    if "Biolog" in (s.get("Type_Localised", "") + s.get("Type", ""))), None)
+        if not bio:
+            return
+        body_id = str(event.get("BodyID", ""))
+        prev = self._body_bio.get((self._current_system, body_id))
+        if prev and prev.get("confirmed"):
+            return  # DSS data is better — don't overwrite with a prediction
+        info = {
+            "system": self._current_system,
+            "body": event.get("BodyName", ""),
+            "body_id": body_id,
+            "count": bio.get("Count", 0),
+            "genera": [],
+            "confirmed": False,
+            "predictions": self._predict_body(body_id),
+        }
+        self._body_bio[(self._current_system, body_id)] = info
+        self._emit("bio_signals", info)
+
+    # Thargoid interceptor kills are identified by their FactionKillBond reward.
+    # There is no type field in the journal, so we match the exact bond value.
+    # These are the values the CMDR confirmed against their own kill history
+    # (the war-era interceptor bonds). Scouts (65k–80k) and the lower/odd bonds
+    # (Hunter 4.5M, pre-adjustment 6.5M/20M) are deliberately excluded.
+    _THARGOID_BOND_TYPE = {
+        8_000_000: "cyclops",
+        24_000_000: "basilisk",
+        40_000_000: "medusa",
+        60_000_000: "hydra",
+    }
+
+    def _classify_thargoid_bond(self, event: dict) -> str | None:
+        victim = event.get("VictimFaction", "")
+        if "Thargoid" not in victim:
+            return None
+        return self._THARGOID_BOND_TYPE.get(event.get("Reward", 0))
+
+    def _handle_faction_kill_bond(self, event: dict):
+        kind = self._classify_thargoid_bond(event)
+        if not kind:
+            return
+        from core.database import add_thargoid_kill
+        total = add_thargoid_kill(kind)
+        self._emit("thargoid_kill", {"type": kind, "count": total})
+        self._refresh_awards()
+
+    def _backfill_thargoid_kills(self):
+        """One-time scan of every journal for past Thargoid interceptor bonds so
+        the per-type awards reflect kills made before this feature existed. Guarded
+        by a pref; the live tail counts new bonds from here on without overlap."""
+        from core.database import get_pref, set_pref, set_thargoid_kills
+        if get_pref("thargoid_kills_backfilled", False):
+            return
+        from core.journal import journal_path
+        counts: dict[str, int] = {}
+        try:
+            journals = sorted(journal_path().glob("Journal.*.log"))
+            for jf in journals:
+                try:
+                    with open(jf, "r", encoding="utf-8", errors="replace") as f:
+                        for line in f:
+                            if '"FactionKillBond"' not in line or "Thargoid" not in line:
+                                continue
+                            try:
+                                ev = json.loads(line)
+                            except json.JSONDecodeError:
+                                continue
+                            if ev.get("event") != "FactionKillBond":
+                                continue
+                            kind = self._classify_thargoid_bond(ev)
+                            if kind:
+                                counts[kind] = counts.get(kind, 0) + 1
+                except OSError:
+                    continue
+            set_thargoid_kills(counts)
+            set_pref("thargoid_kills_backfilled", True)
+            logging.info(f"thargoid kills backfill: {counts}")
+        except Exception:
+            logging.exception("thargoid kills backfill failed")
 
     def _handle_construction_contribution(self, event: dict):
         contributions = event.get("Contributions", [])
@@ -1500,6 +1756,62 @@ class API:
         from core.database import clear_exo_scans_for_system
         return clear_exo_scans_for_system(system)
 
+    def get_completed_exo_scans(self, limit: int = 500) -> list:
+        from core.database import get_completed_exo_scans
+        return get_completed_exo_scans(limit)
+
+    def get_exobiology_data(self) -> list:
+        """Full genus/species reference: values, colony distances, conditions."""
+        from core import exobiology as exo
+        return exo.genera()
+
+    def predict_species(self, params: dict, only_genera: list | None = None) -> list:
+        """Candidate species for a body given {atmosphere, gravity_g,
+        temperature, volcanism, body_type}. only_genera restricts to a DSS
+        scan's confirmed genera."""
+        from core import exobiology as exo
+        return exo.predict(params or {}, only_genera)
+
+    def get_body_bio(self, system: str | None = None) -> list:
+        """Biological-signal bodies seen this session (confirmed genera from DSS,
+        or predicted candidates from FSS), for the current or given system."""
+        sys_name = (system or self._current_system or "").lower()
+        return [v for (s, _b), v in self._body_bio.items() if s.lower() == sys_name]
+
+    def get_exo_sales(self, limit: int = 300) -> list:
+        from core.database import get_exo_sales
+        return get_exo_sales(limit)
+
+    def get_exo_sales_summary(self) -> dict:
+        from core.database import get_exo_sales_summary
+        return get_exo_sales_summary()
+
+    def get_exo_carried_value(self) -> dict:
+        """Value of fully-scanned species not yet sold at Vista Genomics.
+        A species counts as 'carried' if it's 3/3 complete and hasn't appeared
+        in a later sale. Approximate: matches by species name against sales made
+        after the scan was completed."""
+        from core.database import get_completed_exo_scans, get_exo_sales
+        completed = get_completed_exo_scans(2000)
+        sales = get_exo_sales(3000)
+        # Count sales per species; a completed scan is "sold" if a sale of that
+        # species exists at/after the scan time. Consume sales so duplicates of
+        # the same species each need their own sale to be marked sold.
+        from collections import Counter
+        sold_counts = Counter(s["species"] for s in sales)
+        carried = []
+        total = 0
+        for scan in completed:
+            sp = scan["species"]
+            if sold_counts.get(sp, 0) > 0:
+                sold_counts[sp] -= 1
+                continue
+            val = scan.get("value", 0) or 0
+            total += val
+            carried.append({"species": sp, "genus": scan.get("genus", ""),
+                            "value": val, "system": scan.get("system", "")})
+        return {"total": total, "count": len(carried), "species": carried}
+
     # --- Construction ---
 
     def get_construction_projects(self, active_only: bool = True) -> list:
@@ -2217,7 +2529,8 @@ class API:
     def _assemble_award_data(self) -> dict:
         """Gather everything the award catalogue evaluates against."""
         from core.database import (get_cmdr_stats, get_engineer_progress,
-                                   get_carriers, get_logbook, get_guardian_visits)
+                                   get_carriers, get_logbook, get_guardian_visits,
+                                   get_thargoid_kills)
         stats = get_cmdr_stats()
         eng = get_engineer_progress()
         engineers_unlocked = sum(
@@ -2232,6 +2545,7 @@ class API:
             "own_carrier": own_carrier,
             "logbook_count": len(get_logbook()),
             "guardian_visited": len(get_guardian_visits()),
+            "thargoid_kills": get_thargoid_kills(),
         }
 
     def get_awards(self) -> dict:
@@ -2853,6 +3167,8 @@ def main():
 
     threading.Thread(target=_setup_hotkeys, args=(api,), daemon=True).start()
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
+    threading.Thread(target=api._exo_distance_loop, daemon=True).start()
+    threading.Thread(target=api._backfill_thargoid_kills, daemon=True).start()
 
     def _on_ready():
         api._overlay_manager.enable()

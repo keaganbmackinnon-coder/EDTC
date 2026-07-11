@@ -2723,3 +2723,155 @@ priority power split. Frontend builds clean.
 
 ---
 *Session checkpoint: 2026-07-08 01:27:30*
+
+---
+*Session checkpoint: 2026-07-08 01:32:57*
+
+---
+*Session checkpoint: 2026-07-08 02:01:07*
+
+---
+*Session checkpoint: 2026-07-10 00:01:53*
+
+---
+*Session checkpoint: 2026-07-10 00:04:37*
+
+---
+*Session checkpoint: 2026-07-10 00:06:47*
+
+---
+*Session checkpoint: 2026-07-10 00:09:34*
+
+---
+*Session checkpoint: 2026-07-10 00:12:40*
+
+---
+*Session checkpoint: 2026-07-10 00:31:46*
+
+---
+*Session checkpoint: 2026-07-10 00:33:38*
+
+---
+*Session checkpoint: 2026-07-10 00:37:05*
+
+---
+*Session checkpoint: 2026-07-10 00:37:36*
+
+---
+*Session checkpoint: 2026-07-10 00:39:39*
+
+---
+*Session checkpoint: 2026-07-10 00:41:16*
+
+---
+*Session checkpoint: 2026-07-10 00:43:56*
+
+---
+*Session checkpoint: 2026-07-10 00:45:08*
+
+---
+*Session checkpoint: 2026-07-10 00:45:54*
+
+---
+*Session checkpoint: 2026-07-10 00:59:57*
+
+---
+*Session checkpoint: 2026-07-10 01:05:36*
+
+---
+
+## Session 44 — Exobiology overhaul (v0.3.65, local)
+
+Rebuilt the whole exobiology feature set. **Root-cause bug fixed:** `ScanOrganic`
+`ScanType` is `Log`/`Sample`/`Analyse`, NOT `"Analysed"` — the old code counted
+`== "Analysed"`, which never matched, so every exo tracker sat at 0/3 forever.
+Confirmed against the user's real journals. This was the long-flagged
+"Logged vs Analysed" issue across sessions 2–7; now resolved.
+
+### Data foundation
+| Item | File |
+|---|---|
+| `data/exobiology.json` — 22 genera, 119 species: Vista Genomics base values, per-genus clonal colony ranges, and per-species occurrence conditions (atmosphere/gravity/temp/body-type/volcanism) | `data/exobiology.json` |
+| Source: EDMC-BioScan rulesets (github.com/Silarn/EDMC-BioScan) + community colony ranges. Concha Biconcavis 0xFFFFFF sentinel patched to 19,010,800 | — |
+| Reproducible fetch+transform script (downloads rulesets from raw GitHub, regenerates JSON) | `scripts/build_exobiology.py` |
+| `core/exobiology.py` — data loader + lookup maps, `predict()` (ruleset matcher), `surface_distance()` (haversine) | `core/exobiology.py` |
+
+### Backend (main.py / core)
+| Item | File |
+|---|---|
+| `_handle_scan_organic` rewritten: Log→1, Sample→2, Analyse→3; attaches value + required colony distance; records sample lat/lon for the distance helper | `main.py` |
+| Sample-distance helper: `_read_surface_position()` (Status.json Latitude/Longitude/PlanetRadius) + `_exo_distance_loop()` daemon → emits `exo_distance` {distance, required, clear} to overlay + main window every 1 s while sampling | `main.py` |
+| `_handle_sell_organic` (SellOrganicData → `exo_sales` table; Bonus = 4× base = first-logged 5× total) | `main.py`, `core/database.py` |
+| `_handle_saa_signals` (DSS `Genuses[]` → confirmed genera + predictions) + `_handle_fss_body_signals` (FSS bio count → predicted candidates) | `main.py` |
+| `_handle_scan` now caches landable-body params (atmosphere/gravity_g/temp/volcanism/class) for prediction; caches cleared on FSD jump | `main.py` |
+| `exo_scans` migration: `value`, `body_name` columns. New `exo_sales` table + `record_exo_sales`/`get_exo_sales`/`get_exo_sales_summary`/`get_completed_exo_scans` | `core/database.py` |
+| API: `get_exobiology_data`, `predict_species`, `get_body_bio`, `get_exo_sales`, `get_exo_sales_summary`, `get_exo_carried_value`, `get_completed_exo_scans` | `main.py` |
+| `SAASignalsFound`, `FSSBodySignals` added to WATCHED_EVENTS | `core/journal.py` |
+
+### Frontend
+| Item | File |
+|---|---|
+| Exobiology tab rebuilt as 3 sub-tabs — **Tracker** (live distance meter + bio-signal bodies w/ confirmed/predicted species + values + carried unsold value + sampling progress), **Value Reference** (genus browser: value range, colony distance, conditions chips, search/sort — the target-hunting view), **Earnings** (Vista totals, first-logged bonus, carrying, recent sales) | `frontend/src/pages/Exploration.jsx` |
+| Sampling progress filters out pre-fix 0/3 stale rows (`scan_count >= 1`) | `frontend/src/pages/Exploration.jsx` |
+| ExoTracker overlay gains a live distance bar (`exo_distance`) | `frontend/src/overlays/ExoTracker.jsx` |
+| exo_tracker overlay height 200→280 for the distance bar | `core/overlay.py` |
+
+### Verified
+- Backend E2E harness (throwaway DB): Log/Sample/Analyse → 1/2/3 + value + required distance; DB persistence; SellOrganicData → summary (base/bonus/first-logged); carried-value logic; SAA → confirmed genera + predictions (top = Stratum Tectonicas, the species actually sampled on that body); haversine sane.
+- Prediction validated against a real body scan (Dryooe Flyou JO-E c26-128 C 2): correctly surfaced Stratum Tectonicas as top candidate.
+- Built exe, swapped install, launched v0.3.65: clean startup, live tail, DB migration applied (value/body_name cols + exo_sales table), all 3 sub-tabs render (screenshots), stale 0/3 rows gone.
+
+### Notes / next session
+- **v0.3.65 is LOCAL ONLY** — tag for CI release once the user confirms in-app, especially the live sample-distance overlay, which could only be code/math-verified this session (needs a planetside sampling run to confirm end-to-end; game was in space).
+- Prediction intentionally ignores star-type/region/pressure constraints (we don't always have parent star/region) — it over-lists rather than hiding real candidates. Confirmed genera from a DSS map are exact; FSS-only bodies show predicted candidates.
+- `exo_sales` only records sales made with EDTC running (no journal backfill) — Earnings starts empty and fills going forward.
+- Carried-unsold value matches completed scans against later sales by species name — approximate (can't tie a specific sample to a specific sale).
+
+### Per-interceptor Thargoid kill awards (v0.3.66)
+
+Added four new Commendations under **Thargoid War**, one per interceptor type,
+because the journal `Statistics` event only carries a single total
+(`TG_ENCOUNTER_KILLED`) with no per-type breakdown.
+
+| Item | File |
+|---|---|
+| `thargoid_kills` table (type → count) + `add_thargoid_kill`/`get_thargoid_kills`/`set_thargoid_kills` | `core/database.py` |
+| `FactionKillBond` added to WATCHED_EVENTS; `_handle_faction_kill_bond` classifies Thargoid bonds by exact reward value and increments the DB, then re-evaluates awards | `main.py`, `core/journal.py` |
+| `_backfill_thargoid_kills` — one-time scan of all journals (pref-guarded), tallies past bonds so awards reflect history; live tail counts new bonds with no overlap | `main.py` |
+| `thargoid_kills` added to `_assemble_award_data` | `main.py` |
+| Four awards: Cyclops Slayer 👁️, Basilisk Bane 🦎, Medusa's End 🪼, Hydra Hunter 🐉 | `core/awards.py` |
+
+**Reward → type mapping (exact-value, CMDR-confirmed against their kill history):**
+`8,000,000 → cyclops · 24,000,000 → basilisk · 40,000,000 → medusa · 60,000,000 → hydra`.
+Deliberately excluded per the CMDR: Hunter (4.5M), pre-adjustment Cyclops (6.5M)
+and Basilisk (20M), scouts (65k–80k), and a stray 1M bond. **These count combat
+bonds (one per heart), not whole-ship kills** — an interceptor drops 3–6 bonds.
+
+**Verified:** backfill on the real DB produced Cyclops 73 / Basilisk 27 / Medusa 57
+/ Hydra 1 (matches a standalone journal tally); awards evaluate to Gold/Gold/Gold/
+Bronze; all four render in the Commendations page (screenshot).
+
+- If Thargoids return with different bond values, `_THARGOID_BOND_TYPE` in main.py
+  needs the new values added (exact-match, so unknown values are ignored, not
+  miscounted).
+
+---
+*Session 44 — 2026-07-11 (v0.3.66 local)*
+
+---
+*Session checkpoint: 2026-07-10 23:24:12*
+
+---
+*Session checkpoint: 2026-07-11 00:31:25*
+
+---
+*Session checkpoint: 2026-07-11 00:32:05*
+
+---
+*Session checkpoint: 2026-07-11 00:36:00*
+
+---
+*Session checkpoint: 2026-07-11 00:42:00*
+
+---
+*Session checkpoint: 2026-07-11 00:45:30*

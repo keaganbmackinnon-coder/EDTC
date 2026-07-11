@@ -91,6 +91,20 @@ CATALOG = [
     {"id": "maelstrom", "name": "Scourge of the Maelstrom", "icon": "🌀", "category": "Thargoid War",
      "desc": "Destroy 1,000 Thargoids", "unit": "count", "style": "legendary",
      "tiers": [1000], "metric": lambda d: _s(d, "TG_ENCOUNTERS", "TG_ENCOUNTER_KILLED")},
+    # Per-interceptor bonds, classified from FactionKillBond reward values.
+    # These count combat bonds (one per heart destroyed), not whole-ship kills.
+    {"id": "cyclops_slayer", "name": "Cyclops Slayer", "icon": "👁️", "category": "Thargoid War",
+     "desc": "Thargoid Cyclops bonds earned", "unit": "count",
+     "tiers": [1, 10, 50, 200], "metric": lambda d: (d.get("thargoid_kills") or {}).get("cyclops", 0)},
+    {"id": "basilisk_slayer", "name": "Basilisk Bane", "icon": "🦎", "category": "Thargoid War",
+     "desc": "Thargoid Basilisk bonds earned", "unit": "count",
+     "tiers": [1, 10, 25, 100], "metric": lambda d: (d.get("thargoid_kills") or {}).get("basilisk", 0)},
+    {"id": "medusa_slayer", "name": "Medusa's End", "icon": "🪼", "category": "Thargoid War",
+     "desc": "Thargoid Medusa bonds earned", "unit": "count",
+     "tiers": [1, 5, 25, 75], "metric": lambda d: (d.get("thargoid_kills") or {}).get("medusa", 0)},
+    {"id": "hydra_slayer", "name": "Hydra Hunter", "icon": "🐉", "category": "Thargoid War",
+     "desc": "Thargoid Hydra bonds earned", "unit": "count",
+     "tiers": [1, 3, 10, 25], "metric": lambda d: (d.get("thargoid_kills") or {}).get("hydra", 0)},
 
     # ---- Trade & Industry ----
     {"id": "merchant", "name": "Merchant Prince", "icon": "📦", "category": "Trade & Industry",

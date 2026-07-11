@@ -412,14 +412,17 @@ function R2RTab({ currentSystem }) {
 }
 
 // ---- Tab: Exobiology ----
+// Three sub-views: Tracker (live sampling + what's on nearby bodies),
+// Value Reference (target-hunting browser), and Earnings (Vista Genomics).
 
-function ExoProgress({ count }) {
+function ExoProgress({ count, size = 3 }) {
+  const cls = size === 3 ? 'w-3 h-3' : 'w-2.5 h-2.5'
   return (
     <div className="flex gap-1">
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className={`w-3 h-3 rounded-full border ${i < count
+          className={`${cls} rounded-full border ${i < count
             ? 'bg-ed-success border-ed-success'
             : 'bg-transparent border-ed-border'
           }`}
@@ -429,30 +432,112 @@ function ExoProgress({ count }) {
   )
 }
 
-function ExobiologyTab() {
+function valueColor(v) {
+  return v >= 10_000_000 ? 'text-ed-gold'
+    : v >= 3_000_000 ? 'text-ed-orange'
+    : 'text-ed-text'
+}
+
+// --- Sub-view: Tracker ---
+
+function DistanceMeter({ dist }) {
+  // dist: { distance, required, clear, species, samples }
+  const pct = dist.required ? Math.min(100, (dist.distance / dist.required) * 100) : 100
+  const remaining = Math.max(0, (dist.required ?? 0) - (dist.distance ?? 0))
+  return (
+    <div className={`rounded border px-3 py-2 ${dist.clear ? 'border-ed-success/50 bg-ed-success/10' : 'border-ed-orange/40 bg-ed-orange/5'}`}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-mono text-ed-text truncate">{dist.species}</span>
+        <span className={`text-xs font-mono font-semibold ${dist.clear ? 'text-ed-success' : 'text-ed-orange'}`}>
+          {dist.clear ? 'Far enough — sample here' : `Move ${Math.round(remaining)} m more`}
+        </span>
+      </div>
+      <div className="h-1.5 rounded-full bg-ed-dark overflow-hidden">
+        <div
+          className={`h-full transition-all ${dist.clear ? 'bg-ed-success' : 'bg-ed-orange'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="text-[10px] text-ed-muted font-mono mt-1">
+        {Math.round(dist.distance)} m from nearest sample · need {dist.required} m · {dist.samples} taken
+      </p>
+    </div>
+  )
+}
+
+function BioSignalCard({ body }) {
+  const [open, setOpen] = useState(false)
+  const preds = body.predictions ?? []
+  const topValue = preds.reduce((m, p) => Math.max(m, p.value ?? 0), 0)
+  return (
+    <div className="panel">
+      <button className="w-full flex items-center justify-between gap-3 text-left" onClick={() => setOpen(o => !o)}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-ed-text font-ui font-semibold truncate">{body.body}</span>
+          <span className="text-xs font-mono text-green-400 border border-green-500/30 px-1 rounded shrink-0">
+            {body.count} signal{body.count === 1 ? '' : 's'}
+          </span>
+          <span className={`text-[10px] font-mono px-1 rounded border shrink-0 ${body.confirmed ? 'border-ed-success/40 text-ed-success' : 'border-ed-orange/40 text-ed-orange'}`}>
+            {body.confirmed ? 'DSS confirmed' : 'predicted'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {topValue > 0 && <span className={`text-xs font-mono ${valueColor(topValue)}`}>up to {fmtCredits(topValue)}</span>}
+          <span className="text-ed-muted text-xs">{open ? '▲' : '▼'}</span>
+        </div>
+      </button>
+
+      {body.confirmed && body.genera?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {body.genera.map(g => <Tag key={g} label={g} color="border-ed-success/40 text-ed-success" />)}
+        </div>
+      )}
+
+      {open && (
+        <div className="mt-3 border-t border-ed-border pt-2 space-y-1">
+          {preds.length === 0 ? (
+            <p className="text-ed-muted text-xs font-mono">
+              {body.confirmed ? 'No value data for these genera.' : 'Map this body (DSS) to confirm species, or scan it in detail for a prediction.'}
+            </p>
+          ) : preds.map((p, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-green-400 shrink-0">●</span>
+              <span className="text-ed-text flex-1 truncate">{p.name}</span>
+              <span className="text-ed-muted shrink-0">{p.colony_distance} m</span>
+              <span className={`shrink-0 font-semibold ${valueColor(p.value)}`}>{fmtCredits(p.value)}</span>
+            </div>
+          ))}
+          {!body.confirmed && preds.length > 0 && (
+            <p className="text-[10px] text-ed-muted font-mono pt-1">
+              Candidates from body conditions — actual species confirmed after a DSS map.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TrackerView({ currentSystem }) {
   const [scans, setScans] = useState([])
+  const [bodies, setBodies] = useState([])
+  const [dist, setDist] = useState(null)
+  const [carried, setCarried] = useState(null)
 
   const reload = useCallback(() => {
-    // false = include all (completed + in-progress)
-    api()?.get_exo_scans().then(inProgress => {
-      api()?.get_exo_scans(null).then(all => {
-        // get_exo_scans() with no arg returns incomplete only; we want all
-        // but API only takes system param — call with undefined to get all incomplete
-        // For history we'd need to modify the API. Use in-progress for now.
-        setScans(inProgress ?? [])
-      })
-    })
-    // Actually just call it once — get_exo_scans with no system returns incomplete
     api()?.get_exo_scans().then(r => setScans(r ?? []))
+    api()?.get_body_bio().then(r => setBodies(r ?? []))
+    api()?.get_exo_carried_value().then(r => setCarried(r ?? null))
   }, [])
 
-  useEffect(() => {
-    reload()
-  }, [reload])
+  useEffect(() => { reload() }, [reload, currentSystem])
 
   useEffect(() => {
-    const off = window.__edtc?.on('exo_scan', () => reload())
-    return () => off?.()
+    const offScan = window.__edtc?.on('exo_scan', () => reload())
+    const offBio = window.__edtc?.on('bio_signals', () => reload())
+    const offSale = window.__edtc?.on('exo_sale', () => reload())
+    const offDist = window.__edtc?.on('exo_distance', p => setDist(p))
+    return () => { offScan?.(); offBio?.(); offSale?.(); offDist?.() }
   }, [reload])
 
   async function clearSystem(system) {
@@ -460,62 +545,308 @@ function ExobiologyTab() {
     reload()
   }
 
-  // Group by system
+  // Only show genuinely-started species (>=1 sample). Pre-fix rows were stored
+  // at 0/3 because the old code never incremented — hide that stale noise.
   const grouped = {}
   for (const s of scans) {
+    if ((s.scan_count ?? 0) < 1) continue
     if (!grouped[s.system]) grouped[s.system] = []
     grouped[s.system].push(s)
   }
   const systems = Object.entries(grouped)
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-ed-muted text-sm">
-          In-progress scans (3 samples needed per species). Synced live from journal.
-        </p>
-        <button className="btn-ghost text-sm" onClick={reload}>Refresh</button>
+    <div className="space-y-4">
+      {/* Live distance helper */}
+      {dist && (
+        <div>
+          <p className="text-ed-muted text-xs font-mono uppercase tracking-wide mb-1.5">Clonal colony distance</p>
+          <DistanceMeter dist={dist} />
+        </div>
+      )}
+
+      {/* Carried unsold value */}
+      {carried && carried.count > 0 && (
+        <div className="panel flex items-center justify-between">
+          <div>
+            <p className="text-ed-text text-sm font-semibold">Unsold data aboard</p>
+            <p className="text-ed-muted text-xs font-mono">{carried.count} species · sell at Vista Genomics</p>
+          </div>
+          <p className="text-ed-gold font-mono font-semibold">{fmtCredits(carried.total)}</p>
+        </div>
+      )}
+
+      {/* Bio signals on nearby bodies */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-ed-text font-ui font-semibold text-sm">
+            Bio signals {currentSystem && <span className="text-ed-orange">· {currentSystem}</span>}
+          </p>
+          <button className="btn-ghost text-xs" onClick={reload}>Refresh</button>
+        </div>
+        {bodies.length === 0 ? (
+          <EmptyState message="No biological signals detected yet. FSS or DSS-map bodies in this system to populate this." />
+        ) : (
+          <div className="space-y-1">
+            {[...bodies].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).map((b, i) => (
+              <BioSignalCard key={b.body_id ?? i} body={b} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {systems.length === 0 ? (
-        <EmptyState message="No active exo scans. Start scanning organisms in-game with EDTC running." />
-      ) : (
-        <div className="space-y-3">
-          {systems.map(([system, entries]) => (
-            <div key={system} className="panel">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-ed-orange font-semibold font-ui">{system}</p>
-                <button
-                  className="btn-ghost text-xs text-ed-muted"
-                  onClick={() => clearSystem(system)}
-                >
-                  Clear System
-                </button>
-              </div>
-              <div className="space-y-2">
-                {entries.map(e => (
-                  <div key={`${e.body}-${e.species}`} className="flex items-center gap-3">
-                    <ExoProgress count={e.scan_count} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-ed-text text-sm font-mono truncate">{e.species}</p>
-                      {e.genus && e.genus !== e.species && (
-                        <p className="text-ed-muted text-xs font-mono">
-                          {e.genus} · Body {e.body}
-                        </p>
-                      )}
+      {/* In-progress sampling */}
+      <div>
+        <p className="text-ed-text font-ui font-semibold text-sm mb-2">Sampling progress</p>
+        <p className="text-ed-muted text-xs mb-2">Each species needs 3 samples (Log → Sample → Analyse), taken at least the colony distance apart.</p>
+        {systems.length === 0 ? (
+          <EmptyState message="No sampling in progress. Use the Genetic Sampler on organisms in-game." />
+        ) : (
+          <div className="space-y-3">
+            {systems.map(([system, entries]) => (
+              <div key={system} className="panel">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-ed-orange font-semibold font-ui">{system}</p>
+                  <button className="btn-ghost text-xs text-ed-muted" onClick={() => clearSystem(system)}>Clear</button>
+                </div>
+                <div className="space-y-2">
+                  {entries.map(e => (
+                    <div key={`${e.body}-${e.species}`} className="flex items-center gap-3">
+                      <ExoProgress count={e.scan_count} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-ed-text text-sm font-mono truncate">{e.species}</p>
+                        {e.genus && e.genus !== e.species && (
+                          <p className="text-ed-muted text-xs font-mono">{e.genus} · Body {e.body}</p>
+                        )}
+                      </div>
+                      {e.value > 0 && <span className={`text-xs font-mono shrink-0 ${valueColor(e.value)}`}>{fmtCredits(e.value)}</span>}
+                      <span className={`text-xs font-mono shrink-0 w-8 text-right ${e.scan_count >= 3 ? 'text-ed-success' : 'text-ed-muted'}`}>{e.scan_count}/3</span>
                     </div>
-                    <span className={`text-xs font-mono shrink-0 ${
-                      e.scan_count >= 3 ? 'text-ed-success' : 'text-ed-muted'
-                    }`}>
-                      {e.scan_count}/3
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// --- Sub-view: Value Reference (target hunting) ---
+
+const ATMOS_SHORT = {
+  CarbonDioxide: 'CO₂', CarbonDioxideRich: 'CO₂-rich', SulphurDioxide: 'SO₂',
+  Ammonia: 'NH₃', Water: 'H₂O', WaterRich: 'H₂O-rich', Methane: 'CH₄',
+  MethaneRich: 'CH₄-rich', Nitrogen: 'N₂', Oxygen: 'O₂', Argon: 'Ar',
+  ArgonRich: 'Ar-rich', Neon: 'Ne', NeonRich: 'Ne-rich', Helium: 'He',
+}
+
+function genusSummary(g) {
+  const atmos = new Set(), bodies = new Set()
+  let gmax = 0, tmin = Infinity, tmax = 0
+  for (const sp of g.species ?? []) {
+    for (const rs of sp.conditions ?? []) {
+      (rs.atmosphere ?? []).forEach(a => atmos.add(ATMOS_SHORT[a] ?? a))
+      ;(rs.body_type ?? []).forEach(b => bodies.add(b.replace(' body', '')))
+      if (rs.max_gravity) gmax = Math.max(gmax, rs.max_gravity)
+      if (rs.min_temperature) tmin = Math.min(tmin, rs.min_temperature)
+      if (rs.max_temperature) tmax = Math.max(tmax, rs.max_temperature)
+    }
+  }
+  return {
+    atmos: [...atmos], bodies: [...bodies],
+    gmax: gmax || null,
+    temp: tmin !== Infinity ? [Math.round(tmin), Math.round(tmax)] : null,
+  }
+}
+
+function GenusCard({ genus }) {
+  const [open, setOpen] = useState(false)
+  const s = genusSummary(genus)
+  const species = [...(genus.species ?? [])].sort((a, b) => b.value - a.value)
+  return (
+    <div className="panel">
+      <button className="w-full flex items-center justify-between gap-3 text-left" onClick={() => setOpen(o => !o)}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-ed-orange font-ui font-semibold">{genus.name}</span>
+          <span className="text-[10px] font-mono text-ed-muted border border-ed-border px-1 rounded shrink-0">{genus.colony_distance} m apart</span>
+          <span className="text-ed-muted text-xs font-mono">{genus.species?.length} species</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={`text-xs font-mono font-semibold ${valueColor(genus.max_value)}`}>
+            {fmtCredits(genus.min_value)}–{fmtCredits(genus.max_value)}
+          </span>
+          <span className="text-ed-muted text-xs">{open ? '▲' : '▼'}</span>
+        </div>
+      </button>
+
+      <div className="flex flex-wrap gap-1 mt-2">
+        {s.bodies.map(b => <Tag key={b} label={b} />)}
+        {s.atmos.slice(0, 6).map(a => <Tag key={a} label={a} color="border-blue-500/30 text-blue-300" />)}
+        {s.gmax && <Tag label={`≤${s.gmax.toFixed(2)}g`} color="border-ed-border text-ed-muted" />}
+        {s.temp && <Tag label={`${s.temp[0]}–${s.temp[1]}K`} color="border-ed-border text-ed-muted" />}
+      </div>
+
+      {open && (
+        <div className="mt-3 border-t border-ed-border pt-2 space-y-1">
+          {species.map((sp, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-ed-text flex-1 truncate">{sp.name}</span>
+              <span className={`shrink-0 font-semibold ${valueColor(sp.value)}`}>{fmtCredits(sp.value)}</span>
             </div>
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function ReferenceView() {
+  const [data, setData] = useState([])
+  const [query, setQuery] = useState('')
+  const [sortBy, setSortBy] = useState('value')
+
+  useEffect(() => {
+    api()?.get_exobiology_data().then(r => setData(r ?? []))
+  }, [])
+
+  const q = query.trim().toLowerCase()
+  let genera = data.filter(g =>
+    !q || g.name.toLowerCase().includes(q) ||
+    (g.species ?? []).some(sp => sp.name.toLowerCase().includes(q)))
+  if (sortBy === 'value') genera = [...genera].sort((a, b) => b.max_value - a.max_value)
+  else if (sortBy === 'name') genera = [...genera].sort((a, b) => a.name.localeCompare(b.name))
+  else if (sortBy === 'distance') genera = [...genera].sort((a, b) => a.colony_distance - b.colony_distance)
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-3">
+        Base Vista Genomics values. <span className="text-ed-text">First Logged</span> (first CMDR to sample a species) pays <span className="text-ed-gold">5×</span>. Sample colonies at least the listed distance apart.
+      </p>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          className="input font-mono text-sm flex-1 min-w-[180px]"
+          placeholder="Search genus or species…"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        <div className="flex gap-1">
+          {[['value', 'Value'], ['name', 'Name'], ['distance', 'Distance']].map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => setSortBy(id)}
+              className={`text-xs font-mono px-2 py-1 rounded border transition-colors ${sortBy === id ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
+            >{label}</button>
+          ))}
+        </div>
+      </div>
+      {genera.length === 0 ? (
+        <EmptyState message="No genera match your search." />
+      ) : (
+        <div className="space-y-1">
+          {genera.map(g => <GenusCard key={g.id} genus={g} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// --- Sub-view: Earnings (Vista Genomics) ---
+
+function StatTile({ label, value, sub, color = 'text-ed-text' }) {
+  return (
+    <div className="panel">
+      <p className="text-ed-muted text-xs font-mono">{label}</p>
+      <p className={`font-mono font-semibold text-lg ${color}`}>{value}</p>
+      {sub && <p className="text-ed-muted text-[10px] font-mono">{sub}</p>}
+    </div>
+  )
+}
+
+function EarningsView() {
+  const [summary, setSummary] = useState(null)
+  const [sales, setSales] = useState([])
+  const [carried, setCarried] = useState(null)
+
+  const reload = useCallback(() => {
+    api()?.get_exo_sales_summary().then(r => setSummary(r ?? null))
+    api()?.get_exo_sales(200).then(r => setSales(r ?? []))
+    api()?.get_exo_carried_value().then(r => setCarried(r ?? null))
+  }, [])
+
+  useEffect(() => { reload() }, [reload])
+  useEffect(() => {
+    const off = window.__edtc?.on('exo_sale', () => reload())
+    return () => off?.()
+  }, [reload])
+
+  const total = summary ? (summary.base ?? 0) + (summary.bonus ?? 0) : 0
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <StatTile label="Total earned" value={fmtCredits(total)} color="text-ed-gold" sub="base + first-logged" />
+        <StatTile label="Samples sold" value={summary?.samples ?? 0} sub={`${summary?.species ?? 0} species`} />
+        <StatTile label="First Logged" value={summary?.first_logged ?? 0} color="text-ed-orange" sub={fmtCredits(summary?.bonus ?? 0) + ' bonus'} />
+        <StatTile label="Carrying (unsold)" value={fmtCredits(carried?.total ?? 0)} color="text-ed-text" sub={`${carried?.count ?? 0} species`} />
+      </div>
+
+      <div>
+        <p className="text-ed-text font-ui font-semibold text-sm mb-2">Recent sales</p>
+        {sales.length === 0 ? (
+          <EmptyState message="No Vista Genomics sales recorded yet. Sell exobiology data with EDTC running." />
+        ) : (
+          <div className="space-y-1">
+            {sales.map((s, i) => (
+              <div key={s.id ?? i} className="panel py-2 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-ed-text text-sm font-mono truncate">{s.species}</p>
+                  <p className="text-ed-muted text-[10px] font-mono truncate">
+                    {s.genus}{s.system ? ` · ${s.system}` : ''}{s.ts ? ` · ${s.ts.slice(0, 10)}` : ''}
+                  </p>
+                </div>
+                {s.bonus > 0 && (
+                  <span className="text-[10px] font-mono text-ed-orange border border-ed-orange/40 px-1 rounded shrink-0">
+                    +{fmtCredits(s.bonus)} first
+                  </span>
+                )}
+                <span className={`text-sm font-mono font-semibold shrink-0 ${valueColor(s.value + s.bonus)}`}>
+                  {fmtCredits(s.value + s.bonus)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// --- Exobiology tab shell ---
+
+const EXO_SUBTABS = [
+  { id: 'tracker', label: 'Tracker' },
+  { id: 'reference', label: 'Value Reference' },
+  { id: 'earnings', label: 'Earnings' },
+]
+
+function ExobiologyTab({ currentSystem }) {
+  const [sub, setSub] = useState('tracker')
+  return (
+    <div>
+      <div className="flex gap-1 mb-4">
+        {EXO_SUBTABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setSub(t.id)}
+            className={`text-xs font-mono px-3 py-1.5 rounded border transition-colors ${sub === t.id ? 'border-ed-orange text-ed-orange bg-ed-orange/5' : 'border-ed-border text-ed-muted hover:border-ed-orange/50'}`}
+          >{t.label}</button>
+        ))}
+      </div>
+      {sub === 'tracker' && <TrackerView currentSystem={currentSystem} />}
+      {sub === 'reference' && <ReferenceView />}
+      {sub === 'earnings' && <EarningsView />}
     </div>
   )
 }
@@ -896,7 +1227,7 @@ export default function Exploration() {
       {tab === 'system'      && <SystemLookupTab currentSystem={currentSystem} />}
       {tab === 'r2r'         && <R2RTab currentSystem={currentSystem} />}
       {tab === 'exo-planner' && <ExoPlannerTab currentSystem={currentSystem} />}
-      {tab === 'exo'         && <ExobiologyTab />}
+      {tab === 'exo'         && <ExobiologyTab currentSystem={currentSystem} />}
       {tab === 'scanner'     && <SessionScannerTab currentSystem={currentSystem} />}
     </div>
   )
