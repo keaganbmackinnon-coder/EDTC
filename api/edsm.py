@@ -104,6 +104,11 @@ class EdsmAPI(BaseAPI):
             for b in bodies
         ]
 
+    async def get_bodies_raw(self, system_name: str) -> dict:
+        """Raw bodies payload — includes per-body discovery {commander, date}
+        and updateTime, which the Body dataclass drops."""
+        return await self.get("/api-system-v1/bodies", {"systemName": system_name}) or {}
+
     # --- Commander ---
 
     async def get_commander(self, cmdr_name: str) -> dict | None:

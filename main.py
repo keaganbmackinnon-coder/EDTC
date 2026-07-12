@@ -325,6 +325,8 @@ class API:
             self._handle_nav_route_clear()
         elif event_name == "FSDTarget":
             self._handle_fsd_target(event)
+        elif event_name == "StartJump":
+            self._handle_start_jump(event)
         elif event_name == "CarrierLocation":
             self._handle_carrier_location(event)
         elif event_name == "Loadout":
@@ -719,7 +721,9 @@ class API:
         if not systems:
             return
         star_classes = [s.get("StarClass", "") for s in raw if "StarSystem" in s]
-        route = {"systems": systems, "star_classes": star_classes, "current": 0,
+        coords = [s.get("StarPos") for s in raw if "StarSystem" in s]
+        route = {"systems": systems, "star_classes": star_classes,
+                 "coords": coords if all(coords) else None, "current": 0,
                  "name": f"In-game route → {systems[-1]}"}
         from core.database import save_route
         save_route(route)
@@ -747,6 +751,45 @@ class API:
 
     # Fuel-scoopable main-sequence classes (exact match — "TTS"/"AEBE" etc are not)
     _SCOOPABLE_CLASSES = {"K", "G", "B", "F", "O", "A", "M"}
+
+    def _handle_start_jump(self, event: dict):
+        """StartJump (Hyperspace) fires as the FSD charges — push the target
+        system + star class to the route overlay immediately, then enrich with
+        EDSM discovery/traffic/bodies in the background (SrvSurvey-style)."""
+        if event.get("JumpType") != "Hyperspace":
+            return
+        payload = {
+            "system": event.get("StarSystem", ""),
+            "star_class": (event.get("StarClass") or "").upper(),
+        }
+        self._overlay_manager.emit_to_overlay("route", "jump_info", payload)
+        self._emit("jump_info", payload)
+        threading.Thread(target=self._enrich_jump_info, args=(payload,), daemon=True).start()
+
+    def _enrich_jump_info(self, base: dict):
+        info = dict(base)
+        system = base["system"]
+        try:
+            data = self._edsm_run(lambda e: e.get_bodies_raw(system)) or {}
+            bodies = data.get("bodies") or []
+            info["known_to_edsm"] = bool(bodies)
+            if bodies:
+                info["body_count"] = len(bodies)
+                star = next((b for b in bodies if b.get("isMainStar")), bodies[0])
+                disc = star.get("discovery") or {}
+                info["discovered_by"] = disc.get("commander")
+                info["discovered_date"] = (disc.get("date") or "")[:10]
+                info["updated"] = (star.get("updateTime") or "")[:10]
+        except Exception:
+            pass
+        try:
+            tr = (self._edsm_run(lambda e: e.get_traffic(system)) or {}).get("traffic") or {}
+            info["traffic"] = {"day": tr.get("day", 0), "week": tr.get("week", 0),
+                               "total": tr.get("total", 0)}
+        except Exception:
+            pass
+        self._overlay_manager.emit_to_overlay("route", "jump_info", info)
+        self._emit("jump_info", info)
 
     def _handle_fsd_target(self, event: dict):
         """FSDTarget fires when the next jump is locked in — carries the target

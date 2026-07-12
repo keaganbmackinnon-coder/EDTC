@@ -26,7 +26,7 @@ WATCHED_EVENTS = {
     "Powerplay", "NavRoute", "NavRouteClear", "Loadout",
     "Market", "Cargo", "FSDTarget", "CarrierLocation",
     "ProspectedAsteroid", "AsteroidCracked", "PowerplayMerits",
-    "ApproachBody", "Touchdown", "Liftoff", "LeaveBody",
+    "ApproachBody", "Touchdown", "Liftoff", "LeaveBody", "StartJump",
 }
 
 
