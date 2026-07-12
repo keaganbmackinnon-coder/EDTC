@@ -326,17 +326,35 @@ function fmtPct(modifier) {
   return (r > 0 ? '+' : '') + r + '%'
 }
 
-function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
+// module group_name → blueprint applies_to type, where the names differ
+const BP_TYPE = {
+  'Bi-Weave Shield Generator': 'Shield Generator',
+  'Prismatic Shield Generator': 'Shield Generator',
+  'Frame Shift Wake Scanner': 'Wake Scanner',
+  'Detailed Surface Scanner': 'Surface Scanner',
+  'Advanced Multi-Cannon': 'Multi-cannon',
+  'Advanced Missile Rack': 'Missile Rack',
+}
+
+function EngineerEditor({ slot, fitted, module, blueprints, onSave, onClose }) {
   const eng = fitted?.engineering || {}
   const [bp, setBp] = useState(eng.blueprint || '')
   const [grade, setGrade] = useState(eng.grade || 5)
   const [exp, setExp] = useState(eng.experimental || '')
   const [q, setQ] = useState('')
+  const [showAll, setShowAll] = useState(false)
   const imported = !!eng.modifiers
+  // blueprints that apply to the fitted module's type
+  const applicable = useMemo(() => {
+    const target = BP_TYPE[module?.group_name] ?? module?.group_name
+    if (!target) return []
+    return (blueprints || []).filter(b => (b.applies_to || []).includes(target))
+  }, [blueprints, module])
   const list = useMemo(() => {
+    const pool = (showAll || applicable.length === 0) ? (blueprints || []) : applicable
     const s = q.trim().toLowerCase()
-    return (blueprints || []).filter(b => !s || (b.name || '').toLowerCase().includes(s)).slice(0, 60)
-  }, [blueprints, q])
+    return pool.filter(b => !s || (b.name || '').toLowerCase().includes(s)).slice(0, 60)
+  }, [blueprints, applicable, showAll, q])
   const selected = blueprints?.find(b => b.id === bp)
   // grades this blueprint actually has (many are single-grade)
   const availGrades = useMemo(() => (
@@ -373,6 +391,23 @@ function EngineerEditor({ slot, fitted, blueprints, onSave, onClose }) {
         </div>
       )}
       <input className="input font-mono text-sm mb-2" placeholder="Search blueprints…" value={q} onChange={e => setQ(e.target.value)} />
+      {applicable.length > 0 && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <button onClick={() => setShowAll(false)}
+            className={`badge border px-2 py-1 ${!showAll ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted'}`}>
+            {module?.group_name || 'This module'} ({applicable.length})
+          </button>
+          <button onClick={() => setShowAll(true)}
+            className={`badge border px-2 py-1 ${showAll ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted'}`}>
+            All blueprints
+          </button>
+        </div>
+      )}
+      {applicable.length === 0 && module && (
+        <div className="text-[11px] text-ed-muted mb-2">
+          No blueprints apply to {module.group_name} — this module can't be engineered (showing all).
+        </div>
+      )}
       <div className="overflow-y-auto flex-1 space-y-1 pr-1 min-h-0">
         <button onClick={() => setBp('')} className={`w-full text-left px-3 py-1.5 rounded border text-sm ${!bp ? 'border-ed-orange text-ed-orange' : 'border-ed-border text-ed-muted'}`}>
           — No blueprint —
@@ -760,7 +795,7 @@ export default function Builder() {
                 ? <BulkheadPicker ship={ship} current={build.bulkhead_index ?? 0}
                     onPick={i => { setBuild(b => ({ ...b, bulkhead_index: i })); setDrawer(null) }}
                     onClose={() => setDrawer(null)} />
-                : <EngineerEditor slot={{ label: 'Bulkheads' }}
+                : <EngineerEditor slot={{ label: 'Bulkheads' }} module={{ group_name: 'Armour' }}
                     fitted={{ engineering: build.bulkhead_engineering }} blueprints={blueprints}
                     onSave={eng => { setBuild(b => ({ ...b, bulkhead_engineering: eng })); setDrawer(null) }}
                     onClose={() => setDrawer(null)} />}
@@ -770,7 +805,8 @@ export default function Builder() {
               {drawer.mode === 'module'
                 ? <ModulePicker slot={drawerSlot} modules={modules}
                     onPick={m => pickModule(drawerSlot, m)} onClose={() => setDrawer(null)} />
-                : <EngineerEditor slot={drawerSlot} fitted={build.slots?.[drawer.slotKey]} blueprints={blueprints}
+                : <EngineerEditor slot={drawerSlot} fitted={build.slots?.[drawer.slotKey]}
+                    module={moduleBySymbol(build.slots?.[drawer.slotKey]?.symbol)} blueprints={blueprints}
                     onSave={eng => saveEngineering(drawer.slotKey, eng)} onClose={() => setDrawer(null)} />}
             </div>
           ) : (

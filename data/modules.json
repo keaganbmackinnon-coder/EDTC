@@ -46,7 +46,7 @@
     "fx": "Fuel Transfer Limpet Controller",
     "pc": "Prospector Limpet Controller",
     "hb": "Hatch Breaker Limpet Controller",
-    "rpl": "Recon Limpet Controller",
+    "rpl": "Repair Limpet Controller",
     "rsl": "Research Limpet Controller",
     "dtc": "Decontamination Limpet Controller",
     "mrl": "Multi Limpet Controller",
@@ -65,12 +65,12 @@
     "rfl": "Remote Release Flak Launcher",
     "axmc": "AX Multi-cannon",
     "axmr": "AX Missile Rack",
-    "rcpl": "Retributor Beam Laser",
+    "rcpl": "Recon Limpet Controller",
     "gc": "Guardian Gauss Cannon",
     "gpc": "Guardian Plasma Charger",
     "gsc": "Guardian Shard Cannon",
     "scan": "Pulse Wave Analyser",
-    "sfn": "Shock Cannon",
+    "sfn": "Shutdown Field Neutraliser",
     "ch": "Chaff Launcher",
     "hs": "Heat Sink Launcher",
     "po": "Point Defence",
@@ -78,35 +78,36 @@
     "sb": "Shield Booster",
     "kw": "Kill Warrant Scanner",
     "cs": "Manifest Scanner",
-    "ss": "Frame Shift Wake Scanner",
+    "ss": "Detailed Surface Scanner",
     "xs": "Xeno Scanner",
-    "pwa": "Pulse Wave Xeno Scanner",
+    "pwa": "Pulse Wave Analyser",
     "csl": "Caustic Sink Launcher",
-    "tbrp": "Shutdown Field Neutraliser"
+    "tbrp": "Shutdown Field Neutraliser",
+    "amr": "Advanced Missile Rack",
+    "ml": "Mining Laser",
+    "mvr": "Mining Volley Repeater",
+    "abl": "Abrasion Blaster",
+    "advmc": "Advanced Multi-Cannon",
+    "axmce": "Enhanced AX Multi-Cannon",
+    "axmre": "Enhanced AX Missile Rack",
+    "tbem": "Enzyme Missile Rack",
+    "ggc": "Guardian Gauss Cannon",
+    "ntp": "Nanite Torpedo Pylon",
+    "tbrfl": "Remote Release Flechette Launcher",
+    "scl": "Seismic Charge Launcher",
+    "tbsc": "Shock Cannon",
+    "sdm": "Sub-Surface Displacement Missile",
+    "ws": "Frame Shift Wake Scanner",
+    "crl": "Large Cargo Rack",
+    "dtl": "Decontamination Limpet Controller",
+    "ews": "Experimental Weapon Stabiliser",
+    "fi": "Frame Shift Drive Interdictor",
+    "mlc": "Multi Limpet Controller",
+    "pas": "Planetary Approach Suite"
   },
   "modules": {
     "core": {
       "fsd": [
-        {
-          "class": 0,
-          "cost": 0,
-          "fuelmul": 0,
-          "fuelpower": 0,
-          "grp": "fsd",
-          "id": "4P",
-          "name": "Unrecognised Frame Shift Drive",
-          "integrity": 0,
-          "mass": 0,
-          "maxfuel": 0,
-          "optmass": 0,
-          "power": 0,
-          "rating": "Z",
-          "symbol": "Int_Missing_Hyperdrive",
-          "ukName": "Unrecognised Frame Shift Drive",
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (Unrecognised Frame Shift Drive)"
-        },
         {
           "class": 2,
           "cost": 160224,
@@ -145,37 +146,6 @@
           "family": "core",
           "group_name": "Frame Shift Drive",
           "display": "Frame Shift Drive (Frame Shift Drive (SCO))"
-        },
-        {
-          "class": 2,
-          "boot": 2,
-          "fuelmul": 0.013,
-          "fuelpower": 2.0,
-          "grp": "fsd",
-          "id": "5U",
-          "name": "FSD (SCO) PreEng (V1)",
-          "integrity": 64,
-          "mass": 2.5,
-          "maxfuel": 1,
-          "optmass": 100,
-          "power": 0.3,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size2_Class5",
-          "ukName": "Frame Shift Drive (SCO) V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD (SCO) PreEng (V1))"
         },
         {
           "class": 2,
@@ -374,37 +344,6 @@
         },
         {
           "class": 3,
-          "boot": 2,
-          "fuelmul": 0.013,
-          "fuelpower": 2.15,
-          "grp": "fsd",
-          "id": "5T",
-          "name": "FSD (SCO) PreEng (V1)",
-          "integrity": 80,
-          "mass": 5,
-          "maxfuel": 1.9,
-          "optmass": 167,
-          "power": 0.45,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size3_Class5",
-          "ukName": "Frame Shift Drive (SCO) V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD (SCO) PreEng (V1))"
-        },
-        {
-          "class": 3,
           "cost": 169304,
           "fuelmul": 0.01,
           "fuelpower": 2.15,
@@ -600,37 +539,6 @@
         },
         {
           "class": 4,
-          "boot": 2,
-          "fuelmul": 0.013,
-          "fuelpower": 2.3,
-          "grp": "fsd",
-          "id": "5S",
-          "name": "FSD (SCO) PreEng (V1)",
-          "integrity": 100,
-          "mass": 10,
-          "maxfuel": 3.2,
-          "optmass": 585,
-          "power": 0.45,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size4_Class5",
-          "ukName": "Frame Shift Drive (SCO) V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD (SCO) PreEng (V1))"
-        },
-        {
-          "class": 4,
           "cost": 536693,
           "fuelmul": 0.01,
           "fuelpower": 2.3,
@@ -806,37 +714,6 @@
         },
         {
           "class": 5,
-          "cost": 0,
-          "fuelmul": 0.012,
-          "fuelpower": 2.45,
-          "grp": "fsd",
-          "id": "5O",
-          "integrity": 120,
-          "mass": 20,
-          "maxfuel": 5,
-          "optmass": 1050,
-          "power": 0.6,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Size5_Class5",
-          "ukName": "V1 Frame Shift Drive",
-          "name": "FSD PreEng (V1)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD PreEng (V1))"
-        },
-        {
-          "class": 5,
           "cost": 6124743,
           "fuelmul": 0.013,
           "fuelpower": 2.45,
@@ -854,37 +731,6 @@
           "family": "core",
           "group_name": "Frame Shift Drive",
           "display": "Frame Shift Drive (Frame Shift Drive (SCO))"
-        },
-        {
-          "class": 5,
-          "boot": 2,
-          "fuelmul": 0.012,
-          "fuelpower": 2.45,
-          "grp": "fsd",
-          "id": "5R",
-          "name": "FSD (SCO) PreEng (V1)",
-          "integrity": 120,
-          "mass": 20,
-          "maxfuel": 5.2,
-          "optmass": 1175,
-          "power": 0.6,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size5_Class5",
-          "ukName": "Frame Shift Drive (SCO) V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD (SCO) PreEng (V1))"
         },
         {
           "class": 5,
@@ -1083,37 +929,6 @@
         },
         {
           "class": 6,
-          "boot": 2,
-          "fuelmul": 0.013,
-          "fuelpower": 2.6,
-          "grp": "fsd",
-          "id": "5Q",
-          "name": "FSD (SCO) PreEng (V1)",
-          "integrity": 141,
-          "mass": 40,
-          "maxfuel": 8.3,
-          "optmass": 2000,
-          "power": 0.75,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size6_Class5",
-          "ukName": "Frame Shift Drive (SCO) V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (FSD (SCO) PreEng (V1))"
-        },
-        {
-          "class": 6,
           "cost": 5393177,
           "fuelmul": 0.01,
           "fuelpower": 2.6,
@@ -1306,37 +1121,6 @@
           "family": "core",
           "group_name": "Frame Shift Drive",
           "display": "Frame Shift Drive (Frame Shift Drive (SCO))"
-        },
-        {
-          "class": 7,
-          "boot": 2,
-          "fuelmul": 0.013,
-          "fuelpower": 2.75,
-          "grp": "fsd",
-          "id": "5P",
-          "name": "V1 Frame Shift Drive (SCO)",
-          "integrity": 164,
-          "mass": 80,
-          "maxfuel": 13.1,
-          "optmass": 3000,
-          "power": 0.9,
-          "rating": "A",
-          "symbol": "Int_Hyperdrive_Overcharge_Size7_Class5",
-          "ukName": "V1 Frame Shift Drive (SCO)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "FSD_LongRange",
-              "FSD_FastBoot"
-            ],
-            "grade": 5,
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Increased Range and Faster Boot Sequence modifications."
-          },
-          "family": "core",
-          "group_name": "Frame Shift Drive",
-          "display": "Frame Shift Drive (V1 Frame Shift Drive (SCO))"
         },
         {
           "class": 7,
@@ -1633,21 +1417,6 @@
           "display": "Fuel Tank"
         },
         {
-          "class": 1,
-          "cost": 0,
-          "fuel": 0,
-          "mass": 0,
-          "grp": "ft",
-          "id": "4M",
-          "rating": "Z",
-          "symbol": "Int_Missing_FuelTank",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "ukName": "Unrecognised Fuel Tank",
-          "family": "core",
-          "group_name": "Fuel Tank",
-          "display": "Fuel Tank"
-        },
-        {
           "class": 2,
           "cost": 3750,
           "fuel": 4,
@@ -1747,24 +1516,6 @@
         }
       ],
       "ls": [
-        {
-          "boot": 0,
-          "class": 0,
-          "cost": 0,
-          "grp": "ls",
-          "id": "4O",
-          "integrity": 0,
-          "mass": 0,
-          "power": 0,
-          "rating": "Z",
-          "time": 0,
-          "symbol": "Int_Missing_LifeSupport",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "ukName": "Unrecognised Life Support",
-          "family": "core",
-          "group_name": "Life Support",
-          "display": "Life Support"
-        },
         {
           "boot": 1,
           "class": 1,
@@ -2447,29 +2198,6 @@
         }
       ],
       "pd": [
-        {
-          "class": 0,
-          "cost": 0,
-          "engcap": 0,
-          "engrate": 0,
-          "grp": "pd",
-          "id": "4N",
-          "integrity": 0,
-          "mass": 0,
-          "power": 0,
-          "rating": "Z",
-          "syscap": 0,
-          "sysrate": 0,
-          "wepcap": 0,
-          "weprate": 0,
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "name": "Unrecognised Power Distributor",
-          "symbol": "Int_Missing_PowerDistributor",
-          "ukName": "Unrecognised Power Distributor",
-          "family": "core",
-          "group_name": "Power Distributor",
-          "display": "Power Distributor (Unrecognised Power Distributor)"
-        },
         {
           "class": 1,
           "cost": 20195,
@@ -3489,24 +3217,6 @@
       ],
       "pp": [
         {
-          "class": 0,
-          "cost": 0,
-          "eff": 0,
-          "grp": "pp",
-          "id": "4K",
-          "integrity": 0,
-          "mass": 0,
-          "pgen": 0,
-          "rating": "Z",
-          "name": "Unrecognised Power Plant",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "symbol": "Int_Missing_Powerplant",
-          "ukName": "Unrecognised Power Plant",
-          "family": "core",
-          "group_name": "Power Plant",
-          "display": "Power Plant (Unrecognised Power Plant)"
-        },
-        {
           "class": 2,
           "cost": 160137,
           "eff": 0.4,
@@ -4273,24 +3983,6 @@
           "display": "Sensors"
         },
         {
-          "angle": 0,
-          "class": 1,
-          "cost": 0,
-          "grp": "s",
-          "id": "4L",
-          "integrity": 0,
-          "mass": 0,
-          "power": 0,
-          "range": 0,
-          "rating": "Z",
-          "symbol": "Int_Missing_Sensors",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "ukName": "Unrecognised Sensors",
-          "family": "core",
-          "group_name": "Sensors",
-          "display": "Sensors"
-        },
-        {
           "angle": 30,
           "class": 2,
           "cost": 56547,
@@ -5019,28 +4711,6 @@
           "rating": "E",
           "symbol": "Int_Engine_Size2_Class1",
           "ukName": "Thrusters",
-          "family": "core",
-          "group_name": "Thrusters",
-          "display": "Thrusters"
-        },
-        {
-          "class": 2,
-          "cost": 0,
-          "grp": "t",
-          "id": "4J",
-          "integrity": 0,
-          "mass": 0,
-          "maxmass": 0,
-          "maxmul": 0,
-          "minmass": 0,
-          "minmul": 0,
-          "optmass": 0,
-          "optmul": 0,
-          "power": 0,
-          "rating": "Z",
-          "symbol": "Int_Missing_Engine",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "ukName": "Unrecognised Thrusters",
           "family": "core",
           "group_name": "Thrusters",
           "display": "Thrusters"
@@ -5785,8 +5455,8 @@
           "thermload": 1.8,
           "symbol": "Hpt_Mining_AbrBlstr_Fixed_Small",
           "family": "hardpoint",
-          "group_name": "abl",
-          "display": "abl"
+          "group_name": "Abrasion Blaster",
+          "display": "Abrasion Blaster (Fixed)"
         },
         {
           "breachdmg": 0.6,
@@ -5817,53 +5487,8 @@
           "thermload": 1.8,
           "symbol": "Hpt_Mining_Abrblstr_Turret_Small",
           "family": "hardpoint",
-          "group_name": "abl",
-          "display": "abl"
-        },
-        {
-          "breachdmg": 0.6,
-          "breachmax": 0.2,
-          "shotspeed": 2779,
-          "breachmin": 0.1,
-          "class": 1,
-          "cost": 9700,
-          "damage": 4,
-          "chargetime": 0,
-          "damagedist": {
-            "T": 1
-          },
-          "distdraw": 2,
-          "falloff": 4000,
-          "fireint": 0.2,
-          "clip": 1,
-          "grp": "abl",
-          "id": "6A",
-          "reload": 2,
-          "integrity": 40,
-          "mass": 1.82,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_LongRange"
-            ],
-            "grade": 1,
-            "experimentalEffects": [],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 1 Long Range modifications.",
-            "availability": "CG"
-          },
-          "name": "Abr Blast (LR)",
-          "piercing": 18,
-          "power": 0.17,
-          "range": 4180,
-          "rating": "D",
-          "thermload": 1.8,
-          "symbol": "Hpt_Mining_AbrBlstr_Fixed_Small",
-          "family": "hardpoint",
-          "group_name": "abl",
-          "display": "abl (Abr Blast (LR))"
+          "group_name": "Abrasion Blaster",
+          "display": "Abrasion Blaster (Turreted)"
         }
       ],
       "axmr": [
@@ -5899,7 +5524,7 @@
           "symbol": "Hpt_ATDumbfireMissile_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack"
+          "display": "AX Missile Rack (Fixed)"
         },
         {
           "experimental": true,
@@ -5933,54 +5558,7 @@
           "symbol": "Hpt_ATDumbfireMissile_Turret_Medium",
           "family": "hardpoint",
           "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack"
-        },
-        {
-          "experimental": true,
-          "ammo": 64,
-          "breachdmg": 0.1,
-          "breachmax": 0.8,
-          "breachmin": 1,
-          "class": 2,
-          "clip": 8,
-          "cost": 540900,
-          "damage": 71.5,
-          "damagedist": {
-            "X": 1,
-            "E": 1
-          },
-          "distdraw": 0.112,
-          "falloff": 10000,
-          "fireint": 3.045,
-          "grp": "axmr",
-          "id": "5w",
-          "integrity": 51,
-          "mass": 4.25,
-          "missile": "D",
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 5,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 High Capacity and Rapid Fire modifications."
-          },
-          "name": "AX MRack (HCap+RFire)",
-          "piercing": 60,
-          "power": 1.2,
-          "rating": "E",
-          "reload": 7.85,
-          "shotspeed": 750,
-          "thermload": 2.4,
-          "symbol": "Hpt_ATDumbfireMissile_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack (AX MRack (HCap+RFire))"
+          "display": "AX Missile Rack (Turreted)"
         },
         {
           "experimental": true,
@@ -6014,7 +5592,7 @@
           "symbol": "Hpt_ATDumbfireMissile_Fixed_Large",
           "family": "hardpoint",
           "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack"
+          "display": "AX Missile Rack (Fixed)"
         },
         {
           "experimental": true,
@@ -6048,54 +5626,7 @@
           "symbol": "Hpt_ATDumbfireMissile_Turret_Large",
           "family": "hardpoint",
           "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack"
-        },
-        {
-          "experimental": true,
-          "ammo": 128,
-          "breachdmg": 0.1,
-          "breachmax": 0.8,
-          "breachmin": 1,
-          "class": 3,
-          "clip": 12,
-          "cost": 0,
-          "damage": 71.5,
-          "damagedist": {
-            "X": 1,
-            "E": 1
-          },
-          "distdraw": 0.192,
-          "falloff": 10000,
-          "fireint": 3.045,
-          "grp": "axmr",
-          "id": "5x",
-          "integrity": 64,
-          "mass": 8.5,
-          "missile": "D",
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 5,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 High Capacity and Rapid Fire modifications."
-          },
-          "name": "AX MRack (HCap+RFire)",
-          "piercing": 60,
-          "power": 1.62,
-          "rating": "C",
-          "reload": 7.85,
-          "shotspeed": 750,
-          "thermload": 3.6,
-          "symbol": "Hpt_ATDumbfireMissile_Fixed_Large",
-          "family": "hardpoint",
-          "group_name": "AX Missile Rack",
-          "display": "AX Missile Rack (AX MRack (HCap+RFire))"
+          "display": "AX Missile Rack (Turreted)"
         }
       ],
       "axmre": [
@@ -6129,8 +5660,8 @@
           "thermload": 2.4,
           "symbol": "Hpt_ATDumbfireMissile_Fixed_Medium_v2",
           "family": "hardpoint",
-          "group_name": "axmre",
-          "display": "axmre"
+          "group_name": "Enhanced AX Missile Rack",
+          "display": "Enhanced AX Missile Rack (Fixed)"
         },
         {
           "experimental": true,
@@ -6162,8 +5693,8 @@
           "thermload": 1.5,
           "symbol": "Hpt_ATDumbfireMissile_Turret_Medium_v2",
           "family": "hardpoint",
-          "group_name": "axmre",
-          "display": "axmre"
+          "group_name": "Enhanced AX Missile Rack",
+          "display": "Enhanced AX Missile Rack (Turreted)"
         },
         {
           "experimental": true,
@@ -6195,8 +5726,8 @@
           "thermload": 3.6,
           "symbol": "Hpt_ATDumbfireMissile_Fixed_Large_v2",
           "family": "hardpoint",
-          "group_name": "axmre",
-          "display": "axmre"
+          "group_name": "Enhanced AX Missile Rack",
+          "display": "Enhanced AX Missile Rack (Fixed)"
         },
         {
           "experimental": true,
@@ -6228,8 +5759,8 @@
           "thermload": 1.9,
           "symbol": "Hpt_ATDumbfireMissile_Turret_Large_v2",
           "family": "hardpoint",
-          "group_name": "axmre",
-          "display": "axmre"
+          "group_name": "Enhanced AX Missile Rack",
+          "display": "Enhanced AX Missile Rack (Turreted)"
         }
       ],
       "axmc": [
@@ -6265,7 +5796,7 @@
           "symbol": "Hpt_ATMultiCannon_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "AX Multi-cannon",
-          "display": "AX Multi-cannon"
+          "display": "AX Multi-cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -6299,7 +5830,7 @@
           "symbol": "Hpt_ATMultiCannon_Turret_Medium",
           "family": "hardpoint",
           "group_name": "AX Multi-cannon",
-          "display": "AX Multi-cannon"
+          "display": "AX Multi-cannon (Turreted)"
         },
         {
           "experimental": true,
@@ -6333,7 +5864,7 @@
           "symbol": "Hpt_ATMultiCannon_Fixed_Large",
           "family": "hardpoint",
           "group_name": "AX Multi-cannon",
-          "display": "AX Multi-cannon"
+          "display": "AX Multi-cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -6367,7 +5898,7 @@
           "symbol": "Hpt_ATMultiCannon_Turret_Large",
           "family": "hardpoint",
           "group_name": "AX Multi-cannon",
-          "display": "AX Multi-cannon"
+          "display": "AX Multi-cannon (Turreted)"
         }
       ],
       "axmce": [
@@ -6402,8 +5933,8 @@
           "thermload": 0.18,
           "symbol": "Hpt_ATMultiCannon_Fixed_Medium_V2",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -6436,8 +5967,8 @@
           "thermload": 0.18,
           "symbol": "Hpt_ATMultiCannon_Gimbal_Medium",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Gimballed)"
         },
         {
           "experimental": true,
@@ -6470,56 +6001,8 @@
           "thermload": 0.1,
           "symbol": "Hpt_ATMultiCannon_Turret_Medium_V2",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
-        },
-        {
-          "experimental": true,
-          "ammo": 2100,
-          "breachdmg": 3.1,
-          "breachmax": 0.5,
-          "breachmin": 0.8,
-          "class": 2,
-          "clip": 100,
-          "cost": 1197644,
-          "damage": 2.4,
-          "damagedist": {
-            "X": 1,
-            "K": 1
-          },
-          "distdraw": 0.11,
-          "falloff": 2000,
-          "fireint": 0.14,
-          "grp": "axmce",
-          "id": "5y",
-          "integrity": 51,
-          "mass": 4,
-          "mount": "G",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_Overcharged"
-            ],
-            "grade": 5,
-            "experimentalEffects": [
-              "special_auto_loader"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Overcharged modifications and Auto-Loader experimental."
-          },
-          "name": "AX MC (OC, Auto-Load)",
-          "piercing": 17,
-          "power": 0.805,
-          "range": 4000,
-          "rating": "E",
-          "reload": 4,
-          "shotspeed": 4000,
-          "thermload": 0.18,
-          "symbol": "Hpt_ATMultiCannon_Gimbal_Medium",
-          "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce (AX MC (OC, Auto-Load))"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Turreted)"
         },
         {
           "experimental": true,
@@ -6552,8 +6035,8 @@
           "thermload": 0.28,
           "symbol": "Hpt_ATMultiCannon_Fixed_Large_V2",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -6586,56 +6069,8 @@
           "thermload": 0.28,
           "symbol": "Hpt_ATMultiCannon_Gimbal_Large",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
-        },
-        {
-          "experimental": true,
-          "ammo": 2100,
-          "breachdmg": 5.2,
-          "breachmax": 0.5,
-          "breachmin": 0.8,
-          "class": 3,
-          "clip": 100,
-          "cost": 2390460,
-          "damage": 4.065,
-          "damagedist": {
-            "X": 1,
-            "K": 1
-          },
-          "distdraw": 0.18,
-          "falloff": 2000,
-          "fireint": 0.17,
-          "grp": "axmce",
-          "id": "5z",
-          "integrity": 64,
-          "mass": 8,
-          "mount": "G",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_Overcharged"
-            ],
-            "grade": 5,
-            "experimentalEffects": [
-              "special_auto_loader"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Overcharged modifications and Auto-Loader experimental."
-          },
-          "name": "AX MC (OC, Auto-Load)",
-          "piercing": 33,
-          "power": 1.12,
-          "range": 4000,
-          "rating": "C",
-          "reload": 4,
-          "shotspeed": 4000,
-          "thermload": 0.28,
-          "symbol": "Hpt_ATMultiCannon_Gimbal_Large",
-          "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce (AX MC (OC, Auto-Load))"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Gimballed)"
         },
         {
           "experimental": true,
@@ -6668,8 +6103,8 @@
           "thermload": 0.1,
           "symbol": "Hpt_ATMultiCannon_Turret_Large_V2",
           "family": "hardpoint",
-          "group_name": "axmce",
-          "display": "axmce"
+          "group_name": "Enhanced AX Multi-Cannon",
+          "display": "Enhanced AX Multi-Cannon (Turreted)"
         }
       ],
       "bl": [
@@ -6698,7 +6133,7 @@
           "symbol": "Hpt_BeamLaser_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Fixed)"
         },
         {
           "breachdmg": 6.1,
@@ -6725,7 +6160,7 @@
           "symbol": "Hpt_BeamLaser_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Gimballed)"
         },
         {
           "breachdmg": 3.9,
@@ -6756,7 +6191,7 @@
           "symbol": "Hpt_BeamLaser_Fixed_Small_Heat",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser (Retributor)"
+          "display": "Beam Laser (Retributor, Fixed)"
         },
         {
           "breachdmg": 4.3,
@@ -6785,7 +6220,7 @@
           "symbol": "Hpt_BeamLaser_Turret_Small",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Turreted)"
         },
         {
           "breachdmg": 12.8,
@@ -6812,7 +6247,7 @@
           "symbol": "Hpt_BeamLaser_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Fixed)"
         },
         {
           "breachdmg": 10,
@@ -6839,7 +6274,7 @@
           "symbol": "Hpt_BeamLaser_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Gimballed)"
         },
         {
           "breachdmg": 7.1,
@@ -6866,7 +6301,7 @@
           "symbol": "Hpt_BeamLaser_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Turreted)"
         },
         {
           "breachdmg": 20.6,
@@ -6893,7 +6328,7 @@
           "symbol": "Hpt_BeamLaser_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Fixed)"
         },
         {
           "breachdmg": 16.2,
@@ -6920,7 +6355,7 @@
           "symbol": "Hpt_BeamLaser_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Gimballed)"
         },
         {
           "breachdmg": 11.5,
@@ -6947,7 +6382,7 @@
           "symbol": "Hpt_BeamLaser_Turret_Large",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Turreted)"
         },
         {
           "breachdmg": 33.1,
@@ -6974,7 +6409,7 @@
           "symbol": "Hpt_BeamLaser_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Fixed)"
         },
         {
           "breachdmg": 26.1,
@@ -7001,7 +6436,7 @@
           "symbol": "Hpt_BeamLaser_Gimbal_Huge",
           "family": "hardpoint",
           "group_name": "Beam Laser",
-          "display": "Beam Laser"
+          "display": "Beam Laser (Gimballed)"
         }
       ],
       "ul": [
@@ -7033,7 +6468,7 @@
           "symbol": "Hpt_PulseLaserBurst_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Fixed)"
         },
         {
           "breachdmg": 3.1,
@@ -7068,7 +6503,7 @@
           "symbol": "Hpt_PulseLaserBurst_Fixed_Small_Scatter",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser (Cytoscrambler)"
+          "display": "Burst Laser (Cytoscrambler, Fixed)"
         },
         {
           "breachdmg": 1,
@@ -7098,7 +6533,7 @@
           "symbol": "Hpt_PulseLaserBurst_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Gimballed)"
         },
         {
           "breachdmg": 0.4,
@@ -7128,7 +6563,7 @@
           "symbol": "Hpt_PulseLaserBurst_Turret_Small",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Turreted)"
         },
         {
           "breachdmg": 3,
@@ -7158,7 +6593,7 @@
           "symbol": "Hpt_PulseLaserBurst_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Fixed)"
         },
         {
           "breachdmg": 2.1,
@@ -7188,7 +6623,7 @@
           "symbol": "Hpt_PulseLaserBurst_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Gimballed)"
         },
         {
           "breachdmg": 0.9,
@@ -7218,7 +6653,7 @@
           "symbol": "Hpt_PulseLaserBurst_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Turreted)"
         },
         {
           "breachdmg": 3.9,
@@ -7248,7 +6683,7 @@
           "symbol": "Hpt_PulseLaserBurst_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Fixed)"
         },
         {
           "breachdmg": 4.4,
@@ -7278,7 +6713,7 @@
           "symbol": "Hpt_PulseLaserBurst_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Gimballed)"
         },
         {
           "breachdmg": 1.8,
@@ -7308,7 +6743,7 @@
           "symbol": "Hpt_PulseLaserBurst_Turret_Large",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Turreted)"
         },
         {
           "breachdmg": 17.5,
@@ -7338,7 +6773,7 @@
           "symbol": "Hpt_PulseLaserBurst_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Fixed)"
         },
         {
           "breachdmg": 10.3,
@@ -7368,7 +6803,7 @@
           "symbol": "Hpt_PulseLaserBurst_Gimbal_Huge",
           "family": "hardpoint",
           "group_name": "Burst Laser",
-          "display": "Burst Laser"
+          "display": "Burst Laser (Gimballed)"
         }
       ],
       "c": [
@@ -7402,7 +6837,7 @@
           "symbol": "Hpt_Cannon_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Fixed)"
         },
         {
           "ammo": 100,
@@ -7434,7 +6869,7 @@
           "symbol": "Hpt_Cannon_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Gimballed)"
         },
         {
           "ammo": 100,
@@ -7466,7 +6901,7 @@
           "symbol": "Hpt_Cannon_Turret_Small",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Turreted)"
         },
         {
           "ammo": 120,
@@ -7498,7 +6933,7 @@
           "symbol": "Hpt_Cannon_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Fixed)"
         },
         {
           "ammo": 100,
@@ -7530,7 +6965,7 @@
           "symbol": "Hpt_Cannon_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Gimballed)"
         },
         {
           "ammo": 300,
@@ -7568,7 +7003,7 @@
           "symbol": "Hpt_Cannon_Gimbal_Medium_Burst",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon (Concord Cannon)"
+          "display": "Cannon (Concord Cannon, Gimballed)"
         },
         {
           "ammo": 100,
@@ -7600,7 +7035,7 @@
           "symbol": "Hpt_Cannon_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Turreted)"
         },
         {
           "ammo": 120,
@@ -7632,7 +7067,7 @@
           "symbol": "Hpt_Cannon_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Fixed)"
         },
         {
           "ammo": 100,
@@ -7666,7 +7101,7 @@
           "symbol": "Hpt_Cannon_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Gimballed)"
         },
         {
           "ammo": 100,
@@ -7698,7 +7133,7 @@
           "symbol": "Hpt_Cannon_Turret_Large",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Turreted)"
         },
         {
           "ammo": 120,
@@ -7732,7 +7167,7 @@
           "symbol": "Hpt_Cannon_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Fixed)"
         },
         {
           "ammo": 100,
@@ -7766,7 +7201,7 @@
           "symbol": "Hpt_Cannon_Gimbal_Huge",
           "family": "hardpoint",
           "group_name": "Cannon",
-          "display": "Cannon"
+          "display": "Cannon (Gimballed)"
         }
       ],
       "tbem": [
@@ -7798,51 +7233,8 @@
             "E": 1
           },
           "family": "hardpoint",
-          "group_name": "tbem",
-          "display": "tbem"
-        },
-        {
-          "experimental": true,
-          "rating": "B",
-          "class": 2,
-          "grp": "tbem",
-          "id": "5Z",
-          "fireint": 2.0,
-          "mount": "F",
-          "cost": 480501,
-          "mass": 4,
-          "integrity": 51,
-          "power": 1.2,
-          "damage": 5,
-          "distdraw": 0.08,
-          "thermload": 1.5,
-          "piercing": 60,
-          "shotspeed": 750,
-          "clip": 7,
-          "ammo": 40,
-          "name": "Caust Enzyme (High Cap)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity"
-            ],
-            "grade": 1,
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 High Cap modifications.",
-            "availability": "CG"
-          },
-          "reload": 5,
-          "breachdmg": 0,
-          "breachmin": 0.8,
-          "breachmax": 1,
-          "symbol": "Hpt_CausticMissile_Fixed_Medium",
-          "damagedist": {
-            "E": 1
-          },
-          "family": "hardpoint",
-          "group_name": "tbem",
-          "display": "tbem (Caust Enzyme (High Cap))"
+          "group_name": "Enzyme Missile Rack",
+          "display": "Enzyme Missile Rack (Fixed)"
         }
       ],
       "fc": [
@@ -7878,7 +7270,7 @@
           "symbol": "Hpt_Slugshot_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Fixed)"
         },
         {
           "ammo": 180,
@@ -7912,7 +7304,7 @@
           "symbol": "Hpt_Slugshot_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Gimballed)"
         },
         {
           "ammo": 180,
@@ -7946,7 +7338,7 @@
           "symbol": "Hpt_Slugshot_Turret_Small",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Turreted)"
         },
         {
           "ammo": 180,
@@ -7980,7 +7372,7 @@
           "symbol": "Hpt_Slugshot_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Fixed)"
         },
         {
           "ammo": 180,
@@ -8014,7 +7406,7 @@
           "symbol": "Hpt_Slugshot_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Gimballed)"
         },
         {
           "ammo": 180,
@@ -8048,7 +7440,7 @@
           "symbol": "Hpt_Slugshot_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Turreted)"
         },
         {
           "ammo": 180,
@@ -8082,7 +7474,7 @@
           "symbol": "Hpt_Slugshot_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Fixed)"
         },
         {
           "ammo": 180,
@@ -8116,7 +7508,7 @@
           "symbol": "Hpt_Slugshot_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Gimballed)"
         },
         {
           "ammo": 180,
@@ -8150,7 +7542,7 @@
           "symbol": "Hpt_Slugshot_Turret_Large",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon"
+          "display": "Fragment Cannon (Turreted)"
         },
         {
           "ammo": 180,
@@ -8188,7 +7580,7 @@
           "symbol": "Hpt_Slugshot_Fixed_Large_Range",
           "family": "hardpoint",
           "group_name": "Fragment Cannon",
-          "display": "Fragment Cannon (Pacifier)"
+          "display": "Fragment Cannon (Pacifier, Fixed)"
         }
       ],
       "ggc": [
@@ -8224,56 +7616,8 @@
             "horizons": true
           },
           "family": "hardpoint",
-          "group_name": "ggc",
-          "display": "ggc"
-        },
-        {
-          "experimental": true,
-          "ammo": 200,
-          "breachdmg": 11,
-          "breachmax": 0.4,
-          "breachmin": 0.2,
-          "class": 1,
-          "clip": 2,
-          "cost": 0,
-          "damage": 9.6,
-          "damagedist": {
-            "T": 1
-          },
-          "distdraw": 3.8,
-          "falloff": 1200,
-          "fireint": 1.15,
-          "grp": "ggc",
-          "id": "6E",
-          "integrity": 40,
-          "mass": 2,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 1,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 1 High Capacity and Rapid Fire modifications."
-          },
-          "name": "Gauss (HCap + RFire)",
-          "piercing": 140,
-          "power": 1.91,
-          "range": 3000,
-          "rating": "D",
-          "reload": 2.87,
-          "thermload": 15,
-          "symbol": "Hpt_Guardian_GaussCannon_Fixed_Small",
-          "requirements": {
-            "horizons": true
-          },
-          "family": "hardpoint",
-          "group_name": "ggc",
-          "display": "ggc (Gauss (HCap + RFire))"
+          "group_name": "Guardian Gauss Cannon",
+          "display": "Guardian Gauss Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -8308,57 +7652,8 @@
             "horizons": true
           },
           "family": "hardpoint",
-          "group_name": "ggc",
-          "display": "ggc"
-        },
-        {
-          "experimental": true,
-          "ammo": 200,
-          "breachdmg": 35,
-          "breachmax": 0.4,
-          "breachmin": 0.2,
-          "burst": 1,
-          "class": 2,
-          "clip": 2,
-          "cost": 0,
-          "damage": 18.3,
-          "damagedist": {
-            "T": 1
-          },
-          "distdraw": 7.2,
-          "falloff": 1200,
-          "fireint": 1.15,
-          "grp": "ggc",
-          "id": "6F",
-          "integrity": 42,
-          "mass": 4,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 1,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 1 High Capacity and Rapid Fire modifications."
-          },
-          "name": "Gauss (HCap + RFire)",
-          "piercing": 140,
-          "power": 2.61,
-          "range": 3000,
-          "rating": "B",
-          "reload": 2.87,
-          "thermload": 25,
-          "symbol": "Hpt_Guardian_GaussCannon_Fixed_Medium",
-          "requirements": {
-            "horizons": true
-          },
-          "family": "hardpoint",
-          "group_name": "ggc",
-          "display": "ggc (Gauss (HCap + RFire))"
+          "group_name": "Guardian Gauss Cannon",
+          "display": "Guardian Gauss Cannon (Fixed)"
         }
       ],
       "gpc": [
@@ -8393,53 +7688,7 @@
           "symbol": "Hpt_Guardian_PlasmaLauncher_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
-        },
-        {
-          "experimental": true,
-          "ammo": 200,
-          "breachdmg": 0.4,
-          "breachmax": 0.8,
-          "breachmin": 0.5,
-          "class": 1,
-          "clip": 15,
-          "cost": 0,
-          "damage": 3,
-          "damagedist": {
-            "A": 1
-          },
-          "distdraw": 0.68,
-          "falloff": 1000,
-          "fireint": 0.2,
-          "grp": "gpc",
-          "id": "6G",
-          "integrity": 34,
-          "mass": 2,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_Overcharged",
-              "Weapon_Focused"
-            ],
-            "grade": 1,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 1 Overcharged and Focused modifications."
-          },
-          "name": "Plasma Charger (OC+Foc)",
-          "piercing": 65,
-          "power": 1.4,
-          "range": 3000,
-          "rating": "D",
-          "reload": 3,
-          "shotspeed": 1200,
-          "thermload": 4.2,
-          "symbol": "Hpt_Guardian_PlasmaLauncher_Fixed_Small",
-          "family": "hardpoint",
-          "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger (Plasma Charger (OC+Foc))"
+          "display": "Guardian Plasma Charger (Fixed)"
         },
         {
           "experimental": true,
@@ -8472,7 +7721,7 @@
           "symbol": "Hpt_Guardian_PlasmaLauncher_Turret_Small",
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
+          "display": "Guardian Plasma Charger (Turreted)"
         },
         {
           "experimental": true,
@@ -8505,53 +7754,7 @@
           "symbol": "Hpt_Guardian_PlasmaLauncher_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
-        },
-        {
-          "experimental": true,
-          "ammo": 200,
-          "breachdmg": 0.7,
-          "breachmax": 0.8,
-          "breachmin": 0.5,
-          "class": 2,
-          "clip": 15,
-          "cost": 0,
-          "damage": 5,
-          "damagedist": {
-            "A": 1
-          },
-          "distdraw": 1.25,
-          "falloff": 1000,
-          "fireint": 0.2,
-          "grp": "gpc",
-          "id": "6H",
-          "integrity": 42,
-          "mass": 4,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_Overcharged",
-              "Weapon_Focused"
-            ],
-            "grade": 1,
-            "experimentalEffects": [],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 1 Overcharged and Focused modifications."
-          },
-          "name": "Plasma Charger (OC+Foc)",
-          "piercing": 80,
-          "power": 2.13,
-          "range": 3500,
-          "rating": "B",
-          "reload": 3,
-          "shotspeed": 1200,
-          "thermload": 5.2,
-          "symbol": "Hpt_Guardian_PlasmaLauncher_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger (Plasma Charger (OC+Foc))"
+          "display": "Guardian Plasma Charger (Fixed)"
         },
         {
           "experimental": true,
@@ -8584,7 +7787,7 @@
           "symbol": "Hpt_Guardian_PlasmaLauncher_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
+          "display": "Guardian Plasma Charger (Turreted)"
         },
         {
           "experimental": true,
@@ -8617,7 +7820,7 @@
           "falloff": 1000,
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
+          "display": "Guardian Plasma Charger (Fixed)"
         },
         {
           "experimental": true,
@@ -8650,7 +7853,7 @@
           "symbol": "Hpt_Guardian_PlasmaLauncher_Turret_Large",
           "family": "hardpoint",
           "group_name": "Guardian Plasma Charger",
-          "display": "Guardian Plasma Charger"
+          "display": "Guardian Plasma Charger (Turreted)"
         }
       ],
       "gsc": [
@@ -8687,57 +7890,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
-        },
-        {
-          "experimental": true,
-          "rating": "D",
-          "class": 1,
-          "grp": "gsc",
-          "id": "6I",
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_LongRange",
-              "Weapon_Focused"
-            ],
-            "grade": 1,
-            "experimentalEffects": [
-              "special_super_penetrator_cooled"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 1 LongRange and Focused modifications with Super Penetrator Experimental."
-          },
-          "name": "Shard (OC+Foc+SPen)",
-          "cost": 0,
-          "mass": 2,
-          "integrity": 34,
-          "power": 0.87,
-          "damage": 2,
-          "distdraw": 0.42,
-          "fireint": 0.6,
-          "thermload": 0.7,
-          "piercing": 30,
-          "range": 1700,
-          "shotspeed": 1133,
-          "roundspershot": 12,
-          "clip": 5,
-          "ammo": 180,
-          "reload": 5,
-          "breachdmg": 1.6,
-          "breachmin": 0.6,
-          "breachmax": 0.8,
-          "jitter": 5,
-          "symbol": "Hpt_Guardian_ShardCannon_Fixed_Small",
-          "damagedist": {
-            "T": 1
-          },
-          "falloff": 1700,
-          "family": "hardpoint",
-          "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon (Shard (OC+Foc+SPen))"
+          "display": "Guardian Shard Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -8772,7 +7925,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
+          "display": "Guardian Shard Cannon (Turreted)"
         },
         {
           "experimental": true,
@@ -8807,107 +7960,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
-        },
-        {
-          "experimental": true,
-          "rating": "A",
-          "class": 2,
-          "grp": "gsc",
-          "id": "6J",
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_LongRange",
-              "Weapon_Focused"
-            ],
-            "grade": 1,
-            "experimentalEffects": [
-              "special_super_penetrator_cooled"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 1 LongRange and Focused modifications with Super Penetrator Experimental."
-          },
-          "name": "Shard (OC+Foc+SPen)",
-          "cost": 0,
-          "mass": 4,
-          "integrity": 42,
-          "power": 1.21,
-          "damage": 3.7,
-          "distdraw": 0.65,
-          "fireint": 0.6,
-          "thermload": 1.2,
-          "piercing": 45,
-          "range": 1700,
-          "shotspeed": 1133,
-          "roundspershot": 12,
-          "clip": 5,
-          "ammo": 180,
-          "reload": 5,
-          "breachdmg": 3,
-          "breachmin": 0.6,
-          "breachmax": 0.8,
-          "jitter": 5,
-          "symbol": "Hpt_Guardian_ShardCannon_Fixed_Medium",
-          "damagedist": {
-            "T": 1
-          },
-          "falloff": 1700,
-          "family": "hardpoint",
-          "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon (Shard (OC+Foc+SPen))"
-        },
-        {
-          "experimental": true,
-          "rating": "A",
-          "class": 2,
-          "grp": "gsc",
-          "id": "6K",
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_LongRange"
-            ],
-            "grade": 5,
-            "availability": "CG",
-            "experimentalEffects": [
-              ""
-            ],
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 LongRange modifications."
-          },
-          "name": "Shard (Long Range)",
-          "cost": 0,
-          "mass": 4,
-          "integrity": 42,
-          "power": 1.21,
-          "damage": 3.7,
-          "distdraw": 0.65,
-          "fireint": 0.6,
-          "thermload": 1.2,
-          "piercing": 45,
-          "range": 1700,
-          "shotspeed": 1133,
-          "roundspershot": 12,
-          "clip": 5,
-          "ammo": 180,
-          "reload": 5,
-          "breachdmg": 3,
-          "breachmin": 0.6,
-          "breachmax": 0.8,
-          "jitter": 5,
-          "symbol": "Hpt_Guardian_ShardCannon_Fixed_Medium",
-          "damagedist": {
-            "T": 1
-          },
-          "falloff": 1700,
-          "family": "hardpoint",
-          "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon (Shard (Long Range))"
+          "display": "Guardian Shard Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -8942,7 +7995,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
+          "display": "Guardian Shard Cannon (Turreted)"
         },
         {
           "experimental": true,
@@ -8977,7 +8030,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
+          "display": "Guardian Shard Cannon (Fixed)"
         },
         {
           "experimental": true,
@@ -9012,7 +8065,7 @@
           "falloff": 1700,
           "family": "hardpoint",
           "group_name": "Guardian Shard Cannon",
-          "display": "Guardian Shard Cannon"
+          "display": "Guardian Shard Cannon (Turreted)"
         }
       ],
       "nl": [
@@ -9044,7 +8097,7 @@
           "symbol": "Hpt_MineLauncher_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Mine Launcher",
-          "display": "Mine Launcher"
+          "display": "Mine Launcher (Fixed)"
         },
         {
           "ammo": 36,
@@ -9075,7 +8128,7 @@
           "symbol": "Hpt_MineLauncher_Fixed_Small_Impulse",
           "family": "hardpoint",
           "group_name": "Mine Launcher",
-          "display": "Mine Launcher (Shock Mine Launcher)"
+          "display": "Mine Launcher (Shock Mine Launcher, Fixed)"
         },
         {
           "ammo": 72,
@@ -9105,7 +8158,7 @@
           "symbol": "Hpt_MineLauncher_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Mine Launcher",
-          "display": "Mine Launcher"
+          "display": "Mine Launcher (Fixed)"
         }
       ],
       "ml": [
@@ -9133,8 +8186,8 @@
           "thermload": 2,
           "symbol": "Hpt_MiningLaser_Fixed_Small",
           "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml"
+          "group_name": "Mining Laser",
+          "display": "Mining Laser (Fixed)"
         },
         {
           "breachdmg": 0.3,
@@ -9160,8 +8213,8 @@
           "thermload": 2,
           "symbol": "Hpt_MiningLaser_Turret_Small",
           "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml"
+          "group_name": "Mining Laser",
+          "display": "Mining Laser (Turreted)"
         },
         {
           "breachdmg": 1.2,
@@ -9191,49 +8244,8 @@
           "thermload": 6,
           "symbol": "Hpt_MiningLaser_Fixed_Small_Advanced",
           "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml (Mining Lance)"
-        },
-        {
-          "breachdmg": 0.3,
-          "breachmax": 0.2,
-          "breachmin": 0.1,
-          "class": 1,
-          "cost": 0,
-          "damage": 2,
-          "damagedist": {
-            "T": 1
-          },
-          "distdraw": 0.75,
-          "falloff": 1250,
-          "grp": "ml",
-          "id": "5Y",
-          "integrity": 20,
-          "mass": 2,
-          "mount": "F",
-          "piercing": 18,
-          "power": 0.25,
-          "range": 1250,
-          "rating": "D",
-          "thermload": 2,
-          "name": "Mining Laser V1",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_LongRange"
-            ],
-            "grade": 5,
-            "experimentalEffects": [
-              "special_incendiary_rounds"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 Long Range modifications and Incendiary Rounds Experimental."
-          },
-          "symbol": "Hpt_MiningLaser_Fixed_Small",
-          "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml (Mining Laser V1)"
+          "group_name": "Mining Laser",
+          "display": "Mining Lance (Fixed)"
         },
         {
           "breachdmg": 0.6,
@@ -9259,8 +8271,8 @@
           "thermload": 4,
           "symbol": "Hpt_MiningLaser_Fixed_Medium",
           "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml"
+          "group_name": "Mining Laser",
+          "display": "Mining Laser (Fixed)"
         },
         {
           "breachdmg": 0.6,
@@ -9286,8 +8298,8 @@
           "thermload": 4,
           "symbol": "Hpt_MiningLaser_Turret_Medium",
           "family": "hardpoint",
-          "group_name": "ml",
-          "display": "ml"
+          "group_name": "Mining Laser",
+          "display": "Mining Laser (Turreted)"
         }
       ],
       "mvr": [
@@ -9325,8 +8337,8 @@
           "name": "Mining Volley Repeater",
           "symbol": "Hpt_MiningToolV2_Fixed_Large",
           "family": "hardpoint",
-          "group_name": "mvr",
-          "display": "mvr (Mining Volley Repeater)"
+          "group_name": "Mining Volley Repeater",
+          "display": "Mining Volley Repeater (Fixed)"
         }
       ],
       "mr": [
@@ -9359,7 +8371,7 @@
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         },
         {
           "ammo": 6,
@@ -9391,7 +8403,7 @@
           "symbol": "Hpt_BasicMissileRack_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         },
         {
           "ammo": 48,
@@ -9424,7 +8436,7 @@
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         },
         {
           "ammo": 18,
@@ -9458,7 +8470,7 @@
           "symbol": "Hpt_BasicMissileRack_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         },
         {
           "ammo": 48,
@@ -9493,7 +8505,7 @@
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Medium_Lasso",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack (Rocket Propelled FSD Disruptor)"
+          "display": "Missile Rack (Rocket Propelled FSD Disruptor, Fixed)"
         },
         {
           "ammo": 120,
@@ -9531,106 +8543,7 @@
           "symbol": "Hpt_DrunkMissileRack_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack (Pack-Hound)"
-        },
-        {
-          "ammo": 18,
-          "breachdmg": 16,
-          "breachmax": 0,
-          "breachmin": 0,
-          "class": 2,
-          "clip": 6,
-          "cost": 0,
-          "damage": 40,
-          "damagedist": {
-            "E": 1
-          },
-          "distdraw": 0.24,
-          "eps": 0.07,
-          "fireint": 3,
-          "grp": "mr",
-          "hps": 1.08,
-          "id": "5X",
-          "integrity": 51,
-          "mass": 0.57,
-          "missile": "S",
-          "special": "V1 Seeker (HCap+LW+TC)",
-          "name": "V1 Seek (HCap+LW+TC)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_LightWeight"
-            ],
-            "grade": 5,
-            "experimentalEffects": [
-              "special_thermal_cascade"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 High Cap, Lightweight modifications and Thermal Cascade Experimental Effect."
-          },
-          "mount": "F",
-          "piercing": 60,
-          "power": 1.2,
-          "rating": "B",
-          "reload": 12,
-          "shotspeed": 625,
-          "thermload": 3.6,
-          "symbol": "Hpt_BasicMissileRack_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "Missile Rack",
-          "display": "Missile Rack (V1 Seek (HCap+LW+TC))"
-        },
-        {
-          "ammo": 18,
-          "breachdmg": 16,
-          "breachmax": 0,
-          "breachmin": 0,
-          "class": 2,
-          "clip": 6,
-          "cost": 0,
-          "damage": 42.1,
-          "damagedist": {
-            "E": 1
-          },
-          "distdraw": 0.34,
-          "eps": 0.07,
-          "fireint": 5.2,
-          "grp": "mr",
-          "hps": 1.08,
-          "id": "6B",
-          "integrity": 51,
-          "mass": 6.25,
-          "missile": "S",
-          "special": "Seeker (HCap+RF+Drag)",
-          "name": "Seek (HCap+RF+Drag)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 1,
-            "experimentalEffects": [
-              "special_drag_munitions"
-            ],
-            "canApplyExperimental": true,
-            "description": "This module has been pre-engineered with Grade 5 High Cap, Rapid Fire modifications and Drag Munitions Experimental Effect.",
-            "availability": "CG"
-          },
-          "mount": "F",
-          "piercing": 60,
-          "power": 1.2,
-          "rating": "B",
-          "reload": 34.28,
-          "shotspeed": 625,
-          "thermload": 3.6,
-          "symbol": "Hpt_BasicMissileRack_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "Missile Rack",
-          "display": "Missile Rack (Seek (HCap+RF+Drag))"
+          "display": "Missile Rack (Pack-Hound, Fixed)"
         },
         {
           "ammo": 96,
@@ -9661,7 +8574,7 @@
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         },
         {
           "ammo": 36,
@@ -9693,7 +8606,7 @@
           "symbol": "Hpt_BasicMissileRack_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Missile Rack",
-          "display": "Missile Rack"
+          "display": "Missile Rack (Fixed)"
         }
       ],
       "amr": [
@@ -9726,8 +8639,8 @@
           "thermload": 3.6,
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Small_Advanced",
           "family": "hardpoint",
-          "group_name": "amr",
-          "display": "amr (Advanced Missile Rack)"
+          "group_name": "Advanced Missile Rack",
+          "display": "Advanced Missile Rack (Fixed)"
         },
         {
           "ammo": 64,
@@ -9758,8 +8671,8 @@
           "thermload": 3.6,
           "symbol": "Hpt_DumbfireMissileRack_Fixed_Medium_Advanced",
           "family": "hardpoint",
-          "group_name": "amr",
-          "display": "amr (Advanced Missile Rack)"
+          "group_name": "Advanced Missile Rack",
+          "display": "Advanced Missile Rack (Fixed)"
         }
       ],
       "mc": [
@@ -9793,7 +8706,7 @@
           "symbol": "Hpt_MultiCannon_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Fixed)"
         },
         {
           "ammo": 1000,
@@ -9829,7 +8742,7 @@
           "symbol": "Hpt_MultiCannon_Fixed_Small_Strong",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon (Enforcer)"
+          "display": "Multi-cannon (Enforcer, Fixed)"
         },
         {
           "ammo": 2100,
@@ -9861,7 +8774,7 @@
           "symbol": "Hpt_MultiCannon_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Gimballed)"
         },
         {
           "ammo": 2100,
@@ -9893,7 +8806,7 @@
           "symbol": "Hpt_MultiCannon_Turret_Small",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Turreted)"
         },
         {
           "ammo": 2100,
@@ -9925,55 +8838,7 @@
           "symbol": "Hpt_MultiCannon_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
-        },
-        {
-          "ammo": 4706,
-          "breachdmg": 2,
-          "breachmax": 0.8,
-          "breachmin": 0.4,
-          "class": 2,
-          "clip": 294,
-          "cost": 0,
-          "damage": 2.15,
-          "damagedist": {
-            "K": 1
-          },
-          "distdraw": 0.11,
-          "falloff": 1800,
-          "fireint": 0.1115,
-          "grp": "mc",
-          "id": "6D",
-          "integrity": 51,
-          "mass": 3.33,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_RapidFire"
-            ],
-            "grade": 1,
-            "canApplyExperimental": false,
-            "experimentalEffects": [
-              "special_phasing_sequence"
-            ],
-            "description": "This module has been pre-engineered with Grade 5 High Cap & Rapid Fire modifications, and Phasing Sequence Experimental Effect.",
-            "availability": "CG"
-          },
-          "name": "MC (HCap+RFire+Phase)",
-          "piercing": 37,
-          "power": 0.46,
-          "range": 2000,
-          "rating": "E",
-          "reload": 5.33,
-          "shotspeed": 1600,
-          "thermload": 0.18,
-          "symbol": "Hpt_MultiCannon_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "Multi-cannon",
-          "display": "Multi-cannon (MC (HCap+RFire+Phase))"
+          "display": "Multi-cannon (Fixed)"
         },
         {
           "ammo": 2100,
@@ -10005,7 +8870,7 @@
           "symbol": "Hpt_MultiCannon_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Gimballed)"
         },
         {
           "ammo": 2100,
@@ -10037,7 +8902,7 @@
           "symbol": "Hpt_MultiCannon_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Turreted)"
         },
         {
           "ammo": 2100,
@@ -10069,7 +8934,7 @@
           "symbol": "Hpt_MultiCannon_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Fixed)"
         },
         {
           "ammo": 2100,
@@ -10101,7 +8966,7 @@
           "symbol": "Hpt_MultiCannon_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Gimballed)"
         },
         {
           "ammo": 2100,
@@ -10133,7 +8998,7 @@
           "symbol": "Hpt_MultiCannon_Turret_Large",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Turreted)"
         },
         {
           "ammo": 2100,
@@ -10166,7 +9031,7 @@
           "symbol": "Hpt_MultiCannon_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Fixed)"
         },
         {
           "ammo": 2100,
@@ -10199,7 +9064,7 @@
           "symbol": "Hpt_MultiCannon_Gimbal_Huge",
           "family": "hardpoint",
           "group_name": "Multi-cannon",
-          "display": "Multi-cannon"
+          "display": "Multi-cannon (Gimballed)"
         }
       ],
       "advmc": [
@@ -10232,8 +9097,8 @@
           "thermload": 0.09,
           "symbol": "Hpt_MultiCannon_Fixed_Small_Advanced",
           "family": "hardpoint",
-          "group_name": "advmc",
-          "display": "advmc"
+          "group_name": "Advanced Multi-Cannon",
+          "display": "Advanced Multi-Cannon (Fixed)"
         },
         {
           "ammo": 2100,
@@ -10264,8 +9129,8 @@
           "thermload": 0.18,
           "symbol": "Hpt_MultiCannon_Fixed_Medium_Advanced",
           "family": "hardpoint",
-          "group_name": "advmc",
-          "display": "advmc"
+          "group_name": "Advanced Multi-Cannon",
+          "display": "Advanced Multi-Cannon (Fixed)"
         }
       ],
       "ntp": [
@@ -10294,8 +9159,8 @@
           "thermload": 35,
           "symbol": "Hpt_ATVentDisruptorPylon_Fixed_Medium",
           "family": "hardpoint",
-          "group_name": "ntp",
-          "display": "ntp"
+          "group_name": "Nanite Torpedo Pylon",
+          "display": "Nanite Torpedo Pylon (Fixed)"
         },
         {
           "ammo": 125,
@@ -10322,8 +9187,8 @@
           "thermload": 35,
           "symbol": "Hpt_ATVentDisruptorPylon_Fixed_Large",
           "family": "hardpoint",
-          "group_name": "ntp",
-          "display": "ntp"
+          "group_name": "Nanite Torpedo Pylon",
+          "display": "Nanite Torpedo Pylon (Fixed)"
         }
       ],
       "pa": [
@@ -10359,7 +9224,7 @@
           "symbol": "Hpt_PlasmaAccelerator_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Plasma Accelerator",
-          "display": "Plasma Accelerator"
+          "display": "Plasma Accelerator (Fixed)"
         },
         {
           "ammo": 100,
@@ -10393,7 +9258,7 @@
           "symbol": "Hpt_PlasmaAccelerator_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Plasma Accelerator",
-          "display": "Plasma Accelerator"
+          "display": "Plasma Accelerator (Fixed)"
         },
         {
           "ammo": 300,
@@ -10431,7 +9296,7 @@
           "symbol": "Hpt_PlasmaAccelerator_Fixed_Large_Advanced",
           "family": "hardpoint",
           "group_name": "Plasma Accelerator",
-          "display": "Plasma Accelerator (Advanced Plasma Acc)"
+          "display": "Plasma Accelerator (Advanced Plasma Acc, Fixed)"
         },
         {
           "ammo": 0,
@@ -10469,7 +9334,7 @@
           "symbol": "Hpt_MkIIPlasmaShockAutocannon_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Plasma Accelerator",
-          "display": "Plasma Accelerator (Mk II Plasma Shock Accelerator)"
+          "display": "Plasma Accelerator (Mk II Plasma Shock Accelerator, Fixed)"
         },
         {
           "ammo": 100,
@@ -10503,7 +9368,7 @@
           "symbol": "Hpt_PlasmaAccelerator_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Plasma Accelerator",
-          "display": "Plasma Accelerator"
+          "display": "Plasma Accelerator (Fixed)"
         }
       ],
       "pl": [
@@ -10533,7 +9398,7 @@
           "symbol": "Hpt_PulseLaser_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Fixed)"
         },
         {
           "breachdmg": 1.3,
@@ -10561,7 +9426,7 @@
           "symbol": "Hpt_PulseLaser_Gimbal_Small",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Gimballed)"
         },
         {
           "breachdmg": 1,
@@ -10589,7 +9454,7 @@
           "symbol": "Hpt_PulseLaser_Turret_Small",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Turreted)"
         },
         {
           "breachdmg": 3,
@@ -10617,7 +9482,7 @@
           "symbol": "Hpt_PulseLaser_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Fixed)"
         },
         {
           "breachdmg": 2.4,
@@ -10648,7 +9513,7 @@
           "symbol": "Hpt_PulseLaser_Fixed_Medium_Disruptor",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser (Disruptor)"
+          "display": "Pulse Laser (Disruptor, Fixed)"
         },
         {
           "breachdmg": 2.3,
@@ -10676,7 +9541,7 @@
           "symbol": "Hpt_PulseLaser_Gimbal_Medium",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Gimballed)"
         },
         {
           "breachdmg": 1.7,
@@ -10704,7 +9569,7 @@
           "symbol": "Hpt_PulseLaser_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Turreted)"
         },
         {
           "breachdmg": 5.1,
@@ -10732,7 +9597,7 @@
           "symbol": "Hpt_PulseLaser_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Fixed)"
         },
         {
           "breachdmg": 3.9,
@@ -10760,7 +9625,7 @@
           "symbol": "Hpt_PulseLaser_Gimbal_Large",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Gimballed)"
         },
         {
           "breachdmg": 3,
@@ -10788,7 +9653,7 @@
           "symbol": "Hpt_PulseLaser_Turret_Large",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Turreted)"
         },
         {
           "breachdmg": 8.7,
@@ -10816,7 +9681,7 @@
           "symbol": "Hpt_PulseLaser_Fixed_Huge",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Fixed)"
         },
         {
           "breachdmg": 6.6,
@@ -10844,7 +9709,7 @@
           "symbol": "Hpt_PulseLaser_Gimbal_Huge",
           "family": "hardpoint",
           "group_name": "Pulse Laser",
-          "display": "Pulse Laser"
+          "display": "Pulse Laser (Gimballed)"
         }
       ],
       "rg": [
@@ -10879,7 +9744,7 @@
           "symbol": "Hpt_Railgun_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Rail Gun",
-          "display": "Rail Gun"
+          "display": "Rail Gun (Fixed)"
         },
         {
           "ammo": 80,
@@ -10912,7 +9777,7 @@
           "symbol": "Hpt_Railgun_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Rail Gun",
-          "display": "Rail Gun"
+          "display": "Rail Gun (Fixed)"
         },
         {
           "ammo": 240,
@@ -10951,56 +9816,7 @@
           "symbol": "Hpt_Railgun_Fixed_Medium_Burst",
           "family": "hardpoint",
           "group_name": "Rail Gun",
-          "display": "Rail Gun (Imperial Hammer)"
-        },
-        {
-          "ammo": 80,
-          "breachdmg": 39.5,
-          "breachmax": 0.8,
-          "breachmin": 0.4,
-          "charge": 1.2,
-          "class": 2,
-          "clip": 1,
-          "cost": 0,
-          "damage": 41.5,
-          "damagedist": {
-            "T": 0.6666666666666666,
-            "K": 0.3333333333333333
-          },
-          "distdraw": 5.11,
-          "falloff": 1000,
-          "fireint": 0.36,
-          "grp": "rg",
-          "id": "6C",
-          "integrity": 51,
-          "mass": 4,
-          "mount": "F",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Weapon_HighCapacity",
-              "Weapon_LongRange"
-            ],
-            "grade": 5,
-            "canApplyExperimental": false,
-            "experimentalEffects": [
-              "special_feedback_cascade"
-            ],
-            "description": "This module has been pre-engineered with Grade 5 High Cap & Long Range modifications, and Feedback Cascade Experimental Effect.",
-            "availability": "CG"
-          },
-          "name": "Railgun (HCap+LR+FCasc)",
-          "piercing": 100,
-          "power": 2.6895,
-          "range": 3000,
-          "rating": "B",
-          "reload": 1.25,
-          "thermload": 20,
-          "symbol": "Hpt_Railgun_Fixed_Medium",
-          "family": "hardpoint",
-          "group_name": "Rail Gun",
-          "display": "Rail Gun (Railgun (HCap+LR+FCasc))"
+          "display": "Rail Gun (Imperial Hammer, Fixed)"
         }
       ],
       "rfl": [
@@ -11033,7 +9849,7 @@
           "symbol": "Hpt_FlakMortar_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Remote Release Flak Launcher",
-          "display": "Remote Release Flak Launcher"
+          "display": "Remote Release Flak Launcher (Fixed)"
         },
         {
           "ammo": 32,
@@ -11064,7 +9880,7 @@
           "symbol": "Hpt_FlakMortar_Turret_Medium",
           "family": "hardpoint",
           "group_name": "Remote Release Flak Launcher",
-          "display": "Remote Release Flak Launcher"
+          "display": "Remote Release Flak Launcher (Turreted)"
         }
       ],
       "tbrfl": [
@@ -11095,8 +9911,8 @@
             "K": 1
           },
           "family": "hardpoint",
-          "group_name": "tbrfl",
-          "display": "tbrfl"
+          "group_name": "Remote Release Flechette Launcher",
+          "display": "Remote Release Flechette Launcher (Fixed)"
         },
         {
           "rating": "B",
@@ -11125,8 +9941,8 @@
             "K": 1
           },
           "family": "hardpoint",
-          "group_name": "tbrfl",
-          "display": "tbrfl"
+          "group_name": "Remote Release Flechette Launcher",
+          "display": "Remote Release Flechette Launcher (Turreted)"
         }
       ],
       "scl": [
@@ -11159,8 +9975,8 @@
           "thermload": 3.6,
           "symbol": "Hpt_Mining_SeismChrgWarhd_Turret_Medium",
           "family": "hardpoint",
-          "group_name": "scl",
-          "display": "scl"
+          "group_name": "Seismic Charge Launcher",
+          "display": "Seismic Charge Launcher (Turreted)"
         },
         {
           "breachdmg": 3,
@@ -11191,8 +10007,8 @@
           "thermload": 3.6,
           "symbol": "Hpt_Mining_SeismChrgWarhd_Fixed_Medium",
           "family": "hardpoint",
-          "group_name": "scl",
-          "display": "scl"
+          "group_name": "Seismic Charge Launcher",
+          "display": "Seismic Charge Launcher (Fixed)"
         }
       ],
       "tbsc": [
@@ -11225,8 +10041,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Fixed)"
         },
         {
           "rating": "E",
@@ -11257,8 +10073,8 @@
           "id": "yR",
           "symbol": "Hpt_PlasmaShockCannon_Gimbal_Small",
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Gimballed)"
         },
         {
           "rating": "F",
@@ -11289,8 +10105,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Turreted)"
         },
         {
           "rating": "D",
@@ -11321,8 +10137,8 @@
           "id": "2O",
           "symbol": "Hpt_PlasmaShockCannon_Gimbal_Medium",
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Gimballed)"
         },
         {
           "grp": "tbsc",
@@ -11353,8 +10169,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Fixed)"
         },
         {
           "rating": "E",
@@ -11387,8 +10203,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Turreted)"
         },
         {
           "rating": "C",
@@ -11421,8 +10237,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Fixed)"
         },
         {
           "rating": "C",
@@ -11453,8 +10269,8 @@
           "id": "2N",
           "symbol": "Hpt_PlasmaShockCannon_Gimbal_Large",
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Gimballed)"
         },
         {
           "rating": "D",
@@ -11485,8 +10301,8 @@
           },
           "falloff": 2500,
           "family": "hardpoint",
-          "group_name": "tbsc",
-          "display": "tbsc"
+          "group_name": "Shock Cannon",
+          "display": "Shock Cannon (Turreted)"
         }
       ],
       "sdm": [
@@ -11520,8 +10336,8 @@
           "thermload": 2.2,
           "symbol": "Hpt_Mining_SubSurfDispMisle_Fixed_Small",
           "family": "hardpoint",
-          "group_name": "sdm",
-          "display": "sdm"
+          "group_name": "Sub-Surface Displacement Missile",
+          "display": "Sub-Surface Displacement Missile (Fixed)"
         },
         {
           "breachdmg": 0.5,
@@ -11553,8 +10369,8 @@
           "thermload": 2.2,
           "symbol": "Hpt_Mining_Subsurfdispmisle_Turret_Small",
           "family": "hardpoint",
-          "group_name": "sdm",
-          "display": "sdm"
+          "group_name": "Sub-Surface Displacement Missile",
+          "display": "Sub-Surface Displacement Missile (Turreted)"
         },
         {
           "breachdmg": 0.5,
@@ -11586,8 +10402,8 @@
           "thermload": 2.9,
           "symbol": "Hpt_Mining_SubSurfDispMisle_Fixed_Medium",
           "family": "hardpoint",
-          "group_name": "sdm",
-          "display": "sdm"
+          "group_name": "Sub-Surface Displacement Missile",
+          "display": "Sub-Surface Displacement Missile (Fixed)"
         },
         {
           "breachdmg": 0.5,
@@ -11619,8 +10435,8 @@
           "thermload": 2.9,
           "symbol": "Hpt_Mining_Subsurfdispmisle_Turret_Medium",
           "family": "hardpoint",
-          "group_name": "sdm",
-          "display": "sdm"
+          "group_name": "Sub-Surface Displacement Missile",
+          "display": "Sub-Surface Displacement Missile (Turreted)"
         },
         {
           "breachdmg": 0.5,
@@ -11651,8 +10467,8 @@
           "thermload": 2.9,
           "symbol": "Hpt_Human_Extraction_Fixed_Medium",
           "family": "hardpoint",
-          "group_name": "sdm",
-          "display": "sdm (Extraction Missile)"
+          "group_name": "Sub-Surface Displacement Missile",
+          "display": "Extraction Missile, Fixed"
         }
       ],
       "tp": [
@@ -11685,7 +10501,7 @@
           "symbol": "Hpt_AdvancedTorpPylon_Fixed_Small",
           "family": "hardpoint",
           "group_name": "Torpedo Pylon",
-          "display": "Torpedo Pylon"
+          "display": "Torpedo Pylon (Fixed)"
         },
         {
           "ammo": 2,
@@ -11716,7 +10532,7 @@
           "symbol": "Hpt_AdvancedTorpPylon_Fixed_Medium",
           "family": "hardpoint",
           "group_name": "Torpedo Pylon",
-          "display": "Torpedo Pylon"
+          "display": "Torpedo Pylon (Fixed)"
         },
         {
           "ammo": 4,
@@ -11747,7 +10563,7 @@
           "symbol": "Hpt_AdvancedTorpPylon_Fixed_Large",
           "family": "hardpoint",
           "group_name": "Torpedo Pylon",
-          "display": "Torpedo Pylon"
+          "display": "Torpedo Pylon (Fixed)"
         }
       ]
     },
@@ -11927,8 +10743,8 @@
           "scantime": 10,
           "symbol": "Hpt_CloudScanner_Size0_Class5",
           "family": "utility",
-          "group_name": "ws",
-          "display": "ws"
+          "group_name": "Frame Shift Wake Scanner",
+          "display": "Frame Shift Wake Scanner"
         },
         {
           "class": 0,
@@ -11943,8 +10759,8 @@
           "scantime": 10,
           "symbol": "Hpt_CloudScanner_Size0_Class4",
           "family": "utility",
-          "group_name": "ws",
-          "display": "ws"
+          "group_name": "Frame Shift Wake Scanner",
+          "display": "Frame Shift Wake Scanner"
         },
         {
           "class": 0,
@@ -11959,8 +10775,8 @@
           "scantime": 10,
           "symbol": "Hpt_CloudScanner_Size0_Class3",
           "family": "utility",
-          "group_name": "ws",
-          "display": "ws"
+          "group_name": "Frame Shift Wake Scanner",
+          "display": "Frame Shift Wake Scanner"
         },
         {
           "class": 0,
@@ -11975,8 +10791,8 @@
           "scantime": 10,
           "symbol": "Hpt_CloudScanner_Size0_Class2",
           "family": "utility",
-          "group_name": "ws",
-          "display": "ws"
+          "group_name": "Frame Shift Wake Scanner",
+          "display": "Frame Shift Wake Scanner"
         },
         {
           "class": 0,
@@ -11991,8 +10807,8 @@
           "scantime": 10,
           "symbol": "Hpt_CloudScanner_Size0_Class1",
           "family": "utility",
-          "group_name": "ws",
-          "display": "ws"
+          "group_name": "Frame Shift Wake Scanner",
+          "display": "Frame Shift Wake Scanner"
         }
       ],
       "hs": [
@@ -12020,41 +10836,6 @@
           "family": "utility",
           "group_name": "Heat Sink Launcher",
           "display": "Heat Sink Launcher"
-        },
-        {
-          "ammo": 3,
-          "ammocost": 25,
-          "class": 0,
-          "clip": 1,
-          "cost": 0,
-          "distdraw": 2,
-          "drain": 100,
-          "duration": 10,
-          "eps": 0.4,
-          "fireint": 5.0,
-          "grp": "hs",
-          "id": "5W",
-          "integrity": 20,
-          "mass": 0.65,
-          "name": "Heat Sink Launcher (Sirius)",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Misc_HeatSinkCapacity"
-            ],
-            "grade": 1,
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 1 Expanded Heat Sink Capacity modifications."
-          },
-          "passive": 1,
-          "power": 0.2,
-          "rating": "I",
-          "reload": 10,
-          "symbol": "Hpt_HeatSinkLauncher_Turret_Tiny",
-          "family": "utility",
-          "group_name": "Heat Sink Launcher",
-          "display": "Heat Sink Launcher (Heat Sink Launcher (Sirius))"
         }
       ],
       "kw": [
@@ -12139,40 +10920,6 @@
           "display": "Kill Warrant Scanner"
         }
       ],
-      "mh": [
-        {
-          "class": 0,
-          "cost": 0,
-          "grp": "mh",
-          "id": "4G",
-          "integrity": 0,
-          "mass": 0,
-          "name": "Unrecognised Utility",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "power": 0,
-          "rating": "I",
-          "symbol": "Hpt_Missing_Utility",
-          "family": "utility",
-          "group_name": "mh",
-          "display": "mh (Unrecognised Utility)"
-        },
-        {
-          "class": 0,
-          "cost": 10,
-          "grp": "mh",
-          "id": "4H",
-          "integrity": 0,
-          "mass": 0,
-          "name": "Unrecognised Weapon",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "power": 0,
-          "rating": "Z",
-          "symbol": "Hpt_Missing_Hardpoint",
-          "family": "utility",
-          "group_name": "mh",
-          "display": "mh (Unrecognised Weapon)"
-        }
-      ],
       "po": [
         {
           "ammo": 10000,
@@ -12221,8 +10968,8 @@
           "boot": 3,
           "symbol": "Hpt_MRAScanner_Size0_Class5",
           "family": "utility",
-          "group_name": "Pulse Wave Xeno Scanner",
-          "display": "Pulse Wave Xeno Scanner"
+          "group_name": "Pulse Wave Analyser",
+          "display": "Pulse Wave Analyser"
         },
         {
           "rating": "B",
@@ -12239,8 +10986,8 @@
           "grp": "pwa",
           "symbol": "hpt_mrascanner_size0_class4",
           "family": "utility",
-          "group_name": "Pulse Wave Xeno Scanner",
-          "display": "Pulse Wave Xeno Scanner"
+          "group_name": "Pulse Wave Analyser",
+          "display": "Pulse Wave Analyser"
         },
         {
           "rating": "C",
@@ -12257,8 +11004,8 @@
           "grp": "pwa",
           "symbol": "hpt_mrascanner_size0_class3",
           "family": "utility",
-          "group_name": "Pulse Wave Xeno Scanner",
-          "display": "Pulse Wave Xeno Scanner"
+          "group_name": "Pulse Wave Analyser",
+          "display": "Pulse Wave Analyser"
         },
         {
           "rating": "D",
@@ -12275,8 +11022,8 @@
           "grp": "pwa",
           "symbol": "hpt_mrascanner_size0_class2",
           "family": "utility",
-          "group_name": "Pulse Wave Xeno Scanner",
-          "display": "Pulse Wave Xeno Scanner"
+          "group_name": "Pulse Wave Analyser",
+          "display": "Pulse Wave Analyser"
         },
         {
           "rating": "E",
@@ -12293,8 +11040,8 @@
           "grp": "pwa",
           "symbol": "hpt_mrascanner_size0_class1",
           "family": "utility",
-          "group_name": "Pulse Wave Xeno Scanner",
-          "display": "Pulse Wave Xeno Scanner"
+          "group_name": "Pulse Wave Analyser",
+          "display": "Pulse Wave Analyser"
         }
       ],
       "sb": [
@@ -12412,8 +11159,8 @@
           "range": 0,
           "symbol": "Hpt_AntiUnknownShutdown_Tiny_V2",
           "family": "utility",
-          "group_name": "Shock Cannon",
-          "display": "Shock Cannon (Thargoid Pulse Neutraliser)"
+          "group_name": "Shutdown Field Neutraliser",
+          "display": "Shutdown Field Neutraliser (Thargoid Pulse Neutraliser)"
         },
         {
           "class": 0,
@@ -12432,8 +11179,8 @@
           "range": 3000,
           "symbol": "Hpt_AntiUnknownShutdown_Tiny",
           "family": "utility",
-          "group_name": "Shock Cannon",
-          "display": "Shock Cannon (Shutdown Field Neutraliser)"
+          "group_name": "Shutdown Field Neutraliser",
+          "display": "Shutdown Field Neutraliser"
         }
       ],
       "xs": [
@@ -12454,7 +11201,7 @@
           "symbol": "Hpt_XenoScannerMk2_Basic_Tiny",
           "family": "utility",
           "group_name": "Xeno Scanner",
-          "display": "Xeno Scanner (Enhanced Xeno Scanner)"
+          "display": "Enhanced Xeno Scanner"
         },
         {
           "class": 0,
@@ -12473,7 +11220,7 @@
           "symbol": "Hpt_XenoScanner_Advanced_Tiny",
           "family": "utility",
           "group_name": "Xeno Scanner",
-          "display": "Xeno Scanner (Pulse Wave Xeno Scanner)"
+          "display": "Pulse Wave Xeno Scanner"
         },
         {
           "class": 0,
@@ -13413,6 +12160,62 @@
           "family": "optional",
           "group_name": "Business Class Passenger Cabin",
           "display": "Business Class Passenger Cabin"
+        },
+        {
+          "class": 3,
+          "cost": 35610,
+          "grp": "pci",
+          "id": "mk2_pci3",
+          "mass": 5,
+          "passengers": 4,
+          "rating": "C",
+          "symbol": "Int_MkII_PassengerCabin_Size3_Class2",
+          "ukName": "BC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Business Class Passenger Cabin",
+          "display": "Business Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 4,
+          "cost": 75820,
+          "grp": "pci",
+          "id": "mk2_pci4",
+          "mass": 10,
+          "passengers": 9,
+          "rating": "C",
+          "symbol": "Int_MkII_PassengerCabin_Size4_Class2",
+          "ukName": "BC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Business Class Passenger Cabin",
+          "display": "Business Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 5,
+          "cost": 123150,
+          "grp": "pci",
+          "id": "mk2_pci5",
+          "mass": 20,
+          "passengers": 15,
+          "rating": "C",
+          "symbol": "Int_MkII_PassengerCabin_Size5_Class2",
+          "ukName": "BC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Business Class Passenger Cabin",
+          "display": "Business Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 6,
+          "cost": 245640,
+          "grp": "pci",
+          "id": "mk2_pci6",
+          "mass": 40,
+          "passengers": 24,
+          "rating": "C",
+          "symbol": "Int_MkII_PassengerCabin_Size6_Class2",
+          "ukName": "BC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Business Class Passenger Cabin",
+          "display": "Business Class Passenger Cabin (Mk II)"
         }
       ],
       "cr": [
@@ -13556,32 +12359,6 @@
           "display": "Cargo Rack (Corrosion Resistant)"
         },
         {
-          "cargo": 32,
-          "class": 5,
-          "cost": 0,
-          "grp": "cr",
-          "id": "7X",
-          "rating": "E",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "CargoRack_IncreasedCapacity"
-            ],
-            "grade": 5,
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 Expanded Capacity.",
-            "availability": "CG"
-          },
-          "mass": 0,
-          "symbol": "Int_CargoRack_Size5_Class1",
-          "name": "Expanded Capacity Cargo Rack",
-          "ukName": "Expanded Capacity Cargo Rack",
-          "family": "optional",
-          "group_name": "Cargo Rack",
-          "display": "Cargo Rack (Expanded Capacity Cargo Rack)"
-        },
-        {
           "cargo": 64,
           "class": 6,
           "cost": 362591,
@@ -13611,32 +12388,6 @@
           "family": "optional",
           "group_name": "Cargo Rack",
           "display": "Cargo Rack (Corrosion Resistant)"
-        },
-        {
-          "cargo": 64,
-          "class": 6,
-          "cost": 0,
-          "grp": "cr",
-          "id": "7Y",
-          "rating": "E",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "CargoRack_IncreasedCapacity"
-            ],
-            "grade": 5,
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 Expanded Capacity.",
-            "availability": "CG"
-          },
-          "mass": 0,
-          "symbol": "Int_CargoRack_Size6_Class1",
-          "name": "Expanded Capacity Cargo Rack",
-          "ukName": "Expanded Capacity Cargo Rack",
-          "family": "optional",
-          "group_name": "Cargo Rack",
-          "display": "Cargo Rack (Expanded Capacity Cargo Rack)"
         },
         {
           "cargo": 128,
@@ -13683,7 +12434,7 @@
           "ukName": "Mk II Cargo Rack",
           "restriction": "Cargo",
           "family": "optional",
-          "group_name": "Mk II Cargo Rack",
+          "group_name": "Large Cargo Rack",
           "display": "Mk II Cargo Rack (MkII Cargo Rack)"
         },
         {
@@ -13699,7 +12450,7 @@
           "ukName": "Mk II Cargo Rack",
           "restriction": "Cargo",
           "family": "optional",
-          "group_name": "Mk II Cargo Rack",
+          "group_name": "Large Cargo Rack",
           "display": "Mk II Cargo Rack (MkII Cargo Rack)"
         }
       ],
@@ -14059,7 +12810,7 @@
           "symbol": "Int_DroneControl_Decontamination_Size1_Class1",
           "ukName": "Decontamination",
           "family": "optional",
-          "group_name": "Decontamination",
+          "group_name": "Decontamination Limpet Controller",
           "display": "Decontamination"
         },
         {
@@ -14075,7 +12826,7 @@
           "symbol": "Int_DroneControl_Decontamination_Size3_Class1",
           "ukName": "Decontamination",
           "family": "optional",
-          "group_name": "Decontamination",
+          "group_name": "Decontamination Limpet Controller",
           "display": "Decontamination"
         },
         {
@@ -14091,7 +12842,7 @@
           "symbol": "Int_DroneControl_Decontamination_Size5_Class1",
           "ukName": "Decontamination",
           "family": "optional",
-          "group_name": "Decontamination",
+          "group_name": "Decontamination Limpet Controller",
           "display": "Decontamination"
         },
         {
@@ -14107,7 +12858,7 @@
           "symbol": "Int_DroneControl_Decontamination_Size7_Class1",
           "ukName": "Decontamination",
           "family": "optional",
-          "group_name": "Decontamination",
+          "group_name": "Decontamination Limpet Controller",
           "display": "Decontamination"
         }
       ],
@@ -14213,6 +12964,76 @@
           "family": "optional",
           "group_name": "Economy Class Passenger Cabin",
           "display": "Economy Class Passenger Cabin"
+        },
+        {
+          "class": 2,
+          "cost": 5750,
+          "grp": "pce",
+          "id": "mk2_pce2",
+          "mass": 2.5,
+          "passengers": 3,
+          "rating": "D",
+          "symbol": "Int_MkII_PassengerCabin_Size2_Class1",
+          "ukName": "EC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Economy Class Passenger Cabin",
+          "display": "Economy Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 3,
+          "cost": 11540,
+          "grp": "pce",
+          "id": "mk2_pce3",
+          "mass": 5,
+          "passengers": 6,
+          "rating": "D",
+          "symbol": "Int_MkII_PassengerCabin_Size3_Class1",
+          "ukName": "EC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Economy Class Passenger Cabin",
+          "display": "Economy Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 4,
+          "cost": 25270,
+          "grp": "pce",
+          "id": "mk2_pce4",
+          "mass": 10,
+          "passengers": 12,
+          "rating": "D",
+          "symbol": "Int_MkII_PassengerCabin_Size4_Class1",
+          "ukName": "EC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Economy Class Passenger Cabin",
+          "display": "Economy Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 5,
+          "cost": 46610,
+          "grp": "pce",
+          "id": "mk2_pce5",
+          "mass": 20,
+          "passengers": 24,
+          "rating": "D",
+          "symbol": "Int_MkII_PassengerCabin_Size5_Class1",
+          "ukName": "EC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Economy Class Passenger Cabin",
+          "display": "Economy Class Passenger Cabin (Mk II)"
+        },
+        {
+          "class": 6,
+          "cost": 81880,
+          "grp": "pce",
+          "id": "mk2_pce6",
+          "mass": 40,
+          "passengers": 48,
+          "rating": "D",
+          "symbol": "Int_MkII_PassengerCabin_Size6_Class1",
+          "ukName": "EC Passenger Cabin (Mk II)",
+          "family": "optional",
+          "group_name": "Economy Class Passenger Cabin",
+          "display": "Economy Class Passenger Cabin (Mk II)"
         }
       ],
       "ews": [
@@ -14227,7 +13048,7 @@
           "grp": "ews",
           "ukName": "Experimental Weapon Stabilizer",
           "family": "optional",
-          "group_name": "Experimental Weapon Stabilizer",
+          "group_name": "Experimental Weapon Stabiliser",
           "display": "Experimental Weapon Stabilizer"
         },
         {
@@ -14241,7 +13062,7 @@
           "grp": "ews",
           "ukName": "Experimental Weapon Stabilizer",
           "family": "optional",
-          "group_name": "Experimental Weapon Stabilizer",
+          "group_name": "Experimental Weapon Stabiliser",
           "display": "Experimental Weapon Stabilizer"
         }
       ],
@@ -14361,7 +13182,7 @@
           "symbol": "Int_FSDInterdictor_Size1_Class5",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14379,7 +13200,7 @@
           "symbol": "Int_FSDInterdictor_Size1_Class4",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14397,7 +13218,7 @@
           "symbol": "Int_FSDInterdictor_Size1_Class3",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14415,7 +13236,7 @@
           "symbol": "Int_FSDInterdictor_Size1_Class2",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14433,7 +13254,7 @@
           "symbol": "Int_FSDInterdictor_Size1_Class1",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14451,7 +13272,7 @@
           "symbol": "Int_FSDInterdictor_Size2_Class5",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14469,7 +13290,7 @@
           "symbol": "Int_FSDInterdictor_Size2_Class4",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14487,7 +13308,7 @@
           "symbol": "Int_FSDInterdictor_Size2_Class3",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14505,7 +13326,7 @@
           "symbol": "Int_FSDInterdictor_Size2_Class2",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14523,7 +13344,7 @@
           "symbol": "Int_FSDInterdictor_Size2_Class1",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14541,7 +13362,7 @@
           "symbol": "Int_FSDInterdictor_Size3_Class5",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14559,7 +13380,7 @@
           "symbol": "Int_FSDInterdictor_Size3_Class4",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14577,7 +13398,7 @@
           "symbol": "Int_FSDInterdictor_Size3_Class3",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14595,7 +13416,7 @@
           "symbol": "Int_FSDInterdictor_Size3_Class2",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14613,7 +13434,7 @@
           "symbol": "Int_FSDInterdictor_Size3_Class1",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14631,7 +13452,7 @@
           "symbol": "Int_FSDInterdictor_Size4_Class5",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14649,7 +13470,7 @@
           "symbol": "Int_FSDInterdictor_Size4_Class4",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14667,7 +13488,7 @@
           "symbol": "Int_FSDInterdictor_Size4_Class3",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14685,7 +13506,7 @@
           "symbol": "Int_FSDInterdictor_Size4_Class2",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         },
         {
@@ -14703,7 +13524,7 @@
           "symbol": "Int_FSDInterdictor_Size4_Class1",
           "ukName": "FSD Interdictor",
           "family": "optional",
-          "group_name": "FSD Interdictor",
+          "group_name": "Frame Shift Drive Interdictor",
           "display": "FSD Interdictor"
         }
       ],
@@ -17081,24 +15902,6 @@
           "military_ok": true
         }
       ],
-      "mm": [
-        {
-          "class": 0,
-          "cost": 0,
-          "grp": "mm",
-          "id": "4I",
-          "integrity": 0,
-          "mass": 0,
-          "name": "Unrecognised Module",
-          "info": "Not in Coriolis yet. Check GitHub issues. Add Issue if needed.",
-          "power": 0,
-          "rating": "Z",
-          "symbol": "Int_Missing_Module",
-          "family": "optional",
-          "group_name": "mm",
-          "display": "mm (Unrecognised Module)"
-        }
-      ],
       "mrp": [
         {
           "class": 1,
@@ -17277,8 +16080,8 @@
           "symbol": "Int_MultiDroneControl_Operations_Size3_Class4",
           "type": "O",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Operations Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Operations Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17295,8 +16098,8 @@
           "time": 300,
           "type": "X",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Xeno Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Xeno Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17312,8 +16115,8 @@
           "symbol": "Int_MultiDroneControl_Mining_Size3_Class3",
           "type": "M",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Mining Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Mining Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17330,8 +16133,8 @@
           "symbol": "Int_MultiDroneControl_Operations_Size3_Class3",
           "type": "O",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Operations Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Operations Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17348,8 +16151,8 @@
           "symbol": "Int_MultiDroneControl_Rescue_Size3_Class3",
           "type": "R",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Rescue Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Rescue Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17366,8 +16169,8 @@
           "time": 300,
           "type": "X",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Xeno Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Xeno Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17384,8 +16187,8 @@
           "symbol": "Int_MultiDroneControl_Rescue_Size3_Class2",
           "type": "R",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Rescue Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Rescue Multi Limpet Controller"
         },
         {
           "class": 3,
@@ -17401,8 +16204,8 @@
           "symbol": "Int_MultiDroneControl_Mining_Size3_Class1",
           "type": "M",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Mining Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Mining Multi Limpet Controller"
         },
         {
           "class": 5,
@@ -17420,8 +16223,8 @@
           "symbol": "Int_MultiDroneControl_MiningV2_Size5_Class5",
           "type": "M",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Mk II Mining Multi-Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Mk II Mining Multi-Limpet Controller"
         },
         {
           "class": 7,
@@ -17438,8 +16241,8 @@
           "symbol": "Int_MultiDroneControl_Universal_Size7_Class5",
           "type": "U",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Universal Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Universal Multi Limpet Controller"
         },
         {
           "class": 7,
@@ -17456,8 +16259,8 @@
           "symbol": "Int_MultiDroneControl_Universal_Size7_Class3",
           "type": "U",
           "family": "optional",
-          "group_name": "mlc",
-          "display": "mlc (Universal Multi Limpet Controller)"
+          "group_name": "Multi Limpet Controller",
+          "display": "Universal Multi Limpet Controller"
         }
       ],
       "pas": [
@@ -17474,7 +16277,7 @@
           "symbol": "Int_PlanetApproachSuite",
           "ukName": "Planetary Approach Suite (Horizons)",
           "family": "optional",
-          "group_name": "Planetary Approach Suite (Horizons)",
+          "group_name": "Planetary Approach Suite",
           "display": "Planetary Approach Suite (Horizons)"
         },
         {
@@ -17490,7 +16293,7 @@
           "symbol": "int_planetapproachsuite_advanced",
           "ukName": "Advanced Planetary Approach Suite (Odyssey)",
           "family": "optional",
-          "group_name": "Advanced Planetary Approach Suite (Odyssey)",
+          "group_name": "Planetary Approach Suite",
           "display": "Advanced Planetary Approach Suite (Odyssey)"
         }
       ],
@@ -18164,8 +16967,8 @@
           "symbol": "Int_DroneControl_Recon_Size1_Class1",
           "ukName": "Recon",
           "family": "optional",
-          "group_name": "Retributor Beam Laser",
-          "display": "Retributor Beam Laser"
+          "group_name": "Recon Limpet Controller",
+          "display": "Recon Limpet Controller"
         },
         {
           "class": 3,
@@ -18182,8 +16985,8 @@
           "symbol": "Int_DroneControl_Recon_Size3_Class1",
           "ukName": "Recon",
           "family": "optional",
-          "group_name": "Retributor Beam Laser",
-          "display": "Retributor Beam Laser"
+          "group_name": "Recon Limpet Controller",
+          "display": "Recon Limpet Controller"
         },
         {
           "class": 5,
@@ -18200,8 +17003,8 @@
           "symbol": "Int_DroneControl_Recon_Size5_Class1",
           "ukName": "Recon",
           "family": "optional",
-          "group_name": "Retributor Beam Laser",
-          "display": "Retributor Beam Laser"
+          "group_name": "Recon Limpet Controller",
+          "display": "Recon Limpet Controller"
         },
         {
           "class": 7,
@@ -18218,8 +17021,8 @@
           "symbol": "Int_DroneControl_Recon_Size7_Class1",
           "ukName": "Recon",
           "family": "optional",
-          "group_name": "Retributor Beam Laser",
-          "display": "Retributor Beam Laser"
+          "group_name": "Recon Limpet Controller",
+          "display": "Recon Limpet Controller"
         }
       ],
       "rf": [
@@ -18518,8 +17321,8 @@
           "symbol": "Int_DroneControl_Repair_Size1_Class5",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 1,
@@ -18534,8 +17337,8 @@
           "symbol": "Int_DroneControl_Repair_Size1_Class4",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 1,
@@ -18550,8 +17353,8 @@
           "symbol": "Int_DroneControl_Repair_Size1_Class3",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 1,
@@ -18566,8 +17369,8 @@
           "symbol": "Int_DroneControl_Repair_Size1_Class2",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 1,
@@ -18582,8 +17385,8 @@
           "symbol": "Int_DroneControl_Repair_Size1_Class1",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 3,
@@ -18598,8 +17401,8 @@
           "symbol": "Int_DroneControl_Repair_Size3_Class5",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 3,
@@ -18614,8 +17417,8 @@
           "symbol": "Int_DroneControl_Repair_Size3_Class4",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 3,
@@ -18630,8 +17433,8 @@
           "symbol": "Int_DroneControl_Repair_Size3_Class3",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 3,
@@ -18646,8 +17449,8 @@
           "symbol": "Int_DroneControl_Repair_Size3_Class2",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 3,
@@ -18662,8 +17465,8 @@
           "symbol": "Int_DroneControl_Repair_Size3_Class1",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 5,
@@ -18678,8 +17481,8 @@
           "symbol": "Int_DroneControl_Repair_Size5_Class5",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 5,
@@ -18694,8 +17497,8 @@
           "symbol": "Int_DroneControl_Repair_Size5_Class4",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 5,
@@ -18710,8 +17513,8 @@
           "symbol": "Int_DroneControl_Repair_Size5_Class3",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 5,
@@ -18726,8 +17529,8 @@
           "symbol": "Int_DroneControl_Repair_Size5_Class2",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 5,
@@ -18742,8 +17545,8 @@
           "symbol": "Int_DroneControl_Repair_Size5_Class1",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 7,
@@ -18758,8 +17561,8 @@
           "symbol": "Int_DroneControl_Repair_Size7_Class5",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 7,
@@ -18774,8 +17577,8 @@
           "symbol": "Int_DroneControl_Repair_Size7_Class4",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 7,
@@ -18790,8 +17593,8 @@
           "symbol": "Int_DroneControl_Repair_Size7_Class3",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 7,
@@ -18806,8 +17609,8 @@
           "symbol": "Int_DroneControl_Repair_Size7_Class2",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         },
         {
           "class": 7,
@@ -18822,8 +17625,8 @@
           "symbol": "Int_DroneControl_Repair_Size7_Class1",
           "ukName": "Repair",
           "family": "optional",
-          "group_name": "Recon Limpet Controller",
-          "display": "Recon Limpet Controller"
+          "group_name": "Repair Limpet Controller",
+          "display": "Repair Limpet Controller"
         }
       ],
       "rsl": [
@@ -20893,34 +19696,8 @@
           "symbol": "Int_DetailedSurfaceScanner_Tiny",
           "ukName": "Surface Scanner",
           "family": "optional",
-          "group_name": "Frame Shift Wake Scanner",
-          "display": "Frame Shift Wake Scanner (Detailed Surface Scanner)"
-        },
-        {
-          "class": 1,
-          "cost": 0,
-          "grp": "ss",
-          "id": "5V",
-          "mass": 0,
-          "name": "Detailed Surface Scanner V1",
-          "power": 0,
-          "proberadius": 0.2,
-          "rating": "I",
-          "preEngineered": {
-            "reengineerable": false,
-            "gradeChangeable": false,
-            "blueprints": [
-              "Sensor_Expanded"
-            ],
-            "grade": 1,
-            "canApplyExperimental": false,
-            "description": "This module has been pre-engineered with Grade 5 Expanded Probe Radius modifications."
-          },
-          "symbol": "Int_DetailedSurfaceScanner_Tiny",
-          "ukName": "Detailed Surface Scanner V1",
-          "family": "optional",
-          "group_name": "Frame Shift Wake Scanner",
-          "display": "Frame Shift Wake Scanner (Detailed Surface Scanner V1)"
+          "group_name": "Detailed Surface Scanner",
+          "display": "Detailed Surface Scanner"
         }
       ]
     }

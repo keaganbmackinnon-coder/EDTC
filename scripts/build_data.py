@@ -652,10 +652,15 @@ GROUP_NAMES = {
     "pp": "Power Plant", "t": "Thrusters", "fsd": "Frame Shift Drive",
     "ls": "Life Support", "pd": "Power Distributor", "s": "Sensors", "ft": "Fuel Tank",
     # optional internals
-    "cr": "Cargo Rack", "sg": "Shield Generator", "psg": "Prismatic Shield Generator",
+    # NOTE: keys are coriolis-data 'grp' codes — verified against symbols
+    # (Session 48: ss=DSS not wake scanner, sfn=shutdown neutraliser not shock
+    # cannon, rcpl=recon/rpl=repair limpets, ml=mining laser, etc.)
+    "cr": "Cargo Rack", "crl": "Large Cargo Rack", "sg": "Shield Generator",
+    "psg": "Prismatic Shield Generator",
     "bsg": "Bi-Weave Shield Generator", "hr": "Hull Reinforcement Package",
     "mrp": "Module Reinforcement Package", "scb": "Shield Cell Bank",
-    "fsi": "FSD Interdictor", "dss": "Detailed Surface Scanner", "fs": "Fuel Scoop",
+    "fi": "Frame Shift Drive Interdictor", "ss": "Detailed Surface Scanner",
+    "fs": "Fuel Scoop",
     "rf": "Refinery", "am": "Auto Field-Maintenance Unit", "fh": "Fighter Hangar",
     "pv": "Planetary Vehicle Hangar", "pce": "Economy Class Passenger Cabin",
     "pci": "Business Class Passenger Cabin", "pcm": "First Class Passenger Cabin",
@@ -665,23 +670,48 @@ GROUP_NAMES = {
     "gsrp": "Guardian Shield Reinforcement", "mahr": "Meta Alloy Hull Reinforcement",
     "cc": "Collector Limpet Controller", "fx": "Fuel Transfer Limpet Controller",
     "pc": "Prospector Limpet Controller", "hb": "Hatch Breaker Limpet Controller",
-    "rpl": "Recon Limpet Controller", "rsl": "Research Limpet Controller",
-    "dtc": "Decontamination Limpet Controller", "mrl": "Multi Limpet Controller",
+    "rcpl": "Recon Limpet Controller", "rpl": "Repair Limpet Controller",
+    "rsl": "Research Limpet Controller",
+    "dtl": "Decontamination Limpet Controller", "mlc": "Multi Limpet Controller",
+    "ews": "Experimental Weapon Stabiliser", "pas": "Planetary Approach Suite",
     # hardpoints (weapons)
     "bl": "Beam Laser", "pl": "Pulse Laser", "ul": "Burst Laser", "mc": "Multi-cannon",
     "c": "Cannon", "fc": "Fragment Cannon", "rg": "Rail Gun", "pa": "Plasma Accelerator",
-    "mr": "Missile Rack", "dtt": "Dumbfire Missile Rack", "tp": "Torpedo Pylon",
+    "mr": "Missile Rack", "amr": "Advanced Missile Rack", "tp": "Torpedo Pylon",
     "nl": "Mine Launcher", "rfl": "Remote Release Flak Launcher", "axmc": "AX Multi-cannon",
-    "axmr": "AX Missile Rack", "rcpl": "Retributor Beam Laser", "gc": "Guardian Gauss Cannon",
+    "axmr": "AX Missile Rack", "axmce": "Enhanced AX Multi-Cannon",
+    "axmre": "Enhanced AX Missile Rack", "advmc": "Advanced Multi-Cannon",
+    "ggc": "Guardian Gauss Cannon",
     "gpc": "Guardian Plasma Charger", "gsc": "Guardian Shard Cannon",
-    "scan": "Pulse Wave Analyser", "sfn": "Shock Cannon",
+    "abl": "Abrasion Blaster", "ml": "Mining Laser", "mvr": "Mining Volley Repeater",
+    "scl": "Seismic Charge Launcher", "sdm": "Sub-Surface Displacement Missile",
+    "tbem": "Enzyme Missile Rack", "tbrfl": "Remote Release Flechette Launcher",
+    "tbsc": "Shock Cannon", "ntp": "Nanite Torpedo Pylon",
     # utility mounts
     "ch": "Chaff Launcher", "hs": "Heat Sink Launcher", "po": "Point Defence",
     "ec": "Electronic Countermeasure", "sb": "Shield Booster", "kw": "Kill Warrant Scanner",
-    "cs": "Manifest Scanner", "ss": "Frame Shift Wake Scanner", "xs": "Xeno Scanner",
-    "pwa": "Pulse Wave Xeno Scanner", "csl": "Caustic Sink Launcher",
-    "tbrp": "Shutdown Field Neutraliser",
+    "cs": "Manifest Scanner", "ws": "Frame Shift Wake Scanner", "xs": "Xeno Scanner",
+    "pwa": "Pulse Wave Analyser", "csl": "Caustic Sink Launcher",
+    "sfn": "Shutdown Field Neutraliser",
 }
+
+# Mount letter → in-game word, shown inside hardpoint display names
+MOUNT_NAMES = {"F": "Fixed", "G": "Gimballed", "T": "Turreted"}
+
+# Modules missing from coriolis-data — stats from EDSY eddb.js
+# (fdids 129043770..129043778, Panther Clipper Mk II cabins)
+MKII_CABINS = [
+    # (size, class, rating, mass, passengers, cost, grp)
+    (2, 1, "D", 2.5, 3, 5750, "pce"),
+    (3, 1, "D", 5, 6, 11540, "pce"),
+    (4, 1, "D", 10, 12, 25270, "pce"),
+    (5, 1, "D", 20, 24, 46610, "pce"),
+    (6, 1, "D", 40, 48, 81880, "pce"),
+    (3, 2, "C", 5, 4, 35610, "pci"),
+    (4, 2, "C", 10, 9, 75820, "pci"),
+    (5, 2, "C", 20, 15, 123150, "pci"),
+    (6, 2, "C", 40, 24, 245640, "pci"),
+]
 
 # core-slot ordering (matches ships.json core_slots order — see CORE_SLOT_NAMES)
 CORE_GROUP_ORDER = ["pp", "t", "fsd", "ls", "pd", "s", "ft"]
@@ -698,7 +728,19 @@ def _clean_module(entry: dict, group: str, family: str, military_ok: bool) -> di
     # variant label (e.g. "Bi-Weave", "Enhanced Low Power") — coriolis 'name' field
     variant = entry.get("name")
     base = m["group_name"]
-    m["display"] = f"{base} ({variant})" if variant and variant not in base else base
+    if variant and base.lower() in variant.lower():
+        disp = variant                       # "Enhanced Xeno Scanner"
+    elif variant in ("Mining Lance", "Mining Volley Repeater"):
+        disp = variant                       # variant is its own product name
+    elif variant:
+        disp = f"{base} ({variant})"
+    else:
+        disp = base
+    # hardpoints carry their mount in the name — "Pulse Laser (Gimballed)"
+    mount = MOUNT_NAMES.get(entry.get("mount"))
+    if family == "hardpoint" and mount:
+        disp = disp[:-1] + f", {mount})" if disp.endswith(")") else f"{disp} ({mount})"
+    m["display"] = disp
     if military_ok:
         m["military_ok"] = True
     return m
@@ -724,13 +766,21 @@ def build_modules():
     print("\n[7/7] Building modules.json …")
     core, hardpoint, utility, optional = {}, {}, {}, {}
 
+    def _skip(e):
+        # coriolis "Missing module" placeholders aren't real modules
+        return "missing" in str(e.get("symbol", "")).lower()
+
     # standard/ → core internals
     for e in _fetch_module_dir("standard"):
+        if _skip(e):
+            continue
         grp = e.get("grp", "")
         core.setdefault(grp, []).append(_clean_module(e, grp, "core", False))
 
     # hardpoints/ → weapon (has a mount) or utility mount (no mount)
     for e in _fetch_module_dir("hardpoints"):
+        if _skip(e):
+            continue
         grp = e.get("grp", "")
         if e.get("mount") and int(e.get("class", 0)) >= 1:
             hardpoint.setdefault(grp, []).append(_clean_module(e, grp, "hardpoint", False))
@@ -739,14 +789,37 @@ def build_modules():
 
     # internal/ → optional; tag military-slot eligibility by name
     for e in _fetch_module_dir("internal"):
+        if _skip(e):
+            continue
         grp = e.get("grp", "")
         name = f"{GROUP_NAMES.get(grp, '')} {e.get('ukName','')} {e.get('name','')}".lower()
         mil = "reinforcement" in name
         optional.setdefault(grp, []).append(_clean_module(e, grp, "optional", mil))
 
+    # supplements coriolis-data doesn't carry (stats from EDSY)
+    for size, cls, rating, mass, cap, cost, grp in MKII_CABINS:
+        name = GROUP_NAMES[grp]
+        optional.setdefault(grp, []).append({
+            "class": size, "cost": cost, "grp": grp, "id": f"mk2_{grp}{size}",
+            "mass": mass, "passengers": cap, "rating": rating,
+            "symbol": f"Int_MkII_PassengerCabin_Size{size}_Class{cls}",
+            "ukName": f"{'EC' if grp == 'pce' else 'BC'} Passenger Cabin (Mk II)",
+            "family": "optional", "group_name": name, "display": f"{name} (Mk II)",
+        })
+
     def _sort(groups):
-        for g in groups.values():
-            g.sort(key=lambda m: (int(m.get("class", 0)), m.get("rating", "Z")))
+        # coriolis-data repeats some entries across files — dedup by symbol
+        for grp, g in groups.items():
+            seen = set()
+            deduped = []
+            for m in g:
+                s = m.get("symbol", "").lower()
+                if s in seen:
+                    continue
+                seen.add(s)
+                deduped.append(m)
+            deduped.sort(key=lambda m: (int(m.get("class", 0)), m.get("rating", "Z")))
+            groups[grp] = deduped
         return groups
 
     out = {

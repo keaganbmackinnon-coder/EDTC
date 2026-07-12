@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.70"  # bump this with every release
+APP_VERSION = "0.3.71"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -2033,6 +2033,14 @@ class API:
                         sym = str(m.get("symbol", "")).lower()
                         if sym:
                             idx[sym] = m
+            # journal aliases: "_free" store variants are the same module, and
+            # the Panther's FighterBayMk2 shares stats with the regular bay
+            for sym in list(idx):
+                idx.setdefault(sym + "_free", idx[sym])
+                if sym.startswith("int_fighterbay_"):
+                    mk2 = sym.replace("int_fighterbay_", "int_fighterbaymk2_")
+                    idx.setdefault(mk2, idx[sym])
+                    idx.setdefault(mk2 + "_free", idx[sym])
             self._mod_idx_cache = idx
         return idx
 
