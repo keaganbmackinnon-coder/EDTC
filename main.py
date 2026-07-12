@@ -153,6 +153,9 @@ class API:
         # Where the ship touched down (lat, lon) — drives the radar's ship
         # distance readout; cleared on Liftoff/LeaveBody/FSDJump
         self._ship_pos: tuple | None = None
+        # Faction name (lower) -> {influence, reputation} from FSDJump/Location
+        # Factions[] — the station overlay shows Inf%/Rep for the controller
+        self._system_factions: dict[str, dict] = {}
         # Active clonal-colony sampling for the distance helper. None when not
         # mid-sample; else {system, body, species, genus, required, radius,
         # samples:[(lat,lon), ...]} — the distance loop reads this each second.
@@ -229,6 +232,7 @@ class API:
             self._current_station = event.get("StationName", "") if event.get("Docked") else ""
             self._fss_bodies = []
             self._fss_body_count = 0
+            self._cache_system_factions(event)
             self._emit("system_changed", {"system": self._current_system})
             coords = event.get("StarPos")
             if coords and len(coords) == 3:
@@ -302,9 +306,13 @@ class API:
             self._current_station = event.get("StationName", "")
             self._current_system = event.get("StarSystem", self._current_system)
             self._push_station_market()
+            self._handle_docked_station(event)
+        elif event_name == "DockingGranted":
+            self._handle_docking_granted(event)
         elif event_name == "Undocked":
             self._current_station = ""
             self._push_station_market()
+            self._overlay_manager.hide("station_info")
         elif event_name == "MarketBuy":
             self._handle_market_buy(event)
         elif event_name == "MarketSell":
@@ -672,6 +680,7 @@ class API:
         self._exo_active = None
         self._current_body = None
         self._ship_pos = None
+        self._cache_system_factions(event)
         self._emit("system_changed", {"system": system})
 
         coords = event.get("StarPos")
@@ -790,6 +799,152 @@ class API:
             pass
         self._overlay_manager.emit_to_overlay("route", "jump_info", info)
         self._emit("jump_info", info)
+
+    # --- Station info overlay ---
+
+    # Journal StationServices key -> display label (SrvSurvey's "relevant" set)
+    _SERVICE_LABELS = [
+        ("commodities", "Market"),
+        ("blackmarket", "Black Market"),
+        ("exploration", "Universal Cartographics"),
+        ("outfitting", "Outfitting"),
+        ("rearm", "Restock"),
+        ("refuel", "Refuel"),
+        ("repair", "Repair"),
+        ("shipyard", "Shipyard"),
+        ("searchrescue", "Search and Rescue"),
+        ("techbroker", "Technology Broker"),
+        ("materialtrader", "Material Trader"),
+        ("facilitator", "Interstellar Factors"),
+        ("vistagenomics", "Vista Genomics"),
+        ("apexinterstellar", "Apex Interstellar"),
+        ("frontlinesolutions", "Frontline Solutions"),
+    ]
+
+    @staticmethod
+    def _rep_label(rep) -> str | None:
+        if rep is None:
+            return None
+        if rep >= 90: return "Allied"
+        if rep >= 35: return "Friendly"
+        if rep >= 4: return "Cordial"
+        if rep > -4: return "Neutral"
+        if rep > -35: return "Unfriendly"
+        return "Hostile"
+
+    def _cache_system_factions(self, event: dict):
+        factions = event.get("Factions") or []
+        if not factions:
+            return
+        self._system_factions = {
+            (f.get("Name") or "").lower(): {
+                "influence": f.get("Influence"),
+                "reputation": f.get("MyReputation"),
+            }
+            for f in factions
+        }
+
+    def _faction_info(self, name: str) -> dict:
+        f = self._system_factions.get((name or "").lower(), {})
+        inf = f.get("influence")
+        return {
+            "name": name,
+            "influence": round(inf * 100) if inf is not None else None,
+            "reputation": self._rep_label(f.get("reputation")),
+        }
+
+    def _handle_docking_granted(self, event: dict):
+        """Docking approved — show the station card right away with what the
+        event carries, then enrich from Spansh in the background."""
+        payload = {
+            "station": event.get("StationName", ""),
+            "type": event.get("StationType_Localised") or event.get("StationType", ""),
+            "pad": event.get("LandingPad"),
+            "source": "journal",
+        }
+        if self._overlay_manager.is_user_enabled("station_info"):
+            self._overlay_manager.show("station_info")
+            self._overlay_manager.emit_to_overlay("station_info", "station_info", payload)
+        self._emit("station_info", payload)
+        threading.Thread(target=self._spansh_station_info,
+                         args=(payload,), daemon=True).start()
+
+    def _spansh_station_info(self, base: dict):
+        """Fill the approach card from Spansh (nearest-station search, matched
+        by name — the docking station is in the current system)."""
+        import asyncio
+        from api.spansh import SpanshAPI
+
+        async def _run():
+            spansh = SpanshAPI()
+            try:
+                return await spansh.stations_near(self._current_system, size=100)
+            finally:
+                await spansh.close()
+        try:
+            stations = asyncio.run(_run())
+        except Exception:
+            return
+        name = (base.get("station") or "").lower()
+        st = next((s for s in stations
+                   if (s.get("name") or "").lower() == name
+                   and (s.get("distance") or 0) < 0.1), None)
+        if not st:
+            return
+        info = dict(base)
+        info["source"] = "spansh"
+        info["updated"] = (st.get("market_updated_at") or st.get("updated_at") or "")[:10]
+        pads = {"large": st.get("large_pads"), "medium": st.get("medium_pads"),
+                "small": st.get("small_pads")}
+        if any(v is not None for v in pads.values()):
+            info["pads"] = pads
+        faction = st.get("controlling_minor_faction")
+        if faction:
+            info["faction"] = self._faction_info(faction)
+        services = st.get("services") or []
+        names = {(s.get("name") if isinstance(s, dict) else str(s)).lower()
+                 for s in services}
+        matched = [label for key, label in self._SERVICE_LABELS
+                   if any(key in n.replace(" ", "") for n in names)
+                   or any(label.lower() == n for n in names)]
+        if matched:
+            info["services"] = matched
+        economies = st.get("economies") or []
+        if economies and isinstance(economies[0], dict):
+            info["economies"] = [
+                {"name": e.get("name", ""), "share": round(e.get("share", 0))}
+                for e in economies if e.get("name")
+            ]
+        self._overlay_manager.emit_to_overlay("station_info", "station_info", info)
+        self._emit("station_info", info)
+
+    def _handle_docked_station(self, event: dict):
+        """Docked — the journal carries the authoritative station data."""
+        pads = event.get("LandingPads") or {}
+        services = {s.lower() for s in (event.get("StationServices") or [])}
+        payload = {
+            "station": event.get("StationName", ""),
+            "type": event.get("StationType_Localised") or event.get("StationType", ""),
+            "pads": {"large": pads.get("Large"), "medium": pads.get("Medium"),
+                     "small": pads.get("Small")} if pads else None,
+            "economies": [
+                {"name": e.get("Name_Localised") or e.get("Name", ""),
+                 "share": round((e.get("Proportion") or 0) * 100)}
+                for e in (event.get("StationEconomies") or [])
+            ],
+            "faction": self._faction_info(
+                (event.get("StationFaction") or {}).get("Name", "")),
+            "services": [label for key, label in self._SERVICE_LABELS
+                         if key in services],
+            "dist_ls": event.get("DistFromStarLS"),
+            "source": "journal",
+        }
+        if self._overlay_manager.is_user_enabled("station_info"):
+            self._overlay_manager.show("station_info")
+            self._overlay_manager.emit_to_overlay("station_info", "station_info", payload)
+            # docked — the card has served its purpose, tidy up after a while
+            self._overlay_manager.hide_after("station_info", 30)
+        self._emit("station_info", payload)
 
     def _handle_fsd_target(self, event: dict):
         """FSDTarget fires when the next jump is locked in — carries the target

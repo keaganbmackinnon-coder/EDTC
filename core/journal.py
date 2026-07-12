@@ -27,6 +27,7 @@ WATCHED_EVENTS = {
     "Market", "Cargo", "FSDTarget", "CarrierLocation",
     "ProspectedAsteroid", "AsteroidCracked", "PowerplayMerits",
     "ApproachBody", "Touchdown", "Liftoff", "LeaveBody", "StartJump",
+    "DockingGranted",
 }
 
 
