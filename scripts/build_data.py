@@ -178,6 +178,11 @@ def build_blueprints(mat_cat: dict):
 
     blueprints = []
     for (bp_type, bp_name), data in grouped.items():
+        # EDEngineer also lists synthesis recipes (@Synthesis) and Odyssey
+        # suit/weapon gear (@Merchant) as "blueprints" — those aren't ship
+        # engineering; the Synthesis tab has its own dataset
+        if not any(not e.startswith("@") for e in data["engineers"]):
+            continue
         blueprints.append({
             "id": slugify(f"{bp_type}_{bp_name}"),
             "name": bp_name,
