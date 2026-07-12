@@ -3393,9 +3393,8 @@ overlay (the upgraded route/jump overlay covers it).
   running (frozen=True, correct DB), code pushed to main (c97d37a).
 
 ### State / next session
-- **v0.3.69 NOT tagged** — tag for CI release after the CMDR confirms the
-  route overlay in-game (next hyperspace jump should show it; it should hide
-  ~10s after arrival).
+- CMDR confirmed the route overlay in-game — **v0.3.69 tagged + pushed for CI
+  release 2026-07-12**.
 - The old stale test route may still be active in the prod DB — one click of
   the new "Clear route" button in Navigation removes it for good.
 - Still open from Session 47: station_info Spansh field shapes, radar scale
@@ -3403,3 +3402,6 @@ overlay (the upgraded route/jump overlay covers it).
 
 ---
 *Session 48 — 2026-07-12 (v0.3.69 local)*
+
+---
+*Session checkpoint: 2026-07-12 10:26:15*
