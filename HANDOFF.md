@@ -3303,3 +3303,50 @@ Goal: rebuild EDTC's overlays to show the same information.
 
 ---
 *Session checkpoint: 2026-07-11 23:47:30*
+
+---
+
+## Session 47 — Overlay overhaul: SrvSurvey parity (v0.3.68, local)
+
+Executed the PLANNED spec (all 6 items) in the build order it prescribed.
+Every step harness-verified against the real 2026-07-11 journal (55 checks,
+scratchpad test_exo_body.py) and screenshot-verified per overlay state.
+
+| Item | What shipped |
+|---|---|
+| 1. ExoTracker rebuild | Signals/Analyzed header + progress bar; genus chips w/ colony distances (struck when done); sampling card: 3 dots + variant + FF 5x value + distance bar; species lifecycle panel (predicted ?s orange / sampling green / done struck) + Rewards + FF totals |
+| 2. Sample radar | Canvas minimap in ExoTracker: exclusion circle per sample (heading-up, terrain-anchored), player crosshair, ship distance (Touchdown lat/lon, cleared Liftoff/LeaveBody/jump), per-sample footer |
+| 3. FSS overlay | Frontier value formula (k + k*q*m^0.2; 2.6x first-discovery; first-map mults; Odyssey +30%; x1.25 at efficient SAAScanComplete) — matches SrvSurvey to the credit; stars included, belts skipped, dedup; FSS \| DSS \| genus rows, green when mapped, <10K filter, undiscovered flags |
+| 4. Route overlay | StartJump (Hyperspace) -> jump_info: name + colour-coded class instantly, EDSM discovery/traffic/bodies enrichment in background (get_bodies_raw added); #N of M tick bar; remaining ly from NavRoute StarPos coords |
+| 5. Station info | New station_info overlay: DockingGranted shows card + Spansh stations_near enrichment; Docked = authoritative (economies %, pads, services mapped, DistFromStarLS); faction Inf%/Rep from cached FSDJump/Location Factions[]; hides 30s after dock / on Undocked |
+| 6. Bio signals panel | New bio_signals overlay: system rollup — per-body genus chips + predicted value + Rewards total; _body_species_rows() shared with the body tracker; clears+hides on jump |
+
+### Key facts locked down this session
+- **ScanOrganic**: `Variant_Localised` + **`WasLogged`** are in the event —
+  WasLogged=false → 5x first-logged value. Log→Sample→Sample→Analyse maps
+  1→2→2→3 via the ScanType dict (verified, no 4-scan bug).
+- **Exploration values**: verified constants — HMC k=9654 (+100677 TF),
+  rocky 300 (+93328), WW/ELW 64831 (+116295), ammonia 96932, metal-rich
+  21790, GG I 1656, GG II 9654; stars k=1200 (D* 14057, N/H 22628),
+  value = k + M*k/66.25. First-map x3.6996 (both firsts) / x3.2917 (map
+  only) / x3.3333; Odyssey +30%; efficiency x1.25 only when
+  ProbesUsed <= EfficiencyTarget.
+- **New watched events**: ApproachBody, Touchdown, Liftoff, LeaveBody,
+  StartJump, DockingGranted.
+- **Overlay auto-resize** now skips no-op resizes (_last_size) — exo
+  distance ticks at 1/s would have spammed resize/log otherwise.
+- New overlays keyed `station-info`, `bio-signals`; OVERLAY_MAP in App.jsx,
+  toggles in Overlays.jsx.
+
+### State
+- 6 commits pushed to main; **v0.3.68 built locally + installed**
+  (C:\Users\Keagan\AppData\Local\EDTC\EDTC.exe), startup log clean,
+  frozen=True, correct DB, live tail running.
+- **NOT tagged for CI release yet** — tag v0.3.68 once the CMDR confirms
+  the overlays in-game (esp. radar + station card, which only ran against
+  synthetic/replayed data this session).
+
+### Next session
+- Tag + release after in-app confirmation.
+- Watch for: station_info Spansh field names (economies/pads shapes are
+  defensive best-guess), radar scale feel on foot, FSS overlay row cap (12).
