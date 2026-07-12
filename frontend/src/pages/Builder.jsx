@@ -490,6 +490,8 @@ export default function Builder() {
   const [stats, setStats] = useState(null)
   const [drawer, setDrawer] = useState(null)       // {slotKey, mode:'module'|'engineer'}
   const [hoverSlot, setHoverSlot] = useState(null) // slot key highlighted on the schematic
+  const [anchors, setAnchors] = useState({})       // {ship_id: {slotKey: [nx,ny,nz]}} hand-placed mounts
+  const [placeSlot, setPlaceSlot] = useState(null) // slot key being placed on the hull (null = not placing)
   const [newShip, setNewShip] = useState('')
   const [busy, setBusy] = useState('')
   const debounce = useRef(null)
@@ -507,6 +509,7 @@ export default function Builder() {
       api()?.get_ships?.().then(r => setShips(r || []))
       api()?.get_modules?.().then(r => setModules(r?.modules || null))
       api()?.get_blueprints?.().then(r => setBlueprints(r || []))
+      api()?.get_hardpoint_anchors?.().then(r => setAnchors(r || {}))
       loadSaved()
     }
     if (api()) load()
@@ -515,6 +518,30 @@ export default function Builder() {
 
   const ship = useMemo(() => ships.find(s => s.id === build?.ship_id) || null, [ships, build])
   const slots = useMemo(() => shipSlots(ship), [ship])
+  // slots that appear on the schematic and can be hand-placed
+  const locatable = useMemo(() => slots.filter(s => s.family === 'hardpoint' || s.family === 'utility'), [slots])
+  const shipAnchors = anchors[ship?.id] || null
+
+  // leave placement mode when the ship changes
+  useEffect(() => { setPlaceSlot(null) }, [build?.ship_id])
+
+  function placeAnchor(slotKey, pos) {
+    if (!ship) return
+    api()?.save_hardpoint_anchor?.(ship.id, slotKey, pos)
+    setAnchors(a => ({ ...a, [ship.id]: { ...(a[ship.id] || {}), [slotKey]: pos } }))
+    const idx = locatable.findIndex(s => s.key === slotKey)
+    setPlaceSlot(locatable[idx + 1]?.key ?? null)  // auto-advance; exit after last
+  }
+
+  function clearAnchor(slotKey) {
+    if (!ship) return
+    api()?.save_hardpoint_anchor?.(ship.id, slotKey, null)
+    setAnchors(a => {
+      const shipA = { ...(a[ship.id] || {}) }
+      delete shipA[slotKey]
+      return { ...a, [ship.id]: shipA }
+    })
+  }
 
   // recompute stats (debounced) whenever the working build changes
   useEffect(() => {
@@ -673,24 +700,61 @@ export default function Builder() {
                   {ship ? <>{ship.name} · {PAD[ship.pad_size]} pad{build.ship_ident ? ` · ${build.ship_ident}` : ''}</>
                     : <span className="text-ed-danger">Ship type “{build.ship_id || 'unknown'}” not recognised — stats unavailable.</span>}
                 </div>
-                {ship && (
+                {ship && (() => {
+                  const placingSlot = locatable.find(s => s.key === placeSlot)
+                  const placeIdx = locatable.findIndex(s => s.key === placeSlot)
+                  const placedCount = locatable.filter(s => shipAnchors?.[s.key]).length
+                  return (
                   <div className="panel p-2 bg-gradient-to-b from-ed-panel to-ed-dark">
                     {/* height-driven (not width-driven) so a wide window can't balloon the
                         schematic and squeeze the module list below out of view */}
                     <div className="w-full flex justify-center" style={{ height: 'clamp(140px, 26vh, 250px)' }}>
                       <div className="h-full max-w-full" style={{ aspectRatio: '340 / 240' }}>
                         <ShipView ship={ship}
-                          activeKey={drawer?.slotKey || hoverSlot}
-                          onSelectMount={key => setDrawer({ slotKey: key, mode: 'module' })} />
+                          activeKey={placeSlot || drawer?.slotKey || hoverSlot}
+                          onSelectMount={key => setDrawer({ slotKey: key, mode: 'module' })}
+                          anchors={shipAnchors} placing={placeSlot} onPlace={placeAnchor} />
                       </div>
                     </div>
-                    <div className="text-center text-[10px] font-mono text-ed-muted mt-0.5">
-                      {hasModel(ship.id)
-                        ? 'drag to rotate · scroll to zoom · hover a hardpoint below to locate it'
-                        : 'hover a hardpoint below to locate it · click a marker to fit that slot'}
-                    </div>
+                    {placingSlot ? (
+                      <div className="flex items-center justify-center gap-2 mt-1 text-[10px] font-mono">
+                        <span className="text-ed-orange">
+                          {placingSlot.label} {placeIdx + 1}/{locatable.length}
+                          {shipAnchors?.[placeSlot] ? ' ✓' : ''}
+                        </span>
+                        <span className="text-ed-muted">rotate, then click the hull</span>
+                        <button className="badge border border-ed-border text-ed-muted hover:text-ed-text px-1.5"
+                          disabled={placeIdx <= 0}
+                          onClick={() => setPlaceSlot(locatable[placeIdx - 1]?.key)}>←</button>
+                        <button className="badge border border-ed-border text-ed-muted hover:text-ed-text px-1.5"
+                          disabled={placeIdx >= locatable.length - 1}
+                          onClick={() => setPlaceSlot(locatable[placeIdx + 1]?.key)}>→</button>
+                        {shipAnchors?.[placeSlot] && (
+                          <button className="badge border border-ed-border text-ed-muted hover:text-ed-danger px-1.5"
+                            onClick={() => clearAnchor(placeSlot)}>reset</button>
+                        )}
+                        <button className="badge border border-ed-orange/60 text-ed-orange px-1.5"
+                          onClick={() => setPlaceSlot(null)}>done</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 mt-0.5">
+                        <span className="text-center text-[10px] font-mono text-ed-muted">
+                          {hasModel(ship.id)
+                            ? 'drag to rotate · scroll to zoom · hover a hardpoint below to locate it'
+                            : 'hover a hardpoint below to locate it · click a marker to fit that slot'}
+                        </span>
+                        {hasModel(ship.id) && locatable.length > 0 && (
+                          <button className="badge border border-ed-border text-ed-muted hover:text-ed-orange px-1.5 text-[10px] shrink-0"
+                            title="Click each mount's real position on the hull — placed markers show solid, guesses faint"
+                            onClick={() => setPlaceSlot((locatable.find(s => !shipAnchors?.[s.key]) || locatable[0]).key)}>
+                            📍 Place mounts{placedCount ? ` ${placedCount}/${locatable.length}` : ''}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                  )
+                })()}
               </div>
 
               <div className="overflow-y-auto pr-1 min-h-0 space-y-3">
@@ -734,7 +798,7 @@ export default function Builder() {
                         const mod = fitted && moduleBySymbol(fitted.symbol)
                         const eng = fitted?.engineering
                         const locatable = slot.family === 'hardpoint' || slot.family === 'utility'
-                        const hi = (drawer?.slotKey || hoverSlot) === slot.key && locatable
+                        const hi = (placeSlot || drawer?.slotKey || hoverSlot) === slot.key && locatable
                         return (
                           <div key={slot.key}
                             onMouseEnter={() => locatable && setHoverSlot(slot.key)}
@@ -743,7 +807,9 @@ export default function Builder() {
                             <span className="badge border border-ed-border text-ed-muted shrink-0 w-8 text-center font-mono">
                               {slot.size || 'U'}
                             </span>
-                            <button onClick={() => setDrawer({ slotKey: slot.key, mode: 'module' })}
+                            <button onClick={() => (placeSlot && locatable)
+                                ? setPlaceSlot(slot.key)  // placement mode: arm this slot instead
+                                : setDrawer({ slotKey: slot.key, mode: 'module' })}
                               className="flex-1 text-left min-w-0">
                               {mod ? (
                                 <div className={`flex items-center gap-2 ${fitted.enabled === false ? 'opacity-40' : ''}`}>

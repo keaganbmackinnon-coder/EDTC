@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.72"  # bump this with every release
+APP_VERSION = "0.3.73"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -2020,6 +2020,54 @@ class API:
     def get_modules(self) -> dict:
         """Full outfitting module reference (data/modules.json)."""
         return self._load_json("modules.json")
+
+    # --- Hardpoint anchors (hand-placed 3D mount positions) ---
+
+    def _user_anchor_path(self) -> Path:
+        # frozen: the bundled data dir (_MEIPASS) is wiped every launch, so
+        # placements made in the installed app live beside the exe and are
+        # overlaid on the bundled defaults at read time. Dev: write straight
+        # into the repo's data file so placements become the shipped defaults.
+        if getattr(sys, "frozen", False):
+            return Path(sys.executable).parent / "hardpoint_anchors_user.json"
+        return BASE_DIR / "data" / "hardpoint_anchors.json"
+
+    def get_hardpoint_anchors(self) -> dict:
+        """{ship_id: {slot_key: [nx, ny, nz]}} — bundled defaults merged with
+        placements saved on this machine (user file wins per slot)."""
+        merged = self._load_json("hardpoint_anchors.json").get("ships", {}) or {}
+        if getattr(sys, "frozen", False):
+            try:
+                user_path = self._user_anchor_path()
+                if user_path.exists():
+                    user = json.loads(user_path.read_text(encoding="utf-8")).get("ships", {}) or {}
+                    for ship_id, slots in user.items():
+                        merged.setdefault(ship_id, {}).update(slots or {})
+            except Exception as e:
+                logging.warning(f"user hardpoint anchors unreadable: {e}")
+        return merged
+
+    def save_hardpoint_anchor(self, ship_id: str, slot_key: str, pos) -> dict:
+        """Persist one mount position ([nx,ny,nz], or None to remove it)."""
+        path = self._user_anchor_path()
+        try:
+            data = {"ships": {}}
+            if path.exists():
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(data.get("ships"), dict):
+                    data["ships"] = {}
+            slots = data["ships"].setdefault(str(ship_id), {})
+            if pos is None:
+                slots.pop(str(slot_key), None)
+                if not slots:
+                    data["ships"].pop(str(ship_id), None)
+            else:
+                slots[str(slot_key)] = [round(float(v), 4) for v in pos]
+            path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            return {"ok": True}
+        except Exception as e:
+            logging.error(f"save_hardpoint_anchor failed: {e}")
+            return {"ok": False, "error": str(e)}
 
     def _module_symbol_index(self) -> dict:
         """symbol(lower) → module entry, cached across calls."""

@@ -114,7 +114,11 @@ function buildWireframe(root, shipId) {
     const merged = solidGeoms.length === 1 ? solidGeoms[0] : mergeGeometries(solidGeoms, false)
     if (merged) {
       merged.applyMatrix4(wire.matrix) // same lay-flat / flip as the displayed wire
-      raycastMesh = new THREE.Mesh(merged, new THREE.MeshBasicMaterial())
+      // invisible but raycastable — also added to the scene in placement mode
+      // so hull clicks land on the real surface
+      raycastMesh = new THREE.Mesh(merged, new THREE.MeshBasicMaterial({
+        transparent: true, opacity: 0, depthWrite: false,
+      }))
       raycastMesh.updateMatrixWorld(true)
     }
   }
@@ -182,12 +186,14 @@ function Mount3D({ m, maxDim, active, onSelect }) {
       onPointerOver={onSelect ? () => (document.body.style.cursor = 'pointer') : undefined}
       onPointerOut={onSelect ? () => (document.body.style.cursor = 'default') : undefined}>
       <sphereGeometry args={[r, 16, 16]} />
-      <meshBasicMaterial color={active ? '#ffffff' : color} transparent opacity={active ? 1 : 0.72} />
+      {/* hand-placed anchors render solid; procedural guesses stay faint */}
+      <meshBasicMaterial color={active ? '#ffffff' : color} transparent
+        opacity={active ? 1 : m.placed ? 0.95 : 0.5} />
     </mesh>
   )
 }
 
-function ModelScene({ url, ext, ship, activeKey, onSelectMount }) {
+function ModelScene({ url, ext, ship, activeKey, onSelectMount, anchors, placing, onPlace }) {
   const loaded = useLoader(LOADER[ext] || GLTFLoader, url)
   const root = useMemo(() => {
     if (ext === 'stl') return new THREE.Mesh(loaded)   // STLLoader returns a geometry
@@ -195,28 +201,57 @@ function ModelScene({ url, ext, ship, activeKey, onSelectMount }) {
     return loaded.scene                                 // glb / gltf
   }, [loaded, ext])
   const { wire, size, center, maxDim, raycastMesh } = useMemo(() => buildWireframe(root, ship?.id), [root, ship?.id])
-  const mounts = useMemo(() => computeMounts3D(ship, size, center, raycastMesh), [ship, size, center, raycastMesh])
+  const mounts = useMemo(() => {
+    const guessed = computeMounts3D(ship, size, center, raycastMesh)
+    // hand-placed anchors (bbox-normalised [nx,ny,nz]) override the guesses
+    return guessed.map(m => {
+      const a = anchors?.[m.key]
+      if (!Array.isArray(a) || a.length !== 3) return m
+      return { ...m, placed: true, pos: [
+        center.x - size.x / 2 + a[0] * size.x,
+        center.y - size.y / 2 + a[1] * size.y,
+        center.z - size.z / 2 + a[2] * size.z,
+      ] }
+    })
+  }, [ship, size, center, raycastMesh, anchors])
+  const placeOnHull = (e) => {
+    if (e.delta > 6) return          // orbit drag, not a click
+    e.stopPropagation()
+    const p = raycastMesh.worldToLocal(e.point.clone())
+    onPlace?.(placing, [
+      (p.x - (center.x - size.x / 2)) / (size.x || 1),
+      (p.y - (center.y - size.y / 2)) / (size.y || 1),
+      (p.z - (center.z - size.z / 2)) / (size.z || 1),
+    ])
+  }
   return (
     <group scale={3 / maxDim}>
       <group position={[-center.x, -center.y, -center.z]}>
         <primitive object={wire} />
+        {placing && raycastMesh && (
+          <primitive object={raycastMesh} onClick={placeOnHull}
+            onPointerOver={() => (document.body.style.cursor = 'crosshair')}
+            onPointerOut={() => (document.body.style.cursor = 'default')} />
+        )}
         {mounts.map(m => (
           <Mount3D key={m.key} m={m} maxDim={maxDim}
-            active={m.key === activeKey} onSelect={onSelectMount} />
+            active={m.key === activeKey}
+            onSelect={placing ? undefined : onSelectMount} />
         ))}
       </group>
     </group>
   )
 }
 
-function Ship3D({ url, ext, ship, activeKey, onSelectMount }) {
+function Ship3D({ url, ext, ship, activeKey, onSelectMount, anchors, placing, onPlace }) {
   return (
     <Canvas camera={{ position: [2.8, 1.7, 3.4], fov: 42 }} gl={{ alpha: true, antialias: true }}
       dpr={[1, 2]} style={{ width: '100%', height: '100%' }}>
       <Suspense fallback={null}>
-        <ModelScene url={url} ext={ext} ship={ship} activeKey={activeKey} onSelectMount={onSelectMount} />
+        <ModelScene url={url} ext={ext} ship={ship} activeKey={activeKey} onSelectMount={onSelectMount}
+          anchors={anchors} placing={placing} onPlace={onPlace} />
       </Suspense>
-      <OrbitControls enablePan={false} autoRotate autoRotateSpeed={0.5}
+      <OrbitControls enablePan={false} autoRotate={!placing} autoRotateSpeed={0.5}
         minDistance={2} maxDistance={11} />
     </Canvas>
   )
@@ -230,7 +265,8 @@ class ModelBoundary extends Component {
   render() { return this.state.failed ? this.props.fallback : this.props.children }
 }
 
-export default function ShipView({ ship, activeKey = null, onSelectMount, className }) {
+export default function ShipView({ ship, activeKey = null, onSelectMount, className,
+                                    anchors = null, placing = null, onPlace = null }) {
   const entry = ship && MODELS[String(ship.id).toLowerCase()]
   const fallback = (
     <ShipSchematic ship={ship} activeKey={activeKey} onSelectMount={onSelectMount} className={className} />
@@ -240,7 +276,8 @@ export default function ShipView({ ship, activeKey = null, onSelectMount, classN
     <ModelBoundary fallback={fallback}>
       <Suspense fallback={fallback}>
         <Ship3D url={entry.url} ext={entry.ext} ship={ship}
-          activeKey={activeKey} onSelectMount={onSelectMount} />
+          activeKey={activeKey} onSelectMount={onSelectMount}
+          anchors={anchors} placing={placing} onPlace={onPlace} />
       </Suspense>
     </ModelBoundary>
   )

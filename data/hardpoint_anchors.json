@@ -1,0 +1,4 @@
+{
+  "_note": "Hand-placed hardpoint/utility mount positions for the Ship Builder 3D view. Keyed by ship id (ships.json) then slot key (hardpoint:N / utility:N). Values are [x,y,z] normalised 0-1 within the oriented model's bounding box (after ShipView lay-flat/flip). Authored in-app via the Builder's 'Place mounts' mode; ships/slots absent here fall back to the procedural guess. If a ship's model file is replaced, re-place its mounts.",
+  "ships": {}
+}
