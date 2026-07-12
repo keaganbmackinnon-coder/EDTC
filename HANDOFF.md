@@ -3430,8 +3430,8 @@ blueprints." Root cause: EDEngineer's blueprints.json lists synthesis recipes
   granular — per-weapon munitions — could upgrade synthesis.json someday).
 - Carries over: the Ship Builder blueprint picker reads the same file/API, so
   it's clean too. Pins referencing removed ids drop gracefully (null join).
-- v0.3.70 built + installed + running (frozen, correct DB). **NOT tagged** —
-  tag after the user confirms the Blueprints tab in-app.
+- User confirmed the Blueprints tab in-app — **v0.3.70 tagged + pushed for CI
+  release 2026-07-12**.
 - Deferred ideas for the Builder-polish session (from this session's recon):
   filter Builder's blueprint picker by the slot's module type (`applies_to`),
   per-grade craftable ✓ from materials in the Builder editor, experimentals
@@ -3440,3 +3440,6 @@ blueprints." Root cause: EDEngineer's blueprints.json lists synthesis recipes
 
 ---
 *Session 48 (cont.) — 2026-07-12 (v0.3.70 local)*
+
+---
+*Session checkpoint: 2026-07-12 10:42:23*
