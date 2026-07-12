@@ -34,12 +34,6 @@ OVERLAYS = {
         "width": 320,
         "height": 220,
     },
-    "system_preview": {
-        "title": "EDTC — System Preview",
-        "key": "system-preview",
-        "width": 420,
-        "height": 210,
-    },
     "exo_tracker": {
         "title": "EDTC — Exobiology",
         "key": "exo-tracker",
@@ -201,14 +195,23 @@ class OverlayManager:
     def is_user_enabled(self, name: str) -> bool:
         return self._user_enabled.get(name, False)
 
-    def toggle(self, name: str) -> bool:
+    def toggle(self, name: str, show_on_enable: bool = True) -> bool:
+        """Flip the persistent enable pref. Event-driven overlays (route) pass
+        show_on_enable=False — they stay hidden until their trigger fires."""
         new_state = not self._user_enabled.get(name, False)
         self._user_enabled[name] = new_state
-        if new_state:
+        if new_state and show_on_enable:
             self.show(name)
-        else:
+        elif not new_state:
             self.hide(name)
         return new_state
+
+    def cancel_hide(self, name: str):
+        """Cancel a pending hide_after timer (e.g. jumping again before the
+        route overlay's post-arrival hide fires)."""
+        timer = self._hide_timers.pop(name, None)
+        if timer:
+            timer.cancel()
 
     def set_opacity(self, name: str, value: float):
         self._opacity[name] = max(0.1, min(1.0, value))

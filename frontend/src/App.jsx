@@ -52,7 +52,6 @@ import Overlays from './pages/Overlays'
 import CmdrPing from './overlays/CmdrPing'
 import RouteOverlay from './overlays/Route'
 import FssValues from './overlays/FssValues'
-import SystemPreview from './overlays/SystemPreview'
 import ExoTracker from './overlays/ExoTracker'
 import Construction from './overlays/Construction'
 import MiningOverlay from './overlays/Mining'
@@ -63,7 +62,6 @@ const OVERLAY_MAP = {
   'cmdr-ping':      CmdrPing,
   'route':          RouteOverlay,
   'fss':            FssValues,
-  'system-preview': SystemPreview,
   'exo-tracker':    ExoTracker,
   'construction':   Construction,
   'mining':         MiningOverlay,

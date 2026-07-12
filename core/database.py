@@ -377,6 +377,12 @@ def set_active_route(route_id: int) -> bool:
     return True
 
 
+def clear_active_route() -> bool:
+    with _conn() as conn:
+        conn.execute("UPDATE routes SET active=0")
+    return True
+
+
 # --- Watchlist ---
 
 def get_watchlist() -> list:

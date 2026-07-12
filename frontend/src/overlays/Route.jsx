@@ -32,13 +32,12 @@ export default function RouteOverlay() {
     const off = window.__edtc?.on('route_update', (payload) => {
       setState(payload)
       setFsd(null)  // stale target info from the previous route
+      // arrived at the system the jump card was for — it's no longer "next"
+      setJump(j => (j && payload?.current_system &&
+        j.system?.toLowerCase() === payload.current_system.toLowerCase()) ? null : j)
     })
     const offFsd = window.__edtc?.on('fsd_target', (payload) => setFsd(payload))
-    const offJump = window.__edtc?.on('jump_info', (payload) => {
-      // arrival is signalled by route_update / the next FSDTarget — keep the
-      // card until fresher data replaces it
-      setJump(payload)
-    })
+    const offJump = window.__edtc?.on('jump_info', (payload) => setJump(payload))
     return () => { off?.(); offFsd?.(); offJump?.() }
   }, [])
 

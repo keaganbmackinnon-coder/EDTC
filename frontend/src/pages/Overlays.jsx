@@ -4,9 +4,8 @@ const api = () => window?.pywebview?.api
 
 const OVERLAYS = [
   { id: 'cmdr_ping',     label: 'CMDR Proximity Ping',      badge: 'Live', desc: 'Audio beep + popup when another CMDR appears. Watchlist mode for specific targets.' },
-  { id: 'route',         label: 'Route Following',           badge: 'Live', desc: 'Current waypoint, next jump, trip progress. Ctrl+Shift+C copies next system.' },
+  { id: 'route',         label: 'Route Following',           badge: 'Live', desc: 'Appears while the FSD charges/jumps: next system, star class, route progress, EDSM info. Hides shortly after arrival. Ctrl+Shift+C copies next system.' },
   { id: 'fss',           label: 'FSS Body Values',           badge: 'Live', desc: 'Real scan + DSS values per body, undiscovered flags, bio genus counts, system completion.' },
-  { id: 'system_preview',label: 'System Preview on Jump',    badge: 'Live', desc: 'Star class, body count, economy and security shown on every FSD jump.' },
   { id: 'exo_tracker',   label: 'Exobiology Tracker',        badge: 'Live', desc: 'Bio signals, species predictions/values, sampling progress with FF bonus, and a sample-distance radar.' },
   { id: 'construction',  label: 'Construction Materials',    badge: 'Live', desc: 'Live delivery progress for active colonisation construction projects.' },
   { id: 'mining',        label: 'Mining Session',            badge: 'Live', desc: 'Refined tonnage, tons/hr, last prospector result and Powerplay merits while mining.' },

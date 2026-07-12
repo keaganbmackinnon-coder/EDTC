@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.68"  # bump this with every release
+APP_VERSION = "0.3.69"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -185,6 +185,10 @@ class API:
         # Last FSDTarget payload — re-pushed when the route overlay opens
         # mid-route so the scoopable warning isn't lost until the next target
         self._last_fsd_target: dict | None = None
+        # Last StartJump jump_info — re-pushed by _push_route_to_overlay so a
+        # freshly created route window (emits drop during creation) still gets
+        # the in-flight jump card
+        self._last_jump_info: dict | None = None
         # get_market_stats() full-scans the markets table; Trading.jsx polls it
         self._market_stats_cache: dict | None = None
         self._market_stats_time: float = 0.0
@@ -613,6 +617,8 @@ class API:
             # after route_update — the overlay resets its target info on route change
             if self._active_route and self._last_fsd_target:
                 self._overlay_manager.emit_to_overlay("route", "fsd_target", self._last_fsd_target)
+            if self._last_jump_info:
+                self._overlay_manager.emit_to_overlay("route", "jump_info", self._last_jump_info)
             logging.info(f"Pushed route to overlay: {(self._active_route or {}).get('name', 'none')}")
         threading.Thread(target=_push, daemon=True).start()
 
@@ -672,6 +678,7 @@ class API:
     def _handle_fsd_jump(self, event: dict):
         system = event.get("StarSystem", "")
         self._current_system = system
+        self._last_jump_info = None  # arrived — the in-flight jump card is done
         self._fss_bodies = []
         self._fss_body_count = 0
         # Body-scoped exo caches are keyed by BodyID, which repeats across
@@ -705,21 +712,12 @@ class API:
                 "route": self._active_route,
                 "current_system": system,
             })
+            self._emit("route_update", {"route": self._active_route, "current_system": system})
 
-        # System preview
-        preview_payload = {
-            "system": system,
-            "star_class": event.get("StarClass", ""),
-            "allegiance": event.get("SystemAllegiance", ""),
-            "security": event.get("SystemSecurity_Localised", ""),
-            "economy": event.get("SystemEconomy_Localised", ""),
-            "population": event.get("Population", 0),
-            "body_count": None,
-        }
-        if self._overlay_manager.is_user_enabled("system_preview"):
-            self._overlay_manager.show("system_preview")
-            self._overlay_manager.emit_to_overlay("system_preview", "system_jumped", preview_payload)
-            self._overlay_manager.hide_after("system_preview", 15)
+        # Route overlay lives only around the jump: shown on StartJump (FSD
+        # charge), lingers briefly after arrival, then hides until the next jump
+        if self._overlay_manager.is_shown("route"):
+            self._overlay_manager.hide_after("route", 10)
 
         self._overlay_manager.emit_to_overlay("fss", "system_jumped", {})
         self._overlay_manager.emit_to_overlay("exo_tracker", "system_jumped", {})
@@ -735,16 +733,16 @@ class API:
         coords = [s.get("StarPos") for s in raw if "StarSystem" in s]
         route = {"systems": systems, "star_classes": star_classes,
                  "coords": coords if all(coords) else None, "current": 0,
-                 "name": f"In-game route → {systems[-1]}"}
-        from core.database import save_route
+                 "active": 1, "name": f"In-game route → {systems[-1]}"}
+        # without active=1 the in-game route was saved inactive and an old
+        # manually-activated route stayed active=1 in the DB forever — that
+        # stale route resurrected on every app launch
+        from core.database import save_route, clear_active_route
+        clear_active_route()
         save_route(route)
         self._active_route = route
         self._last_fsd_target = None  # old target is stale for the new route
-        if self._overlay_manager.is_user_enabled("route"):
-            self._overlay_manager.show("route")
-            # if show() just created the window, the immediate emit below is
-            # dropped — the delayed push catches the fresh window
-            self._push_route_to_overlay()
+        # no show() here — the overlay appears on StartJump (FSD engagement)
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": route,
             "current_system": self._current_system,
@@ -752,8 +750,14 @@ class API:
         self._emit("route_update", {"route": route, "current_system": self._current_system})
 
     def _handle_nav_route_clear(self):
+        # also flip active=0 in the DB — otherwise the route resurrects on the
+        # next app launch (get_active_route at startup)
+        from core.database import clear_active_route
+        clear_active_route()
         self._active_route = None
         self._last_fsd_target = None
+        self._last_jump_info = None
+        self._overlay_manager.hide("route")
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": None,
             "current_system": self._current_system,
@@ -773,6 +777,16 @@ class API:
             "system": event.get("StarSystem", ""),
             "star_class": (event.get("StarClass") or "").upper(),
         }
+        self._last_jump_info = payload
+        if self._overlay_manager.is_user_enabled("route"):
+            # the overlay only exists around the jump — bring it up now and
+            # keep it up (cancel a pending post-arrival hide from a quick
+            # back-to-back jump)
+            self._overlay_manager.cancel_hide("route")
+            self._overlay_manager.show("route")
+            # if show() just created the window, the immediate emits below are
+            # dropped — the delayed push re-sends route + jump_info
+            self._push_route_to_overlay()
         self._overlay_manager.emit_to_overlay("route", "jump_info", payload)
         self._emit("jump_info", payload)
         threading.Thread(target=self._enrich_jump_info, args=(payload,), daemon=True).start()
@@ -799,6 +813,7 @@ class API:
                                "total": tr.get("total", 0)}
         except Exception:
             pass
+        self._last_jump_info = info
         self._overlay_manager.emit_to_overlay("route", "jump_info", info)
         self._emit("jump_info", info)
 
@@ -975,14 +990,7 @@ class API:
         self._emit("carrier_update", {"carrier": carrier})
 
     def _handle_fss_discovery(self, event: dict):
-        payload = {
-            "system": event.get("SystemName", self._current_system),
-            "body_count": event.get("BodyCount", 0),
-            "non_body_count": event.get("NonBodyCount", 0),
-            "progress": event.get("Progress", 0),
-        }
         self._fss_body_count = event.get("BodyCount", 0)
-        self._overlay_manager.emit_to_overlay("system_preview", "fss_discovery", payload)
         self._push_fss()
 
     def _handle_scan(self, event: dict):
@@ -2204,15 +2212,17 @@ class API:
         from core.database import set_active_route, get_active_route
         set_active_route(route_id)
         self._active_route = get_active_route()
-        if self._active_route and self._overlay_manager.is_user_enabled("route"):
-            self._overlay_manager.show("route")
-            # immediate emit covers an already-open window; the delayed push
-            # covers a window show() is still creating (emit drops silently)
-            self._overlay_manager.emit_to_overlay("route", "route_update", {
-                "route": self._active_route,
-                "current_system": self._current_system,
-            })
-            self._push_route_to_overlay()
+        self._last_jump_info = None
+        # no show() — the overlay appears at the next FSD engagement
+        self._overlay_manager.emit_to_overlay("route", "route_update", {
+            "route": self._active_route,
+            "current_system": self._current_system,
+        })
+        return True
+
+    def clear_active_route(self) -> bool:
+        """UI 'Clear route' button — same teardown as an in-game NavRouteClear."""
+        self._handle_nav_route_clear()
         return True
 
     def get_active_route(self) -> dict | None:
@@ -2262,8 +2272,8 @@ class API:
 
     def _load_overlay_opacities(self):
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker",
-                 "construction", "mining"]
+        names = ["cmdr_ping", "route", "fss", "exo_tracker",
+                 "construction", "mining", "station_info", "bio_signals"]
         for name in names:
             val = get_pref(f"overlay_opacity_{name}", 1.0)
             try:
@@ -2303,15 +2313,16 @@ class API:
 
     def toggle_overlay(self, name: str):
         from core.database import set_pref
-        new_state = self._overlay_manager.toggle(name)
+        # route is event-driven: enabling arms it, it only appears on FSD engagement
+        new_state = self._overlay_manager.toggle(name, show_on_enable=(name != "route"))
         set_pref(f"overlay_auto_{name}", new_state)
-        if new_state:
+        if new_state and name != "route":
             self._seed_overlay(name)
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "system_preview", "exo_tracker",
-                 "construction", "mining"]
+        names = ["cmdr_ping", "route", "fss", "exo_tracker",
+                 "construction", "mining", "station_info", "bio_signals"]
         return {
             name: {
                 "shown": self._overlay_manager.is_shown(name),

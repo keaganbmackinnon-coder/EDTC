@@ -64,8 +64,10 @@ export default function Navigation() {
       if (range) setJumpRange(range.toFixed(2))
     })
     const off3 = window.__edtc?.on('route_update', payload => {
-      setActiveRoute(payload)
-      if (payload?.id) setActiveId(payload.id)
+      // payload is {route, current_system} — route is null when cleared
+      const r = payload?.route ?? null
+      setActiveRoute(r)
+      setActiveId(r?.id ?? null)
     })
     return () => { off1?.(); off2?.(); off3?.() }
   }, [])
@@ -135,6 +137,12 @@ export default function Navigation() {
     await api()?.copy_next_destination()
   }
 
+  async function clearRoute() {
+    await api()?.clear_active_route()
+    setActiveRoute(null)
+    setActiveId(null)
+  }
+
   const preview = parseRoute(routeText)
 
   return (
@@ -166,12 +174,20 @@ export default function Navigation() {
               }}
             />
           </div>
-          <button
-            onClick={copyNext}
-            className="text-xs font-mono text-ed-orange border border-ed-orange/40 rounded px-3 py-1 hover:bg-ed-orange/10 transition-colors"
-          >
-            Copy next destination  (Ctrl+Shift+C)
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={copyNext}
+              className="text-xs font-mono text-ed-orange border border-ed-orange/40 rounded px-3 py-1 hover:bg-ed-orange/10 transition-colors"
+            >
+              Copy next destination  (Ctrl+Shift+C)
+            </button>
+            <button
+              onClick={clearRoute}
+              className="text-xs font-mono text-red-400 border border-red-400/40 rounded px-3 py-1 hover:bg-red-400/10 transition-colors"
+            >
+              Clear route
+            </button>
+          </div>
         </div>
       )}
 
