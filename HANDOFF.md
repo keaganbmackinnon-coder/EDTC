@@ -3517,8 +3517,8 @@ so long pickers scroll instead of stretching the page; empty-state panel got
 min-h so it can't collapse.
 
 - `npm run build` clean; built + installed locally as **v0.3.72**
-  (startup log: frozen=True, correct exe/db). NOT tagged — tag v0.3.72
-  after the CMDR confirms the resize behaviour in-app.
+  (startup log: frozen=True, correct exe/db).
+- User confirmed — **v0.3.72 tagged + pushed for CI release 2026-07-12**.
 
 ---
 *Session 48 (cont. 3) — 2026-07-12 (v0.3.72 local)*
@@ -3537,3 +3537,6 @@ min-h so it can't collapse.
 
 ---
 *Session checkpoint: 2026-07-12 15:04:14*
+
+---
+*Session checkpoint: 2026-07-12 15:07:21*
