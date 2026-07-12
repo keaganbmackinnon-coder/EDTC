@@ -11,6 +11,7 @@ const OVERLAYS = [
   { id: 'construction',  label: 'Construction Materials',    badge: 'Live', desc: 'Live delivery progress for active colonisation construction projects.' },
   { id: 'mining',        label: 'Mining Session',            badge: 'Live', desc: 'Refined tonnage, tons/hr, last prospector result and Powerplay merits while mining.' },
   { id: 'station_info',  label: 'Station Info on Docking',   badge: 'Live', desc: 'Station type, pads, economy shares, faction influence/rep and services when docking is granted.' },
+  { id: 'bio_signals',   label: 'Bio Signals System Panel',  badge: 'Live', desc: 'System-wide biological rollup: per-body genus chips and predicted values with a rewards total.' },
 ]
 
 // --- Watchlist section ---

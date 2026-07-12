@@ -57,6 +57,7 @@ import ExoTracker from './overlays/ExoTracker'
 import Construction from './overlays/Construction'
 import MiningOverlay from './overlays/Mining'
 import StationInfo from './overlays/StationInfo'
+import BioSignals from './overlays/BioSignals'
 
 const OVERLAY_MAP = {
   'cmdr-ping':      CmdrPing,
@@ -67,6 +68,7 @@ const OVERLAY_MAP = {
   'construction':   Construction,
   'mining':         MiningOverlay,
   'station-info':   StationInfo,
+  'bio-signals':    BioSignals,
 }
 
 const NAV_ITEMS = [

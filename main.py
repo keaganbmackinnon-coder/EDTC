@@ -681,6 +681,8 @@ class API:
         self._current_body = None
         self._ship_pos = None
         self._cache_system_factions(event)
+        self._overlay_manager.emit_to_overlay("bio_signals", "bio_panel", {"clear": True})
+        self._overlay_manager.hide("bio_signals")
         self._emit("system_changed", {"system": system})
 
         coords = event.get("StarPos")
@@ -1140,6 +1142,7 @@ class API:
             self._overlay_manager.show("exo_tracker")
             self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
         self._push_exo_body()
+        self._push_bio_panel()
 
     def _read_surface_position(self) -> tuple | None:
         """(latitude, longitude, planet_radius_m, heading_deg) from Status.json
@@ -1263,6 +1266,7 @@ class API:
         self._emit("bio_signals", info)
         self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
+        self._push_bio_panel()
 
     def _handle_fss_body_signals(self, event: dict):
         """FSS reveals a body has N biological signals (but not which genera —
@@ -1290,6 +1294,7 @@ class API:
         self._emit("bio_signals", info)
         self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
+        self._push_bio_panel()
 
     # --- Exo body tracker (SrvSurvey-style overlay) ---
 
@@ -1316,16 +1321,46 @@ class API:
         self._emit("exo_body", payload)
         self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", payload)
 
-    def _exo_body_payload(self) -> dict:
-        """Everything the exo tracker overlay shows about the body under the
-        ship: signal count, per-genus species rows (predicted / sampling / done),
-        values, and whether the 5x first-logged bonus applies."""
-        from core import exobiology as exo
-        body = self._current_body
-        if not body:
-            return {"clear": True}
+    def _push_bio_panel(self):
+        """System-wide bio rollup (SrvSurvey's 'Bio signals' panel): one line
+        per body with genus chips + predicted max value, plus a rewards total."""
         system = self._current_system
-        body_id = body["id"]
+        bodies = []
+        total = 0
+        rewards = 0
+        for (s, bid), info in self._body_bio.items():
+            if s != system:
+                continue
+            rows = self._body_species_rows(bid)
+            value = sum(r["value"] for r in rows)
+            count = info.get("count", 0) or len(rows)
+            name = info.get("body", "")
+            short = name[len(system) + 1:] if name.startswith(system + " ") else name
+            total += count
+            rewards += value
+            bodies.append({
+                "body": short or bid,
+                "count": count,
+                "value": value,
+                "chips": [{"genus": r["genus"],
+                           "predicted": r["state"] == "predicted",
+                           "done": r["state"] == "done"} for r in rows],
+            })
+        if not bodies:
+            return
+        bodies.sort(key=lambda b: b["value"], reverse=True)
+        payload = {"system": system, "total": total, "rewards": rewards,
+                   "bodies": bodies}
+        self._emit("bio_panel", payload)
+        if self._overlay_manager.is_user_enabled("bio_signals"):
+            self._overlay_manager.show("bio_signals")
+            self._overlay_manager.emit_to_overlay("bio_signals", "bio_panel", payload)
+
+    def _body_species_rows(self, body_id: str) -> list[dict]:
+        """One row per genus on a body: a live scan when there is one, else the
+        top predicted species for that genus. Sorted by value, highest first."""
+        from core import exobiology as exo
+        system = self._current_system
         info = self._body_bio.get((system, body_id), {})
         signal_count = info.get("count", 0)
         confirmed = info.get("confirmed", False)
@@ -1373,7 +1408,21 @@ class API:
                     "scan_count": 0, "was_logged": None,
                     "distance": p.get("colony_distance") or exo.genus_distance(p.get("genus", "")),
                 }
-        species = sorted(rows.values(), key=lambda r: r["value"], reverse=True)
+        return sorted(rows.values(), key=lambda r: r["value"], reverse=True)
+
+    def _exo_body_payload(self) -> dict:
+        """Everything the exo tracker overlay shows about the body under the
+        ship: signal count, per-genus species rows (predicted / sampling / done),
+        values, and whether the 5x first-logged bonus applies."""
+        body = self._current_body
+        if not body:
+            return {"clear": True}
+        system = self._current_system
+        body_id = body["id"]
+        info = self._body_bio.get((system, body_id), {})
+        signal_count = info.get("count", 0)
+        confirmed = info.get("confirmed", False)
+        species = self._body_species_rows(body_id)
         analysed = sum(1 for r in species if r["state"] == "done")
         return {
             "system": system,
