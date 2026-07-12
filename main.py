@@ -51,25 +51,6 @@ logging.info(
 )
 
 # Approximate scan values by planet class (first-discovery estimates in Cr)
-_SCAN_VALUES = {
-    "Earthlike body": 1_500_000,
-    "Ammonia world": 700_000,
-    "Water world": 450_000,
-    "Metal rich body": 50_000,
-    "High metal content body": 25_000,
-    "Rocky ice body": 1_200,
-    "Icy body": 1_000,
-    "Rocky body": 1_000,
-    "Sudarsky class i gas giant": 8_000,
-    "Sudarsky class ii gas giant": 12_000,
-    "Sudarsky class iii gas giant": 8_000,
-    "Sudarsky class iv gas giant": 10_000,
-    "Sudarsky class v gas giant": 10_000,
-    "Gas giant with water based life": 45_000,
-    "Gas giant with ammonia based life": 50_000,
-    "Helium rich gas giant": 8_000,
-    "Helium gas giant": 8_000,
-}
 
 
 # Journal internal ship names → display names. The journal's Ship_Localised is
@@ -110,17 +91,45 @@ def _ship_display_name(event: dict) -> str:
     )
 
 
-def _estimate_scan_value(event: dict) -> int:
-    if event.get("StarType"):
-        return 0
-    planet_class = event.get("PlanetClass", "").lower()
-    base = next(
-        (v for k, v in _SCAN_VALUES.items() if k.lower() == planet_class),
-        1_000,
-    )
-    if event.get("TerraformState") == "Terraformable":
-        base = max(base, 200_000)
-    return base
+# Frontier's exploration value formula (MattG's forum post, as implemented by
+# EDSM/EDDiscovery): value = k + k*q*mass^0.2. Verified against SrvSurvey's
+# displayed numbers for the 2026-07-11 run bodies (33.29K/200,113 etc).
+_PLANET_K = {
+    "metal rich body": (21790, 0),
+    "ammonia world": (96932, 0),
+    "sudarsky class i gas giant": (1656, 0),
+    "sudarsky class ii gas giant": (9654, 100677),
+    "high metal content body": (9654, 100677),
+    "water world": (64831, 116295),
+    "earthlike body": (64831, 116295),  # ELW always gets the terraform bonus
+    "rocky body": (300, 93328),
+}
+
+
+def _body_scan_values(event: dict) -> tuple[int, int]:
+    """(fss_value, mapped_value) in credits as the game will pay this CMDR,
+    including the 2.6x first-discovery bonus when WasDiscovered is false and
+    the Odyssey +30% on mapping. The x1.25 efficient-DSS bonus is NOT included
+    here — SAAScanComplete applies it once the map actually beats the target."""
+    q = 0.56591828
+    first = not event.get("WasDiscovered", True)
+    star_type = event.get("StarType")
+    if star_type:
+        k = (22628 if star_type in ("N", "H") else
+             14057 if star_type.startswith("D") else 1200)
+        value = k + event.get("StellarMass", 0) * k / 66.25
+        return (int(value * (2.6 if first else 1)), 0)
+    pc = (event.get("PlanetClass") or "").lower()
+    k, tf_bonus = _PLANET_K.get(pc, (300, 0))
+    if event.get("TerraformState") == "Terraformable" or pc == "earthlike body":
+        k += tf_bonus
+    base = max(500.0, k + k * q * (event.get("MassEM", 0) or 0) ** 0.2)
+    fss = base * (2.6 if first else 1)
+    first_map = not event.get("WasMapped", True)
+    mult = (3.699622554 if (first and first_map)
+            else (8.0956 / 2.4593) if first_map else (10 / 3))
+    mapped = base * mult * 1.3 * (2.6 if first else 1)
+    return (int(fss), int(mapped))
 
 
 class API:
@@ -154,6 +163,7 @@ class API:
         # Body scan parameters for species prediction: body_id -> params
         self._body_params: dict[str, dict] = {}
         self._fss_bodies: list[dict] = []
+        self._fss_body_count: int = 0  # from FSSDiscoveryScan (the "honk")
         self._current_station: str = ""
         self._current_ship: dict = {}
         self._current_loadout: dict = {}   # full Loadout event, for build import
@@ -218,6 +228,7 @@ class API:
             # without this, depot/trade events after a relog see no station
             self._current_station = event.get("StationName", "") if event.get("Docked") else ""
             self._fss_bodies = []
+            self._fss_body_count = 0
             self._emit("system_changed", {"system": self._current_system})
             coords = event.get("StarPos")
             if coords and len(coords) == 3:
@@ -227,6 +238,8 @@ class API:
             self._handle_fss_discovery(event)
         elif event_name == "Scan":
             self._handle_scan(event)
+        elif event_name == "SAAScanComplete":
+            self._handle_saa_scan_complete(event)
         elif event_name == "ScanOrganic":
             self._handle_scan_organic(event)
         elif event_name == "SellOrganicData":
@@ -650,6 +663,7 @@ class API:
         system = event.get("StarSystem", "")
         self._current_system = system
         self._fss_bodies = []
+        self._fss_body_count = 0
         # Body-scoped exo caches are keyed by BodyID, which repeats across
         # systems — clear them on a jump so predictions don't leak between systems.
         self._body_params = {}
@@ -767,14 +781,16 @@ class API:
             "non_body_count": event.get("NonBodyCount", 0),
             "progress": event.get("Progress", 0),
         }
+        self._fss_body_count = event.get("BodyCount", 0)
         self._overlay_manager.emit_to_overlay("system_preview", "fss_discovery", payload)
+        self._push_fss()
 
     def _handle_scan(self, event: dict):
-        if event.get("StarType"):
-            return
         body_name = event.get("BodyName", "")
+        star_type = event.get("StarType", "")
         planet_class = event.get("PlanetClass_Localised") or event.get("PlanetClass", "")
-        value = _estimate_scan_value(event)
+        if not star_type and not planet_class:
+            return  # belt cluster — the FSS panel hides those
         terraformable = event.get("TerraformState") == "Terraformable"
 
         # Cache landable-body parameters so species prediction can run when this
@@ -791,19 +807,69 @@ class API:
                 "body_type": planet_class,
             }
 
+        system = event.get("StarSystem", self._current_system)
+        if body_name == system:
+            short = "0"
+        elif body_name.startswith(system + " "):
+            short = body_name[len(system) + 1:]
+        else:
+            short = body_name
+        fss_value, mapped_value = _body_scan_values(event)
+        body_id = str(event.get("BodyID", ""))
+        prev = next((b for b in self._fss_bodies if b["body"] == body_name), None)
         body = {
             "body": body_name,
-            "class": planet_class,
-            "value": value,
+            "short": short,
+            "body_id": body_id,
+            "class": planet_class or f"{star_type} Star",
+            "value": fss_value,
+            "mapped_value": mapped_value,
             "terraformable": terraformable,
+            "landable": bool(event.get("Landable")),
+            "discovered": event.get("WasDiscovered", True),
+            "dss": prev.get("dss", False) if prev else False,
+            "bio_count": prev.get("bio_count", 0) if prev else 0,
         }
-        self._fss_bodies.append(body)
+        if prev:
+            if prev.get("dss"):
+                # keep the efficiency-boosted value applied at SAAScanComplete
+                body["mapped_value"] = prev["mapped_value"]
+            self._fss_bodies[self._fss_bodies.index(prev)] = body
+        else:
+            self._fss_bodies.append(body)
 
-        self._overlay_manager.emit_to_overlay("fss", "body_scanned", {
-            "body": body,
-            "all_bodies": self._fss_bodies,
-        })
+        self._push_fss()
         self._emit("scan_update", {"body": body, "all_bodies": self._fss_bodies})
+
+    def _push_fss(self):
+        payload = {
+            "system": self._current_system,
+            "bodies": self._fss_bodies,
+            "body_count": self._fss_body_count,
+        }
+        self._overlay_manager.emit_to_overlay("fss", "fss_update", payload)
+
+    def _mark_body_bio(self, body_id: str, count: int):
+        """Attach a bio-signal count to the FSS body list (from FSSBodySignals
+        or SAASignalsFound) and refresh the FSS overlay."""
+        for b in self._fss_bodies:
+            if b.get("body_id") == body_id:
+                if b.get("bio_count") != count:
+                    b["bio_count"] = count
+                    self._push_fss()
+                return
+
+    def _handle_saa_scan_complete(self, event: dict):
+        body_id = str(event.get("BodyID", ""))
+        efficient = (event.get("ProbesUsed") or 0) <= (event.get("EfficiencyTarget") or 0)
+        for b in self._fss_bodies:
+            if b.get("body_id") == body_id:
+                if not b.get("dss"):
+                    b["dss"] = True
+                    if efficient:
+                        b["mapped_value"] = int(b["mapped_value"] * 1.25)
+                self._push_fss()
+                return
 
     # ScanOrganic ScanType progression: Log (1st sample) -> Sample (2nd) ->
     # Analyse (3rd, completes the species). NOT "Analysed" — that value never
@@ -997,6 +1063,7 @@ class API:
         }
         self._body_bio[(self._current_system, body_id)] = info
         self._emit("bio_signals", info)
+        self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
 
     def _handle_fss_body_signals(self, event: dict):
@@ -1008,6 +1075,7 @@ class API:
         if not bio:
             return
         body_id = str(event.get("BodyID", ""))
+        self._mark_body_bio(body_id, bio.get("Count", 0))
         prev = self._body_bio.get((self._current_system, body_id))
         if prev and prev.get("confirmed"):
             return  # DSS data is better — don't overwrite with a prediction
@@ -1022,6 +1090,7 @@ class API:
         }
         self._body_bio[(self._current_system, body_id)] = info
         self._emit("bio_signals", info)
+        self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
 
     # --- Exo body tracker (SrvSurvey-style overlay) ---
