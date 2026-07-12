@@ -43,7 +43,7 @@ OVERLAYS = {
     "exo_tracker": {
         "title": "EDTC — Exobiology",
         "key": "exo-tracker",
-        "width": 360,
+        "width": 400,
         "height": 280,
     },
     "mining": {
@@ -62,6 +62,7 @@ class OverlayManager:
         self._user_enabled: dict[str, bool] = {}  # persistent per-overlay on/off preference
         self._opacity: dict[str, float] = {}
         self._hide_timers: dict[str, threading.Timer] = {}
+        self._last_size: dict[str, int] = {}  # last content-fitted height per overlay
         self._dev_mode = dev_mode
         self._dist_path = dist_path
         self._enabled = False  # suppressed until webview is running
@@ -120,7 +121,7 @@ class OverlayManager:
             self._shown[name] = True
             self._apply_opacity(name)
             # size may be stale — pushes while hidden skip the auto-fit
-            if name in ("construction", "route", "mining"):
+            if name in ("construction", "route", "mining", "exo_tracker"):
                 self.resize_to_content(name)
             return
 
@@ -235,7 +236,7 @@ class OverlayManager:
         # so window.pywebview.api is an empty object there. Measure and resize
         # from this side instead; evaluate_js provably works (it's how the
         # data gets in). Both overlays carry id="overlay-panel" for measuring.
-        if name in ("construction", "route", "mining"):
+        if name in ("construction", "route", "mining", "exo_tracker"):
             self.resize_to_content(name)
 
     def resize_to_content(self, name: str, pad: int = 24, delay: float = 0.4):
@@ -260,8 +261,14 @@ class OverlayManager:
                 if isinstance(h, (int, float)) and h >= 20:
                     if not self._shown.get(name, False):
                         return  # hidden while we were measuring
-                    win.resize(width, int(h) + pad)
-                    logging.info(f"overlay: resized '{name}' to {width}x{int(h) + pad}")
+                    target = int(h) + pad
+                    # exo_tracker measures every second while sampling — skip
+                    # the resize (and the log line) when nothing changed
+                    if self._last_size.get(name) == target:
+                        return
+                    self._last_size[name] = target
+                    win.resize(width, target)
+                    logging.info(f"overlay: resized '{name}' to {width}x{target}")
             except Exception as e:
                 logging.warning(f"overlay: resize_to_content '{name}': {e}")
 

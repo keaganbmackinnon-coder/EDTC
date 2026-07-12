@@ -135,8 +135,15 @@ class API:
         self._load_overlay_opacities()
         self._active_route: dict | None = None
         self._current_system: str = ""
-        # exo state: (system, body, species) -> scan_count
-        self._exo_state: dict[tuple, int] = {}
+        # exo state: (system, body, species) -> {genus, variant, scan_count,
+        # was_logged, value} — live per-species detail for the tracker overlay
+        self._exo_state: dict[tuple, dict] = {}
+        # Body the CMDR is at (ApproachBody/Touchdown), None in open space —
+        # scopes the exo tracker overlay to the body under the ship
+        self._current_body: dict | None = None
+        # Where the ship touched down (lat, lon) — drives the radar's ship
+        # distance readout; cleared on Liftoff/LeaveBody/FSDJump
+        self._ship_pos: tuple | None = None
         # Active clonal-colony sampling for the distance helper. None when not
         # mid-sample; else {system, body, species, genus, required, radius,
         # samples:[(lat,lon), ...]} — the distance loop reads this each second.
@@ -228,6 +235,12 @@ class API:
             self._handle_saa_signals(event)
         elif event_name == "FSSBodySignals":
             self._handle_fss_body_signals(event)
+        elif event_name in ("ApproachBody", "Touchdown"):
+            self._handle_approach_body(event)
+        elif event_name == "Liftoff":
+            self._ship_pos = None
+        elif event_name == "LeaveBody":
+            self._handle_leave_body(event)
         elif event_name == "FactionKillBond":
             self._handle_faction_kill_bond(event)
         elif event_name == "ColonisationContribution":
@@ -641,6 +654,8 @@ class API:
         # systems — clear them on a jump so predictions don't leak between systems.
         self._body_params = {}
         self._exo_active = None
+        self._current_body = None
+        self._ship_pos = None
         self._emit("system_changed", {"system": system})
 
         coords = event.get("StarPos")
@@ -800,26 +815,34 @@ class API:
         scan_type = event.get("ScanType", "")
         species = event.get("Species_Localised") or event.get("Species", "")
         genus = event.get("Genus_Localised") or event.get("Genus", "")
+        variant = event.get("Variant_Localised") or event.get("Variant", "")
+        # WasLogged False = nobody has logged this species here — Vista pays 5x
+        was_logged = event.get("WasLogged")
         body_id = str(event.get("Body", ""))
         system = self._current_system
 
         key = (system, body_id, species)
-        count = self._EXO_SCAN_COUNT.get(scan_type, self._exo_state.get(key, 0))
-        self._exo_state[key] = count
+        prev = self._exo_state.get(key, {})
+        count = self._EXO_SCAN_COUNT.get(scan_type, prev.get("scan_count", 0))
         completed = count >= 3
 
         value = exo.species_value(species)
         required = exo.genus_distance(genus)
+        self._exo_state[key] = {
+            "genus": genus, "variant": variant, "scan_count": count,
+            "was_logged": was_logged, "value": value,
+        }
 
+        body_name = (self._current_body or {}).get("name", "")
         from core.database import upsert_exo_scan
-        upsert_exo_scan(system, body_id, species, genus, count, value)
+        upsert_exo_scan(system, body_id, species, genus, count, value, body_name)
 
         # Clonal-colony distance helper: record where each sample was taken so
         # the live loop can tell the CMDR when they're far enough for the next.
         if not completed:
             pos = self._read_surface_position()
             if pos:
-                lat, lon, radius = pos
+                lat, lon, radius, _heading = pos
                 if (not self._exo_active
                         or self._exo_active.get("species") != species
                         or self._exo_active.get("body") != body_id):
@@ -839,10 +862,12 @@ class API:
             "body": body_id,
             "species": species,
             "genus": genus,
+            "variant": variant,
             "scan_count": count,
             "completed": completed,
             "scan_type": scan_type,
             "value": value,
+            "was_logged": was_logged,
             "required_distance": required,
             "samples_taken": len(self._exo_active["samples"]) if self._exo_active else count,
         }
@@ -850,11 +875,12 @@ class API:
         if self._overlay_manager.is_user_enabled("exo_tracker"):
             self._overlay_manager.show("exo_tracker")
             self._overlay_manager.emit_to_overlay("exo_tracker", "exo_scan", payload)
+        self._push_exo_body()
 
     def _read_surface_position(self) -> tuple | None:
-        """(latitude, longitude, planet_radius_m) from Status.json when the CMDR
-        is on/near a planet surface, else None. PlanetRadius is present on foot,
-        in the SRV, and when flying low over a body."""
+        """(latitude, longitude, planet_radius_m, heading_deg) from Status.json
+        when the CMDR is on/near a planet surface, else None. PlanetRadius is
+        present on foot, in the SRV, and when flying low over a body."""
         try:
             from core.journal import journal_path
             status = json.loads((journal_path() / "Status.json").read_text(encoding="utf-8"))
@@ -862,7 +888,7 @@ class API:
             lon = status.get("Longitude")
             if lat is None or lon is None:
                 return None
-            return (lat, lon, status.get("PlanetRadius"))
+            return (lat, lon, status.get("PlanetRadius"), status.get("Heading"))
         except Exception:
             return None
 
@@ -880,13 +906,21 @@ class API:
             pos = self._read_surface_position()
             if not pos:
                 continue
-            lat, lon, radius = pos
+            lat, lon, radius, heading = pos
             radius = active.get("radius") or radius or 0
             if not radius:
                 continue
-            dmin = min(exo.surface_distance(lat, lon, slat, slon, radius)
-                       for slat, slon in active["samples"])
+            sample_points = [
+                {"lat": slat, "lon": slon,
+                 "dist": round(exo.surface_distance(lat, lon, slat, slon, radius))}
+                for slat, slon in active["samples"]
+            ]
+            dmin = min(p["dist"] for p in sample_points)
             required = active.get("required", 0)
+            ship_dist = None
+            if self._ship_pos:
+                ship_dist = round(exo.surface_distance(
+                    lat, lon, self._ship_pos[0], self._ship_pos[1], radius))
             payload = {
                 "genus": active.get("genus", ""),
                 "species": active.get("species", ""),
@@ -894,6 +928,10 @@ class API:
                 "required": required,
                 "clear": (required == 0) or (dmin >= required),
                 "samples": len(active["samples"]),
+                # radar minimap data
+                "lat": lat, "lon": lon, "heading": heading, "radius": radius,
+                "sample_points": sample_points,
+                "ship_dist": ship_dist,
             }
             self._emit("exo_distance", payload)
             if self._overlay_manager.is_user_enabled("exo_tracker"):
@@ -959,6 +997,7 @@ class API:
         }
         self._body_bio[(self._current_system, body_id)] = info
         self._emit("bio_signals", info)
+        self._push_exo_body()
 
     def _handle_fss_body_signals(self, event: dict):
         """FSS reveals a body has N biological signals (but not which genera —
@@ -983,6 +1022,104 @@ class API:
         }
         self._body_bio[(self._current_system, body_id)] = info
         self._emit("bio_signals", info)
+        self._push_exo_body()
+
+    # --- Exo body tracker (SrvSurvey-style overlay) ---
+
+    def _handle_approach_body(self, event: dict):
+        body_id = str(event.get("BodyID", ""))
+        self._current_body = {"id": body_id, "name": event.get("Body", "")}
+        if event.get("event") == "Touchdown" and event.get("Latitude") is not None:
+            self._ship_pos = (event.get("Latitude"), event.get("Longitude"))
+        payload = self._exo_body_payload()
+        self._emit("exo_body", payload)
+        if payload.get("signal_count") and self._overlay_manager.is_user_enabled("exo_tracker"):
+            self._overlay_manager.show("exo_tracker")
+            self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", payload)
+
+    def _handle_leave_body(self, event: dict):
+        self._current_body = None
+        self._ship_pos = None
+        self._emit("exo_body", {"clear": True})
+        self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", {"clear": True})
+        self._overlay_manager.hide("exo_tracker")
+
+    def _push_exo_body(self):
+        payload = self._exo_body_payload()
+        self._emit("exo_body", payload)
+        self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", payload)
+
+    def _exo_body_payload(self) -> dict:
+        """Everything the exo tracker overlay shows about the body under the
+        ship: signal count, per-genus species rows (predicted / sampling / done),
+        values, and whether the 5x first-logged bonus applies."""
+        from core import exobiology as exo
+        body = self._current_body
+        if not body:
+            return {"clear": True}
+        system = self._current_system
+        body_id = body["id"]
+        info = self._body_bio.get((system, body_id), {})
+        signal_count = info.get("count", 0)
+        confirmed = info.get("confirmed", False)
+        genera_names = info.get("genera", [])
+        predictions = info.get("predictions", [])
+
+        # Live scans on this body are authoritative — one row per genus
+        rows: dict[str, dict] = {}
+        for (s, b, sp), d in self._exo_state.items():
+            if s != system or b != body_id:
+                continue
+            g = d.get("genus", "")
+            rows[g.lower()] = {
+                "genus": g, "name": sp, "variant": d.get("variant", ""),
+                "value": d.get("value", 0),
+                "state": "done" if d.get("scan_count", 0) >= 3 else "sampling",
+                "scan_count": d.get("scan_count", 0),
+                "was_logged": d.get("was_logged"),
+                "distance": exo.genus_distance(g),
+            }
+        if confirmed and genera_names:
+            # DSS told us the genera — fill unscanned ones with the top prediction
+            for g in genera_names:
+                if g.lower() in rows:
+                    continue
+                top = next((p for p in predictions
+                            if (p.get("genus") or "").lower() == g.lower()), None)
+                rows[g.lower()] = {
+                    "genus": g, "name": (top or {}).get("name", ""), "variant": "",
+                    "value": (top or {}).get("value", 0), "state": "predicted",
+                    "scan_count": 0, "was_logged": None,
+                    "distance": exo.genus_distance(g),
+                }
+        else:
+            # FSS only — top predicted genus candidates up to the signal count
+            for p in predictions:
+                g = (p.get("genus") or "").lower()
+                if g in rows:
+                    continue
+                if signal_count and len(rows) >= signal_count:
+                    break
+                rows[g] = {
+                    "genus": p.get("genus", ""), "name": p.get("name", ""),
+                    "variant": "", "value": p.get("value", 0), "state": "predicted",
+                    "scan_count": 0, "was_logged": None,
+                    "distance": p.get("colony_distance") or exo.genus_distance(p.get("genus", "")),
+                }
+        species = sorted(rows.values(), key=lambda r: r["value"], reverse=True)
+        analysed = sum(1 for r in species if r["state"] == "done")
+        return {
+            "system": system,
+            "body_id": body_id,
+            "body_name": body["name"],
+            "signal_count": signal_count or len(species),
+            "confirmed": confirmed,
+            "analysed": analysed,
+            "species": species,
+            "rewards": sum(r["value"] for r in species),
+            # First-footfall/first-logged: any sampled species nobody logged before
+            "ff": any(r.get("was_logged") is False for r in species),
+        }
 
     # Thargoid interceptor kills are identified by their FactionKillBond reward.
     # There is no type field in the journal, so we match the exact bond value.
