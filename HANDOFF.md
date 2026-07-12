@@ -3350,3 +3350,56 @@ scratchpad test_exo_body.py) and screenshot-verified per overlay state.
 - Tag + release after in-app confirmation.
 - Watch for: station_info Spansh field names (economies/pads shapes are
   defensive best-guess), radar scale feel on foot, FSS overlay row cap (12).
+
+---
+*Session checkpoint: 2026-07-12 00:10:06*
+
+---
+*Session checkpoint: 2026-07-12 00:11:56*
+
+---
+*Session checkpoint: 2026-07-12 00:13:14*
+
+---
+*Session checkpoint: 2026-07-12 00:15:05*
+
+---
+*Session checkpoint: 2026-07-12 09:46:57*
+
+---
+
+## Session 48 — Route overlay: FSD-engagement-only + Clear route (v0.3.69, local)
+
+User feedback: route overlay always showed a stale route from old testing, and
+there was no way to clear a route in the app. Also removed System Preview
+overlay (the upgraded route/jump overlay covers it).
+
+| Item | What shipped |
+|---|---|
+| Route overlay lifecycle | Shows on StartJump (Hyperspace) when enabled, `hide_after(10s)` on FSDJump arrival, `cancel_hide` on back-to-back jumps. Enabling in Overlays arms it without showing (`toggle(show_on_enable=False)`). NavRoute/set_active_route no longer show it. |
+| **Stale-route root cause** | `_handle_nav_route` saved in-game routes WITHOUT `active=1` — an old manually-activated route kept `active=1` forever and reloaded every launch. Now: `clear_active_route()` + save with `active: 1`. |
+| Clear route | New `clear_active_route()` API + DB fn (`UPDATE routes SET active=0`); red "Clear route" button in Navigation active-route panel; `_handle_nav_route_clear` (in-game NavRouteClear) now also clears the DB flag + hides the overlay. |
+| Payload bug #6 | Navigation.jsx `route_update` listener read the `{route, current_system}` wrapper as the route itself (Session 46 family). Fixed; FSDJump route advance now also `_emit`s to the main window so the Navigation panel updates live. |
+| Jump card staleness | `_last_jump_info` stored/re-pushed by `_push_route_to_overlay` (fresh-window seed), cleared on arrival; Route.jsx drops the jump card when `route_update.current_system` matches it. |
+| System Preview removed | Deleted from OVERLAYS (core/overlay.py), main.py handlers/name lists, Overlays.jsx, App.jsx OVERLAY_MAP; SystemPreview.jsx deleted. |
+| Pref-load bug | `station_info`/`bio_signals` were missing from `_load_overlay_opacities` + `get_overlay_states` name lists — their enable prefs never loaded at startup. Fixed. |
+
+### Verified
+- Harness (scratchpad test_route_lifecycle.py, 20/20): NavRoute doesn't show
+  overlay + activates in DB; StartJump cancel_hide→show→jump_info + delayed
+  re-push; FSDJump advances/persists/emits both sides/schedules hide/clears
+  jump card; clear_active_route hides + DB active=0; disabled overlay never shows.
+- `npm run build` clean; py_compile clean; v0.3.69 built locally, installed,
+  running (frozen=True, correct DB), code pushed to main (c97d37a).
+
+### State / next session
+- **v0.3.69 NOT tagged** — tag for CI release after the CMDR confirms the
+  route overlay in-game (next hyperspace jump should show it; it should hide
+  ~10s after arrival).
+- The old stale test route may still be active in the prod DB — one click of
+  the new "Clear route" button in Navigation removes it for good.
+- Still open from Session 47: station_info Spansh field shapes, radar scale
+  feel, FSS overlay 12-row cap.
+
+---
+*Session 48 — 2026-07-12 (v0.3.69 local)*
