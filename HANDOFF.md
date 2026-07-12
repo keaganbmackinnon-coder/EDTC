@@ -3524,6 +3524,42 @@ min-h so it can't collapse.
 *Session 48 (cont. 3) — 2026-07-12 (v0.3.72 local)*
 
 ---
+
+## Session 48 (cont. 4) — Hardpoint anchor placement editor (v0.3.73, local)
+
+Research first: user pointed at jixxed/ed-odyssey-materials-helper — their ship
+builder's hardpoint locations are ~430 hand-authored pixel coords hardcoded in
+Ship.java (`ImageSlot.builder()...x(1107).y(597).fdevName("SmallHardpoint1")`)
+on 1920x1080 in-game screenshots, 2-4 views/ship. No 3D, no machine source —
+accurate placement is always hand-authored. They DO have Type-11 (lakonminer)
+and Kestrel Mk II (smallcombat01_nx) but only as 2D images — no meshes for our
+missing STLs (check Pizza42 Thingiverse/Printables for those).
+
+Built the EDTC equivalent — click-to-place on our 3D hulls:
+
+| Item | File |
+|---|---|
+| `data/hardpoint_anchors.json` — ship id → slot key → [x,y,z] normalised to oriented-model bbox | new |
+| `get_hardpoint_anchors` (bundled + per-machine user file merged, user wins) / `save_hardpoint_anchor` (dev → repo data file = shipped defaults; frozen → `hardpoint_anchors_user.json` beside exe) | `main.py` |
+| Anchored slots override procedural guesses; placed markers solid, guesses faint (0.5) | `ShipView.jsx` |
+| Placement mode: invisible raycast hull catches clicks (e.delta>6 = drag, ignored), converts to normalised coords, saves; autoRotate paused; crosshair cursor | `ShipView.jsx` |
+| 📍 Place mounts button (shows placed count) → armed-slot banner: label i/n, ✓ if placed, ←/→/reset/done, auto-advance after each click; clicking a hardpoint/utility row while placing arms it | `Builder.jsx` |
+
+Harness: 9/9 (scratchpad test_anchors.py — save/read/round/delete/dev-file/_note).
+py_compile + npm build clean. v0.3.73 built + installed + running (frozen=True).
+
+**Workflow note**: placements made in the installed app land in
+`%LOCALAPPDATA%\EDTC\hardpoint_anchors_user.json` — copy its `ships` entries
+into `data/hardpoint_anchors.json` in the repo to ship them as defaults for
+everyone. Use jixxed's annotated screenshots as visual reference while placing.
+If a ship's STL is ever replaced, its anchors need re-placing (bbox-relative).
+
+NOT tagged — tag v0.3.73 after the CMDR tries the placement editor in-app.
+
+---
+*Session 48 (cont. 4) — 2026-07-12 (v0.3.73 local)*
+
+---
 *Session checkpoint: 2026-07-12 12:49:11*
 
 ---
@@ -3540,3 +3576,12 @@ min-h so it can't collapse.
 
 ---
 *Session checkpoint: 2026-07-12 15:07:21*
+
+---
+*Session checkpoint: 2026-07-12 15:08:28*
+
+---
+*Session checkpoint: 2026-07-12 15:10:04*
+
+---
+*Session checkpoint: 2026-07-12 15:20:31*
