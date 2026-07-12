@@ -3405,3 +3405,38 @@ overlay (the upgraded route/jump overlay covers it).
 
 ---
 *Session checkpoint: 2026-07-12 10:26:15*
+
+---
+*Session checkpoint: 2026-07-12 10:29:54*
+
+---
+*Session checkpoint: 2026-07-12 10:40:57*
+
+---
+
+## Session 48 (cont.) — Blueprints tab cleanup (v0.3.70, local)
+
+User: "the stuff we can synthesise in our ship is mixed in with the engineering
+blueprints." Root cause: EDEngineer's blueprints.json lists synthesis recipes
+(engineers = `@Synthesis`, 65 entries) and Odyssey suit/weapon gear
+(`@Merchant`, 15) alongside real ship engineering.
+
+- `data/blueprints.json` filtered 240 → **160** (kept only entries with ≥1
+  real engineer; verified all 160 are ship modules, 38 module types).
+- `scripts/build_data.py` `build_blueprints()` applies the same filter on
+  future regens.
+- Nothing lost: the Synthesis tab has its own dataset (synthesis.json); the
+  dropped EDEngineer synthesis set is regenerable if ever wanted (it's more
+  granular — per-weapon munitions — could upgrade synthesis.json someday).
+- Carries over: the Ship Builder blueprint picker reads the same file/API, so
+  it's clean too. Pins referencing removed ids drop gracefully (null join).
+- v0.3.70 built + installed + running (frozen, correct DB). **NOT tagged** —
+  tag after the user confirms the Blueprints tab in-app.
+- Deferred ideas for the Builder-polish session (from this session's recon):
+  filter Builder's blueprint picker by the slot's module type (`applies_to`),
+  per-grade craftable ✓ from materials in the Builder editor, experimentals
+  dataset (free-text today), engineer unlock status in the editor footer,
+  "pin all engineering in this build" → Pinned shopping list.
+
+---
+*Session 48 (cont.) — 2026-07-12 (v0.3.70 local)*
