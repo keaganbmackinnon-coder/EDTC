@@ -618,7 +618,7 @@ export default function Builder() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] gap-4 flex-1 min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px] xl:grid-cols-[240px_1fr_300px] lg:grid-rows-[minmax(0,1fr)] gap-4 flex-1 min-h-0">
         {/* ── builds library ── */}
         <div className="flex flex-col min-h-0">
           <button className="btn-primary mb-2" disabled={busy === 'import'} onClick={importShip}>
@@ -632,7 +632,7 @@ export default function Builder() {
             <button className="btn-ghost px-2" onClick={startNew} disabled={!newShip}>+</button>
           </div>
           <div className="text-ed-muted text-[10px] uppercase tracking-wide mb-1">Saved builds</div>
-          <div className="overflow-y-auto flex-1 space-y-1 pr-1">
+          <div className="overflow-y-auto flex-1 space-y-1 pr-1 max-h-48 lg:max-h-none">
             {saved.map(b => (
               <div key={b.id}
                 className={`px-3 py-2 rounded border cursor-pointer group ${build?.id === b.id ? 'border-ed-orange bg-ed-dark' : 'border-ed-border hover:border-ed-orange/50'}`}
@@ -655,7 +655,7 @@ export default function Builder() {
         {/* ── slot editor ── */}
         <div className="flex flex-col min-h-0">
           {!build ? (
-            <div className="panel h-full flex items-center justify-center text-ed-muted text-sm">
+            <div className="panel h-full min-h-[160px] flex items-center justify-center text-ed-muted text-sm">
               Import your current ship or start a new build.
             </div>
           ) : (
@@ -675,10 +675,14 @@ export default function Builder() {
                 </div>
                 {ship && (
                   <div className="panel p-2 bg-gradient-to-b from-ed-panel to-ed-dark">
-                    <div className="w-full" style={{ aspectRatio: '340 / 240' }}>
-                      <ShipView ship={ship}
-                        activeKey={drawer?.slotKey || hoverSlot}
-                        onSelectMount={key => setDrawer({ slotKey: key, mode: 'module' })} />
+                    {/* height-driven (not width-driven) so a wide window can't balloon the
+                        schematic and squeeze the module list below out of view */}
+                    <div className="w-full flex justify-center" style={{ height: 'clamp(140px, 26vh, 250px)' }}>
+                      <div className="h-full max-w-full" style={{ aspectRatio: '340 / 240' }}>
+                        <ShipView ship={ship}
+                          activeKey={drawer?.slotKey || hoverSlot}
+                          onSelectMount={key => setDrawer({ slotKey: key, mode: 'module' })} />
+                      </div>
                     </div>
                     <div className="text-center text-[10px] font-mono text-ed-muted mt-0.5">
                       {hasModel(ship.id)
@@ -788,7 +792,7 @@ export default function Builder() {
         </div>
 
         {/* ── right column: stats or drawer ── */}
-        <div className="overflow-y-auto min-h-0">
+        <div className="overflow-y-auto min-h-0 max-h-[70vh] lg:max-h-none">
           {drawer?.slotKey === 'bulkhead' && ship ? (
             <div className="panel h-full">
               {drawer.mode === 'module'
