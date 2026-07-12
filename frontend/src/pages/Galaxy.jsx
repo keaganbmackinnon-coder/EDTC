@@ -428,10 +428,11 @@ const POWERS = [
   { name: 'Denton Patreus',        allegiance: 'Empire',      home: 'Eotienses',     ethos: 'Military',  perk: 'Incendiary Rounds (laser mod)' },
   { name: 'Edmund Mahon',          allegiance: 'Alliance',    home: 'Gateway',       ethos: 'Trade',     perk: 'Trade bonus in controlled systems' },
   { name: 'Felicia Winters',       allegiance: 'Federation',  home: 'Rhea',          ethos: 'Welfare',   perk: 'Manifest Scanner' },
+  { name: 'Jerome Archer',         allegiance: 'Federation',  home: 'Nanomam',       ethos: 'Security',  perk: '+100% bounty payouts in controlled systems' },
   { name: 'Li Yong-Rui',          allegiance: 'Independent', home: 'Lembava',       ethos: 'Corporate', perk: 'Discounted outfitting in SiriusGov systems' },
+  { name: 'Nakato Kaine',          allegiance: 'Alliance',    home: 'Tionisla',      ethos: 'Reform',    perk: '+50% mining commodity profits in controlled systems' },
   { name: 'Pranav Antal',          allegiance: 'Independent', home: 'Polevnic',      ethos: 'Utopian',   perk: 'Enforcer Cannon' },
   { name: 'Yuri Grom',             allegiance: 'Independent', home: 'Clayakarma',    ethos: 'Military',  perk: 'Pacifier Frag-Cannon' },
-  { name: 'Zachary Hudson',        allegiance: 'Federation',  home: 'Nanoman',       ethos: 'Security',  perk: 'Prismatic Shield Generator' },
   { name: 'Zemina Torval',         allegiance: 'Empire',      home: 'Synteini',      ethos: 'Corporate', perk: 'Mining Lance Beam Laser' },
 ]
 
@@ -456,7 +457,7 @@ function PowerplayTab() {
   }, [])
 
   useEffect(() => {
-    return window.__edtc?.on('powerplay_update', e => setStatus(e?.payload ?? {}))
+    return window.__edtc?.on('powerplay_update', p => setStatus(p ?? {}))
   }, [])
 
   async function lookupSystem() {
@@ -1649,8 +1650,8 @@ export default function Galaxy() {
   }, [])
 
   useEffect(() => {
-    const off = window.__edtc?.on('system_changed', e => {
-      setCurrentSystem(e?.payload?.system ?? '')
+    const off = window.__edtc?.on('system_changed', p => {
+      setCurrentSystem(p?.system ?? '')
     })
     return () => off?.()
   }, [])

@@ -3017,3 +3017,286 @@ session tracker, and a mining overlay.
 
 ---
 *Session 45 — 2026-07-11 (v0.3.67 local)*
+
+---
+*Session checkpoint: 2026-07-11 17:00:25*
+
+---
+*Session checkpoint: 2026-07-11 17:02:21*
+
+---
+*Session checkpoint: 2026-07-11 17:05:18*
+
+---
+*Session checkpoint: 2026-07-11 18:48:54*
+
+---
+*Session checkpoint: 2026-07-11 18:54:18*
+
+---
+
+## Session 46 — event-listener payload fix + PP2.0 roster in Galaxy
+
+Fixed the latent bug flagged in Session 45: `window.__edtc.on` handlers receive
+the **payload directly** (see `main.jsx` — `handlers.forEach(fn => fn(event.payload))`),
+but five listeners read `e?.payload?.X` and therefore always got `undefined`.
+
+| Fix | File |
+|---|---|
+| `system_changed` listener set currentSystem to `''` on every jump | `frontend/src/pages/Trading.jsx` |
+| `system_changed` listener (same bug) | `frontend/src/pages/Galaxy.jsx` |
+| `powerplay_update` listener wiped Powerplay status to `{}` on live update | `frontend/src/pages/Galaxy.jsx` |
+| `scan_update` listener cleared the Session Scanner body list on every scan | `frontend/src/pages/Exploration.jsx` |
+| `system_changed` listener (same bug) | `frontend/src/pages/Exploration.jsx` |
+| POWERS table updated to PP2.0 roster: Zachary Hudson → Jerome Archer (Federation, Nanomam — also fixed "Nanoman" typo), Nakato Kaine added (Alliance, Tionisla). Now 12 powers, matching Mining.jsx | `frontend/src/pages/Galaxy.jsx` |
+
+Notes: the Session 45 note only flagged Trading + Galaxy, but Exploration.jsx had
+two more instances of the same bug — all five sites fixed. Archer/Kaine "perk"
+column uses PP2.0 pledge bonuses (bounty/mining profit) since PP2.0 modules are
+no longer power-exclusive. Frontend builds clean.
+
+---
+*Session 46 — 2026-07-11*
+
+---
+*Session checkpoint: 2026-07-11 19:03:58*
+
+---
+*Session checkpoint: 2026-07-11 19:17:24*
+
+---
+*Session checkpoint: 2026-07-11 19:17:30*
+
+---
+*Session checkpoint: 2026-07-11 19:17:44*
+
+---
+*Session checkpoint: 2026-07-11 19:19:55*
+
+---
+*Session checkpoint: 2026-07-11 19:22:21*
+
+---
+*Session checkpoint: 2026-07-11 19:23:38*
+
+---
+*Session checkpoint: 2026-07-11 19:25:14*
+
+---
+*Session checkpoint: 2026-07-11 19:26:43*
+
+---
+*Session checkpoint: 2026-07-11 19:33:37*
+
+---
+*Session checkpoint: 2026-07-11 19:38:41*
+
+---
+*Session checkpoint: 2026-07-11 19:40:13*
+
+---
+*Session checkpoint: 2026-07-11 19:40:52*
+
+---
+*Session checkpoint: 2026-07-11 19:41:03*
+
+---
+*Session checkpoint: 2026-07-11 19:41:27*
+
+---
+*Session checkpoint: 2026-07-11 19:42:10*
+
+---
+*Session checkpoint: 2026-07-11 19:44:26*
+
+---
+*Session checkpoint: 2026-07-11 19:45:53*
+
+---
+*Session checkpoint: 2026-07-11 19:46:54*
+
+---
+*Session checkpoint: 2026-07-11 19:47:46*
+
+---
+*Session checkpoint: 2026-07-11 19:48:04*
+
+---
+*Session checkpoint: 2026-07-11 19:49:03*
+
+---
+*Session checkpoint: 2026-07-11 19:49:17*
+
+---
+*Session checkpoint: 2026-07-11 19:51:44*
+
+---
+*Session checkpoint: 2026-07-11 19:54:49*
+
+---
+*Session checkpoint: 2026-07-11 19:56:23*
+
+---
+*Session checkpoint: 2026-07-11 20:00:15*
+
+---
+*Session checkpoint: 2026-07-11 20:02:33*
+
+---
+*Session checkpoint: 2026-07-11 20:04:20*
+
+---
+*Session checkpoint: 2026-07-11 20:04:28*
+
+---
+*Session checkpoint: 2026-07-11 20:04:59*
+
+---
+*Session checkpoint: 2026-07-11 20:05:10*
+
+---
+*Session checkpoint: 2026-07-11 20:05:18*
+
+---
+*Session checkpoint: 2026-07-11 20:05:42*
+
+---
+*Session checkpoint: 2026-07-11 20:05:53*
+
+---
+*Session checkpoint: 2026-07-11 20:06:04*
+
+---
+*Session checkpoint: 2026-07-11 20:06:13*
+
+---
+*Session checkpoint: 2026-07-11 20:06:23*
+
+---
+*Session checkpoint: 2026-07-11 20:06:45*
+
+---
+*Session checkpoint: 2026-07-11 20:06:52*
+
+---
+*Session checkpoint: 2026-07-11 20:07:08*
+
+---
+
+## PLANNED — Overlay overhaul: SrvSurvey parity (next session)
+
+Live observation session 2026-07-11: watched the CMDR run a full exobiology
+trip (station → 63-jump route → FSS → DSS → land → sample 2 species to 100%)
+with SrvSurvey overlays active, screenshotting each overlay state. Reference
+screenshots: `docs/srvsurvey_reference/*.png` (16 images, named by state).
+Goal: rebuild EDTC's overlays to show the same information.
+
+### Observed overlays (in trigger order)
+
+1. **Jump overlay** (`jump_overlay.png`) — draws top-center during hyperspace.
+   Next-system name + star class (colour-coded); "#2 of 63" route progress bar
+   with one tick per jump and arrow at current position + total ly remaining;
+   "Discovered by <cmdr> <date> / Last updated"; traffic 24h/week/ever (EDSM);
+   body count. → Upgrade EDTC `Route` overlay: NavRoute list + StartJump
+   StarClass + EDSM system/traffic lookups (all already available).
+2. **Station info** (`station_info.png`) — on docking approach. Station name,
+   type (Dodec Starport), pad size ✓, economy shares (%), controlling faction
+   + Inf% + rep, services list, "Data: Spansh + updated date". → New overlay
+   candidate; Docked event + Spansh station data (client exists).
+3. **FSS system summary** (`fss_system_summary.png`, `fss_summary_with_bio.png`)
+   — persistent left panel. System name + ✔ when 100% scanned; "Scanned N
+   bodies: X CR" total; per-body lines "3 - High metal content body 🌿
+   33.29 K | 200,113 | 2 Genus" = FSS value | DSS value | genus count, sorted
+   by value, "(Hiding bodies < 10 K CR)" filter; flag = undiscovered; icons
+   for terraformable/landable; green row = DSS'd. → Upgrade EDTC `fss`
+   overlay: all fields derivable from Scan events (WasDiscovered/WasMapped/
+   TerraformState/Landable) + existing value estimator.
+4. **Bio signals panel** (`bio_signals_panel.png`) — after FSS, persists
+   outside FSS mode. "Bio signals: 4" system total; per-body genus icon chips
+   + predicted max value ("3 [chips] 20.7 M"); "Rewards: 41.4 M" system total.
+   → core/exobiology.py predict() already computes species+values; needs
+   per-body value rollup emitted to overlay.
+5. **Approach body card** (`approach_body_card.png`) — on ApproachBody.
+   Body name + "(⚑ Undiscovered)"; scan value; temp/gravity/pressure;
+   "Bio signals: 2 (value 20.7 M cr)"; volcanism; atmosphere composition;
+   full surface materials table with rare mats (Niobium/Molybdenum/Yttrium)
+   bolded. → Scan event has all of this incl. Materials[].
+6. **Bio tracker strip** (`bio_tracker_pre_sampling.png` → `sampling_active_
+   ff_value.png` → `tracker_one_species_done.png` → `tracker_body_complete.png`)
+   — top-center on planet. States: (a) genus list "Bacterium|500m Stratum|500m"
+   (genus + colony distance) + "Analyzed: 0" + body progress bar %;
+   (b) active sampling: 3 big sample dots + species/variant name + value
+   ("95.05 M CR (FF bonus)" = 5× when WasLogged false/first footfall) +
+   distance-since-last-sample bar scaled to colony range; (c) species done:
+   strikethrough in genus list; (d) body done: "All signals scanned with FF
+   bonus applied" + 100%.
+7. **Sample-distance radar** (`sample_radar_inside_zone.png`,
+   `sample_radar_two_zones.png`) — right side, on foot/SRV. Top-down minimap:
+   green hatched circle per sample = colony exclusion zone (terrain-anchored,
+   scrolls as you move), crosshair = you; header "Ship: 41m · SRV: 41m" live
+   distances; footer "1st: 1.84km · 2nd: 1.16km" per-sample distances.
+   → EDTC has Status.json lat/lon/heading + PlanetRadius + sample positions
+   (session 44 groundwork); needs a canvas minimap in ExoTracker overlay.
+8. **Body bio panel** (`species_predictions.png` → `species_confirmed_
+   sampling.png` → `species_one_done.png` → `panel_body_complete.png`) —
+   bottom-left. Per-species lifecycle styling: predicted = "?Cerbrus:?Teal"
+   orange with ?s; confirmed+sampling = green highlight bars, ?s dropped;
+   complete = strikethrough + dimmed. Shows value per species, "Rewards:
+   20.7 M" + "(FF bonus: 104 M)". Predictions were EXACT both times
+   (Stratum Tectonicas Green 19.01M, Bacterium Cerbrus Teal 1.69M).
+
+### Key data points from the live run
+
+- ScanOrganic sequence is **Log → Sample → Sample → Analyse** (4 events; the
+  3rd scan emits a second "Sample", then "Analyse" auto-fires ~5 s later).
+  Verify `_handle_scan_organic` counts this as 1→2→2→3, not 4 scans.
+- First-footfall bonus: SrvSurvey shows base × 5 when `WasLogged: false`
+  (labelled "FF bonus"); body totals shown both ways (20.7 M / 104 M).
+- Colony ranges shown per genus in-strip (Bacterium 500m, Stratum 500m) —
+  matches data/exobiology.json clonal ranges.
+- SrvSurvey species/variant prediction from body params was exactly right on
+  both species — our predict() (same BioScan rulesets) should match.
+
+### Suggested build order
+
+1. ExoTracker overlay rebuild (tracker strip states + body bio panel styling
+   + FF bonus math) — biggest win, all data already flows.
+2. Sample-distance radar minimap (needs sample lat/lon history + canvas).
+3. FSS overlay upgrade (value pairs, filters, undiscovered flags, genus count).
+4. Route overlay upgrade (tick progress bar + EDSM enrichment on StartJump).
+5. Station info overlay (new; Docked + Spansh).
+6. Bio signals system panel (predict() rollup after FSSBodySignals).
+
+---
+*Observation session complete — 2026-07-12*
+
+---
+*Session checkpoint: 2026-07-11 20:10:30*
+
+---
+
+## Session 46/47 wrap-up — READ THIS FIRST NEXT SESSION
+
+**State: ALL CHANGES UNCOMMITTED** (session ended near token limit):
+
+1. **Session 46 fixes (done, verified, builds clean, NOT committed):**
+   - 5 event-listener payload bugs fixed (`e?.payload?.X` → payload direct):
+     Trading.jsx, Galaxy.jsx ×2, Exploration.jsx ×2 (see Session 46 entry)
+   - Galaxy.jsx POWERS → PP2.0 roster (Hudson→Archer, +Kaine, Nanomam typo)
+   - `npm run build` passed; NOT yet version-bumped/released/exe-swapped
+2. **`docs/srvsurvey_reference/` — 16 new screenshot files, untracked.**
+3. **HANDOFF.md — Session 46 entry + PLANNED SrvSurvey-parity spec (above).**
+
+**Next session, in order:**
+1. Commit everything (payload fixes + roster + docs + HANDOFF).
+2. Verify `_handle_scan_organic` handles Log→Sample→Sample→Analyse (4 events,
+   3 scans, live-confirmed) — see Key data points above.
+3. Start the PLANNED overlay overhaul, build order in the spec (ExoTracker
+   rebuild first). Read the spec + docs/srvsurvey_reference images first.
+4. Version bump + release when user confirms in-app.
+
+---
+*Session 47 (observation) complete — 2026-07-12*
+
+---
+*Session checkpoint: 2026-07-11 20:13:33*

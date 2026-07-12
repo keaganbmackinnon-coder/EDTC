@@ -675,8 +675,8 @@ export default function Trading() {
   }, [])
 
   useEffect(() => {
-    const off = window.__edtc?.on('system_changed', e => {
-      setCurrentSystem(e?.payload?.system ?? '')
+    const off = window.__edtc?.on('system_changed', p => {
+      setCurrentSystem(p?.system ?? '')
     })
     return () => off?.()
   }, [])

@@ -1117,8 +1117,8 @@ function SessionScannerTab({ currentSystem }) {
   }, [])
 
   useEffect(() => {
-    const offScan = window.__edtc?.on('scan_update', e => {
-      setBodies(e?.payload?.all_bodies ?? [])
+    const offScan = window.__edtc?.on('scan_update', p => {
+      setBodies(p?.all_bodies ?? [])
     })
     const offJump = window.__edtc?.on('system_changed', () => {
       setBodies([])
@@ -1197,8 +1197,8 @@ export default function Exploration() {
   }, [])
 
   useEffect(() => {
-    const off = window.__edtc?.on('system_changed', e => {
-      setCurrentSystem(e?.payload?.system ?? '')
+    const off = window.__edtc?.on('system_changed', p => {
+      setCurrentSystem(p?.system ?? '')
     })
     return () => off?.()
   }, [])
