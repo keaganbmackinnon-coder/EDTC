@@ -3443,3 +3443,54 @@ blueprints." Root cause: EDEngineer's blueprints.json lists synthesis recipes
 
 ---
 *Session checkpoint: 2026-07-12 10:42:23*
+
+---
+*Session checkpoint: 2026-07-12 10:45:26*
+
+---
+
+## Session 48 (cont. 2) — Ship Builder module-data polish (v0.3.71, local)
+
+User: "ship builder seems to be missing components, some things have wrong
+info — I can't tell if my weapons are gimballed/fixed/turreted."
+
+### Root causes found (data audit vs journals + EDSY)
+- Mount type existed in modules.json (`mount: F/G/T`) but fitted slot rows
+  showed only name + class/RATING — rating letters (F/G) read like mount
+  codes but aren't.
+- coriolis-data mirror had: 29 duplicate entries, 10 "Missing module"
+  placeholders shown as real modules, and 20+ groups with wrong or raw-key
+  names (sfn "Shock Cannon"→Shutdown Field Neutraliser, pwa→Pulse Wave
+  Analyser, ss→Detailed Surface Scanner, rcpl/rpl limpets shifted, regular
+  Mining Lasers displayed as bare "Fixed").
+- Genuinely missing: the 9 Panther Mk II passenger cabins (not upstream;
+  added with EDSY stats, fdids 129043770-78), and `_free`-suffix store
+  variants / Int_FighterBayMk2_* silently dropped on import (aliased now).
+- NOT missing (verified unreleased, EDSY comments/hidden flags): huge cannon
+  turret, prisoner cells, size-8 standard FSDs (SCO size-8s already in),
+  anti-corrosion rack size 2, 1B shield gen — do not "fix" these.
+
+### Shipped
+| Item | File |
+|---|---|
+| Mount in every hardpoint display name ("Pulse Laser (Gimballed)", "Missile Rack (Pack-Hound, Fixed)") | `data/modules.json` |
+| All group names corrected; dedup; placeholders dropped; Mk II cabins added (940 modules total) | `data/modules.json` |
+| Same transforms for future regens (GROUP_NAMES verified per-key, `_skip` placeholders, dedup in `_sort`, MKII_CABINS supplement, mount+variant display in `_clean_module`) | `scripts/build_data.py` |
+| `_module_symbol_index`: `_free` + FighterBayMk2 aliases | `main.py` |
+| Engineering editor: blueprint list filtered to fitted module's type (BP_TYPE alias map + All toggle; "can't be engineered" note when none apply) | `frontend/src/pages/Builder.jsx` |
+
+### Verified
+- 13/13 harness (scratchpad test_builder_import.py): real Panther Mk II
+  import 17/17 modules, unladen mass exact vs game; MkII cabin swap moves
+  mass correctly; aliases resolve; blueprint applies_to ↔ module group
+  cross-check = every blueprint type maps, unmatched groups are genuinely
+  unengineerable.
+- Journal scan (60 files, whole fleet): 0 unresolved fittable modules.
+
+### State
+- v0.3.71 built + installed locally; **NOT tagged** — tag after the user
+  checks the Builder in-app (mount names in slot rows + picker, blueprint
+  filter in the engineering drawer).
+
+---
+*Session 48 (cont. 2) — 2026-07-12 (v0.3.71 local)*
