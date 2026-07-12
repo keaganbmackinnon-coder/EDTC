@@ -3495,4 +3495,45 @@ info — I can't tell if my weapons are gimballed/fixed/turreted."
 *Session 48 (cont. 2) — 2026-07-12 (v0.3.71 local)*
 
 ---
+
+## Session 48 (cont. 3) — Ship Builder resize-layout fix (v0.3.72, local)
+
+User: resizing the window made the module list impossible to see after
+shrinking again, and the stats panel got cut off. Two root causes in
+`frontend/src/pages/Builder.jsx`:
+
+1. **Schematic was width-driven** — `aspectRatio: 340/240` on a full-width div
+   inside the `shrink-0` header. Wide middle column → 500-600px-tall schematic
+   → module list below squeezed to ~0 height. Now height-driven:
+   `clamp(140px, 26vh, 250px)`, centered, aspect box inside.
+2. **Grid rows never height-constrained** — columns grew to content and the
+   stats column clipped past the window instead of scrolling. Added
+   `lg:grid-rows-[minmax(0,1fr)]` so each column scrolls internally and always
+   fits the viewport.
+
+Also: side columns narrower at lg (220/280px, full 240/300 at xl); in stacked
+(<lg) mode the saved-builds list caps at max-h-48 and the right column at 70vh
+so long pickers scroll instead of stretching the page; empty-state panel got
+min-h so it can't collapse.
+
+- `npm run build` clean; built + installed locally as **v0.3.72**
+  (startup log: frozen=True, correct exe/db). NOT tagged — tag v0.3.72
+  after the CMDR confirms the resize behaviour in-app.
+
+---
+*Session 48 (cont. 3) — 2026-07-12 (v0.3.72 local)*
+
+---
 *Session checkpoint: 2026-07-12 12:49:11*
+
+---
+*Session checkpoint: 2026-07-12 13:28:12*
+
+---
+*Session checkpoint: 2026-07-12 14:55:02*
+
+---
+*Session checkpoint: 2026-07-12 14:56:21*
+
+---
+*Session checkpoint: 2026-07-12 15:04:14*
