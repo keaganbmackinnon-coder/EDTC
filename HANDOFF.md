@@ -3488,9 +3488,11 @@ info — I can't tell if my weapons are gimballed/fixed/turreted."
 - Journal scan (60 files, whole fleet): 0 unresolved fittable modules.
 
 ### State
-- v0.3.71 built + installed locally; **NOT tagged** — tag after the user
-  checks the Builder in-app (mount names in slot rows + picker, blueprint
-  filter in the engineering drawer).
+- User confirmed the Builder in-app — **v0.3.71 tagged + pushed for CI
+  release 2026-07-12**. Local install already on v0.3.71.
 
 ---
 *Session 48 (cont. 2) — 2026-07-12 (v0.3.71 local)*
+
+---
+*Session checkpoint: 2026-07-12 12:49:11*
