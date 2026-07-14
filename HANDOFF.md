@@ -3644,8 +3644,10 @@ data ≈ 411M with FF bonus, EDTC's "Carrying (unsold)" showed 21.7M.
 - exo_sales table untouched by backfill (already matched journal 35/35).
 
 ### State
-- Committed + pushed to main. v0.3.74 built locally (dist\EDTC.exe) — **NOT
-  installed/tagged**: CMDR was mid-session; swap + in-game confirm next, then tag.
+- Committed + pushed to main. v0.3.74 installed locally; backfill verified on
+  first launch (45 completed scans rebuilt from 209 journals, carried 513.9M —
+  410.6M ground truth + tonight's two new first-logged species). CMDR confirmed
+  in-app — **v0.3.74 tagged + pushed for CI release 2026-07-13**.
 
 ---
 *Session 49 — 2026-07-13*
@@ -3667,3 +3669,9 @@ data ≈ 411M with FF bonus, EDTC's "Carrying (unsold)" showed 21.7M.
 
 ---
 *Session checkpoint: 2026-07-13 21:00:37*
+
+---
+*Session checkpoint: 2026-07-13 21:28:02*
+
+---
+*Session checkpoint: 2026-07-13 21:36:59*
