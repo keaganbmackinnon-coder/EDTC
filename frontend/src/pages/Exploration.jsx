@@ -570,7 +570,10 @@ function TrackerView({ currentSystem }) {
         <div className="panel flex items-center justify-between">
           <div>
             <p className="text-ed-text text-sm font-semibold">Unsold data aboard</p>
-            <p className="text-ed-muted text-xs font-mono">{carried.count} species · sell at Vista Genomics</p>
+            <p className="text-ed-muted text-xs font-mono">
+              {carried.count} species · sell at Vista Genomics
+              {carried.total > (carried.base_total ?? carried.total) && ' · incl. first-footfall ×5'}
+            </p>
           </div>
           <p className="text-ed-gold font-mono font-semibold">{fmtCredits(carried.total)}</p>
         </div>
@@ -789,7 +792,8 @@ function EarningsView() {
         <StatTile label="Total earned" value={fmtCredits(total)} color="text-ed-gold" sub="base + first-logged" />
         <StatTile label="Samples sold" value={summary?.samples ?? 0} sub={`${summary?.species ?? 0} species`} />
         <StatTile label="First Logged" value={summary?.first_logged ?? 0} color="text-ed-orange" sub={fmtCredits(summary?.bonus ?? 0) + ' bonus'} />
-        <StatTile label="Carrying (unsold)" value={fmtCredits(carried?.total ?? 0)} color="text-ed-text" sub={`${carried?.count ?? 0} species`} />
+        <StatTile label="Carrying (unsold)" value={fmtCredits(carried?.total ?? 0)} color="text-ed-text"
+                  sub={`${carried?.count ?? 0} species${(carried?.total ?? 0) > (carried?.base_total ?? carried?.total ?? 0) ? ' · FF ×5' : ''}`} />
       </div>
 
       <div>

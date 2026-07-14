@@ -3585,3 +3585,85 @@ NOT tagged — tag v0.3.73 after the CMDR tries the placement editor in-app.
 
 ---
 *Session checkpoint: 2026-07-12 15:20:31*
+
+---
+*Session checkpoint: 2026-07-12 15:41:34*
+
+---
+*Session checkpoint: 2026-07-12 15:43:03*
+
+---
+
+## Session 49 — FSS species predictions + first-footfall carried value (v0.3.74, local)
+
+User (live session, running SrvSurvey side-by-side): (1) SrvSurvey shows predicted
+species the moment a bio body is FSS'd, EDTC didn't; (2) SrvSurvey said unsold exo
+data ≈ 411M with FF bonus, EDTC's "Carrying (unsold)" showed 21.7M.
+
+### Root causes (all live-verified against the 2026-07-13 journal)
+1. **FSS ordering bug**: `FSSBodySignals` lands one journal line BEFORE the
+   body's detailed `Scan` — **every time** (7/7 bio bodies watched live via
+   monitor). `_handle_fss_body_signals` predicted with no `_body_params` →
+   empty predictions, never re-ran. Fix: `_handle_scan` re-predicts + re-emits
+   + re-pushes the bio panel when a pending unconfirmed bio body's Scan lands.
+2. **Carried value**: (a) no FF ×5 — `WasLogged` wasn't stored; (b) sale
+   matching by species name only (ignored time), over-consuming carried scans;
+   (c) `Died` not handled — 31 of the CMDR's 43 analysed scans were lost to
+   deaths but still matched sales. Ground truth from full journal replay:
+   **410,563,000 cr** (82,112,600 base, 8 species, all first-logged ×5) —
+   matches SrvSurvey exactly.
+
+### Shipped
+| Item | File |
+|---|---|
+| Re-predict on late Scan + `was_footfalled` cached in `_body_params` | `main.py` `_handle_scan` |
+| `exo_scans` columns: `was_logged` (NULL=unknown, 0=first-logged ×5), `sold`, `lost` + migration | `core/database.py` |
+| `mark_exo_sold` (FIFO per sale), `mark_exo_lost` (death), `get_carried_exo_scans`, `replace_completed_exo_scans` | `core/database.py` |
+| `Died` watched + handler (wipes carried + partial scans, `exo_data_lost` event) | `core/journal.py`, `main.py` |
+| **`_backfill_exo_history()`** — full journal replay at EVERY startup (bg thread): rebuilds completed scans with sold/lost/was_logged chronologically (incl. sessions where EDTC wasn't running — the SrvSurvey approach) | `main.py` |
+| `get_exo_carried_value()` rewrite: carried = completed ∧ ¬sold ∧ ¬lost; payout ×5 where `was_logged=0`; returns `total`(payable), `base_total` | `main.py` |
+| `_body_species_rows`: per-row `ff_value` (×5 sampled first-logged; ×5 potential when body `WasFootfalled=false`) | `main.py` |
+| Bio panel payload: per-body `species` detail rows, `ff_value`, `ff_rewards`, `focus` body | `main.py` `_push_bio_panel` |
+| BioSignals overlay: focused (just-scanned) body expands to predicted species list ("?Species value ×5", "predicted — DSS to confirm"), FF total in footer | `overlays/BioSignals.jsx` |
+| ExoTracker: FF bonus total = per-species `ff_rewards` (was all-or-nothing rewards×5) | `overlays/ExoTracker.jsx` |
+| Exploration page: carried tiles show FF-inclusive total + "FF ×5" hint | `pages/Exploration.jsx` |
+
+### Verified
+- Harness 23/23 (scratchpad test_exo_fixes.py, isolated test DB): backfill from
+  real journals → carried == 410,563,000 exactly; ordering fix replayed with
+  tonight's actual B 2 c events (empty → 24 candidates incl. Recepta on Scan);
+  sold/lost FIFO; upsert re-scan resets sold; ×5 potential rows.
+- py_compile + npm run build clean.
+
+### Notes
+- FF detection is automatic: `ScanOrganic.WasLogged=false` → ×5 (user asked for
+  a manual checkbox fallback — not needed, journal has it; add only if a body
+  ever shows was_logged NULL).
+- Backfill runs every startup (not pref-gated) so state self-heals; ~seconds in
+  a bg thread over 60 journals.
+- exo_sales table untouched by backfill (already matched journal 35/35).
+
+### State
+- Committed + pushed to main. v0.3.74 built locally (dist\EDTC.exe) — **NOT
+  installed/tagged**: CMDR was mid-session; swap + in-game confirm next, then tag.
+
+---
+*Session 49 — 2026-07-13*
+
+---
+*Session checkpoint: 2026-07-13 20:48:49*
+
+---
+*Session checkpoint: 2026-07-13 20:49:37*
+
+---
+*Session checkpoint: 2026-07-13 20:53:16*
+
+---
+*Session checkpoint: 2026-07-13 20:58:07*
+
+---
+*Session checkpoint: 2026-07-13 20:58:16*
+
+---
+*Session checkpoint: 2026-07-13 21:00:37*

@@ -256,7 +256,9 @@ function BioPanel({ body }) {
       </div>
       <p className="text-ed-orange text-[11px] font-mono mt-1.5">
         Rewards: {fmtM(body.rewards)}
-        {body.ff && <span className="text-ed-gold"> (FF bonus: {fmtM(body.rewards * 5)})</span>}
+        {(body.ff_rewards ?? body.rewards) > body.rewards && (
+          <span className="text-ed-gold"> (FF bonus: {fmtM(body.ff_rewards)})</span>
+        )}
       </p>
     </div>
   )

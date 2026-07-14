@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.73"  # bump this with every release
+APP_VERSION = "0.3.74"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -252,6 +252,8 @@ class API:
             self._handle_scan_organic(event)
         elif event_name == "SellOrganicData":
             self._handle_sell_organic(event)
+        elif event_name == "Died":
+            self._handle_died(event)
         elif event_name == "SAASignalsFound":
             self._handle_saa_signals(event)
         elif event_name == "FSSBodySignals":
@@ -1006,14 +1008,24 @@ class API:
         # separate event, sometimes before, sometimes after, the detailed Scan).
         if event.get("Landable") and event.get("BodyID") is not None:
             grav = event.get("SurfaceGravity", 0) or 0
-            self._body_params[str(event.get("BodyID"))] = {
+            bid = str(event.get("BodyID"))
+            self._body_params[bid] = {
                 "atmosphere": event.get("AtmosphereType") or event.get("Atmosphere") or "None",
                 "gravity_g": grav / 9.80665 if grav else None,
                 "temperature": event.get("SurfaceTemperature", 0),
                 "pressure": event.get("SurfacePressure", 0),
                 "volcanism": event.get("Volcanism", ""),
                 "body_type": planet_class,
+                "was_footfalled": event.get("WasFootfalled"),
             }
+            # FSSBodySignals lands one journal line BEFORE this Scan, so the
+            # bio prediction ran with no parameters and came back empty.
+            # Re-run it now that the body data exists.
+            pending = self._body_bio.get((self._current_system, bid))
+            if pending is not None and not pending.get("confirmed"):
+                pending["predictions"] = self._predict_body(bid)
+                self._emit("bio_signals", pending)
+                self._push_bio_panel(focus_body_id=bid)
 
         system = event.get("StarSystem", self._current_system)
         if body_name == system:
@@ -1109,7 +1121,8 @@ class API:
 
         body_name = (self._current_body or {}).get("name", "")
         from core.database import upsert_exo_scan
-        upsert_exo_scan(system, body_id, species, genus, count, value, body_name)
+        upsert_exo_scan(system, body_id, species, genus, count, value, body_name,
+                        was_logged=was_logged)
 
         # Clonal-colony distance helper: record where each sample was taken so
         # the live loop can tell the CMDR when they're far enough for the next.
@@ -1230,8 +1243,22 @@ class API:
         if not entries:
             return
         record_exo_sales(entries, self._current_system)
+        from core.database import mark_exo_sold
+        for e in entries:
+            mark_exo_sold(e["species"])
         total = sum(e["value"] + e["bonus"] for e in entries)
         self._emit("exo_sale", {"count": len(entries), "total": total})
+
+    def _handle_died(self, event: dict):
+        """Death loses all unsold exobiology data (and any partial scans)."""
+        from core.database import mark_exo_lost
+        lost = mark_exo_lost()
+        self._exo_state.clear()
+        self._exo_active = None
+        logging.info(f"Died: {lost} carried exo scans marked lost")
+        self._emit("exo_data_lost", {"count": lost})
+        self._push_exo_body()
+        self._push_bio_panel()
 
     def _predict_body(self, body_id: str, only_genera: list | None = None) -> list:
         from core import exobiology as exo
@@ -1274,7 +1301,7 @@ class API:
         self._emit("bio_signals", info)
         self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
-        self._push_bio_panel()
+        self._push_bio_panel(focus_body_id=body_id)
 
     def _handle_fss_body_signals(self, event: dict):
         """FSS reveals a body has N biological signals (but not which genera —
@@ -1302,7 +1329,7 @@ class API:
         self._emit("bio_signals", info)
         self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
-        self._push_bio_panel()
+        self._push_bio_panel(focus_body_id=body_id)
 
     # --- Exo body tracker (SrvSurvey-style overlay) ---
 
@@ -1329,35 +1356,48 @@ class API:
         self._emit("exo_body", payload)
         self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", payload)
 
-    def _push_bio_panel(self):
+    def _push_bio_panel(self, focus_body_id: str | None = None):
         """System-wide bio rollup (SrvSurvey's 'Bio signals' panel): one line
-        per body with genus chips + predicted max value, plus a rewards total."""
+        per body with genus chips + predicted max value, plus a rewards total.
+        focus_body_id marks the body whose species detail the overlay expands
+        (the one the CMDR just FSS'd/DSS'd)."""
         system = self._current_system
         bodies = []
         total = 0
         rewards = 0
+        ff_rewards = 0
         for (s, bid), info in self._body_bio.items():
             if s != system:
                 continue
             rows = self._body_species_rows(bid)
             value = sum(r["value"] for r in rows)
+            ff_value = sum(r.get("ff_value", r["value"]) for r in rows)
             count = info.get("count", 0) or len(rows)
             name = info.get("body", "")
             short = name[len(system) + 1:] if name.startswith(system + " ") else name
             total += count
             rewards += value
+            ff_rewards += ff_value
             bodies.append({
                 "body": short or bid,
+                "body_id": bid,
                 "count": count,
                 "value": value,
+                "ff_value": ff_value,
+                "confirmed": info.get("confirmed", False),
                 "chips": [{"genus": r["genus"],
                            "predicted": r["state"] == "predicted",
                            "done": r["state"] == "done"} for r in rows],
+                "species": [{"genus": r["genus"], "name": r["name"],
+                             "value": r["value"],
+                             "ff_value": r.get("ff_value", r["value"]),
+                             "state": r["state"]} for r in rows[:8]],
             })
         if not bodies:
             return
         bodies.sort(key=lambda b: b["value"], reverse=True)
         payload = {"system": system, "total": total, "rewards": rewards,
+                   "ff_rewards": ff_rewards, "focus": focus_body_id,
                    "bodies": bodies}
         self._emit("bio_panel", payload)
         if self._overlay_manager.is_user_enabled("bio_signals"):
@@ -1375,15 +1415,21 @@ class API:
         genera_names = info.get("genera", [])
         predictions = info.get("predictions", [])
 
+        # First-footfall potential: nobody has walked this body, so every
+        # species would be first-logged (5x) if the CMDR samples it.
+        ff_potential = self._body_params.get(body_id, {}).get("was_footfalled") is False
+
         # Live scans on this body are authoritative — one row per genus
         rows: dict[str, dict] = {}
         for (s, b, sp), d in self._exo_state.items():
             if s != system or b != body_id:
                 continue
             g = d.get("genus", "")
+            val = d.get("value", 0)
             rows[g.lower()] = {
                 "genus": g, "name": sp, "variant": d.get("variant", ""),
-                "value": d.get("value", 0),
+                "value": val,
+                "ff_value": val * 5 if d.get("was_logged") is False else val,
                 "state": "done" if d.get("scan_count", 0) >= 3 else "sampling",
                 "scan_count": d.get("scan_count", 0),
                 "was_logged": d.get("was_logged"),
@@ -1396,9 +1442,12 @@ class API:
                     continue
                 top = next((p for p in predictions
                             if (p.get("genus") or "").lower() == g.lower()), None)
+                val = (top or {}).get("value", 0)
                 rows[g.lower()] = {
                     "genus": g, "name": (top or {}).get("name", ""), "variant": "",
-                    "value": (top or {}).get("value", 0), "state": "predicted",
+                    "value": val,
+                    "ff_value": val * 5 if ff_potential else val,
+                    "state": "predicted",
                     "scan_count": 0, "was_logged": None,
                     "distance": exo.genus_distance(g),
                 }
@@ -1410,9 +1459,12 @@ class API:
                     continue
                 if signal_count and len(rows) >= signal_count:
                     break
+                val = p.get("value", 0)
                 rows[g] = {
                     "genus": p.get("genus", ""), "name": p.get("name", ""),
-                    "variant": "", "value": p.get("value", 0), "state": "predicted",
+                    "variant": "", "value": val,
+                    "ff_value": val * 5 if ff_potential else val,
+                    "state": "predicted",
                     "scan_count": 0, "was_logged": None,
                     "distance": p.get("colony_distance") or exo.genus_distance(p.get("genus", "")),
                 }
@@ -1441,6 +1493,7 @@ class API:
             "analysed": analysed,
             "species": species,
             "rewards": sum(r["value"] for r in species),
+            "ff_rewards": sum(r.get("ff_value", r["value"]) for r in species),
             # First-footfall/first-logged: any sampled species nobody logged before
             "ff": any(r.get("was_logged") is False for r in species),
         }
@@ -2450,30 +2503,112 @@ class API:
         return get_exo_sales_summary()
 
     def get_exo_carried_value(self) -> dict:
-        """Value of fully-scanned species not yet sold at Vista Genomics.
-        A species counts as 'carried' if it's 3/3 complete and hasn't appeared
-        in a later sale. Approximate: matches by species name against sales made
-        after the scan was completed."""
-        from core.database import get_completed_exo_scans, get_exo_sales
-        completed = get_completed_exo_scans(2000)
-        sales = get_exo_sales(3000)
-        # Count sales per species; a completed scan is "sold" if a sale of that
-        # species exists at/after the scan time. Consume sales so duplicates of
-        # the same species each need their own sale to be marked sold.
-        from collections import Counter
-        sold_counts = Counter(s["species"] for s in sales)
-        carried = []
+        """Value of fully-scanned species not yet sold at Vista Genomics, with
+        the 5x first-logged bonus applied where WasLogged=false — i.e. what
+        Vista will actually pay. Sold/lost state is kept accurate by the
+        live handlers plus the startup journal backfill."""
+        from core.database import get_carried_exo_scans
+        species = []
+        base_total = 0
         total = 0
-        for scan in completed:
-            sp = scan["species"]
-            if sold_counts.get(sp, 0) > 0:
-                sold_counts[sp] -= 1
+        for r in get_carried_exo_scans():
+            base = r.get("value", 0) or 0
+            ff = r.get("was_logged") == 0
+            payout = base * 5 if ff else base
+            base_total += base
+            total += payout
+            species.append({"species": r["species"], "genus": r.get("genus", ""),
+                            "value": payout, "base": base, "ff": ff,
+                            "system": r.get("system", ""),
+                            "body_name": r.get("body_name", "")})
+        species.sort(key=lambda s: s["value"], reverse=True)
+        return {"total": total, "base_total": base_total,
+                "count": len(species), "species": species}
+
+    def _backfill_exo_history(self):
+        """Rebuild completed exobiology scans from the FULL journal history at
+        startup. Replays every ScanOrganic Analyse / SellOrganicData / Died
+        chronologically, so carried-data state stays correct even across
+        sessions where EDTC wasn't running (this is how SrvSurvey stays
+        accurate). Runs in a background thread; a few seconds for years of
+        journals."""
+        from core import exobiology as exo
+        from core.database import replace_completed_exo_scans
+        from core.journal import journal_path
+        try:
+            logs = sorted(journal_path().glob("Journal*.log"),
+                          key=lambda p: p.stat().st_mtime)
+        except OSError as e:
+            logging.warning(f"Exo backfill: cannot list journals: {e}")
+            return
+        events = []
+        body_names = {}
+        for log in logs:
+            system = ""
+            try:
+                text = log.read_text(encoding="utf-8", errors="replace")
+            except OSError:
                 continue
-            val = scan.get("value", 0) or 0
-            total += val
-            carried.append({"species": sp, "genus": scan.get("genus", ""),
-                            "value": val, "system": scan.get("system", "")})
-        return {"total": total, "count": len(carried), "species": carried}
+            for line in text.splitlines():
+                try:
+                    e = json.loads(line)
+                except ValueError:
+                    continue
+                ev = e.get("event")
+                if ev in ("FSDJump", "Location"):
+                    system = e.get("StarSystem", system)
+                elif ev == "Scan" and e.get("BodyID") is not None:
+                    body_names[(e.get("StarSystem", system), str(e["BodyID"]))] = \
+                        e.get("BodyName", "")
+                elif ev == "ScanOrganic" and e.get("ScanType") == "Analyse":
+                    events.append((e.get("timestamp", ""), "scan", {
+                        "system": system,
+                        "body": str(e.get("Body", "")),
+                        "species": e.get("Species_Localised") or e.get("Species", ""),
+                        "genus": e.get("Genus_Localised") or e.get("Genus", ""),
+                        "was_logged": e.get("WasLogged"),
+                    }))
+                elif ev == "SellOrganicData":
+                    for b in e.get("BioData", []):
+                        events.append((e.get("timestamp", ""), "sale", {
+                            "species": b.get("Species_Localised") or b.get("Species", ""),
+                        }))
+                elif ev == "Died":
+                    events.append((e.get("timestamp", ""), "died", {}))
+        events.sort(key=lambda x: x[0])
+
+        rows: dict[tuple, dict] = {}  # (system, body, species) -> latest state
+        for ts, kind, d in events:
+            if kind == "scan":
+                key = (d["system"], d["body"], d["species"])
+                rows[key] = {
+                    "system": d["system"], "body": d["body"],
+                    "species": d["species"], "genus": d["genus"],
+                    "body_name": body_names.get((d["system"], d["body"]), ""),
+                    "value": exo.species_value(d["species"]) or 0,
+                    "was_logged": d["was_logged"],
+                    "sold": 0, "lost": 0,
+                    "ts": ts.replace("T", " ").rstrip("Z"),
+                }
+            elif kind == "sale":
+                # FIFO: one sold sample consumes the oldest carried scan of
+                # that species (dict preserves chronological insertion order)
+                for key, r in rows.items():
+                    if key[2] == d["species"] and not r["sold"] and not r["lost"]:
+                        r["sold"] = 1
+                        break
+            elif kind == "died":
+                for r in rows.values():
+                    if not r["sold"] and not r["lost"]:
+                        r["lost"] = 1
+        try:
+            n = replace_completed_exo_scans(list(rows.values()))
+        except Exception as e:
+            logging.warning(f"Exo backfill: DB write failed: {e}")
+            return
+        carried = sum(1 for r in rows.values() if not r["sold"] and not r["lost"])
+        logging.info(f"Exo backfill: {n} completed scans rebuilt from "
+                     f"{len(logs)} journals, {carried} carried unsold")
 
     # --- Construction ---
 
@@ -3952,6 +4087,7 @@ def main():
     threading.Thread(target=_eddn_listener, args=(api,), daemon=True).start()
     threading.Thread(target=api._exo_distance_loop, daemon=True).start()
     threading.Thread(target=api._backfill_thargoid_kills, daemon=True).start()
+    threading.Thread(target=api._backfill_exo_history, daemon=True).start()
 
     def _on_ready():
         api._overlay_manager.enable()

@@ -242,6 +242,10 @@ def init_db():
             "ALTER TABLE construction_projects ADD COLUMN market_id INTEGER",
             "ALTER TABLE exo_scans ADD COLUMN value INTEGER DEFAULT 0",
             "ALTER TABLE exo_scans ADD COLUMN body_name TEXT DEFAULT ''",
+            # NULL = unknown (pre-Odyssey-4.0 journals), 0 = first-logged (5x pay)
+            "ALTER TABLE exo_scans ADD COLUMN was_logged INTEGER",
+            "ALTER TABLE exo_scans ADD COLUMN sold INTEGER DEFAULT 0",
+            "ALTER TABLE exo_scans ADD COLUMN lost INTEGER DEFAULT 0",
         ]:
             try:
                 conn.execute(sql)
@@ -447,22 +451,87 @@ def get_exo_scans(system: str | None = None) -> list:
 
 
 def upsert_exo_scan(system: str, body: str, species: str, genus: str,
-                    scan_count: int, value: int = 0, body_name: str = "") -> dict:
+                    scan_count: int, value: int = 0, body_name: str = "",
+                    was_logged=None) -> dict:
     completed = 1 if scan_count >= 3 else 0
+    wl = None if was_logged is None else int(bool(was_logged))
     with _conn() as conn:
         conn.execute(
-            "INSERT INTO exo_scans (system, body, species, genus, scan_count, completed, value, body_name) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+            "INSERT INTO exo_scans (system, body, species, genus, scan_count, completed, value, body_name, was_logged) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(system, body, species) DO UPDATE SET "
             "scan_count=excluded.scan_count, completed=excluded.completed, "
-            "value=excluded.value, body_name=excluded.body_name, updated=datetime('now')",
-            (system, body, species, genus, scan_count, completed, value, body_name),
+            "value=excluded.value, body_name=excluded.body_name, "
+            "was_logged=COALESCE(excluded.was_logged, was_logged), "
+            # A re-scan of a previously sold/lost species is a NEW sellable sample
+            "sold=0, lost=0, updated=datetime('now')",
+            (system, body, species, genus, scan_count, completed, value, body_name, wl),
         )
         row = conn.execute(
             "SELECT * FROM exo_scans WHERE system=? AND body=? AND species=?",
             (system, body, species),
         ).fetchone()
         return dict(row)
+
+
+def get_carried_exo_scans() -> list:
+    """Fully-scanned species not yet sold at Vista Genomics and not lost to a
+    death — the data the CMDR is physically carrying right now."""
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM exo_scans WHERE completed=1 AND sold=0 AND lost=0 "
+            "ORDER BY updated"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def mark_exo_sold(species: str) -> bool:
+    """Mark the oldest carried scan of this species sold (FIFO — each sold
+    sample consumes exactly one completed scan)."""
+    with _conn() as conn:
+        cur = conn.execute(
+            "UPDATE exo_scans SET sold=1, updated=datetime('now') WHERE id = ("
+            "  SELECT id FROM exo_scans WHERE species=? AND completed=1 "
+            "  AND sold=0 AND lost=0 ORDER BY updated LIMIT 1)",
+            (species,),
+        )
+        return cur.rowcount > 0
+
+
+def mark_exo_lost() -> int:
+    """Death: all carried (unsold) data is gone. In-progress partial scans
+    are wiped too. Returns the number of completed scans lost."""
+    with _conn() as conn:
+        cur = conn.execute(
+            "UPDATE exo_scans SET lost=1, updated=datetime('now') "
+            "WHERE completed=1 AND sold=0 AND lost=0"
+        )
+        conn.execute("DELETE FROM exo_scans WHERE completed=0")
+        return cur.rowcount
+
+
+def replace_completed_exo_scans(rows: list) -> int:
+    """Journal backfill: replace every completed scan row with the
+    authoritative set reconstructed from the full journal history.
+    Each row: {system, body, species, genus, value, body_name, was_logged,
+    sold, lost, ts}. In-progress (scan_count<3) rows are untouched."""
+    with _conn() as conn:
+        conn.execute("DELETE FROM exo_scans WHERE completed=1")
+        conn.executemany(
+            "INSERT INTO exo_scans (system, body, species, genus, scan_count, "
+            "completed, value, body_name, was_logged, sold, lost, created, updated) "
+            "VALUES (?, ?, ?, ?, 3, 1, ?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(system, body, species) DO UPDATE SET "
+            "scan_count=3, completed=1, value=excluded.value, "
+            "body_name=excluded.body_name, was_logged=excluded.was_logged, "
+            "sold=excluded.sold, lost=excluded.lost, updated=excluded.updated",
+            [(r["system"], r["body"], r["species"], r.get("genus", ""),
+              int(r.get("value", 0) or 0), r.get("body_name", ""),
+              None if r.get("was_logged") is None else int(bool(r["was_logged"])),
+              int(r.get("sold", 0)), int(r.get("lost", 0)),
+              r.get("ts", ""), r.get("ts", "")) for r in rows],
+        )
+    return len(rows)
 
 
 def get_completed_exo_scans(limit: int = 500) -> list:
