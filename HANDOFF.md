@@ -3694,9 +3694,9 @@ and a price range instead of just the max value.
   sampled row min==max, range tightens after sampling.
 
 ### State
-- v0.3.75 built locally + installed (always-on + lock CONFIRMED in-game;
-  bio panel range shipped in same build). NOT tagged — tag after the CMDR
-  confirms the bio panel changes in-game.
+- CMDR confirmed always-on + lock AND the bio panel range in-game —
+  **v0.3.75 tagged + pushed for CI release 2026-07-15** (commit 2879522).
+  Local install already on v0.3.75.
 - Note: `win.events.moved` availability on WebView2 unverified in the field —
   if drag-while-locked doesn't re-save, the fallback is untick/re-tick the
   lock box (snapshot path, verified).
