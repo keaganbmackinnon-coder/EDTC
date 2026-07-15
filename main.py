@@ -41,7 +41,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.74"  # bump this with every release
+APP_VERSION = "0.3.75"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -318,7 +318,6 @@ class API:
         elif event_name == "Undocked":
             self._current_station = ""
             self._push_station_market()
-            self._overlay_manager.hide("station_info")
         elif event_name == "MarketBuy":
             self._handle_market_buy(event)
         elif event_name == "MarketSell":
@@ -675,7 +674,6 @@ class API:
         if self._overlay_manager.is_user_enabled("cmdr_ping"):
             self._overlay_manager.show("cmdr_ping")
             self._overlay_manager.emit_to_overlay("cmdr_ping", "cmdr_detected", payload)
-            self._overlay_manager.hide_after("cmdr_ping", 8)
 
     def _handle_fsd_jump(self, event: dict):
         system = event.get("StarSystem", "")
@@ -691,7 +689,10 @@ class API:
         self._ship_pos = None
         self._cache_system_factions(event)
         self._overlay_manager.emit_to_overlay("bio_signals", "bio_panel", {"clear": True})
-        self._overlay_manager.hide("bio_signals")
+        # overlays stay on screen — tell each one the system changed so it
+        # resets to its idle state (they all listen for 'system_changed')
+        for _name in self._OVERLAY_NAMES:
+            self._overlay_manager.emit_to_overlay(_name, "system_changed", {"system": system})
         self._emit("system_changed", {"system": system})
 
         coords = event.get("StarPos")
@@ -716,13 +717,6 @@ class API:
             })
             self._emit("route_update", {"route": self._active_route, "current_system": system})
 
-        # Route overlay lives only around the jump: shown on StartJump (FSD
-        # charge), lingers briefly after arrival, then hides until the next jump
-        if self._overlay_manager.is_shown("route"):
-            self._overlay_manager.hide_after("route", 10)
-
-        self._overlay_manager.emit_to_overlay("fss", "system_jumped", {})
-        self._overlay_manager.emit_to_overlay("exo_tracker", "system_jumped", {})
 
     def _handle_nav_route(self, event: dict):
         raw = event.get("Route", [])
@@ -744,7 +738,6 @@ class API:
         save_route(route)
         self._active_route = route
         self._last_fsd_target = None  # old target is stale for the new route
-        # no show() here — the overlay appears on StartJump (FSD engagement)
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": route,
             "current_system": self._current_system,
@@ -759,7 +752,6 @@ class API:
         self._active_route = None
         self._last_fsd_target = None
         self._last_jump_info = None
-        self._overlay_manager.hide("route")
         self._overlay_manager.emit_to_overlay("route", "route_update", {
             "route": None,
             "current_system": self._current_system,
@@ -781,10 +773,6 @@ class API:
         }
         self._last_jump_info = payload
         if self._overlay_manager.is_user_enabled("route"):
-            # the overlay only exists around the jump — bring it up now and
-            # keep it up (cancel a pending post-arrival hide from a quick
-            # back-to-back jump)
-            self._overlay_manager.cancel_hide("route")
             self._overlay_manager.show("route")
             # if show() just created the window, the immediate emits below are
             # dropped — the delayed push re-sends route + jump_info
@@ -961,8 +949,6 @@ class API:
         if self._overlay_manager.is_user_enabled("station_info"):
             self._overlay_manager.show("station_info")
             self._overlay_manager.emit_to_overlay("station_info", "station_info", payload)
-            # docked — the card has served its purpose, tidy up after a while
-            self._overlay_manager.hide_after("station_info", 30)
         self._emit("station_info", payload)
 
     def _handle_fsd_target(self, event: dict):
@@ -1349,7 +1335,6 @@ class API:
         self._ship_pos = None
         self._emit("exo_body", {"clear": True})
         self._overlay_manager.emit_to_overlay("exo_tracker", "exo_body", {"clear": True})
-        self._overlay_manager.hide("exo_tracker")
 
     def _push_exo_body(self):
         payload = self._exo_body_payload()
@@ -1365,24 +1350,28 @@ class API:
         bodies = []
         total = 0
         rewards = 0
+        rewards_min = 0
         ff_rewards = 0
         for (s, bid), info in self._body_bio.items():
             if s != system:
                 continue
             rows = self._body_species_rows(bid)
             value = sum(r["value"] for r in rows)
+            value_min = sum(r.get("value_min", r["value"]) for r in rows)
             ff_value = sum(r.get("ff_value", r["value"]) for r in rows)
             count = info.get("count", 0) or len(rows)
             name = info.get("body", "")
             short = name[len(system) + 1:] if name.startswith(system + " ") else name
             total += count
             rewards += value
+            rewards_min += value_min
             ff_rewards += ff_value
             bodies.append({
                 "body": short or bid,
                 "body_id": bid,
                 "count": count,
                 "value": value,
+                "value_min": value_min,
                 "ff_value": ff_value,
                 "confirmed": info.get("confirmed", False),
                 "chips": [{"genus": r["genus"],
@@ -1397,6 +1386,7 @@ class API:
             return
         bodies.sort(key=lambda b: b["value"], reverse=True)
         payload = {"system": system, "total": total, "rewards": rewards,
+                   "rewards_min": rewards_min,
                    "ff_rewards": ff_rewards, "focus": focus_body_id,
                    "bodies": bodies}
         self._emit("bio_panel", payload)
@@ -1419,6 +1409,16 @@ class API:
         # species would be first-logged (5x) if the CMDR samples it.
         ff_potential = self._body_params.get(body_id, {}).get("was_footfalled") is False
 
+        # Cheapest candidate species per genus — a predicted row's value is
+        # the genus's best case; value_min is its worst case, so the overlay
+        # can show a price range instead of just the max.
+        genus_min: dict[str, int] = {}
+        for p in predictions:
+            g = (p.get("genus") or "").lower()
+            v = p.get("value", 0)
+            if g not in genus_min or v < genus_min[g]:
+                genus_min[g] = v
+
         # Live scans on this body are authoritative — one row per genus
         rows: dict[str, dict] = {}
         for (s, b, sp), d in self._exo_state.items():
@@ -1428,7 +1428,7 @@ class API:
             val = d.get("value", 0)
             rows[g.lower()] = {
                 "genus": g, "name": sp, "variant": d.get("variant", ""),
-                "value": val,
+                "value": val, "value_min": val,
                 "ff_value": val * 5 if d.get("was_logged") is False else val,
                 "state": "done" if d.get("scan_count", 0) >= 3 else "sampling",
                 "scan_count": d.get("scan_count", 0),
@@ -1445,7 +1445,7 @@ class API:
                 val = (top or {}).get("value", 0)
                 rows[g.lower()] = {
                     "genus": g, "name": (top or {}).get("name", ""), "variant": "",
-                    "value": val,
+                    "value": val, "value_min": genus_min.get(g.lower(), val),
                     "ff_value": val * 5 if ff_potential else val,
                     "state": "predicted",
                     "scan_count": 0, "was_logged": None,
@@ -1463,6 +1463,7 @@ class API:
                 rows[g] = {
                     "genus": p.get("genus", ""), "name": p.get("name", ""),
                     "variant": "", "value": val,
+                    "value_min": genus_min.get(g, val),
                     "ff_value": val * 5 if ff_potential else val,
                     "state": "predicted",
                     "scan_count": 0, "was_logged": None,
@@ -2379,11 +2380,12 @@ class API:
 
     # --- Overlays ---
 
+    _OVERLAY_NAMES = ["cmdr_ping", "route", "fss", "exo_tracker",
+                      "construction", "mining", "station_info", "bio_signals"]
+
     def _load_overlay_opacities(self):
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "exo_tracker",
-                 "construction", "mining", "station_info", "bio_signals"]
-        for name in names:
+        for name in self._OVERLAY_NAMES:
             val = get_pref(f"overlay_opacity_{name}", 1.0)
             try:
                 self._overlay_manager.load_opacity(name, float(val))
@@ -2391,6 +2393,23 @@ class API:
                 pass
             enabled = get_pref(f"overlay_auto_{name}", False)
             self._overlay_manager.load_user_enabled(name, bool(enabled))
+            self._overlay_manager.load_locked(name, bool(get_pref(f"overlay_lock_{name}", False)))
+            pos = get_pref(f"overlay_pos_{name}")
+            if isinstance(pos, dict) and "x" in pos and "y" in pos:
+                self._overlay_manager.load_position(name, pos["x"], pos["y"])
+        # a drag while locked re-saves the spot (latest position wins)
+        self._overlay_manager.on_position_change = self._save_overlay_position
+
+    def _save_overlay_position(self, name: str, x: int, y: int):
+        from core.database import set_pref
+        set_pref(f"overlay_pos_{name}", {"x": x, "y": y})
+
+    def _show_enabled_overlays(self):
+        """Bring up every user-enabled overlay — enabled overlays are always
+        on screen; game events only update their content."""
+        for name in self._OVERLAY_NAMES:
+            if self._overlay_manager.is_user_enabled(name):
+                self.show_overlay(name)
 
     def resize_overlay(self, name: str, width: int, height: int) -> None:
         win = self._overlay_manager._windows.get(name)
@@ -2422,23 +2441,33 @@ class API:
 
     def toggle_overlay(self, name: str):
         from core.database import set_pref
-        # route is event-driven: enabling arms it, it only appears on FSD engagement
-        new_state = self._overlay_manager.toggle(name, show_on_enable=(name != "route"))
+        new_state = self._overlay_manager.toggle(name)
         set_pref(f"overlay_auto_{name}", new_state)
-        if new_state and name != "route":
+        if new_state:
             self._seed_overlay(name)
+
+    def set_overlay_lock(self, name: str, locked: bool) -> dict:
+        """Lock an overlay to its current on-screen spot (or release it).
+        Locking snapshots the window position and persists it — the overlay
+        reopens there on every launch."""
+        from core.database import set_pref
+        pos = self._overlay_manager.set_locked(name, bool(locked))
+        set_pref(f"overlay_lock_{name}", bool(locked))
+        if locked and pos:
+            set_pref(f"overlay_pos_{name}", {"x": pos[0], "y": pos[1]})
+        return {"locked": bool(locked),
+                "pos": {"x": pos[0], "y": pos[1]} if pos else None}
 
     def get_overlay_states(self) -> dict:
         from core.database import get_pref
-        names = ["cmdr_ping", "route", "fss", "exo_tracker",
-                 "construction", "mining", "station_info", "bio_signals"]
         return {
             name: {
                 "shown": self._overlay_manager.is_shown(name),
                 "auto_enabled": self._overlay_manager.is_user_enabled(name),
                 "opacity": float(get_pref(f"overlay_opacity_{name}", 1.0)),
+                "locked": self._overlay_manager.is_locked(name),
             }
-            for name in names
+            for name in self._OVERLAY_NAMES
         }
 
     def set_overlay_opacity(self, name: str, value: float) -> None:
@@ -4091,6 +4120,9 @@ def main():
 
     def _on_ready():
         api._overlay_manager.enable()
+        # enabled overlays are always on screen — bring them up now, at their
+        # locked positions if set
+        api._show_enabled_overlays()
         # Re-emit startup state after window is confirmed ready.
         # Journal replay runs in a background thread and may not have finished
         # by the time the frontend's first get_ship_info() call lands.

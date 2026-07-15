@@ -4,7 +4,7 @@ const api = () => window?.pywebview?.api
 
 const OVERLAYS = [
   { id: 'cmdr_ping',     label: 'CMDR Proximity Ping',      badge: 'Live', desc: 'Audio beep + popup when another CMDR appears. Watchlist mode for specific targets.' },
-  { id: 'route',         label: 'Route Following',           badge: 'Live', desc: 'Appears while the FSD charges/jumps: next system, star class, route progress, EDSM info. Hides shortly after arrival. Ctrl+Shift+C copies next system.' },
+  { id: 'route',         label: 'Route Following',           badge: 'Live', desc: 'Next system, star class, route progress and EDSM info while jumping. Ctrl+Shift+C copies next system.' },
   { id: 'fss',           label: 'FSS Body Values',           badge: 'Live', desc: 'Real scan + DSS values per body, undiscovered flags, bio genus counts, system completion.' },
   { id: 'exo_tracker',   label: 'Exobiology Tracker',        badge: 'Live', desc: 'Bio signals, species predictions/values, sampling progress with FF bonus, and a sample-distance radar.' },
   { id: 'construction',  label: 'Construction Materials',    badge: 'Live', desc: 'Live delivery progress for active colonisation construction projects.' },
@@ -214,18 +214,28 @@ export default function OverlaysPage() {
     }))
   }
 
+  async function setLock(id, locked) {
+    setStates(prev => ({
+      ...prev,
+      [id]: { ...prev[id], locked },
+    }))
+    await api()?.set_overlay_lock(id, locked)
+  }
+
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-2xl font-ui font-semibold text-ed-orange mb-1">Live In-Game Overlays</h1>
       <p className="text-ed-muted text-sm mb-6">
         Transparent always-on-top windows that sit over Elite Dangerous.
-        Toggle each overlay and adjust its opacity with the controls below.
+        Enabled overlays stay on screen — drag one where you want it, then tick
+        Lock position so it always reopens in that exact spot.
       </p>
 
       <div className="grid grid-cols-1 gap-3">
         {OVERLAYS.map(({ id, label, badge, desc }) => {
           const enabled = states[id]?.auto_enabled ?? false
           const opacity = states[id]?.opacity ?? 1.0
+          const locked = states[id]?.locked ?? false
           return (
             <div key={id} className="panel">
               <div className="flex items-center gap-4">
@@ -258,6 +268,23 @@ export default function OverlaysPage() {
                 <span className="text-ed-muted text-xs font-mono w-10 text-right shrink-0">
                   {Math.round(opacity * 100)}%
                 </span>
+                <label
+                  className={`flex items-center gap-1.5 shrink-0 text-xs font-mono select-none ${
+                    enabled ? 'text-ed-text cursor-pointer' : 'text-ed-muted/50 cursor-not-allowed'
+                  }`}
+                  title={enabled
+                    ? 'Remember this overlay’s current on-screen position'
+                    : 'Enable the overlay first, drag it into place, then lock'}
+                >
+                  <input
+                    type="checkbox"
+                    checked={locked}
+                    disabled={!enabled}
+                    onChange={e => setLock(id, e.target.checked)}
+                    className="accent-ed-orange"
+                  />
+                  {locked ? '🔒 Locked' : 'Lock position'}
+                </label>
               </div>
             </div>
           )

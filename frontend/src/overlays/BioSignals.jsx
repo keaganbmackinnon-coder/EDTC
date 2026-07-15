@@ -7,6 +7,12 @@ function fmtM(v) {
   return `${v}`
 }
 
+// "1.2 M–4.5 M" when the prediction spans a range, single value once known
+function fmtRange(min, max) {
+  if (min != null && min < max) return `${fmtM(min)}–${fmtM(max)}`
+  return fmtM(max)
+}
+
 // One predicted/sampled species line, SrvSurvey-style: "?Genus ?Species  value"
 function SpeciesLine({ sp }) {
   const predicted = sp.state === 'predicted'
@@ -44,7 +50,7 @@ export default function BioSignals() {
   if (!data) {
     return (
       <div className="w-full flex items-start justify-center pt-2 select-none">
-        <div id="overlay-panel" className="bg-ed-panel/95 border-y-2 border-ed-orange/70 px-3 py-1.5 shadow-2xl w-[248px]">
+        <div id="overlay-panel" className="bg-ed-panel/95 border-y-2 border-ed-orange/70 px-3 py-1.5 shadow-2xl w-[296px]">
           <p className="text-ed-muted text-xs font-mono">No bio signals yet</p>
         </div>
       </div>
@@ -53,7 +59,7 @@ export default function BioSignals() {
 
   return (
     <div className="w-full flex items-start justify-center pt-2 select-none">
-      <div id="overlay-panel" className="bg-ed-panel/95 border-y-2 border-ed-orange/70 px-3 py-1.5 shadow-2xl w-[248px] font-mono">
+      <div id="overlay-panel" className="bg-ed-panel/95 border-y-2 border-ed-orange/70 px-3 py-1.5 shadow-2xl w-[296px] font-mono">
         <p className="text-ed-orange text-xs">Bio signals: <span className="font-semibold">{data.total}</span></p>
 
         <div className="mt-1 space-y-0.5">
@@ -62,7 +68,7 @@ export default function BioSignals() {
             return (
               <div key={b.body_id ?? b.body}>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-ed-text text-sm w-7 shrink-0 truncate">{b.body}</span>
+                  <span className="text-ed-text text-sm shrink-0 whitespace-nowrap">{b.body}</span>
                   <span className="flex gap-0.5 flex-1 min-w-0 overflow-hidden">
                     {b.chips.map((c, i) => (
                       <span key={i}
@@ -76,7 +82,7 @@ export default function BioSignals() {
                       </span>
                     ))}
                   </span>
-                  <span className="text-ed-success text-xs shrink-0">{fmtM(b.value)}</span>
+                  <span className="text-ed-success text-xs shrink-0">{fmtRange(b.value_min, b.value)}</span>
                 </div>
                 {focused && b.species?.length > 0 && (
                   <div className="ml-7 mb-0.5 border-l border-ed-border pl-1.5">
@@ -92,7 +98,7 @@ export default function BioSignals() {
         </div>
 
         <p className="text-ed-orange text-xs mt-1 border-t border-ed-orange/40 pt-0.5">
-          Rewards: {fmtM(data.rewards)}
+          Rewards: {fmtRange(data.rewards_min, data.rewards)}
           {data.ff_rewards > data.rewards && (
             <span className="text-ed-gold"> (FF: {fmtM(data.ff_rewards)})</span>
           )}

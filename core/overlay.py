@@ -55,7 +55,7 @@ OVERLAYS = {
     "bio_signals": {
         "title": "EDTC — Bio Signals",
         "key": "bio-signals",
-        "width": 250,
+        "width": 300,
         "height": 200,
     },
 }
@@ -67,11 +67,14 @@ class OverlayManager:
         self._shown: dict[str, bool] = {}
         self._user_enabled: dict[str, bool] = {}  # persistent per-overlay on/off preference
         self._opacity: dict[str, float] = {}
-        self._hide_timers: dict[str, threading.Timer] = {}
+        self._locked: dict[str, bool] = {}  # per-overlay position lock
+        self._pos: dict[str, tuple[int, int]] = {}  # saved (x, y) per overlay
         self._last_size: dict[str, int] = {}  # last content-fitted height per overlay
         self._dev_mode = dev_mode
         self._dist_path = dist_path
         self._enabled = False  # suppressed until webview is running
+        # set by main.py — persists a locked overlay's position when it moves
+        self.on_position_change: Callable[[str, int, int], None] | None = None
 
     def enable(self):
         self._enabled = True
@@ -126,6 +129,7 @@ class OverlayManager:
             self._windows[name].show()
             self._shown[name] = True
             self._apply_opacity(name)
+            self._restore_position(name)
             # size may be stale — pushes while hidden skip the auto-fit
             if name in ("construction", "route", "mining", "exo_tracker", "fss",
                         "station_info", "bio_signals"):
@@ -149,6 +153,10 @@ class OverlayManager:
                 # WebView2 mechanism that can render a flat white window instead of
                 # see-through (open upstream issue, no fix). Use a solid dark HUD
                 # background instead (set in App.jsx) — reliable every time.
+                kwargs = {}
+                pos = self._pos.get(name)
+                if self._locked.get(name) and pos:
+                    kwargs["x"], kwargs["y"] = pos
                 win = webview.create_window(
                     title=cfg["title"],
                     url=url,
@@ -158,8 +166,10 @@ class OverlayManager:
                     on_top=True,
                     frameless=True,
                     easy_drag=True,
+                    **kwargs,
                 )
                 self._windows[name] = win
+                self._watch_moves(name, win)
                 logging.info(f"overlay: window '{name}' created")
                 time.sleep(1.5)
                 if not self._shown.get(name, False):
@@ -174,13 +184,65 @@ class OverlayManager:
 
         threading.Thread(target=_create, daemon=True).start()
 
+    def _restore_position(self, name: str):
+        """Move an existing window back to its locked position."""
+        pos = self._pos.get(name)
+        if not (self._locked.get(name) and pos):
+            return
+        win = self._windows.get(name)
+        if win is None:
+            return
+        try:
+            win.move(pos[0], pos[1])
+        except Exception as e:
+            logging.warning(f"overlay: restore position '{name}': {e}")
+
+    def _watch_moves(self, name: str, win):
+        """While locked, a drag updates the saved position (latest spot wins).
+        The moved event may not exist on every pywebview backend — best-effort."""
+        def _on_moved(x, y):
+            if self._locked.get(name):
+                self._pos[name] = (int(x), int(y))
+                if self.on_position_change:
+                    try:
+                        self.on_position_change(name, int(x), int(y))
+                    except Exception:
+                        pass
+        try:
+            win.events.moved += _on_moved
+        except Exception:
+            pass
+
+    def load_locked(self, name: str, value: bool):
+        self._locked[name] = value
+
+    def load_position(self, name: str, x: int, y: int):
+        self._pos[name] = (int(x), int(y))
+
+    def is_locked(self, name: str) -> bool:
+        return self._locked.get(name, False)
+
+    def get_position(self, name: str) -> tuple[int, int] | None:
+        return self._pos.get(name)
+
+    def set_locked(self, name: str, locked: bool) -> tuple[int, int] | None:
+        """Set the position lock. Locking snapshots the window's current spot
+        (if it exists on screen) so it reopens there. Returns the saved (x, y)
+        or None. Unlocking keeps the saved position but stops applying it."""
+        self._locked[name] = locked
+        if locked:
+            win = self._windows.get(name)
+            if win is not None:
+                try:
+                    self._pos[name] = (int(win.x), int(win.y))
+                except Exception as e:
+                    logging.warning(f"overlay: read position '{name}': {e}")
+        return self._pos.get(name)
+
     def hide(self, name: str):
         # flip the flag even when the window doesn't exist yet — show()'s
         # creation thread checks it after the window comes up
         self._shown[name] = False
-        timer = self._hide_timers.pop(name, None)
-        if timer:
-            timer.cancel()
         win = self._windows.get(name)
         if win is not None:
             try:
@@ -195,23 +257,16 @@ class OverlayManager:
     def is_user_enabled(self, name: str) -> bool:
         return self._user_enabled.get(name, False)
 
-    def toggle(self, name: str, show_on_enable: bool = True) -> bool:
-        """Flip the persistent enable pref. Event-driven overlays (route) pass
-        show_on_enable=False — they stay hidden until their trigger fires."""
+    def toggle(self, name: str) -> bool:
+        """Flip the persistent enable pref. Enabled overlays are always on
+        screen — game events only update their content."""
         new_state = not self._user_enabled.get(name, False)
         self._user_enabled[name] = new_state
-        if new_state and show_on_enable:
+        if new_state:
             self.show(name)
-        elif not new_state:
+        else:
             self.hide(name)
         return new_state
-
-    def cancel_hide(self, name: str):
-        """Cancel a pending hide_after timer (e.g. jumping again before the
-        route overlay's post-arrival hide fires)."""
-        timer = self._hide_timers.pop(name, None)
-        if timer:
-            timer.cancel()
 
     def set_opacity(self, name: str, value: float):
         self._opacity[name] = max(0.1, min(1.0, value))
@@ -291,17 +346,4 @@ class OverlayManager:
 
         timer = threading.Timer(delay, _measure)
         timer.daemon = True
-        timer.start()
-
-    def hide_after(self, name: str, seconds: float):
-        existing = self._hide_timers.pop(name, None)
-        if existing:
-            existing.cancel()
-
-        def _hide():
-            self.hide(name)
-            self._hide_timers.pop(name, None)
-
-        timer = threading.Timer(seconds, _hide)
-        self._hide_timers[name] = timer
         timer.start()

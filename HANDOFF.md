@@ -3397,8 +3397,8 @@ overlay (the upgraded route/jump overlay covers it).
   release 2026-07-12**.
 - The old stale test route may still be active in the prod DB — one click of
   the new "Clear route" button in Navigation removes it for good.
-- Still open from Session 47: station_info Spansh field shapes, radar scale
-  feel, FSS overlay 12-row cap.
+- Still open from Session 47: radar scale feel on foot. (FSS overlay and
+  station_info both confirmed fine in-game 2026-07-14 — no longer open items.)
 
 ---
 *Session 48 — 2026-07-12 (v0.3.69 local)*
@@ -3653,6 +3653,55 @@ data ≈ 411M with FF bonus, EDTC's "Carrying (unsold)" showed 21.7M.
 *Session 49 — 2026-07-13*
 
 ---
+
+## Session 50 — Always-on overlays + position lock (v0.3.75, local)
+
+User changed their mind on overlay lifecycle: "I want the overlays to just
+always be there", plus a lock checkbox so an overlay always reopens where
+they dragged it.
+
+| Item | What shipped |
+|---|---|
+| Always-on lifecycle | Enabled overlays are always on screen; game events only update content. Removed every auto-hide: cmdr_ping 8s, route 10s post-arrival, station_info 30s + Undocked hide, exo_tracker LeaveBody hide, bio_signals jump hide. `hide_after`/`cancel_hide`/`_hide_timers` deleted from OverlayManager; `toggle()` lost `show_on_enable` (route special-case gone). |
+| Startup show | `_show_enabled_overlays()` called from `_on_ready` — every user-enabled overlay comes up at launch (at its locked position). |
+| Position lock | `overlay_lock_{name}` + `overlay_pos_{name}` prefs. `set_overlay_lock` API snapshots the live window's x/y (`win.x/win.y`) and persists. Locked overlays: created with `x=/y=` kwargs, `win.move()` on re-show, and `win.events.moved` hook re-saves the spot on drag (latest position wins; hook is best-effort try/except per backend). |
+| Overlays page UI | "Lock position" checkbox per overlay (disabled until the overlay is enabled; 🔒 when locked); page subtitle explains drag-then-lock. Route desc no longer mentions hiding. |
+| Idle states | CmdrPing.jsx: window persists, so added "Listening for CMDRs…" idle card; ping card clears itself after 8s client-side (fresh ping restarts the timer). Others already had awaiting-states. |
+| system_changed to overlays | `_handle_fsd_jump` now broadcasts `system_changed` to ALL overlay windows — StationInfo/FssValues/ExoTracker listeners finally fire (backend used to send `system_jumped`, which nothing listened to; dead emits removed). Station card resets to "Awaiting docking…" on jump. |
+
+### Verified
+- Harness 15/15 (scratchpad test_overlay_lock.py, stubbed webview): toggle
+  always shows, lock snapshot, drag-while-locked persists via callback,
+  unlocked drag ignored, locked re-show moves back, fresh window created at
+  saved pos, hide_after/cancel_hide gone.
+- py_compile + npm run build clean.
+
+### Round 2 (same session): bio panel body names + price range
+CMDR confirmed always-on + lock working in-game, then asked: full body
+designation in the bio panel (was truncated to ~3 chars by `w-7 truncate`),
+and a price range instead of just the max value.
+
+- `_body_species_rows`: every row gets `value_min` — sampled rows exact
+  (min == max); predicted rows use the cheapest candidate species of that
+  genus (`genus_min` dict built from predictions).
+- `_push_bio_panel`: per-body `value_min` + payload `rewards_min`.
+- BioSignals.jsx: `fmtRange(min, max)` → "1.2 M–4.5 M", single value once
+  min == max (range tightens as species are confirmed/sampled); body name
+  no longer width-capped (`shrink-0 whitespace-nowrap`); panel widened
+  248→296px (window 250→300 in core/overlay.py) to fit.
+- Harness 10/10 (scratchpad test_bio_range.py, stubbed webview + fake
+  overlay manager): row mins, body/panel range sums, designation kept,
+  sampled row min==max, range tightens after sampling.
+
+### State
+- v0.3.75 built locally + installed (always-on + lock CONFIRMED in-game;
+  bio panel range shipped in same build). NOT tagged — tag after the CMDR
+  confirms the bio panel changes in-game.
+- Note: `win.events.moved` availability on WebView2 unverified in the field —
+  if drag-while-locked doesn't re-save, the fallback is untick/re-tick the
+  lock box (snapshot path, verified).
+
+---
 *Session checkpoint: 2026-07-13 20:48:49*
 
 ---
@@ -3675,3 +3724,24 @@ data ≈ 411M with FF bonus, EDTC's "Carrying (unsold)" showed 21.7M.
 
 ---
 *Session checkpoint: 2026-07-13 21:36:59*
+
+---
+*Session checkpoint: 2026-07-13 21:41:01*
+
+---
+*Session checkpoint: 2026-07-13 21:54:57*
+
+---
+*Session checkpoint: 2026-07-14 23:31:14*
+
+---
+*Session checkpoint: 2026-07-14 23:32:43*
+
+---
+*Session checkpoint: 2026-07-14 23:33:42*
+
+---
+*Session checkpoint: 2026-07-14 23:57:42*
+
+---
+*Session checkpoint: 2026-07-15 00:06:33*

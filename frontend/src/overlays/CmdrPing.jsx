@@ -1,18 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function CmdrPing() {
   const [ping, setPing] = useState(null)
-  const [visible, setVisible] = useState(false)
+  const timerRef = useRef(null)
 
   useEffect(() => {
     const off = window.__edtc?.on('cmdr_detected', (payload) => {
       setPing(payload)
-      setVisible(true)
+      // the window stays on screen — the ping card clears itself back to
+      // the idle state after a few seconds (a fresh ping restarts the timer)
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setPing(null), 8000)
     })
-    return off
+    return () => { off?.(); clearTimeout(timerRef.current) }
   }, [])
 
-  if (!visible || !ping) return null
+  if (!ping) {
+    return (
+      <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
+        <div className="bg-ed-panel/95 border border-ed-border/70 rounded-lg px-4 py-3 shadow-2xl backdrop-blur-sm min-w-[280px]">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-ed-muted/60 shrink-0" />
+            <span className="text-ed-muted text-xs font-mono uppercase tracking-widest">
+              Listening for CMDRs…
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-screen flex items-start justify-center pt-3 select-none">
