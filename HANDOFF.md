@@ -3696,10 +3696,28 @@ and a price range instead of just the max value.
 ### State
 - CMDR confirmed always-on + lock AND the bio panel range in-game —
   **v0.3.75 tagged + pushed for CI release 2026-07-15** (commit 2879522).
-  Local install already on v0.3.75.
+  Local install already on v0.3.75; CI run was still in_progress at session
+  end — verify the release assets published if anyone downloads from GitHub.
 - Note: `win.events.moved` availability on WebView2 unverified in the field —
   if drag-while-locked doesn't re-save, the fallback is untick/re-tick the
   lock box (snapshot path, verified).
+
+### Known issues / notes for next session
+- FSS overlay + station_info confirmed fine in-game (2026-07-14); the only
+  Session 47 leftover is radar scale feel on foot.
+- Overlays are now always-on: if a future overlay needs event-only behaviour,
+  don't reintroduce hide_after — give it an idle card like CmdrPing instead.
+- Bio panel value_min uses the cheapest candidate species per predicted
+  genus; FSS-only bodies still show the top-N genera by value, so the true
+  floor could be lower if lower-value genera are present. Fine in practice.
+- Hardpoint anchor placements still land in
+  %LOCALAPPDATA%\EDTC\hardpoint_anchors_user.json — copy into
+  data/hardpoint_anchors.json to ship as defaults.
+- Updater still has no exe checksum; guardian_sites.json still 8 sites;
+  pygame unavailable on Python 3.14 (dev only — CI builds on 3.12 have audio).
+
+---
+*Session 50 — 2026-07-15 (v0.3.75 released)*
 
 ---
 *Session checkpoint: 2026-07-13 20:48:49*
@@ -3745,3 +3763,6 @@ and a price range instead of just the max value.
 
 ---
 *Session checkpoint: 2026-07-15 00:06:33*
+
+---
+*Session checkpoint: 2026-07-15 00:09:18*
