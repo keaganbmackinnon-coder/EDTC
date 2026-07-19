@@ -243,13 +243,57 @@ function StatsPanel({ stats, ship, build, onBuild }) {
 }
 
 // ── right drawer: module picker ───────────────────────────────────────────────
+function ModuleButton({ m, onPick }) {
+  return (
+    <button onClick={() => onPick(m)}
+      className="w-full text-left px-3 py-2 rounded border border-ed-border hover:border-ed-orange/60">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-ed-text text-sm truncate">{m.display || m.group_name}</span>
+        <span className="badge border border-ed-border text-ed-orange shrink-0 font-mono">{m.class}{m.rating}</span>
+      </div>
+      <div className="text-ed-muted text-[11px] font-mono flex gap-3">
+        {m.mass != null && <span>{m.mass}t</span>}
+        {m.power != null && <span>{m.power}MW</span>}
+        {m.mount && <span>{m.mount === 'F' ? 'Fixed' : m.mount === 'G' ? 'Gimbal' : 'Turret'}</span>}
+        {m.cost ? <span className="text-ed-gold">{cr(m.cost)}</span> : null}
+      </div>
+    </button>
+  )
+}
+
 function ModulePicker({ slot, modules, onPick, onClose }) {
   const [q, setQ] = useState('')
-  const list = useMemo(() => {
-    const all = validModules(modules, slot)
-    const s = q.trim().toLowerCase()
-    return s ? all.filter(m => (m.display || m.group_name || '').toLowerCase().includes(s)) : all
-  }, [modules, slot, q])
+  const [openGroups, setOpenGroups] = useState(() => new Set())
+
+  // The drawer isn't remounted between slots — clear search + open state so a
+  // new slot starts from a clean picker.
+  useEffect(() => { setQ(''); setOpenGroups(new Set()) }, [slot])
+
+  const all = useMemo(() => validModules(modules, slot), [modules, slot])
+  const s = q.trim().toLowerCase()
+  const list = s ? all.filter(m => (m.display || m.group_name || '').toLowerCase().includes(s)) : all
+
+  // Group by module type ("Pulse Laser", "Shield Generator", …). Single-group
+  // pools (core slots) stay flat — one dropdown would just add a click.
+  const groups = useMemo(() => {
+    const by = new Map()
+    for (const m of all) {
+      const g = m.group_name || 'Other'
+      if (!by.has(g)) by.set(g, [])
+      by.get(g).push(m)
+    }
+    return [...by.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  }, [all])
+  const grouped = !s && groups.length > 1
+
+  function toggleGroup(name) {
+    setOpenGroups(prev => {
+      const next = new Set(prev)
+      next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-2">
@@ -263,21 +307,29 @@ function ModulePicker({ slot, modules, onPick, onClose }) {
         <button onClick={() => onPick(null)} className="w-full text-left px-3 py-2 rounded border border-ed-border hover:border-ed-danger/60 text-ed-muted text-sm">
           — Empty slot —
         </button>
-        {list.map((m, i) => (
-          <button key={m.symbol || i} onClick={() => onPick(m)}
-            className="w-full text-left px-3 py-2 rounded border border-ed-border hover:border-ed-orange/60">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-ed-text text-sm truncate">{m.display || m.group_name}</span>
-              <span className="badge border border-ed-border text-ed-orange shrink-0 font-mono">{m.class}{m.rating}</span>
-            </div>
-            <div className="text-ed-muted text-[11px] font-mono flex gap-3">
-              {m.mass != null && <span>{m.mass}t</span>}
-              {m.power != null && <span>{m.power}MW</span>}
-              {m.mount && <span>{m.mount === 'F' ? 'Fixed' : m.mount === 'G' ? 'Gimbal' : 'Turret'}</span>}
-              {m.cost ? <span className="text-ed-gold">{cr(m.cost)}</span> : null}
-            </div>
-          </button>
-        ))}
+        {grouped ? (
+          groups.map(([name, mods]) => {
+            const isOpen = openGroups.has(name)
+            return (
+              <div key={name}>
+                <button onClick={() => toggleGroup(name)}
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded border border-ed-border hover:border-ed-orange/60 text-left">
+                  <span className="text-ed-text text-sm truncate">
+                    {name} <span className="text-ed-muted font-mono text-xs">({mods.length})</span>
+                  </span>
+                  <span className="text-ed-muted text-xs shrink-0">{isOpen ? '▲' : '▼'}</span>
+                </button>
+                {isOpen && (
+                  <div className="mt-1 mb-2 ml-2 space-y-1">
+                    {mods.map((m, i) => <ModuleButton key={m.symbol || i} m={m} onPick={onPick} />)}
+                  </div>
+                )}
+              </div>
+            )
+          })
+        ) : (
+          list.map((m, i) => <ModuleButton key={m.symbol || i} m={m} onPick={onPick} />)
+        )}
         {list.length === 0 && <div className="text-ed-muted text-sm text-center py-6">No modules fit this slot.</div>}
       </div>
     </div>

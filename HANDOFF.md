@@ -4018,6 +4018,31 @@ User: "clean up the blueprints for engineers, grouped in drop downs."
 *Session 52 (cont.) — 2026-07-19*
 
 ---
+
+## Session 52 (cont. 2) — Ship Builder module picker grouped dropdowns (v0.3.77 local, untagged)
+
+User: "do the same in ship builder when selecting parts." Same treatment as
+the Blueprints tab, applied to `ModulePicker` in `Builder.jsx`:
+
+- Hardpoint / utility / optional / military slots group modules by
+  `group_name` into collapsible dropdowns ("Pulse Laser (12)"), alphabetical,
+  multiple open at once; module row extracted to `ModuleButton`.
+- Core slots stay flat — their pool is a single group, a dropdown would just
+  add a click (auto-detected: `groups.length > 1`).
+- Search flattens to matching modules (old behaviour); "— Empty slot —"
+  stays pinned on top.
+- Slot switch now resets search + open groups (drawer isn't remounted
+  between slots; stale search text used to linger — pre-existing quirk).
+
+npm build + PyInstaller clean; installed locally, startup log healthy
+(0.3.77, frozen=True). **v0.3.77 still NOT tagged** — covers both the
+Blueprints tab and the Builder picker; tag after the CMDR confirms both
+in-app.
+
+---
+*Session 52 (cont. 2) — 2026-07-19*
+
+---
 *Session checkpoint: 2026-07-18 23:01:13*
 
 ---
@@ -4049,3 +4074,9 @@ User: "clean up the blueprints for engineers, grouped in drop downs."
 
 ---
 *Session checkpoint: 2026-07-19 14:51:12*
+
+---
+*Session checkpoint: 2026-07-19 14:52:37*
+
+---
+*Session checkpoint: 2026-07-19 15:02:18*
