@@ -218,10 +218,151 @@ function EngineersTab() {
 
 const EFFECT_COLOR = (positive) => positive ? 'text-ed-success' : 'text-ed-danger'
 
+// Outfitting-style buckets for the module-type dropdowns. Types missing here
+// (future data regens) fall through to an "Other" section instead of vanishing.
+const MODULE_CATEGORIES = [
+  {
+    title: 'Hardpoints',
+    modules: ['Pulse Laser', 'Burst Laser', 'Beam Laser', 'Multi-cannon', 'Cannon',
+      'Fragment Cannon', 'Rail Gun', 'Plasma Accelerator', 'Missile Rack',
+      'Torpedo Pylon', 'Mine Launcher'],
+  },
+  {
+    title: 'Utility Mounts',
+    modules: ['Shield Booster', 'Chaff Launcher', 'Electronic Countermeasure',
+      'Heat Sink Launcher', 'Point Defence', 'Kill Warrant Scanner',
+      'Manifest Scanner', 'Wake Scanner'],
+  },
+  {
+    title: 'Core Internals',
+    modules: ['Armour', 'Power Plant', 'Thrusters', 'Frame Shift Drive',
+      'Life Support', 'Power Distributor', 'Sensors'],
+  },
+  {
+    title: 'Optional Internals',
+    modules: ['Shield Generator', 'Shield Cell Bank', 'Hull Reinforcement Package',
+      'Frame Shift Drive Interdictor', 'Fuel Scoop', 'Refinery',
+      'Auto Field-Maintenance Unit', 'Surface Scanner',
+      'Collector Limpet Controller', 'Fuel Transfer Limpet Controller',
+      'Hatch Breaker Limpet Controller', 'Prospector Limpet Controller'],
+  },
+]
+
+function BlueprintCard({ bp, isOpen, onToggle, matMap, canCraftGrade, highestCraftableGrade, isPinned, togglePin, showModuleTags }) {
+  const grades = Object.keys(bp.grades ?? {}).sort()
+  const craftable = highestCraftableGrade(bp)
+
+  return (
+    <div className="panel">
+      <button
+        className="w-full flex items-center justify-between gap-3 text-left"
+        onClick={onToggle}
+      >
+        <div>
+          <span className="text-ed-text font-semibold font-ui">{bp.name}</span>
+          {grades.some(g => isPinned?.(bp.id, g)) && (
+            <span className="ml-2 text-xs" title="Pinned">📌</span>
+          )}
+          {craftable != null && (
+            <span className="ml-2 text-xs font-mono text-ed-success">
+              ✓ Can craft G{craftable}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex gap-1">
+            {grades.map(g => (
+              <span
+                key={g}
+                className={`text-xs font-mono w-5 h-5 flex items-center justify-center rounded ${
+                  canCraftGrade(bp, g)
+                    ? 'bg-ed-success/20 text-ed-success'
+                    : 'bg-ed-border/20 text-ed-muted'
+                }`}
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+          <span className="text-ed-muted text-xs">{isOpen ? '▲' : '▼'}</span>
+        </div>
+      </button>
+
+      {showModuleTags && (bp.applies_to?.length > 0) && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {bp.applies_to.map(m => (
+            <Tag key={m} label={m} />
+          ))}
+        </div>
+      )}
+
+      {isOpen && (
+        <div className="mt-3 space-y-3 border-t border-ed-border pt-3">
+          {(bp.engineers?.length > 0) && (
+            <p className="text-xs font-mono text-ed-muted">
+              Engineers: <span className="text-ed-text">{bp.engineers.join(', ')}</span>
+            </p>
+          )}
+          {grades.map(g => {
+            const grade = bp.grades[g]
+            const craftable = canCraftGrade(bp, g)
+            return (
+              <div key={g} className={`rounded p-3 ${craftable ? 'bg-ed-success/5 border border-ed-success/20' : 'bg-ed-dark/50'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-ed-text font-semibold text-sm">
+                    Grade {g}
+                    {craftable && <span className="ml-2 text-ed-success text-xs font-mono">✓ craftable</span>}
+                  </p>
+                  <button
+                    className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
+                      isPinned?.(bp.id, g)
+                        ? 'border-ed-orange text-ed-orange'
+                        : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-orange'
+                    }`}
+                    onClick={() => togglePin?.(bp.id, g)}
+                  >
+                    {isPinned?.(bp.id, g) ? '📌 Pinned' : '📌 Pin'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-ed-muted text-xs font-mono mb-1">Materials</p>
+                    {(grade.materials ?? []).map(m => {
+                      const have = matMap[m.name.toLowerCase()] ?? 0
+                      const ok = have >= m.amount
+                      return (
+                        <div key={m.name} className="flex justify-between text-xs font-mono">
+                          <span className={ok ? 'text-ed-success' : 'text-ed-text'}>{m.name}</span>
+                          <span className={ok ? 'text-ed-success' : 'text-ed-danger'}>
+                            {have}/{m.amount}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div>
+                    <p className="text-ed-muted text-xs font-mono mb-1">Effects</p>
+                    {(grade.effects ?? []).map((ef, i) => (
+                      <div key={i} className={`text-xs font-mono ${EFFECT_COLOR(ef.positive)}`}>
+                        {ef.attribute}: ×{ef.modifier}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function BlueprintsTab({ materials, isPinned, togglePin }) {
   const [blueprints, setBlueprints] = useState([])
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(null)
+  const [openModules, setOpenModules] = useState(() => new Set())
 
   useEffect(() => {
     api()?.get_blueprints().then(r => setBlueprints(r ?? []))
@@ -240,122 +381,109 @@ function BlueprintsTab({ materials, isPinned, togglePin }) {
     return grades.find(g => canCraftGrade(blueprint, g.toString())) ?? null
   }
 
-  const filtered = blueprints.filter(b => {
-    const q = search.toLowerCase()
-    return !q || b.name?.toLowerCase().includes(q)
+  function toggleModule(name) {
+    setOpenModules(prev => {
+      const next = new Set(prev)
+      next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }
+
+  const cardProps = { matMap, canCraftGrade, highestCraftableGrade, isPinned, togglePin }
+
+  // Searching flattens the groups so matches are visible immediately.
+  const q = search.toLowerCase()
+  if (q) {
+    const filtered = blueprints.filter(b =>
+      b.name?.toLowerCase().includes(q)
       || (b.applies_to ?? []).some(m => m.toLowerCase().includes(q))
-  })
+    )
+    return (
+      <div>
+        <SearchBar value={search} onChange={setSearch} placeholder="Search blueprints or modules…" />
+        {filtered.length === 0 ? (
+          <EmptyState message="No blueprints match your search." />
+        ) : (
+          <div className="space-y-2">
+            {filtered.map(bp => (
+              <BlueprintCard key={bp.id} bp={bp} isOpen={expanded === bp.id}
+                onToggle={() => setExpanded(expanded === bp.id ? null : bp.id)}
+                showModuleTags {...cardProps} />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const byModule = {}
+  for (const bp of blueprints) {
+    const mod = bp.applies_to?.[0] ?? 'Other'
+    ;(byModule[mod] ??= []).push(bp)
+  }
+  const known = new Set(MODULE_CATEGORIES.flatMap(c => c.modules))
+  const leftovers = Object.keys(byModule).filter(m => !known.has(m)).sort()
+  const categories = leftovers.length
+    ? [...MODULE_CATEGORIES, { title: 'Other', modules: leftovers }]
+    : MODULE_CATEGORIES
 
   return (
     <div>
       <SearchBar value={search} onChange={setSearch} placeholder="Search blueprints or modules…" />
 
-      {filtered.length === 0 ? (
+      {blueprints.length === 0 ? (
         <EmptyState message="No blueprints found. Full dataset comes from EDCD blueprints.json." />
       ) : (
-        <div className="space-y-2">
-          {filtered.map(bp => {
-            const grades = Object.keys(bp.grades ?? {}).sort()
-            const craftable = highestCraftableGrade(bp)
-            const isOpen = expanded === bp.id
-
+        <div className="space-y-5">
+          {categories.map(cat => {
+            const modules = cat.modules.filter(m => byModule[m]?.length)
+            if (modules.length === 0) return null
             return (
-              <div key={bp.id} className="panel">
-                <button
-                  className="w-full flex items-center justify-between gap-3 text-left"
-                  onClick={() => setExpanded(isOpen ? null : bp.id)}
-                >
-                  <div>
-                    <span className="text-ed-text font-semibold font-ui">{bp.name}</span>
-                    {grades.some(g => isPinned?.(bp.id, g)) && (
-                      <span className="ml-2 text-xs" title="Pinned">📌</span>
-                    )}
-                    {craftable != null && (
-                      <span className="ml-2 text-xs font-mono text-ed-success">
-                        ✓ Can craft G{craftable}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex gap-1">
-                      {grades.map(g => (
-                        <span
-                          key={g}
-                          className={`text-xs font-mono w-5 h-5 flex items-center justify-center rounded ${
-                            canCraftGrade(bp, g)
-                              ? 'bg-ed-success/20 text-ed-success'
-                              : 'bg-ed-border/20 text-ed-muted'
-                          }`}
+              <div key={cat.title}>
+                <h3 className="text-ed-text font-ui font-semibold text-sm mb-2">
+                  {cat.title}{' '}
+                  <span className="text-ed-muted font-mono text-xs">
+                    ({modules.reduce((n, m) => n + byModule[m].length, 0)})
+                  </span>
+                </h3>
+                <div className="space-y-1.5">
+                  {modules.map(mod => {
+                    const bps = byModule[mod]
+                    const isOpen = openModules.has(mod)
+                    const craftableCount = bps.filter(b => highestCraftableGrade(b) != null).length
+                    const hasPin = bps.some(b =>
+                      Object.keys(b.grades ?? {}).some(g => isPinned?.(b.id, g)))
+                    return (
+                      <div key={mod} className="panel !py-2">
+                        <button
+                          className="w-full flex items-center justify-between gap-3 text-left"
+                          onClick={() => toggleModule(mod)}
                         >
-                          {g}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-ed-muted text-xs">{isOpen ? '▲' : '▼'}</span>
-                  </div>
-                </button>
-
-                {(bp.applies_to?.length > 0) && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {bp.applies_to.map(m => (
-                      <Tag key={m} label={m} />
-                    ))}
-                  </div>
-                )}
-
-                {isOpen && (
-                  <div className="mt-3 space-y-3 border-t border-ed-border pt-3">
-                    {grades.map(g => {
-                      const grade = bp.grades[g]
-                      const craftable = canCraftGrade(bp, g)
-                      return (
-                        <div key={g} className={`rounded p-3 ${craftable ? 'bg-ed-success/5 border border-ed-success/20' : 'bg-ed-dark/50'}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-ed-text font-semibold text-sm">
-                              Grade {g}
-                              {craftable && <span className="ml-2 text-ed-success text-xs font-mono">✓ craftable</span>}
-                            </p>
-                            <button
-                              className={`text-xs font-mono px-2 py-0.5 rounded border transition-colors ${
-                                isPinned?.(bp.id, g)
-                                  ? 'border-ed-orange text-ed-orange'
-                                  : 'border-ed-border text-ed-muted hover:border-ed-orange/50 hover:text-ed-orange'
-                              }`}
-                              onClick={() => togglePin?.(bp.id, g)}
-                            >
-                              {isPinned?.(bp.id, g) ? '📌 Pinned' : '📌 Pin'}
-                            </button>
+                          <div>
+                            <span className="text-ed-text font-ui text-sm">{mod}</span>
+                            <span className="ml-2 text-ed-muted font-mono text-xs">({bps.length})</span>
+                            {hasPin && <span className="ml-2 text-xs" title="Has pinned blueprints">📌</span>}
+                            {craftableCount > 0 && (
+                              <span className="ml-2 text-xs font-mono text-ed-success">
+                                ✓ {craftableCount} craftable
+                              </span>
+                            )}
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <p className="text-ed-muted text-xs font-mono mb-1">Materials</p>
-                              {(grade.materials ?? []).map(m => {
-                                const have = matMap[m.name.toLowerCase()] ?? 0
-                                const ok = have >= m.amount
-                                return (
-                                  <div key={m.name} className="flex justify-between text-xs font-mono">
-                                    <span className={ok ? 'text-ed-success' : 'text-ed-text'}>{m.name}</span>
-                                    <span className={ok ? 'text-ed-success' : 'text-ed-danger'}>
-                                      {have}/{m.amount}
-                                    </span>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                            <div>
-                              <p className="text-ed-muted text-xs font-mono mb-1">Effects</p>
-                              {(grade.effects ?? []).map((ef, i) => (
-                                <div key={i} className={`text-xs font-mono ${EFFECT_COLOR(ef.positive)}`}>
-                                  {ef.attribute}: ×{ef.modifier}
-                                </div>
-                              ))}
-                            </div>
+                          <span className="text-ed-muted text-xs shrink-0">{isOpen ? '▲' : '▼'}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="mt-2 space-y-2">
+                            {bps.map(bp => (
+                              <BlueprintCard key={bp.id} bp={bp} isOpen={expanded === bp.id}
+                                onToggle={() => setExpanded(expanded === bp.id ? null : bp.id)}
+                                {...cardProps} />
+                            ))}
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )
           })}

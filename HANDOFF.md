@@ -3995,6 +3995,29 @@ the same self-healing since they share `_post`.
 *Session 52 — 2026-07-19*
 
 ---
+
+## Session 52 (cont.) — Blueprints tab grouped dropdowns (v0.3.77 local, untagged)
+
+User: "clean up the blueprints for engineers, grouped in drop downs."
+
+| Item | File |
+|---|---|
+| Blueprint list card extracted to `BlueprintCard` (shared by grouped + search views); expanded card now also lists the engineers that offer the blueprint | `frontend/src/pages/Engineering.jsx` |
+| `MODULE_CATEGORIES` — outfitting-style buckets (Hardpoints 11 / Utility Mounts 8 / Core Internals 7 / Optional Internals 12 module types = all 38 in the data; unknown future types fall to an auto "Other" section) | `frontend/src/pages/Engineering.jsx` |
+| Grouped view: category headers → one collapsible dropdown per module type ("Pulse Laser (7)") with 📌-if-any-pinned and "✓ N craftable" rollups; multiple dropdowns can be open (Set state) | `frontend/src/pages/Engineering.jsx` |
+| Search flattens groups: non-empty query renders the old flat card list (with module tags) so matches are immediately visible | `frontend/src/pages/Engineering.jsx` |
+
+- Data facts (verified): every blueprint has exactly one `applies_to` module,
+  160 blueprints across 38 module types.
+- npm build clean; APP_VERSION bumped to 0.3.77; built + installed locally,
+  startup log healthy (frozen=True, correct exe/db).
+- **v0.3.77 NOT tagged** — tag after the CMDR confirms the new Blueprints tab
+  in-app.
+
+---
+*Session 52 (cont.) — 2026-07-19*
+
+---
 *Session checkpoint: 2026-07-18 23:01:13*
 
 ---
@@ -4020,3 +4043,9 @@ the same self-healing since they share `_post`.
 
 ---
 *Session checkpoint: 2026-07-19 14:39:59*
+
+---
+*Session checkpoint: 2026-07-19 14:42:26*
+
+---
+*Session checkpoint: 2026-07-19 14:51:12*
