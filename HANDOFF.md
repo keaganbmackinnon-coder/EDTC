@@ -4035,9 +4035,9 @@ the Blueprints tab, applied to `ModulePicker` in `Builder.jsx`:
   between slots; stale search text used to linger — pre-existing quirk).
 
 npm build + PyInstaller clean; installed locally, startup log healthy
-(0.3.77, frozen=True). **v0.3.77 still NOT tagged** — covers both the
-Blueprints tab and the Builder picker; tag after the CMDR confirms both
-in-app.
+(0.3.77, frozen=True). CMDR confirmed both the Blueprints tab and the
+Builder picker in-app — **v0.3.77 tagged + pushed for CI release
+2026-07-19** (commit 8e66792; CI run in_progress at session end).
 
 ---
 *Session 52 (cont. 2) — 2026-07-19*
@@ -4080,3 +4080,6 @@ in-app.
 
 ---
 *Session checkpoint: 2026-07-19 15:02:18*
+
+---
+*Session checkpoint: 2026-07-19 15:05:15*
