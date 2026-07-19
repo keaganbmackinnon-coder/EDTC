@@ -3981,10 +3981,15 @@ the same self-healing since they share `_post`.
 
 ### State
 
-- v0.3.76 rebuilt + installed locally with the fix. **Still NOT tagged** —
-  tag v0.3.76 after the CMDR confirms Traders/Brokers search in-app.
+- v0.3.76 rebuilt + installed locally with the fix. CMDR confirmed trader
+  search in-app — **v0.3.76 tagged + pushed for CI release 2026-07-19**
+  (commit fbb637d; CI run was in_progress at session end).
 - Session 51's remaining deferred items unchanged (#11 EDDN batch upserts,
   #15 httpx client reuse, #16 backfill checkpoint, #17 sqlite close).
+- Startup-log observation, NOT investigated: the 2026-07-19 00:41 shutdown
+  line says "all overlay auto-enable prefs cleared" — if enabled overlays
+  are forgetting their state between launches, look at the shutdown path
+  (possible conflict with Session 50's always-on persistence).
 
 ---
 *Session 52 — 2026-07-19*
@@ -4012,3 +4017,6 @@ the same self-healing since they share `_post`.
 
 ---
 *Session checkpoint: 2026-07-19 00:40:43*
+
+---
+*Session checkpoint: 2026-07-19 14:39:59*
