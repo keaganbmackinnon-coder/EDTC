@@ -2975,7 +2975,13 @@ class API:
         try:
             return asyncio.run(_run())
         except Exception as e:
-            return {"error": str(e), "results": []}
+            # RuntimeError from SpanshAPI._post is already user-friendly
+            # ("system not recognised"); anything else httpx-shaped gets a
+            # readable fallback instead of the raw status-line text.
+            msg = str(e)
+            if "400" in msg and "spansh" in msg.lower():
+                msg = f'Search failed — Spansh rejected the request for "{ref}". Check the system name.'
+            return {"error": msg, "results": []}
 
     def get_materials(self) -> list:
         from core.database import get_materials

@@ -3942,6 +3942,54 @@ everything else from the fix pass checked out in-app or in harness tests.
 *Session 51 — 2026-07-18/19 (v0.3.76 local, untagged)*
 
 ---
+
+## Session 52 — Traders/Brokers 400 FIXED (v0.3.76 local, untagged)
+
+Picked up the Session 51 open bug. Ran `scripts/repro_spansh_400.py` (step 1
+from the handoff) — **root cause confirmed immediately**:
+
+```
+200 'Kuk'                  count=371
+400 'kuk' / 'KUK' / 'Kuk ' / ' Kuk' / 'meliae' / 'G9L-N4H' / 'shinrarta dezhra'
+```
+
+Spansh's `reference_system` is **exact-match** (case- and whitespace-
+sensitive, rejects carrier callsigns). The CMDR typing a system name in
+anything but exact game casing → 400 "Invalid request". Explains why venv
+repros (which used correct casing) always worked while in-app clicks failed.
+
+### Fix (central, covers every search page not just Traders)
+
+| Item | File |
+|---|---|
+| `resolve_system_name()` — GET `/systems/field_values/system_names?q=` (Spansh's own autocomplete endpoint; case-insensitive, trims, returns canonical casing, empty for callsigns — verified live) | `api/spansh.py` |
+| `_post()` helper — ALL Spansh POSTs routed through it: on 400 with a `reference_system`, resolves the typed name and retries once; unresolvable → clean `RuntimeError('System "X" not recognised — check the spelling (fleet carrier callsigns can't be used here).')`; every non-200 logs payload + response body (the Session 51 "blind log" complaint) | `api/spansh.py` |
+| All 8 POST call sites (galaxy_route, road_to_riches, stations_near, _filtered_stations, exobiology_route, ring_hotspots, mining_sell_stations, commodity_markets) collapsed onto `_post` | `api/spansh.py` |
+| `_find_station_service` except-block: residual httpx 400 text replaced with a readable "Spansh rejected the request for X" fallback | `main.py` |
+
+Correctly-cased names go straight through (no extra request — retry only
+fires after a 400). Commodity search, mining, nearest-service all inherit
+the same self-healing since they share `_post`.
+
+### Verified
+
+- Live harness 7/7 (scratchpad `test_spansh_fix.py`): 'kuk'/'KUK'/'Kuk '
+  traders, 'meliae' Guardian brokers, canonical 'Kuk' (no retry), lowercase
+  'shinrarta dezhra' commodity search, 'G9L-N4H' → friendly error. Log shows
+  `reference_system 'kuk' resolved to 'Kuk' — retrying` then 200.
+- py_compile clean (main.py, api/spansh.py). No frontend changes.
+
+### State
+
+- v0.3.76 rebuilt + installed locally with the fix. **Still NOT tagged** —
+  tag v0.3.76 after the CMDR confirms Traders/Brokers search in-app.
+- Session 51's remaining deferred items unchanged (#11 EDDN batch upserts,
+  #15 httpx client reuse, #16 backfill checkpoint, #17 sqlite close).
+
+---
+*Session 52 — 2026-07-19*
+
+---
 *Session checkpoint: 2026-07-18 23:01:13*
 
 ---
@@ -3961,3 +4009,6 @@ everything else from the fix pass checked out in-app or in harness tests.
 
 ---
 *Session checkpoint: 2026-07-18 23:47:20*
+
+---
+*Session checkpoint: 2026-07-19 00:40:43*

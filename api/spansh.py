@@ -3,9 +3,12 @@ Spansh API — https://spansh.co.uk/api
 All public, no auth required. Route jobs are async — poll until done.
 """
 import asyncio
+import logging
 from dataclasses import dataclass
 
 from .base import BaseAPI
+
+log = logging.getLogger(__name__)
 
 POLL_INTERVAL = 2.0
 POLL_TIMEOUT = 120.0
@@ -22,6 +25,52 @@ class RouteSystem:
 
 class SpanshAPI(BaseAPI):
     BASE_URL = "https://spansh.co.uk/api"
+
+    async def resolve_system_name(self, name: str) -> str | None:
+        """Resolve a user-typed system name to Spansh's canonical casing.
+        `reference_system` on the search endpoints is EXACT-match — 'kuk',
+        'Kuk ' and carrier callsigns all 400 (Session 52, verified live).
+        The typeahead endpoint matches case-insensitively and trims, so it
+        recovers the proper casing. Returns None if Spansh doesn't know the
+        name at all (e.g. a fleet-carrier callsign)."""
+        q = name.strip()
+        if not q:
+            return None
+        data = await self.get("/systems/field_values/system_names", {"q": q})
+        for v in data.get("values", []):
+            if v.strip().lower() == q.lower():
+                return v
+        return None
+
+    async def _post(self, path: str, *, json: dict | None = None,
+                    data: dict | None = None, _retried: bool = False):
+        """All Spansh POSTs go through here: rate-limit, log payload + body on
+        any error (a 400 here is just 'Invalid request' — useless without the
+        payload), and self-heal exact-match `reference_system` rejections by
+        resolving the typed name to canonical casing and retrying once."""
+        await self._limiter.wait()
+        client = await self._get_client()
+        resp = await client.post(path, json=json, data=data)
+        if (resp.status_code == 400 and not _retried
+                and json and json.get("reference_system")):
+            ref = json["reference_system"]
+            canonical = await self.resolve_system_name(ref)
+            if canonical and canonical != ref:
+                log.info("Spansh reference_system %r resolved to %r — retrying",
+                         ref, canonical)
+                return await self._post(
+                    path, json={**json, "reference_system": canonical},
+                    _retried=True)
+            if not canonical:
+                raise RuntimeError(
+                    f'System "{ref.strip()}" not recognised — check the '
+                    f"spelling (fleet carrier callsigns can't be used here)."
+                )
+        if resp.status_code >= 400:
+            log.warning("Spansh POST %s -> %s | payload=%s | body=%s",
+                        path, resp.status_code, json or data, resp.text[:500])
+        resp.raise_for_status()
+        return resp
 
     async def _poll_job(self, job_id: str) -> dict:
         deadline = asyncio.get_event_loop().time() + POLL_TIMEOUT
@@ -79,10 +128,7 @@ class SpanshAPI(BaseAPI):
         is_supercharged/use_supercharge/use_injections/exclude_secondary).
         Returns result['jumps']: dicts with name/distance/distance_to_destination/
         fuel_used/fuel_in_tank/is_scoopable/has_neutron/must_refuel (verified live)."""
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/generic/route", data=params)
-        resp.raise_for_status()
+        resp = await self._post("/generic/route", data=params)
         job_id = resp.json().get("job")
         if not job_id:
             return []
@@ -106,8 +152,6 @@ class SpanshAPI(BaseAPI):
         400'd). Result is a list of {name, jumps, bodies[]} where bodies use
         snake_case keys (estimated_mapping_value, distance_to_arrival, ...).
         Destination is optional — omit for a loop around the origin."""
-        await self._limiter.wait()
-        client = await self._get_client()
         form = {
             "from": origin,
             "range": range_ly,
@@ -120,8 +164,7 @@ class SpanshAPI(BaseAPI):
         }
         if destination:
             form["to"] = destination
-        resp = await client.post("/riches/route", data=form)
-        resp.raise_for_status()
+        resp = await self._post("/riches/route", data=form)
         job_id = resp.json().get("job")
         if not job_id:
             return []
@@ -165,14 +208,11 @@ class SpanshAPI(BaseAPI):
         param is silently ignored (verified: identical results with/without it),
         so service matching is done client-side against each station's own
         `services` list instead — see core/database.py or main.py callers."""
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/stations/search", json={
+        resp = await self._post("/stations/search", json={
             "reference_system": system,
             "sort": [{"distance": {"direction": "asc"}}],
             "size": size,
         })
-        resp.raise_for_status()
         return resp.json().get("results", [])
 
     # --- Material traders / tech brokers ---
@@ -181,15 +221,12 @@ class SpanshAPI(BaseAPI):
         """Nearest-first station search with a nested filter dict (Session 32:
         filters MUST be nested and sort must be the array form — top-level
         variants are silently ignored)."""
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/stations/search", json={
+        resp = await self._post("/stations/search", json={
             "reference_system": system,
             "filters": filters,
             "sort": [{"distance": {"direction": "asc"}}],
             "size": size,
         })
-        resp.raise_for_status()
         return resp.json().get("results", [])
 
     async def material_traders(
@@ -229,9 +266,7 @@ class SpanshAPI(BaseAPI):
         radius: float = 10000,
         max_results: int = 20,
     ) -> list[dict]:
-        client = await self._get_client()
-        await self._limiter.wait()
-        resp = await client.post(
+        resp = await self._post(
             "/exobiology/route",
             data={
                 "from": origin,
@@ -240,7 +275,6 @@ class SpanshAPI(BaseAPI):
                 "max_results": max_results,
             },
         )
-        resp.raise_for_status()
         job_id = resp.json().get("job")
         if not job_id:
             return []
@@ -278,15 +312,12 @@ class SpanshAPI(BaseAPI):
             filters["system_controlling_power"] = {"value": controlling_powers}
         if power_states:
             filters["system_power_state"] = {"value": power_states}
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/bodies/search", json={
+        resp = await self._post("/bodies/search", json={
             "reference_system": system,
             "filters": filters,
             "sort": [{"distance": {"direction": "asc"}}],
             "size": size,
         })
-        resp.raise_for_status()
         return resp.json().get("results", [])
 
     async def mining_sell_stations(
@@ -313,23 +344,18 @@ class SpanshAPI(BaseAPI):
             filters["system_controlling_power"] = {"value": controlling_powers}
         if power_states:
             filters["system_power_state"] = {"value": power_states}
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/stations/search", json={
+        resp = await self._post("/stations/search", json={
             "reference_system": system,
             "filters": filters,
             "sort": [{"market_sell_price": [{"name": commodity, "direction": "desc"}]}],
             "size": size,
         })
-        resp.raise_for_status()
         return resp.json().get("results", [])
 
     # --- Commodity market search ---
 
     async def commodity_markets(self, system: str, commodity: str) -> list[dict]:
-        await self._limiter.wait()
-        client = await self._get_client()
-        resp = await client.post("/stations/search", json={
+        resp = await self._post("/stations/search", json={
             "reference_system": system,
             # top-level "market" and bare "sort": "distance" are both silently
             # ignored by Spansh — filters must be nested and sort must be the
@@ -338,5 +364,4 @@ class SpanshAPI(BaseAPI):
             "sort": [{"distance": {"direction": "asc"}}],
             "size": 100,
         })
-        resp.raise_for_status()
         return resp.json().get("results", [])
