@@ -3986,10 +3986,13 @@ the same self-healing since they share `_post`.
   (commit fbb637d; CI run was in_progress at session end).
 - Session 51's remaining deferred items unchanged (#11 EDDN batch upserts,
   #15 httpx client reuse, #16 backfill checkpoint, #17 sqlite close).
-- Startup-log observation, NOT investigated: the 2026-07-19 00:41 shutdown
-  line says "all overlay auto-enable prefs cleared" — if enabled overlays
-  are forgetting their state between launches, look at the shutdown path
-  (possible conflict with Session 50's always-on persistence).
+- ~~Startup-log observation~~ RESOLVED as intentional (Session 52 cont. 3):
+  the "all overlay auto-enable prefs cleared" shutdown line is the v0.3.46
+  `window.events.closed` handler in main.py wiping `overlay_auto_*` on every
+  close. It does mean overlays must be re-enabled each session despite the
+  Session 50 always-on design — the CMDR was offered persist / persist+tray
+  / keep, and **chose to keep the wipe**. Do NOT "fix" this; position, lock,
+  and opacity prefs persist, only the enable flags reset.
 
 ---
 *Session 52 — 2026-07-19*
@@ -4083,3 +4086,6 @@ Builder picker in-app — **v0.3.77 tagged + pushed for CI release
 
 ---
 *Session checkpoint: 2026-07-19 15:05:15*
+
+---
+*Session checkpoint: 2026-07-19 15:08:28*
