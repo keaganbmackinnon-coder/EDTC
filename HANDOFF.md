@@ -3881,11 +3881,81 @@ No frontend changes — no npm build needed.
 - v0.3.76 NOT tagged — tag after the CMDR confirms in-app (especially the
   Galaxy → Thargoid War → Nearby Threat tab, now working).
 
+### OPEN BUG at session end — Engineering Traders/Brokers search 400s in-app
+
+**Status: UNRESOLVED — pick this up first next session.**
+
+v0.3.76 was built + installed locally (startup log verified: frozen=True,
+correct exe/db, EDDN + journal tail + backfills all healthy). CMDR then found
+Engineering → Traders/Brokers search failing with the raw httpx text
+"Client error '400 Bad Request'" on every click.
+
+Evidence gathered (all on 2026-07-18/19 local):
+
+1. The exact Spansh payloads EDTC sends (`/stations/search`, nested
+   `material_trader`/`technology_broker`/`services` filters, array sort) return
+   **200 with results when sent from the venv** — every type variant, every
+   reference system the CMDR was in that night (Kuk, Meliae, LB 2449,
+   HDS 1879, Trifid Sector BG-O b6-14, Sol).
+2. Driving the app's own `API._find_station_service()` from the venv: all
+   8 UI variants **work** (30 results each).
+3. Log correlation vs journal: the `stations/search` **200s** in the app log
+   (00:17–00:30) match `DockingGranted` events exactly — they are the
+   station-info overlay's background `stations_near` enrichment, NOT trader
+   searches. Every actual trader-search click in the exe → **400**.
+   Same pattern at 23:30 the previous hour.
+4. Spansh returns `400 {"error":"Invalid request"}` when `reference_system`
+   is a name it doesn't know (verified with a fake name). All legit payload
+   shapes work.
+
+**Leading hypothesis:** whatever is in the Traders tab's "Near system" box in
+the running app is a name Spansh rejects — user-typed casing (e.g. "kuk"
+lowercase), leading/trailing whitespace, or the fleet-carrier callsign
+(CMDR was docked at carrier G9L-N4H when reproducing). The next diagnostic
+was written but NOT yet run: `repro_case.py` in the session scratchpad tests
+"kuk"/"KUK"/"Kuk "/" Kuk"/"G9L-N4H"/lowercase-multiword as reference_system.
+
+Next steps:
+1. Run the case/whitespace/callsign repro. If confirmed: normalise/resolve the
+   reference system before the search (trim; resolve casing via a cheap Spansh
+   system-search or EDSM lookup; reject carrier callsigns with a clear message).
+2. Either way, add a `logging.warning` of the payload + response body on any
+   non-200 in `SpanshAPI._filtered_stations` (and ideally all Spansh POSTs) —
+   this session burned an hour blind because only the status line was logged.
+3. Replace the raw httpx error string shown in the UI with a friendly
+   "system not recognised — check the spelling" message.
+4. Ask the CMDR exactly what was in the "Near system" box when it failed —
+   never confirmed this session.
+
+Note: this bug is almost certainly NOT caused by Session 51's changes — the
+trader-search path wasn't touched, and the same 400s appear in the log at
+23:30, minutes after the new build's first launch, before any cache/journal
+changes could matter. It may have been broken for a while (server-side name
+matching change on Spansh's side is also possible).
+
+**v0.3.76 NOT tagged** — hold the release until the trader search is fixed;
+everything else from the fix pass checked out in-app or in harness tests.
+
 ---
-*Session 51 — 2026-07-18*
+*Session 51 — 2026-07-18/19 (v0.3.76 local, untagged)*
 
 ---
 *Session checkpoint: 2026-07-18 23:01:13*
 
 ---
 *Session checkpoint: 2026-07-18 23:08:28*
+
+---
+*Session checkpoint: 2026-07-18 23:24:44*
+
+---
+*Session checkpoint: 2026-07-18 23:31:18*
+
+---
+*Session checkpoint: 2026-07-18 23:36:27*
+
+---
+*Session checkpoint: 2026-07-18 23:37:44*
+
+---
+*Session checkpoint: 2026-07-18 23:47:20*
