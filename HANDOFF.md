@@ -3912,8 +3912,10 @@ Evidence gathered (all on 2026-07-18/19 local):
 the running app is a name Spansh rejects — user-typed casing (e.g. "kuk"
 lowercase), leading/trailing whitespace, or the fleet-carrier callsign
 (CMDR was docked at carrier G9L-N4H when reproducing). The next diagnostic
-was written but NOT yet run: `repro_case.py` in the session scratchpad tests
+was written but NOT yet run: **`scripts/repro_spansh_400.py`** (committed) tests
 "kuk"/"KUK"/"Kuk "/" Kuk"/"G9L-N4H"/lowercase-multiword as reference_system.
+The Session 51 fix harness is also preserved at
+`scripts/test_session51_fixes.py` (run with the venv python).
 
 Next steps:
 1. Run the case/whitespace/callsign repro. If confirmed: normalise/resolve the
