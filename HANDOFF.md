@@ -3766,3 +3766,126 @@ and a price range instead of just the max value.
 
 ---
 *Session checkpoint: 2026-07-15 00:09:18*
+
+---
+*Session checkpoint: 2026-07-15 00:11:21*
+
+---
+*Session checkpoint: 2026-07-15 00:11:58*
+
+---
+*Session checkpoint: 2026-07-16 18:54:37*
+
+---
+*Session checkpoint: 2026-07-16 18:55:40*
+
+---
+*Session checkpoint: 2026-07-16 18:57:05*
+
+---
+*Session checkpoint: 2026-07-16 19:03:00*
+
+---
+*Session checkpoint: 2026-07-16 19:04:36*
+
+---
+*Session checkpoint: 2026-07-16 19:07:29*
+
+---
+
+## Session 51 — Full-codebase audit (read-only) + fix pass (2026-07-18)
+
+User request: review everything built so far for bugs and optimisation areas.
+Audited: all of core/, api/, main.py (4,149 lines), frontend App/main/overlays +
+pattern checks across pages. Findings below, ranked; fixes applied same session
+(see the shipped table after the list).
+
+### Audit findings — bugs
+
+1. **`get_thargoid_nearby` broken (always errors)** — main.py:3800 referenced
+   `self._edsm` (never assigned) and `_run()` took no args while `_edsm_run`
+   calls `coro_factory(edsm)`. Every Nearby Threat search failed since the
+   method was written.
+2. **Journal watchdog could switch the feed to a stale journal** —
+   `_on_file_change` switched to whichever Journal.*.log was touched (not the
+   newest). An AV/backup touching an old journal would replay its entire
+   history into live handlers (duplicate trade log / material / kill counts).
+3. **Spansh `_poll_job` didn't detect failed jobs** — errored jobs polled for
+   the full 120s then raised a misleading TimeoutError.
+4. **DB migrations swallowed every exception** — `except Exception: pass`
+   treated "database is locked" the same as "duplicate column".
+5. **`routes` table grew forever** — every in-game NavRoute inserted a new
+   permanent row.
+6. **`search_local_markets` case-inconsistent coord lookup** + LOWER() in
+   `get_system_coords` defeated the PK index.
+7. **`_handle_fss_body_signals` called `_mark_body_bio` twice** — no-op dup.
+
+### Audit findings — optimisations
+
+8. **edtc_debug.log at DEBUG, unbounded, never rotated** (httpx/watchdog noise).
+9. **`get_market_stats` full-scans markets table** ~every 30s while Trading open.
+10. **`search_local_markets` had no LIMIT** — common commodities pushed
+    thousands of rows through the JS bridge into React.
+11. EDDN market writes are per-message (coverage already batches; markets could
+    use the same buffer pattern). **DEFERRED**
+12. `_latest_journal` globbed + statted 200+ journals every second.
+13. `_load_json` had no cache — Builder recomputes re-parsed ships/blueprints
+    JSON per edit (and per engineered slot).
+14. `get_ship_info` self-heal re-scanned the whole latest journal on every call
+    until a Loadout appeared.
+15. Per-call asyncio.run + fresh httpx client per API request. **DEFERRED**
+16. `_backfill_exo_history` replays all journals every startup (fine today;
+    checkpoint by mtime someday). **DEFERRED**
+17. sqlite connections closed only by GC (`with conn:` commits, doesn't close).
+    **DEFERRED**
+
+### Clean bill of health
+
+- Frontend hygiene good: all setInterval/`__edtc.on` subscriptions have cleanup.
+- outfitting.py / awards.py / exobiology.py / overlay lifecycle: no bugs found.
+- **Updater checksum**: `_do_update` now verifies the GitHub sha256 digest —
+  the long-standing "no checksum" known issue is FIXED; drop it from notes.
+
+### Fix pass — shipped (same session, v0.3.76 local)
+
+| # | Fix | File |
+|---|---|---|
+| 1 | `get_thargoid_nearby` rewritten to `_edsm_run(coro_factory)` pattern — Nearby Threat search works for the first time | `main.py` |
+| 8 | Logging → INFO + RotatingFileHandler (5 MB × 2 backups) | `main.py` |
+| 2 | Watchdog only switches to mtime-NEWER journals (stale-touch replay guard) | `core/journal.py` |
+| 12 | Poll re-globs the journal dir every 10th tick (~10s) instead of every second; watchdog still catches rotation instantly | `core/journal.py` |
+| 10 | `search_local_markets`: 250-row cap, nearest-first when ref coords known | `core/database.py` |
+| 9 | `get_market_stats`: 5-min TTL, stale-while-revalidate on a bg thread | `main.py` |
+| 6 | `get_system_coords` exact-match (PK index) first, LOWER() scan only as fallback; used for ref coords in market search | `core/database.py` |
+| 3 | Spansh `_poll_job` raises immediately on job `error` payload | `api/spansh.py` |
+| 4 | Migration guard narrowed to `sqlite3.OperationalError` "duplicate column" | `core/database.py` |
+| 5 | `delete_ingame_routes()` — newest NavRoute replaces prior auto-saved rows | `core/database.py`, `main.py` |
+| 7 | Removed duplicate `_mark_body_bio` call in `_handle_fss_body_signals` | `main.py` |
+| 13 | `_load_json` mtime-keyed cache (+ `get_guardian_sites` copies its dicts so DB-note clears don't linger on cached objects) | `main.py` |
+| 14 | `get_ship_info` journal self-heal scans at most once | `main.py` |
+
+Verified: py_compile clean; harness 16/16 (scratchpad `test_session51_fixes.py`,
+isolated DB + stubbed webview) covering the watchdog guard, poll throttle,
+market cap/sort/case-fallback, route pruning, migration idempotence, Spansh
+error fast-fail, JSON cache invalidation, one-shot ship scan, and stats cache.
+No frontend changes — no npm build needed.
+
+### Notes / deferred for a future session
+
+- #11 batch EDDN market upserts (reuse the coverage buffer pattern), #15 reuse
+  httpx clients/event loop, #16 checkpoint `_backfill_exo_history` by mtime,
+  #17 close sqlite connections deterministically (the test run's flood of
+  `ResourceWarning: unclosed database` confirms it empirically).
+- The harness test file lives in the session scratchpad — copy into the repo
+  if a permanent test suite is ever wanted.
+- v0.3.76 NOT tagged — tag after the CMDR confirms in-app (especially the
+  Galaxy → Thargoid War → Nearby Threat tab, now working).
+
+---
+*Session 51 — 2026-07-18*
+
+---
+*Session checkpoint: 2026-07-18 23:01:13*
+
+---
+*Session checkpoint: 2026-07-18 23:08:28*

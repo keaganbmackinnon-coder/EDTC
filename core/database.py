@@ -249,8 +249,11 @@ def init_db():
         ]:
             try:
                 conn.execute(sql)
-            except Exception:
-                pass  # column already exists
+            except sqlite3.OperationalError as e:
+                # Only "duplicate column" is expected — a locked/corrupt DB
+                # must fail loudly, not silently leave the schema incomplete.
+                if "duplicate column" not in str(e).lower():
+                    raise
         # Indexes for fast commodity lookups
         conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_commodity ON markets(commodity)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_markets_system ON markets(system)")
@@ -385,6 +388,15 @@ def clear_active_route() -> bool:
     with _conn() as conn:
         conn.execute("UPDATE routes SET active=0")
     return True
+
+
+def delete_ingame_routes() -> None:
+    """Drop auto-saved in-game routes. Every galaxy-map plot fires a NavRoute
+    event and inserted a permanent row — months of play left hundreds of dead
+    'In-game route → X' entries. The newest one replaces them all; routes the
+    user saved by hand have their own names and are untouched."""
+    with _conn() as conn:
+        conn.execute("DELETE FROM routes WHERE name LIKE 'In-game route %'")
 
 
 # --- Watchlist ---
@@ -1252,9 +1264,16 @@ def upsert_system_coords(system: str, x: float, y: float, z: float) -> None:
 
 def get_system_coords(system: str) -> tuple[float, float, float] | None:
     with _conn() as conn:
+        # Exact match first — it uses the primary-key index. The LOWER() form
+        # scans the whole table, so it's only the fallback for casing drift
+        # between EDDN names and journal names.
         r = conn.execute(
-            "SELECT x, y, z FROM system_coords WHERE LOWER(system) = LOWER(?)", (system,)
+            "SELECT x, y, z FROM system_coords WHERE system = ?", (system,)
         ).fetchone()
+        if not r:
+            r = conn.execute(
+                "SELECT x, y, z FROM system_coords WHERE LOWER(system) = LOWER(?)", (system,)
+            ).fetchone()
         return (r["x"], r["y"], r["z"]) if r else None
 
 
@@ -1299,7 +1318,13 @@ def get_station_commodities(system: str, station: str) -> list[dict]:
     ]
 
 
-def search_local_markets(commodity: str, ref_system: str | None = None) -> list[dict]:
+def search_local_markets(commodity: str, ref_system: str | None = None,
+                         limit: int = 250) -> list[dict]:
+    """Cached market rows for a commodity. Capped at `limit` — a common
+    commodity can match thousands of stations across 30 days of EDDN traffic,
+    and every row is JSON-serialised through the pywebview bridge into React.
+    Nearest-first when the reference system's coords are known, else most
+    recently updated first."""
     import math
     with _conn() as conn:
         rows = conn.execute("""
@@ -1313,35 +1338,32 @@ def search_local_markets(commodity: str, ref_system: str | None = None) -> list[
             ORDER BY m.updated_at DESC
         """, (_commodity_symbol(commodity),)).fetchall()
 
-        ref_coords = None
-        if ref_system:
-            r = conn.execute(
-                "SELECT x, y, z FROM system_coords WHERE system = ?", (ref_system,)
-            ).fetchone()
-            if r:
-                ref_coords = (r["x"], r["y"], r["z"])
+    ref_coords = get_system_coords(ref_system) if ref_system else None
 
-        results = []
-        for r in rows:
-            dist = None
-            if ref_coords and r["x"] is not None:
-                dx, dy, dz = r["x"] - ref_coords[0], r["y"] - ref_coords[1], r["z"] - ref_coords[2]
-                dist = round(math.sqrt(dx*dx + dy*dy + dz*dz), 1)
-            results.append({
-                "station":             r["station"],
-                "system":              r["system"],
-                "distance":            dist,
-                "distance_to_arrival": 0,
-                "has_large_pad":       r["has_large_pad"],
-                "is_planetary":        None,
-                "updated_at":          r["updated_at"],
-                "buy_price":           r["buy_price"],
-                "sell_price":          r["sell_price"],
-                "supply":              r["supply"],
-                "demand":              r["demand"],
-                "source":              "eddn",
-            })
-        return results
+    results = []
+    for r in rows:
+        dist = None
+        if ref_coords and r["x"] is not None:
+            dx, dy, dz = r["x"] - ref_coords[0], r["y"] - ref_coords[1], r["z"] - ref_coords[2]
+            dist = round(math.sqrt(dx*dx + dy*dy + dz*dz), 1)
+        results.append({
+            "station":             r["station"],
+            "system":              r["system"],
+            "distance":            dist,
+            "distance_to_arrival": 0,
+            "has_large_pad":       r["has_large_pad"],
+            "is_planetary":        None,
+            "updated_at":          r["updated_at"],
+            "buy_price":           r["buy_price"],
+            "sell_price":          r["sell_price"],
+            "supply":              r["supply"],
+            "demand":              r["demand"],
+            "source":              "eddn",
+        })
+    if ref_coords:
+        # nearest first, unknown-distance rows last (they keep recency order)
+        results.sort(key=lambda x: (x["distance"] is None, x["distance"] or 0.0))
+    return results[:limit]
 
 
 def prune_markets(days: int = 30) -> int:

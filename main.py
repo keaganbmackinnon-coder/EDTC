@@ -7,10 +7,17 @@ from pathlib import Path
 
 import webview
 
+# INFO, rotated: DEBUG captured httpx/watchdog/asyncio internals and the file
+# in the home dir grew without bound across sessions (Session 51 audit).
+from logging.handlers import RotatingFileHandler
+
 logging.basicConfig(
-    filename=Path.home() / "edtc_debug.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[RotatingFileHandler(
+        Path.home() / "edtc_debug.log",
+        maxBytes=5_000_000, backupCount=2, encoding="utf-8",
+    )],
 )
 
 def _log_exception(exc_type, exc_value, exc_tb):
@@ -41,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.75"  # bump this with every release
+APP_VERSION = "0.3.76"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -170,6 +177,10 @@ class API:
         self._current_station: str = ""
         self._current_ship: dict = {}
         self._current_loadout: dict = {}   # full Loadout event, for build import
+        # get_ship_info's self-heal scans the whole latest journal — once. If
+        # no Loadout is there, rescanning per call buys nothing (the live tail
+        # dispatches the Loadout the moment the game writes one).
+        self._loadout_scanned = False
         self._ship_cargo: list[dict] = []
         # ColonisationConstructionDepot re-fires every few seconds while docked
         # at a construction site — remember the last payload to skip no-op re-fires
@@ -192,6 +203,7 @@ class API:
         # get_market_stats() full-scans the markets table; Trading.jsx polls it
         self._market_stats_cache: dict | None = None
         self._market_stats_time: float = 0.0
+        self._market_stats_refreshing = False
         # Buyable commodities at the station we're docked at — pushed to the
         # Colonisation shopping list so it can highlight what's sold here
         self._station_market: dict | None = None
@@ -733,8 +745,9 @@ class API:
         # without active=1 the in-game route was saved inactive and an old
         # manually-activated route stayed active=1 in the DB forever — that
         # stale route resurrected on every app launch
-        from core.database import save_route, clear_active_route
+        from core.database import save_route, clear_active_route, delete_ingame_routes
         clear_active_route()
+        delete_ingame_routes()
         save_route(route)
         self._active_route = route
         self._last_fsd_target = None  # old target is stale for the new route
@@ -1313,7 +1326,6 @@ class API:
         }
         self._body_bio[(self._current_system, body_id)] = info
         self._emit("bio_signals", info)
-        self._mark_body_bio(body_id, bio.get("Count", 0))
         self._push_exo_body()
         self._push_bio_panel(focus_body_id=body_id)
 
@@ -2856,11 +2868,28 @@ class API:
     # --- Engineering (static data loaders) ---
 
     def _load_json(self, filename: str) -> dict:
+        """Parsed data-file cache, invalidated by mtime. Without it the Builder
+        re-parsed ships.json on every recompute and blueprints.json once per
+        engineered slot (compute_build fires on every edit). The mtime check
+        keeps dev workflows working (e.g. the hardpoint placement editor
+        writes data/hardpoint_anchors.json and reads it straight back)."""
+        cache = getattr(self, "_json_cache", None)
+        if cache is None:
+            cache = self._json_cache = {}
+        path = BASE_DIR / "data" / filename
         try:
-            import json
-            return json.loads((BASE_DIR / "data" / filename).read_text(encoding="utf-8"))
+            mtime = path.stat().st_mtime
+        except OSError:
+            return {}
+        hit = cache.get(filename)
+        if hit is not None and hit[0] == mtime:
+            return hit[1]
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             return {}
+        cache[filename] = (mtime, data)
+        return data
 
     def get_engineers(self) -> list:
         from core.database import get_engineer_progress
@@ -2995,13 +3024,30 @@ class API:
             logging.warning(f"coverage flush failed: {e}")
 
     def get_market_stats(self) -> dict:
+        """Counts DISTINCT stations/commodities — a full scan of the (large)
+        markets table. Cached 5 min and refreshed in a background thread so
+        the Trading page's poll never blocks the bridge on the scan."""
         import time
         now = time.time()
-        if self._market_stats_cache and now - self._market_stats_time < 30:
+        if self._market_stats_cache is None:
+            # first call ever — compute synchronously so the page has data
+            from core.database import get_market_stats
+            self._market_stats_cache = get_market_stats()
+            self._market_stats_time = now
             return self._market_stats_cache
-        from core.database import get_market_stats
-        self._market_stats_cache = get_market_stats()
-        self._market_stats_time = now
+        if now - self._market_stats_time >= 300 and not self._market_stats_refreshing:
+            self._market_stats_refreshing = True
+
+            def _refresh():
+                try:
+                    from core.database import get_market_stats
+                    self._market_stats_cache = get_market_stats()
+                    self._market_stats_time = time.time()
+                except Exception as e:
+                    logging.warning(f"market stats refresh failed: {e}")
+                finally:
+                    self._market_stats_refreshing = False
+            threading.Thread(target=_refresh, daemon=True).start()
         return self._market_stats_cache
 
     # --- Galaxy scan coverage ---
@@ -3527,8 +3573,9 @@ class API:
         return self._current_system
 
     def get_ship_info(self) -> dict:
-        if not self._current_ship:
-            # Replay thread hasn't run yet — scan the journal directly
+        if not self._current_ship and not self._loadout_scanned:
+            # Replay thread hasn't run yet — scan the journal directly (once)
+            self._loadout_scanned = True
             try:
                 import json as _j
                 from core.journal import journal_path
@@ -3702,8 +3749,10 @@ class API:
         from core.database import get_guardian_visits
         visits = get_guardian_visits()
         data = self._load_json("guardian_sites.json")
-        ruins = data.get("ruins", [])
-        structures = data.get("structures", [])
+        # copies — _load_json now caches, and this method overlays per-visit
+        # fields (a note cleared in the DB must not linger on the cached dict)
+        ruins = [dict(s) for s in data.get("ruins", [])]
+        structures = [dict(s) for s in data.get("structures", [])]
         for site in ruins:
             v = visits.get(site["id"], {})
             site["visited"] = bool(v.get("visited", 0))
@@ -3796,8 +3845,7 @@ class API:
         return self._edsm_run(lambda e: e.get_system_thargoid(system_name)) or {}
 
     def get_thargoid_nearby(self, system_name: str, radius: int = 50) -> list:
-        async def _run():
-            edsm = self._edsm
+        async def _run(edsm):
             systems = await edsm.get_systems_in_sphere(system_name, radius) or []
             result = []
             for s in systems:

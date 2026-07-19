@@ -184,12 +184,18 @@ class JournalWatcher:
     def _poll(self):
         """Switch to a newer journal on rotation, then drain appended lines."""
         with self._lock:
-            latest = _latest_journal(self._path)
-            if latest and (self._current_file is None
-                           or latest.name != self._current_file.name):
-                logging.info(f"journal rotation: switching to {latest.name}")
-                self._current_file = latest
-                self._file_pos = 0
+            # Globbing + statting 200+ journal files every second is wasteful —
+            # watchdog's on_created switches to a new journal instantly, so the
+            # glob is only a fallback and can run every 10th poll (~10s).
+            self._poll_count = getattr(self, "_poll_count", 0) + 1
+            if self._poll_count >= 10 or self._current_file is None:
+                self._poll_count = 0
+                latest = _latest_journal(self._path)
+                if latest and (self._current_file is None
+                               or latest.name != self._current_file.name):
+                    logging.info(f"journal rotation: switching to {latest.name}")
+                    self._current_file = latest
+                    self._file_pos = 0
             self._read_new_lines_locked()
 
     def _read_new_lines_locked(self):
@@ -217,6 +223,17 @@ class JournalWatcher:
             with self._lock:
                 if (self._current_file is None
                         or self._current_file.name != changed.name):
+                    # Only switch to a NEWER journal. Anything can touch an old
+                    # journal file (antivirus, backup tools) — switching to it
+                    # would reset the read position and replay its whole history
+                    # into the live handlers (duplicate trade log entries,
+                    # double-counted materials/kills).
+                    if self._current_file is not None:
+                        try:
+                            if changed.stat().st_mtime <= self._current_file.stat().st_mtime:
+                                return
+                        except OSError:
+                            return
                     logging.info(f"journal watchdog: switching to {changed.name}")
                     self._current_file = changed
                     self._file_pos = 0

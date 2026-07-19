@@ -29,6 +29,11 @@ class SpanshAPI(BaseAPI):
             result = await self.get(f"/results/{job_id}")
             if result.get("status") == "ok":
                 return result.get("result", {})
+            # A failed job never becomes "ok" — surface the real error instead
+            # of polling to the deadline and reporting a misleading timeout.
+            err = result.get("error")
+            if err:
+                raise RuntimeError(f"Spansh: {err}")
             if asyncio.get_event_loop().time() > deadline:
                 raise TimeoutError(f"Spansh job {job_id} timed out")
             await asyncio.sleep(POLL_INTERVAL)
