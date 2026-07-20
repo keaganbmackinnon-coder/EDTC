@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import ShipView, { hasModel } from '../components/ShipView'
+import ShipView, { hasModel, MOUNT_MARKERS_ENABLED } from '../components/ShipView'
 
 const api = () => window?.pywebview?.api
 
@@ -792,10 +792,12 @@ export default function Builder() {
                       <div className="flex items-center justify-center gap-2 mt-0.5">
                         <span className="text-center text-[10px] font-mono text-ed-muted">
                           {hasModel(ship.id)
-                            ? 'drag to rotate · scroll to zoom · hover a hardpoint below to locate it'
+                            ? (MOUNT_MARKERS_ENABLED
+                                ? 'drag to rotate · scroll to zoom · hover a hardpoint below to locate it'
+                                : 'drag to rotate · scroll to zoom')
                             : 'hover a hardpoint below to locate it · click a marker to fit that slot'}
                         </span>
-                        {hasModel(ship.id) && locatable.length > 0 && (
+                        {MOUNT_MARKERS_ENABLED && hasModel(ship.id) && locatable.length > 0 && (
                           <button className="badge border border-ed-border text-ed-muted hover:text-ed-orange px-1.5 text-[10px] shrink-0"
                             title="Click each mount's real position on the hull — placed markers show solid, guesses faint"
                             onClick={() => setPlaceSlot((locatable.find(s => !shipAnchors?.[s.key]) || locatable[0]).key)}>

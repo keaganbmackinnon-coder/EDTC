@@ -78,6 +78,10 @@ class JournalWatcher:
         # no buyable-here highlight).
         DOCK_EVENTS = {"Location", "Docked", "Undocked", "FSDJump"}
         dock_state = None
+        # Same last-one-wins problem for the plotted route: whether the session
+        # ended with a route depends on which of NavRoute/NavRouteClear came
+        # last. The NavRoute handler reads the actual route from NavRoute.json.
+        nav_state = None
         seen = {}
         material_deltas = []
         try:
@@ -91,6 +95,8 @@ class JournalWatcher:
                         kind = event.get("event")
                         if kind in DOCK_EVENTS:
                             dock_state = event
+                        if kind in ("NavRoute", "NavRouteClear"):
+                            nav_state = event
                         if kind in STARTUP_EVENTS:
                             seen[kind] = event
                             if kind == "Materials":
@@ -115,6 +121,11 @@ class JournalWatcher:
                 # last dock-affecting event was Undocked/FSDJump — clear any
                 # stale station the replayed login Location may have set
                 self._dispatch({"event": "Undocked"})
+        if nav_state:
+            # After Location/FSDJump so route_update carries the right system.
+            # NavRoute resurrects the plotted route (even one plotted while
+            # EDTC was closed); NavRouteClear tears down a stale DB route.
+            self._dispatch(nav_state)
 
     def _dispatch(self, event: dict):
         """Hand one event to the app. One bad handler (DB lock, network,

@@ -48,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.78"  # bump this with every release
+APP_VERSION = "0.3.79"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -771,6 +771,12 @@ class API:
     def _handle_nav_route(self, event: dict):
         raw = event.get("Route", [])
         if not raw:
+            # The live journal writes a bare {"event":"NavRoute"} marker — the
+            # actual route only exists in NavRoute.json beside the journals
+            # (verified against live journals 2026-07-19). Until this read was
+            # added, in-game plotted routes never reached the overlay at all.
+            raw = self._read_nav_route_file()
+        if not raw:
             return
         systems = [s["StarSystem"] for s in raw if "StarSystem" in s]
         if not systems:
@@ -794,6 +800,24 @@ class API:
             "current_system": self._current_system,
         })
         self._emit("route_update", {"route": route, "current_system": self._current_system})
+
+    def _read_nav_route_file(self) -> list:
+        """Route array from NavRoute.json. One retry: the game writes the file
+        around the same moment the journal marker lands, so the first read can
+        catch it mid-write."""
+        import time
+        from core.journal import journal_path
+        for attempt in (0, 1):
+            try:
+                data = json.loads((journal_path() / "NavRoute.json")
+                                  .read_text(encoding="utf-8"))
+                return data.get("Route") or []
+            except (OSError, ValueError) as e:
+                if attempt == 0:
+                    time.sleep(0.5)
+                else:
+                    logging.warning(f"NavRoute.json read failed: {e}")
+        return []
 
     def _handle_nav_route_clear(self):
         # also flip active=0 in the DB — otherwise the route resurrects on the

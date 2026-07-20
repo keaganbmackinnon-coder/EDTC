@@ -4141,4 +4141,44 @@ All four deferred optimisations from the Session 51 audit, in one pass:
 *Session 53 — 2026-07-19 (v0.3.78 released)*
 
 ---
+
+## Session 53 (cont.) — hide hardpoint dots + in-game NavRoute fix (v0.3.79 local, untagged)
+
+User: "remove the hardpoint placement on the ships and ship builder for now …
+they are just annoying to see" and "can the navigation overlay also show the
+whole route / how many jumps left if a full route has been plotted in game?"
+
+| Item | File |
+|---|---|
+| `MOUNT_MARKERS_ENABLED = false` — single flag hides the 3D mount dots, hull-click placement, and the 📍 Place mounts button; flip to true to bring the whole editor back for its polish pass. Saved anchors + backend API untouched. 2D schematic fallback (ships without models) unchanged — its slot dots aren't movable placement points. | `frontend/src/components/ShipView.jsx`, `frontend/src/pages/Builder.jsx` |
+| **ROOT CAUSE, route overlay**: live journals write a bare `{"event":"NavRoute"}` marker — the Route array only exists in `NavRoute.json` (verified vs live journals). `_handle_nav_route` bailed on the empty event, so in-game plotted routes NEVER reached the overlay/Navigation page. Now falls back to `_read_nav_route_file()` (NavRoute.json, one 0.5 s retry for mid-write). | `main.py` |
+| Startup replay tracks last-wins NavRoute/NavRouteClear (like dock_state) and dispatches it after Location/FSDJump — resurrects a route plotted while EDTC was closed; a trailing clear tears down stale DB routes. | `core/journal.py` |
+
+The overlay already had the display side (jumps left, #n of m tick bar,
+remaining ly) — it just never received in-game routes.
+
+- Harness 6/6 (`scripts/test_navroute.py`): bare marker reads NavRoute.json /
+  inline Route still works / missing file no-op / replay last-wins both ways /
+  no nav events dispatches none. Deferred-fixes harness still 9/9. npm +
+  py_compile clean.
+- Live: v0.3.79 built + installed + running; startup log healthy. Replay
+  correctly pushed NO route (the CMDR's route had just auto-cleared on arrival
+  — journal shows NavRouteClear as the last nav event). Overlay pickup of a
+  freshly plotted route not yet observed in-game — check next session.
+- **v0.3.79 NOT tagged** — tag after the CMDR plots a route in-game and sees
+  jumps-left in the overlay, and confirms the hardpoint dots are gone.
+
+---
+*Session 53 (cont.) — 2026-07-19 (v0.3.79 local, untagged)*
+
+---
 *Session checkpoint: 2026-07-19 20:51:47*
+
+---
+*Session checkpoint: 2026-07-19 20:54:15*
+
+---
+*Session checkpoint: 2026-07-19 22:55:37*
+
+---
+*Session checkpoint: 2026-07-19 23:05:13*

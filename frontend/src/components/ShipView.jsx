@@ -33,6 +33,12 @@ for (const path in _files) {
 
 const LOADER = { obj: OBJLoader, stl: STLLoader, glb: GLTFLoader, gltf: GLTFLoader }
 
+// Mount markers + the hand-placement editor are parked until they get a
+// polish pass (CMDR request, Session 53) — the dots sat visibly off-hull on
+// most ships. Flip to true to bring back the 3D dots, hull-click placement,
+// and the 📍 Place mounts button in Builder. Saved anchors are untouched.
+export const MOUNT_MARKERS_ENABLED = false
+
 export function hasModel(shipId) {
   return !!(shipId && MODELS[String(shipId).toLowerCase()])
 }
@@ -228,12 +234,12 @@ function ModelScene({ url, ext, ship, activeKey, onSelectMount, anchors, placing
     <group scale={3 / maxDim}>
       <group position={[-center.x, -center.y, -center.z]}>
         <primitive object={wire} />
-        {placing && raycastMesh && (
+        {MOUNT_MARKERS_ENABLED && placing && raycastMesh && (
           <primitive object={raycastMesh} onClick={placeOnHull}
             onPointerOver={() => (document.body.style.cursor = 'crosshair')}
             onPointerOut={() => (document.body.style.cursor = 'default')} />
         )}
-        {mounts.map(m => (
+        {MOUNT_MARKERS_ENABLED && mounts.map(m => (
           <Mount3D key={m.key} m={m} maxDim={maxDim}
             active={m.key === activeKey}
             onSelect={placing ? undefined : onSelectMount} />
