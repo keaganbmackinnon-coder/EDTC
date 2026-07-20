@@ -2,6 +2,7 @@ import json
 import re
 import sqlite3
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 if getattr(sys, "frozen", False):
@@ -10,7 +11,12 @@ else:
     DB_PATH = Path(__file__).parent.parent / "edtc.db"
 
 
-def _conn() -> sqlite3.Connection:
+@contextmanager
+def _conn():
+    """`with _conn() as conn:` — commit-or-rollback like a bare sqlite3
+    connection context, but also CLOSE the connection on exit. sqlite3's own
+    `with conn:` only ends the transaction; every call used to leave the
+    connection for the GC (ResourceWarning floods under -X dev)."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     # Many threads (journal watcher, EDDN listener, UI bridge) share this DB;
@@ -19,7 +25,11 @@ def _conn() -> sqlite3.Connection:
     # writers WAIT, not raise — a raise inside the journal-watcher startup
     # replay killed the whole feed for a session (2026-07-08).
     conn.execute("PRAGMA busy_timeout = 30000")
-    return conn
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def init_db():
@@ -234,6 +244,14 @@ def init_db():
             CREATE TABLE IF NOT EXISTS thargoid_kills (
                 type   TEXT PRIMARY KEY,
                 count  INTEGER DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS exo_journal_cache (
+                journal    TEXT PRIMARY KEY,
+                mtime      REAL NOT NULL,
+                size       INTEGER NOT NULL,
+                events     TEXT NOT NULL,
+                body_names TEXT NOT NULL
             );
         """)
         # Migrations for columns added after initial release
@@ -544,6 +562,51 @@ def replace_completed_exo_scans(rows: list) -> int:
               r.get("ts", ""), r.get("ts", "")) for r in rows],
         )
     return len(rows)
+
+
+def get_exo_journal_cache() -> dict:
+    """journal filename -> {mtime, size, events, body_names} — the per-journal
+    parse results the exo backfill reuses so unchanged journals aren't re-read.
+    body_names keys are stored as 'system\\x1fbody_id'."""
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT journal, mtime, size, events, body_names FROM exo_journal_cache"
+        ).fetchall()
+    out = {}
+    for r in rows:
+        try:
+            out[r["journal"]] = {
+                "mtime": r["mtime"], "size": r["size"],
+                "events": json.loads(r["events"]),
+                "body_names": json.loads(r["body_names"]),
+            }
+        except ValueError:
+            continue  # corrupt row — journal just gets re-parsed
+    return out
+
+
+def upsert_exo_journal_cache(entries: list) -> None:
+    """entries: (journal, mtime, size, events_json, body_names_json)"""
+    if not entries:
+        return
+    with _conn() as conn:
+        conn.executemany("""
+            INSERT INTO exo_journal_cache (journal, mtime, size, events, body_names)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(journal) DO UPDATE SET
+                mtime=excluded.mtime, size=excluded.size,
+                events=excluded.events, body_names=excluded.body_names
+        """, entries)
+
+
+def prune_exo_journal_cache(present: set) -> None:
+    """Drop cache rows for journals that no longer exist on disk, so a
+    deleted journal's events disappear from the rebuild like they always did."""
+    with _conn() as conn:
+        rows = conn.execute("SELECT journal FROM exo_journal_cache").fetchall()
+        stale = [(r["journal"],) for r in rows if r["journal"] not in present]
+        if stale:
+            conn.executemany("DELETE FROM exo_journal_cache WHERE journal=?", stale)
 
 
 def get_completed_exo_scans(limit: int = 500) -> list:
@@ -1226,19 +1289,26 @@ def clear_trade_log() -> bool:
 # --- EDDN Market Cache ---
 
 def upsert_market_data(system: str, station: str, timestamp: str, commodities: list) -> None:
+    upsert_market_batch([(system, station, timestamp, commodities)])
+
+
+def upsert_market_batch(entries: list) -> None:
+    """entries: (system, station, timestamp, commodities). One transaction per
+    flush of the EDDN buffer instead of one per message."""
     rows = []
-    for c in commodities:
-        # Store the normalized symbol so search_local_markets can compare the
-        # column directly and hit idx_markets_commodity.
-        name = _commodity_symbol(c.get("name") or "")
-        if not name:
-            continue
-        rows.append((
-            system, station, name,
-            c.get("buyPrice", 0), c.get("sellPrice", 0),
-            c.get("stock", 0), c.get("demand", 0),
-            timestamp,
-        ))
+    for system, station, timestamp, commodities in entries:
+        for c in commodities:
+            # Store the normalized symbol so search_local_markets can compare
+            # the column directly and hit idx_markets_commodity.
+            name = _commodity_symbol(c.get("name") or "")
+            if not name:
+                continue
+            rows.append((
+                system, station, name,
+                c.get("buyPrice", 0), c.get("sellPrice", 0),
+                c.get("stock", 0), c.get("demand", 0),
+                timestamp,
+            ))
     if not rows:
         return
     with _conn() as conn:

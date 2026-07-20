@@ -48,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.77"  # bump this with every release
+APP_VERSION = "0.3.78"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -219,6 +219,18 @@ class API:
         # commodity display name (lowercased) → galactic average price,
         # built lazily from data/commodities.json for session value estimates
         self._commodity_avg_prices: dict[str, int] | None = None
+        # One persistent asyncio loop + shared API client instances: per-call
+        # asyncio.run() tore down the httpx connection pool after every
+        # request, so each search paid a fresh TCP+TLS handshake.
+        self._async_loop = None
+        self._async_lock = threading.Lock()
+        self._shared_apis: dict = {}
+        # EDDN commodity messages buffered like the coverage grid: keyed by
+        # (system, station) so a burst of updates for one station collapses
+        # to the newest snapshot; flushed every ~15 s in one transaction.
+        self._mkt_buf: dict[tuple, tuple] = {}
+        self._mkt_last_flush: float = 0.0
+        self._mkt_lock = threading.Lock()
 
     def set_window(self, window):
         self._window = window
@@ -231,6 +243,32 @@ class API:
             self._window.evaluate_js(
                 f"window.__edtc?.onEvent({json.dumps({'type': event_type, 'payload': payload})})"
             )
+
+    def _run_async(self, coro):
+        """Run a coroutine on the app's persistent asyncio loop (started on
+        first use) and block for the result. Replaces per-call asyncio.run()
+        so the shared API clients' connection pools stay alive between calls.
+        Calls from different bridge threads interleave on the one loop, which
+        is what the per-scope RateLimiter already assumes."""
+        import asyncio
+        with self._async_lock:
+            if self._async_loop is None:
+                loop = asyncio.new_event_loop()
+                threading.Thread(target=loop.run_forever, daemon=True,
+                                 name="edtc-async").start()
+                self._async_loop = loop
+        return asyncio.run_coroutine_threadsafe(coro, self._async_loop).result()
+
+    def _shared_api(self, cls):
+        """Shared API client instance (SpanshAPI, EdsmAPI, ...). Every use
+        goes through _run_async's single loop, so one instance — and one
+        httpx connection pool — can serve all calls. Never close() these.
+        InaraAPI stays per-call: its constructor takes the (editable) key."""
+        with self._async_lock:
+            inst = self._shared_apis.get(cls)
+            if inst is None:
+                inst = self._shared_apis[cls] = cls()
+            return inst
 
     # --- Journal ---
 
@@ -892,17 +930,11 @@ class API:
     def _spansh_station_info(self, base: dict):
         """Fill the approach card from Spansh (nearest-station search, matched
         by name — the docking station is in the current system)."""
-        import asyncio
         from api.spansh import SpanshAPI
-
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                return await spansh.stations_near(self._current_system, size=100)
-            finally:
-                await spansh.close()
+        spansh = self._shared_api(SpanshAPI)
         try:
-            stations = asyncio.run(_run())
+            stations = self._run_async(
+                spansh.stations_near(self._current_system, size=100))
         except Exception:
             return
         name = (base.get("station") or "").lower()
@@ -2574,7 +2606,10 @@ class API:
         accurate). Runs in a background thread; a few seconds for years of
         journals."""
         from core import exobiology as exo
-        from core.database import replace_completed_exo_scans
+        from core.database import (replace_completed_exo_scans,
+                                   get_exo_journal_cache,
+                                   upsert_exo_journal_cache,
+                                   prune_exo_journal_cache)
         from core.journal import journal_path
         try:
             logs = sorted(journal_path().glob("Journal*.log"),
@@ -2582,14 +2617,40 @@ class API:
         except OSError as e:
             logging.warning(f"Exo backfill: cannot list journals: {e}")
             return
+        # Per-journal parse results are cached in the DB keyed by
+        # (mtime, size) — finished journals never change, so a normal startup
+        # only re-reads the journal that was live last session. The fold over
+        # ALL events below is unchanged; only the file reading is skipped.
+        try:
+            cache = get_exo_journal_cache()
+        except Exception as e:
+            logging.warning(f"Exo backfill: cache read failed ({e}) — full replay")
+            cache = {}
         events = []
         body_names = {}
+        new_entries = []
+        parsed = 0
         for log in logs:
+            try:
+                st = log.stat()
+            except OSError:
+                continue
+            cached = cache.get(log.name)
+            if (cached and cached["mtime"] == st.st_mtime
+                    and cached["size"] == st.st_size):
+                events.extend(tuple(ev) for ev in cached["events"])
+                for k, v in cached["body_names"].items():
+                    sys_name, _, body_id = k.partition("\x1f")
+                    body_names[(sys_name, body_id)] = v
+                continue
             system = ""
             try:
                 text = log.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
+            parsed += 1
+            j_events = []
+            j_names = {}
             for line in text.splitlines():
                 try:
                     e = json.loads(line)
@@ -2599,10 +2660,10 @@ class API:
                 if ev in ("FSDJump", "Location"):
                     system = e.get("StarSystem", system)
                 elif ev == "Scan" and e.get("BodyID") is not None:
-                    body_names[(e.get("StarSystem", system), str(e["BodyID"]))] = \
+                    j_names[(e.get("StarSystem", system), str(e["BodyID"]))] = \
                         e.get("BodyName", "")
                 elif ev == "ScanOrganic" and e.get("ScanType") == "Analyse":
-                    events.append((e.get("timestamp", ""), "scan", {
+                    j_events.append((e.get("timestamp", ""), "scan", {
                         "system": system,
                         "body": str(e.get("Body", "")),
                         "species": e.get("Species_Localised") or e.get("Species", ""),
@@ -2611,11 +2672,23 @@ class API:
                     }))
                 elif ev == "SellOrganicData":
                     for b in e.get("BioData", []):
-                        events.append((e.get("timestamp", ""), "sale", {
+                        j_events.append((e.get("timestamp", ""), "sale", {
                             "species": b.get("Species_Localised") or b.get("Species", ""),
                         }))
                 elif ev == "Died":
-                    events.append((e.get("timestamp", ""), "died", {}))
+                    j_events.append((e.get("timestamp", ""), "died", {}))
+            events.extend(j_events)
+            body_names.update(j_names)
+            new_entries.append((
+                log.name, st.st_mtime, st.st_size,
+                json.dumps(j_events),
+                json.dumps({f"{k[0]}\x1f{k[1]}": v for k, v in j_names.items()}),
+            ))
+        try:
+            upsert_exo_journal_cache(new_entries)
+            prune_exo_journal_cache({log.name for log in logs})
+        except Exception as e:
+            logging.warning(f"Exo backfill: cache write failed: {e}")
         events.sort(key=lambda x: x[0])
 
         rows: dict[tuple, dict] = {}  # (system, body, species) -> latest state
@@ -2649,7 +2722,8 @@ class API:
             return
         carried = sum(1 for r in rows.values() if not r["sold"] and not r["lost"])
         logging.info(f"Exo backfill: {n} completed scans rebuilt from "
-                     f"{len(logs)} journals, {carried} carried unsold")
+                     f"{len(logs)} journals ({parsed} parsed, "
+                     f"{len(logs) - parsed} cached), {carried} carried unsold")
 
     # --- Construction ---
 
@@ -2735,32 +2809,28 @@ class API:
         return get_carriers(include_hidden=True)
 
     def plan_neutron_route(self, origin: str, destination: str, range_ly: float, efficiency: int = 60) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
+        spansh = self._shared_api(SpanshAPI)
         async def _run():
-            spansh = SpanshAPI()
-            try:
-                systems = await spansh.neutron_route(origin, destination, range_ly, efficiency)
-                total_jumps = sum(s.jumps for s in systems)
-                total_dist = sum(s.distance_jumped for s in systems)
-                return {
-                    "systems": [
-                        {
-                            "system": s.system,
-                            "distance_jumped": round(s.distance_jumped, 2),
-                            "distance_remaining": round(s.distance, 2),
-                            "jumps": s.jumps,
-                            "neutron_star": s.neutron_star,
-                        }
-                        for s in systems
-                    ],
-                    "total_jumps": total_jumps,
-                    "total_distance": round(total_dist, 1),
-                }
-            finally:
-                await spansh.close()
+            systems = await spansh.neutron_route(origin, destination, range_ly, efficiency)
+            total_jumps = sum(s.jumps for s in systems)
+            total_dist = sum(s.distance_jumped for s in systems)
+            return {
+                "systems": [
+                    {
+                        "system": s.system,
+                        "distance_jumped": round(s.distance_jumped, 2),
+                        "distance_remaining": round(s.distance, 2),
+                        "jumps": s.jumps,
+                        "neutron_star": s.neutron_star,
+                    }
+                    for s in systems
+                ],
+                "total_jumps": total_jumps,
+                "total_distance": round(total_dist, 1),
+            }
         try:
-            return asyncio.run(_run())
+            return self._run_async(_run())
         except Exception as e:
             return {"error": str(e), "systems": [], "total_jumps": 0, "total_distance": 0}
 
@@ -2776,7 +2846,6 @@ class API:
         when worthwhile), not just neutron waypoints. Builds the FSD fuel model
         from the live Loadout; optimal_mass is derived from MaxJumpRange so
         engineering is automatically accounted for."""
-        import asyncio
         from api.spansh import SpanshAPI
 
         ship = self._current_ship
@@ -2816,52 +2885,45 @@ class API:
             "cargo": cargo,
         }
 
+        spansh = self._shared_api(SpanshAPI)
         async def _run():
-            spansh = SpanshAPI()
-            try:
-                jumps = await spansh.galaxy_route(params)
-                total_dist = sum(j.get("distance", 0) for j in jumps)
-                return {
-                    "systems": [
-                        {
-                            "system": j.get("name", ""),
-                            "distance_jumped": round(j.get("distance", 0), 2),
-                            "distance_remaining": round(j.get("distance_to_destination", 0), 2),
-                            "jumps": 1,
-                            "neutron_star": j.get("has_neutron", False),
-                            "scoopable": j.get("is_scoopable", False),
-                            "must_refuel": j.get("must_refuel", False),
-                            "fuel_used": round(j.get("fuel_used", 0), 2),
-                        }
-                        for j in jumps
-                    ],
-                    "total_jumps": max(0, len(jumps) - 1),
-                    "total_distance": round(total_dist, 1),
-                }
-            finally:
-                await spansh.close()
+            jumps = await spansh.galaxy_route(params)
+            total_dist = sum(j.get("distance", 0) for j in jumps)
+            return {
+                "systems": [
+                    {
+                        "system": j.get("name", ""),
+                        "distance_jumped": round(j.get("distance", 0), 2),
+                        "distance_remaining": round(j.get("distance_to_destination", 0), 2),
+                        "jumps": 1,
+                        "neutron_star": j.get("has_neutron", False),
+                        "scoopable": j.get("is_scoopable", False),
+                        "must_refuel": j.get("must_refuel", False),
+                        "fuel_used": round(j.get("fuel_used", 0), 2),
+                    }
+                    for j in jumps
+                ],
+                "total_jumps": max(0, len(jumps) - 1),
+                "total_distance": round(total_dist, 1),
+            }
         try:
-            return asyncio.run(_run())
+            return self._run_async(_run())
         except Exception as e:
             return {"error": str(e), "systems": [], "total_jumps": 0, "total_distance": 0}
 
     def plan_fc_route(self, origin: str, destination: str) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
+        spansh = self._shared_api(SpanshAPI)
         async def _run():
-            spansh = SpanshAPI()
-            try:
-                jumps = await spansh.fleet_carrier_route(origin, destination)
-                total_dist = sum(j.get("distance_jumped", j.get("distance", 0)) for j in jumps)
-                return {
-                    "jumps": jumps,
-                    "total_jumps": len(jumps),
-                    "total_distance": round(total_dist, 1),
-                }
-            finally:
-                await spansh.close()
+            jumps = await spansh.fleet_carrier_route(origin, destination)
+            total_dist = sum(j.get("distance_jumped", j.get("distance", 0)) for j in jumps)
+            return {
+                "jumps": jumps,
+                "total_jumps": len(jumps),
+                "total_distance": round(total_dist, 1),
+            }
         try:
-            return asyncio.run(_run())
+            return self._run_async(_run())
         except Exception as e:
             return {"error": str(e), "jumps": [], "total_jumps": 0, "total_distance": 0}
 
@@ -2940,40 +3002,36 @@ class API:
         return self._find_station_service("technology_broker", system, broker_type)
 
     def _find_station_service(self, kind: str, system: str, type_filter: str) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
         ref = system.strip() or self._current_system
         if not ref:
             return {"error": "No reference system — enter one or launch the game.", "results": []}
 
+        spansh = self._shared_api(SpanshAPI)
         async def _run():
-            spansh = SpanshAPI()
-            try:
-                if kind == "material_trader":
-                    stations = await spansh.material_traders(ref, type_filter or None)
-                else:
-                    stations = await spansh.tech_brokers(ref, type_filter or None)
-                return {
-                    "reference": ref,
-                    "results": [
-                        {
-                            "system": s.get("system_name", ""),
-                            "station": s.get("name", ""),
-                            # badge shown in the UI: trader or broker type
-                            "trader": s.get(kind, "") or "",
-                            "distance": round(s.get("distance") or 0, 1),
-                            "arrival": round(s.get("distance_to_arrival") or 0),
-                            "station_type": s.get("type", ""),
-                            "large_pad": s.get("has_large_pad", None),
-                            "planetary": s.get("is_planetary", False),
-                        }
-                        for s in stations
-                    ],
-                }
-            finally:
-                await spansh.close()
+            if kind == "material_trader":
+                stations = await spansh.material_traders(ref, type_filter or None)
+            else:
+                stations = await spansh.tech_brokers(ref, type_filter or None)
+            return {
+                "reference": ref,
+                "results": [
+                    {
+                        "system": s.get("system_name", ""),
+                        "station": s.get("name", ""),
+                        # badge shown in the UI: trader or broker type
+                        "trader": s.get(kind, "") or "",
+                        "distance": round(s.get("distance") or 0, 1),
+                        "arrival": round(s.get("distance_to_arrival") or 0),
+                        "station_type": s.get("type", ""),
+                        "large_pad": s.get("has_large_pad", None),
+                        "planetary": s.get("is_planetary", False),
+                    }
+                    for s in stations
+                ],
+            }
         try:
-            return asyncio.run(_run())
+            return self._run_async(_run())
         except Exception as e:
             # RuntimeError from SpanshAPI._post is already user-friendly
             # ("system not recognised"); anything else httpx-shaped gets a
@@ -3004,9 +3062,22 @@ class API:
         station = message.get("stationName", "")
         timestamp = message.get("timestamp", "")
         commodities = message.get("commodities", [])
-        if system and station and commodities:
-            from core.database import upsert_market_data
-            upsert_market_data(system, station, timestamp, commodities)
+        if not (system and station and commodities):
+            return
+        import time
+        with self._mkt_lock:
+            self._mkt_buf[(system, station)] = (timestamp, commodities)
+            now = time.time()
+            if now - self._mkt_last_flush < 15:
+                return
+            buf, self._mkt_buf = self._mkt_buf, {}
+            self._mkt_last_flush = now
+        try:
+            from core.database import upsert_market_batch
+            upsert_market_batch([(sy, st, ts, comms)
+                                 for (sy, st), (ts, comms) in buf.items()])
+        except Exception as e:
+            logging.warning(f"market flush failed: {e}")
 
     def _handle_eddn_journal(self, message: dict):
         """Every journal-schema message (any player's FSDJump/Scan/Location/...)
@@ -3190,15 +3261,14 @@ class API:
         set_pref("inara_api_key", key.strip())
 
     def test_inara_key(self, key: str) -> dict:
-        import asyncio
         from api.inara import InaraAPI
         async def _test():
+            # InaraAPI opens its httpx client per request — nothing to close
             inara = InaraAPI(key.strip(), APP_VERSION)
             # Quick test: search for Gold near Sol — always has results if key is valid
-            raw = await inara.commodity_markets("Gold", 0.0, 0.0, 0.0, limit=1)
-            return raw
+            return await inara.commodity_markets("Gold", 0.0, 0.0, 0.0, limit=1)
         try:
-            result = asyncio.run(_test())
+            result = self._run_async(_test())
             if isinstance(result, list) and len(result) > 0:
                 return {"ok": True}
             if isinstance(result, list) and len(result) == 0:
@@ -3213,7 +3283,6 @@ class API:
             return {"ok": False, "error": f"Connection error: {msg}"}
 
     def search_commodity_markets(self, system: str, commodity: str) -> list:
-        import asyncio
         from core.database import search_local_markets, get_pref, get_system_coords
 
         local = search_local_markets(commodity, system)
@@ -3224,11 +3293,7 @@ class API:
 
         async def _run_spansh():
             from api.spansh import SpanshAPI
-            spansh = SpanshAPI()
-            try:
-                raw = await spansh.commodity_markets(system, commodity)
-            finally:
-                await spansh.close()
+            raw = await self._shared_api(SpanshAPI).commodity_markets(system, commodity)
             needle = commodity.lower()
             results = []
             for s in raw:
@@ -3259,7 +3324,7 @@ class API:
             if not coords:
                 # Coords missing from local DB — look up via EDSM and cache them
                 from api.edsm import EdsmAPI
-                edsm = EdsmAPI()
+                edsm = self._shared_api(EdsmAPI)
                 try:
                     sys_info = await edsm.get_system(system)
                     if sys_info and sys_info.coords:
@@ -3270,8 +3335,6 @@ class API:
                         logging.info(f"Inara: fetched coords for {system} from EDSM")
                 except Exception as e:
                     logging.warning(f"Inara: EDSM coord lookup failed for {system}: {e}")
-                finally:
-                    await edsm.close()
             if not coords:
                 logging.warning(f"Inara: no coords for {system}, skipping")
                 return []
@@ -3281,10 +3344,11 @@ class API:
             return [InaraAPI.format_result(e) for e in raw]
 
         async def _run_all():
+            import asyncio
             return await asyncio.gather(_run_spansh(), _run_inara(), return_exceptions=True)
 
         try:
-            raw_results = asyncio.run(_run_all())
+            raw_results = self._run_async(_run_all())
             spansh_results = raw_results[0] if not isinstance(raw_results[0], Exception) else []
             inara_results  = raw_results[1] if not isinstance(raw_results[1], Exception) else []
         except Exception:
@@ -3309,26 +3373,19 @@ class API:
                              options: dict | None = None) -> dict:
         """Rings with a hotspot of `commodity` near `system`, one row per ring.
         options: ring_types[], reserve_levels[], powers[], power_states[], size."""
-        import asyncio
         from api.spansh import SpanshAPI
         opts = options or {}
-
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                return await spansh.ring_hotspots(
-                    system, commodity,
-                    ring_types=opts.get("ring_types") or None,
-                    reserve_levels=opts.get("reserve_levels") or None,
-                    controlling_powers=opts.get("powers") or None,
-                    power_states=opts.get("power_states") or None,
-                    size=int(opts.get("size") or 40),
-                )
-            finally:
-                await spansh.close()
+        spansh = self._shared_api(SpanshAPI)
 
         try:
-            raw = asyncio.run(_run())
+            raw = self._run_async(spansh.ring_hotspots(
+                system, commodity,
+                ring_types=opts.get("ring_types") or None,
+                reserve_levels=opts.get("reserve_levels") or None,
+                controlling_powers=opts.get("powers") or None,
+                power_states=opts.get("power_states") or None,
+                size=int(opts.get("size") or 40),
+            ))
         except Exception as e:
             return {"error": str(e), "results": []}
 
@@ -3367,26 +3424,19 @@ class API:
                            options: dict | None = None) -> dict:
         """Stations buying `commodity`, best sell price first.
         options: min_demand, max_distance, powers[], power_states[], size."""
-        import asyncio
         from api.spansh import SpanshAPI
         opts = options or {}
-
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                return await spansh.mining_sell_stations(
-                    system, commodity,
-                    min_demand=int(opts.get("min_demand") or 0),
-                    max_distance=opts.get("max_distance") or None,
-                    controlling_powers=opts.get("powers") or None,
-                    power_states=opts.get("power_states") or None,
-                    size=int(opts.get("size") or 40),
-                )
-            finally:
-                await spansh.close()
+        spansh = self._shared_api(SpanshAPI)
 
         try:
-            raw = asyncio.run(_run())
+            raw = self._run_async(spansh.mining_sell_stations(
+                system, commodity,
+                min_demand=int(opts.get("min_demand") or 0),
+                max_distance=opts.get("max_distance") or None,
+                controlling_powers=opts.get("powers") or None,
+                power_states=opts.get("power_states") or None,
+                size=int(opts.get("size") or 40),
+            ))
         except Exception as e:
             return {"error": str(e), "results": []}
 
@@ -3429,14 +3479,12 @@ class API:
         return self._fss_bodies
 
     def lookup_system(self, name: str) -> dict:
-        import asyncio
         from api.edsm import EdsmAPI
+        edsm = self._shared_api(EdsmAPI)
         async def _run():
-            edsm = EdsmAPI()
-            try:
-                system = await edsm.get_system(name)
-                bodies = await edsm.get_bodies(name)
-                return {
+            system = await edsm.get_system(name)
+            bodies = await edsm.get_bodies(name)
+            return {
                     "system": {
                         "name": system.name,
                         "coords": system.coords,
@@ -3461,60 +3509,42 @@ class API:
                         for b in bodies
                     ],
                 }
-            finally:
-                await edsm.close()
         try:
-            return asyncio.run(_run())
+            return self._run_async(_run())
         except Exception as e:
             return {"error": str(e), "system": None, "bodies": []}
 
     def plan_exobiology_route(
         self, origin: str, range_ly: float, radius: float = 10000, max_results: int = 20
     ) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                systems = await spansh.exobiology_route(origin, range_ly, radius, max_results)
-                return {"systems": systems}
-            finally:
-                await spansh.close()
+        spansh = self._shared_api(SpanshAPI)
         try:
-            return asyncio.run(_run())
+            systems = self._run_async(
+                spansh.exobiology_route(origin, range_ly, radius, max_results))
+            return {"systems": systems}
         except Exception as e:
             return {"error": str(e), "systems": []}
 
     def road_to_riches(
         self, origin: str, destination: str, range_ly: float, max_systems: int = 100
     ) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                systems = await spansh.road_to_riches(origin, destination, range_ly, max_systems)
-                return {"systems": systems}
-            finally:
-                await spansh.close()
+        spansh = self._shared_api(SpanshAPI)
         try:
-            return asyncio.run(_run())
+            systems = self._run_async(
+                spansh.road_to_riches(origin, destination, range_ly, max_systems))
+            return {"systems": systems}
         except Exception as e:
             return {"error": str(e), "systems": []}
 
     # --- Commander ---
 
     def lookup_commander(self, cmdr_name: str) -> dict:
-        import asyncio
         from api.edsm import EdsmAPI
-        async def _run():
-            edsm = EdsmAPI()
-            try:
-                return await edsm.get_commander(cmdr_name)
-            finally:
-                await edsm.close()
+        edsm = self._shared_api(EdsmAPI)
         try:
-            result = asyncio.run(_run())
+            result = self._run_async(edsm.get_commander(cmdr_name))
             return result or {"error": "Commander not found or profile not public"}
         except Exception as e:
             return {"error": str(e)}
@@ -3693,7 +3723,6 @@ class API:
         return clear_trade_log()
 
     def find_nearest_service(self, system: str, services: list) -> dict:
-        import asyncio
         from api.spansh import SpanshAPI
 
         def station_has(station: dict, label: str) -> bool:
@@ -3707,15 +3736,9 @@ class API:
                 return any("interstellar factor" in n for n in names)
             return label_l in names
 
-        async def _run():
-            spansh = SpanshAPI()
-            try:
-                return await spansh.stations_near(system)
-            finally:
-                await spansh.close()
-
+        spansh = self._shared_api(SpanshAPI)
         try:
-            stations = asyncio.run(_run())
+            stations = self._run_async(spansh.stations_near(system))
         except Exception as e:
             return {"error": str(e)}
 
@@ -3783,30 +3806,16 @@ class API:
     # --- Galaxy ---
 
     def _edsm_run(self, coro_factory):
-        import asyncio
         from api.edsm import EdsmAPI
-        async def _run():
-            edsm = EdsmAPI()
-            try:
-                return await coro_factory(edsm)
-            finally:
-                await edsm.close()
         try:
-            return asyncio.run(_run())
+            return self._run_async(coro_factory(self._shared_api(EdsmAPI)))
         except Exception as e:
             return {"error": str(e)}
 
     def get_galnet(self) -> list:
-        import asyncio
         from api.galnet import GalnetAPI
-        async def _run():
-            galnet = GalnetAPI()
-            try:
-                return await galnet.get_news()
-            finally:
-                await galnet.close()
         try:
-            result = asyncio.run(_run())
+            result = self._run_async(self._shared_api(GalnetAPI).get_news())
         except Exception:
             return []
         return result if isinstance(result, list) else []
@@ -3818,16 +3827,9 @@ class API:
         return self._edsm_run(lambda e: e.get_traffic(system_name))
 
     def get_community_goals(self) -> list:
-        import asyncio
         from api.communitygoals import CommunityGoalsAPI
-        async def _run():
-            cg = CommunityGoalsAPI()
-            try:
-                return await cg.get_active()
-            finally:
-                await cg.close()
         try:
-            result = asyncio.run(_run())
+            result = self._run_async(self._shared_api(CommunityGoalsAPI).get_active())
         except Exception:
             return []
         return result if isinstance(result, list) else []

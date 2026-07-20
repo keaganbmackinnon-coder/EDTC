@@ -4089,3 +4089,54 @@ Builder picker in-app — **v0.3.77 tagged + pushed for CI release
 
 ---
 *Session checkpoint: 2026-07-19 15:08:28*
+
+---
+*Session checkpoint: 2026-07-19 15:11:33*
+
+---
+*Session checkpoint: 2026-07-19 20:04:07*
+
+---
+*Session checkpoint: 2026-07-19 20:32:23*
+
+---
+*Session checkpoint: 2026-07-19 20:33:03*
+
+---
+
+## Session 53 — Session 51 deferred audit fixes (#11 #15 #16 #17) (v0.3.78 local, untagged)
+
+All four deferred optimisations from the Session 51 audit, in one pass:
+
+| # | Fix | File |
+|---|---|---|
+| 11 | EDDN commodity messages buffered like the coverage grid: `_mkt_buf` keyed (system, station) — a burst of updates for one station collapses to the newest snapshot — flushed every ~15 s via new `upsert_market_batch()` (one transaction per flush instead of one per message). Journal Market.json path (`upsert_market_data`) unchanged/immediate — it now delegates to the batch fn. | `main.py`, `core/database.py` |
+| 15 | One persistent asyncio loop (`_run_async`, daemon thread "edtc-async", started on first use) + shared API client instances (`_shared_api`) — per-call `asyncio.run()` + fresh client paid a TCP+TLS handshake per request. ALL 17 call sites converted (Spansh/EDSM/Galnet/CommunityGoals). InaraAPI stays per-call: its ctor takes the editable key AND it opens its httpx client per request (no `.close()` — don't add one, it has no method). Never `close()` the shared clients. | `main.py` |
+| 16 | Exo backfill checkpoint: new `exo_journal_cache` DB table (journal, mtime, size, events JSON, body_names JSON). Per-journal parse results cached; unchanged (mtime+size) journals aren't re-read; the chronological fold over ALL events is unchanged. Deleted journals prune from cache (their events drop out, as before). body_names keys stored as `system\x1fbody_id`. | `main.py`, `core/database.py` |
+| 17 | `_conn()` is now a @contextmanager: commit-or-rollback exactly as before, **plus close** on exit. All ~100 `with _conn() as conn:` call sites work unchanged. (sqlite3's own `with conn:` only ends the transaction — connections were left to the GC → ResourceWarning floods.) | `core/database.py` |
+
+### Verified
+- Harness 9/9 (`scripts/test_deferred_fixes.py`, isolated DB + stubbed webview):
+  conn closed after with / commit persists / rollback on exception; EDDN
+  buffer+flush+per-station dedupe + journal path still immediate; exo cache
+  round-trip (content corrupted in place with mtime/size kept → cached parse
+  used; journal changed → re-parsed; journal deleted → events drop out);
+  _run_async loop reuse across threads + shared-client live Spansh (kuk→Kuk,
+  sol→Sol over one client).
+- Session 51 regression harness still 16/16. py_compile clean.
+- **Live**: v0.3.78 built + installed + running. First startup parsed all 231
+  journals and built the cache; second startup: **1 parsed, 230 cached**, same
+  58 scans, backfill ~0.4 s (was ~2.2 s). EDDN + live tail + Spansh searches
+  (stations/bodies) all healthy in the log.
+
+### State
+- **v0.3.78 NOT tagged** — tag after the CMDR confirms in-app (Traders search,
+  Mining searches, commodity search, Galnet — anything that hits Spansh/EDSM
+  now goes through the shared loop/clients).
+- No frontend changes — no npm build needed this session.
+- Swap note: the old exe was locked by FOUR EDTC.exe processes (two instances
+  × main+child); `Get-Process EDTC` missed them — use
+  `Get-CimInstance Win32_Process` filtered on ExecutablePath when swapping.
+
+---
+*Session 53 — 2026-07-19 (v0.3.78 local, untagged)*
