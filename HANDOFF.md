@@ -4286,8 +4286,13 @@ journal-shaped Loadout event). This is also the no-server answer to
 - Harness 6/6 (`scripts/test_slef.py`): array/object/bare parse, journal-noise
   skip (cockpit/hatch), EDTC round-trip (export→import identical fit),
   engineering modifier round-trip, planned-eng drop count, error cases.
-- **v0.3.81 NOT tagged** — tag after the CMDR round-trips a build with EDSY
-  (export → EDSY import, or an EDSY export pasted into EDTC).
+- ~~v0.3.81 NOT tagged~~ — CMDR confirmed the round-trip **works in EDSY**;
+  **v0.3.81 tagged + pushed for CI release 2026-07-19** (commit 07e2fec).
+  Backlog item 2 (SLEF import/export, incl. shareable builds) is DONE —
+  next up is item 3, tourist/passenger route planner.
+
+---
+*Session 54 (cont.) — 2026-07-19 (v0.3.81 released)*
 
 ---
 *Session checkpoint: 2026-07-19 20:51:47*
@@ -4330,3 +4335,6 @@ journal-shaped Loadout event). This is also the no-server answer to
 
 ---
 *Session checkpoint: 2026-07-19 23:49:41*
+
+---
+*Session checkpoint: 2026-07-19 23:51:45*
