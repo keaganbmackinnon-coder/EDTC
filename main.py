@@ -48,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.79"  # bump this with every release
+APP_VERSION = "0.3.80"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -3537,6 +3537,78 @@ class API:
             return self._run_async(_run())
         except Exception as e:
             return {"error": str(e), "system": None, "bodies": []}
+
+    def search_star_systems(self, options: dict | None = None) -> dict:
+        """Star system search with attribute filters (Spansh /systems/search).
+        options: reference, name, max_distance, allegiances[], governments[],
+        securities[], primary_economies[], min/max_population, needs_permit,
+        powers[], power_states[], main_star_subtypes[], sort_by, sort_dir,
+        size, page. Returns {count, results} with rows trimmed for the bridge
+        (raw rows carry full bodies[]/stations[] — far too heavy for React)."""
+        from api.spansh import SpanshAPI
+        opts = options or {}
+        ref = (opts.get("reference") or "").strip() or self._current_system
+        if not ref:
+            return {"error": "No reference system — enter one or launch the game.",
+                    "count": 0, "results": []}
+        spansh = self._shared_api(SpanshAPI)
+
+        def _num(key):
+            v = opts.get(key)
+            try:
+                return int(v) if v not in (None, "") else None
+            except (TypeError, ValueError):
+                return None
+
+        try:
+            raw = self._run_async(spansh.systems_search(
+                ref,
+                max_distance=float(opts.get("max_distance") or 0) or None,
+                name=(opts.get("name") or "").strip() or None,
+                allegiances=opts.get("allegiances") or None,
+                governments=opts.get("governments") or None,
+                securities=opts.get("securities") or None,
+                primary_economies=opts.get("primary_economies") or None,
+                min_population=_num("min_population"),
+                max_population=_num("max_population"),
+                needs_permit=opts.get("needs_permit"),
+                controlling_powers=opts.get("powers") or None,
+                power_states=opts.get("power_states") or None,
+                main_star_subtypes=opts.get("main_star_subtypes") or None,
+                sort_by=opts.get("sort_by") or "distance",
+                sort_dir=opts.get("sort_dir") or "asc",
+                size=min(int(opts.get("size") or 50), 100),
+                page=int(opts.get("page") or 0),
+            ))
+        except Exception as e:
+            return {"error": str(e), "count": 0, "results": []}
+
+        rows = []
+        for s in raw["results"]:
+            # Multi-star systems can carry several is_main_star bodies (and the
+            # star-class filter matches ANY of them) — show the arrival star
+            mains = [b for b in (s.get("bodies") or []) if b.get("is_main_star")]
+            main = min(mains, key=lambda b: b.get("distance_to_arrival") or 0,
+                       default=None)
+            rows.append({
+                "name":        s.get("name", ""),
+                "distance":    round(s.get("distance", 0), 1),
+                "main_star":   (main or {}).get("subtype", ""),
+                "allegiance":  s.get("allegiance") or "",
+                "government":  s.get("government") or "",
+                "security":    s.get("security") or "",
+                "economy":     s.get("primary_economy") or "",
+                "population":  s.get("population") or 0,
+                "body_count":  s.get("body_count") or 0,
+                "stations":    len(s.get("stations") or []),
+                "power":       s.get("controlling_power") or "",
+                "power_state": s.get("power_state") or "",
+                "region":      s.get("region") or "",
+                "permit":      bool(s.get("needs_permit")),
+                "scan_value":  s.get("estimated_scan_value") or 0,
+                "updated":     (s.get("updated_at") or "")[:10],
+            })
+        return {"reference": ref, "count": raw["count"], "results": rows}
 
     def plan_exobiology_route(
         self, origin: str, range_ly: float, radius: float = 10000, max_results: int = 20

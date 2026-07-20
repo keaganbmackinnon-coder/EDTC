@@ -4215,6 +4215,41 @@ finder), commodity market price alerts. Do not build these.
   rerun-failed-jobs before assuming a code problem.
 
 ---
+
+## Session 54 — Star system search (backlog item 1) (v0.3.80 local, untagged)
+
+Exploration → **System Search** tab: attribute-filtered system search on
+Spansh POST /systems/search, sorted from a reference system.
+
+### Filter shapes (ALL verified live 2026-07-19 — this endpoint silently
+### ignores wrong shapes, so don't guess)
+- `allegiance` / `government` / `security` / `primary_economy` /
+  `controlling_power` / `power_state` / `needs_permit`: `{"value": [...]}`.
+- `population`: MUST be `{"comparison": "<=>", "value": [lo, hi]}` —
+  `{"min","max"}` is silently ignored, `{"value": [lo,hi]}` returns 0.
+- Main star: NO top-level filter works (`main_star` etc all ignored) — use
+  nested `{"bodies": [{"subtype": {"value": [...]}, "is_main_star":
+  {"value": true}}]}`. Subtype strings are exact (list from
+  `/bodies/field_values/subtype`; STAR_GROUPS in Exploration.jsx maps
+  UI classes → exact strings).
+- `name`: string with `*` wildcard — covers boxel/sector-prefix search.
+- Multi-star gotcha: the star filter matches ANY main star; display shows
+  the arrival star (min distance_to_arrival), so a few rows can show a
+  different class than filtered (e.g. Luyten 145-141 WD primary + G
+  secondary). Expected, not a bug.
+
+| Item | File |
+|---|---|
+| `systems_search()` — all filters + sort + pagination, returns {count, results} | `api/spansh.py` |
+| `search_star_systems(options)` — bridge method; trims heavy rows (bodies/stations lists) to flat display dicts; arrival-star extraction | `main.py` |
+| System Search tab — reference/name/distance + 8 attribute dropdowns + population presets + permit + sort, results table (copy-on-click names, permit 🔒, star-class colours), Prev/Next pagination (50/page) | `frontend/src/pages/Exploration.jsx` |
+
+- Harness 8/8 live (`scripts/test_system_search.py`): distance sort, narrowing
+  proof, population preset + desc sort, neutron→0/G→Sol nested star filter,
+  lowercase reference self-heal, wildcard, pagination disjoint, no-ref error.
+- **v0.3.80 NOT tagged** — tag after the CMDR tries the System Search tab.
+
+---
 *Session checkpoint: 2026-07-19 20:51:47*
 
 ---
@@ -4240,3 +4275,9 @@ finder), commodity market price alerts. Do not build these.
 
 ---
 *Session checkpoint: 2026-07-19 23:17:21*
+
+---
+*Session checkpoint: 2026-07-19 23:22:02*
+
+---
+*Session checkpoint: 2026-07-19 23:34:08*

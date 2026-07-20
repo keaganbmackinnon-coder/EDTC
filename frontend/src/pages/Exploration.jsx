@@ -1184,8 +1184,282 @@ function SessionScannerTab({ currentSystem }) {
 
 // ---- Main ----
 
+// ---- Tab: System Search (attribute filters, Spansh) ----
+
+const SEARCH_ALLEGIANCES = ['Alliance', 'Empire', 'Federation', 'Guardian',
+  'Independent', 'Pilots Federation', 'Thargoid']
+const SEARCH_GOVERNMENTS = ['Anarchy', 'Communism', 'Confederacy', 'Cooperative',
+  'Corporate', 'Democracy', 'Dictatorship', 'Feudal', 'Patronage', 'Prison',
+  'Prison Colony', 'Theocracy', 'None']
+const SEARCH_SECURITIES = ['Anarchy', 'High', 'Medium', 'Low']
+const SEARCH_ECONOMIES = ['Agriculture', 'Colony', 'Extraction', 'High Tech',
+  'Industrial', 'Military', 'Refinery', 'Service', 'Terraforming', 'Tourism', 'None']
+const SEARCH_POWERS = ['A. Lavigny-Duval', 'Aisling Duval', 'Archon Delaine',
+  'Denton Patreus', 'Edmund Mahon', 'Felicia Winters', 'Jerome Archer',
+  'Li Yong-Rui', 'Nakato Kaine', 'Pranav Antal', 'Yuri Grom', 'Zemina Torval']
+const SEARCH_POWER_STATES = ['Stronghold', 'Fortified', 'Exploited', 'Unoccupied']
+
+// UI star-class groups → Spansh's exact main-star subtype strings (verified
+// against /bodies/field_values/subtype 2026-07-19 — exact match required)
+const STAR_GROUPS = {
+  'O':            ['O (Blue-White) Star'],
+  'B':            ['B (Blue-White) Star', 'B (Blue-White super giant) Star'],
+  'A':            ['A (Blue-White) Star', 'A (Blue-White super giant) Star'],
+  'F':            ['F (White) Star', 'F (White super giant) Star'],
+  'G':            ['G (White-Yellow) Star', 'G (White-Yellow super giant) Star'],
+  'K':            ['K (Yellow-Orange) Star', 'K (Yellow-Orange giant) Star'],
+  'M':            ['M (Red dwarf) Star', 'M (Red giant) Star', 'M (Red super giant) Star'],
+  'Scoopable (O-M)': ['O (Blue-White) Star', 'B (Blue-White) Star',
+    'B (Blue-White super giant) Star', 'A (Blue-White) Star',
+    'A (Blue-White super giant) Star', 'F (White) Star', 'F (White super giant) Star',
+    'G (White-Yellow) Star', 'G (White-Yellow super giant) Star',
+    'K (Yellow-Orange) Star', 'K (Yellow-Orange giant) Star',
+    'M (Red dwarf) Star', 'M (Red giant) Star', 'M (Red super giant) Star'],
+  'Brown dwarf (L/T/Y)': ['L (Brown dwarf) Star', 'T (Brown dwarf) Star',
+    'Y (Brown dwarf) Star'],
+  'Neutron Star': ['Neutron Star'],
+  'White Dwarf':  ['White Dwarf (D) Star', 'White Dwarf (DA) Star',
+    'White Dwarf (DAB) Star', 'White Dwarf (DAV) Star', 'White Dwarf (DAZ) Star',
+    'White Dwarf (DB) Star', 'White Dwarf (DBV) Star', 'White Dwarf (DBZ) Star',
+    'White Dwarf (DC) Star', 'White Dwarf (DCV) Star', 'White Dwarf (DQ) Star'],
+  'Black Hole':   ['Black Hole', 'Supermassive Black Hole'],
+}
+
+const POP_PRESETS = {
+  'Uninhabited': { max_population: 0 },
+  'Populated':   { min_population: 1 },
+  '> 1M':        { min_population: 1_000_000 },
+  '> 100M':      { min_population: 100_000_000 },
+  '> 1B':        { min_population: 1_000_000_000 },
+}
+
+function starShort(subtype) {
+  if (!subtype) return '—'
+  if (subtype === 'Neutron Star') return 'N'
+  if (subtype.includes('Black Hole')) return 'BH'
+  if (subtype.startsWith('White Dwarf')) return subtype.match(/\((\w+)\)/)?.[1] || 'D'
+  if (subtype.includes('T Tauri')) return 'TTS'
+  return subtype[0]
+}
+
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <label className="block">
+      <span className="text-ed-muted text-xs font-mono">{label}</span>
+      <select className="input w-full mt-0.5" value={value}
+        onChange={e => onChange(e.target.value)}>
+        <option value="">Any</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </label>
+  )
+}
+
+function SystemSearchTab({ currentSystem }) {
+  const [reference, setReference] = useState('')
+  const [name, setName] = useState('')
+  const [maxDist, setMaxDist] = useState('')
+  const [star, setStar] = useState('')
+  const [allegiance, setAllegiance] = useState('')
+  const [government, setGovernment] = useState('')
+  const [security, setSecurity] = useState('')
+  const [economy, setEconomy] = useState('')
+  const [pop, setPop] = useState('')
+  const [permit, setPermit] = useState('')
+  const [power, setPower] = useState('')
+  const [powerState, setPowerState] = useState('')
+  const [sortBy, setSortBy] = useState('distance')
+  const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [copied, setCopied] = useState('')
+
+  const SIZE = 50
+
+  async function search(p = 0) {
+    setLoading(true)
+    setPage(p)
+    const opts = {
+      reference: reference.trim() || currentSystem,
+      name: name.trim(),
+      max_distance: maxDist ? Number(maxDist) : null,
+      allegiances: allegiance ? [allegiance] : null,
+      governments: government ? [government] : null,
+      securities: security ? [security] : null,
+      primary_economies: economy ? [economy] : null,
+      powers: power ? [power] : null,
+      power_states: powerState ? [powerState] : null,
+      main_star_subtypes: star ? STAR_GROUPS[star] : null,
+      needs_permit: permit === '' ? null : permit === 'permit',
+      sort_by: sortBy,
+      sort_dir: sortBy === 'population' ? 'desc' : 'asc',
+      size: SIZE,
+      page: p,
+      ...(pop ? POP_PRESETS[pop] : {}),
+    }
+    const r = await api()?.search_star_systems(opts)
+    setResult(r ?? { error: 'No response' })
+    setLoading(false)
+  }
+
+  function copyName(n) {
+    api()?.copy_to_clipboard(n)
+    setCopied(n)
+    setTimeout(() => setCopied(c => (c === n ? '' : c)), 1500)
+  }
+
+  const rows = result?.results ?? []
+  const pages = result ? Math.max(1, Math.ceil(result.count / SIZE)) : 0
+
+  return (
+    <div>
+      <div className="panel mb-4">
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <label className="block">
+            <span className="text-ed-muted text-xs font-mono">Near system</span>
+            <input className="input w-full mt-0.5" value={reference}
+              placeholder={currentSystem || 'e.g. Sol'}
+              onChange={e => setReference(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && search(0)} />
+          </label>
+          <label className="block">
+            <span className="text-ed-muted text-xs font-mono">System name (* = wildcard)</span>
+            <input className="input w-full mt-0.5" value={name}
+              placeholder="e.g. Col 285 Sector*"
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && search(0)} />
+          </label>
+          <label className="block">
+            <span className="text-ed-muted text-xs font-mono">Max distance (ly)</span>
+            <input className="input w-full mt-0.5" type="number" min="1" value={maxDist}
+              placeholder="any" onChange={e => setMaxDist(e.target.value)} />
+          </label>
+        </div>
+        <div className="grid grid-cols-4 gap-3 mb-3">
+          <FilterSelect label="Main star" value={star} onChange={setStar}
+            options={Object.keys(STAR_GROUPS)} />
+          <FilterSelect label="Allegiance" value={allegiance} onChange={setAllegiance}
+            options={SEARCH_ALLEGIANCES} />
+          <FilterSelect label="Government" value={government} onChange={setGovernment}
+            options={SEARCH_GOVERNMENTS} />
+          <FilterSelect label="Security" value={security} onChange={setSecurity}
+            options={SEARCH_SECURITIES} />
+        </div>
+        <div className="grid grid-cols-4 gap-3 mb-3">
+          <FilterSelect label="Primary economy" value={economy} onChange={setEconomy}
+            options={SEARCH_ECONOMIES} />
+          <FilterSelect label="Population" value={pop} onChange={setPop}
+            options={Object.keys(POP_PRESETS)} />
+          <FilterSelect label="Controlling power" value={power} onChange={setPower}
+            options={SEARCH_POWERS} />
+          <FilterSelect label="Power state" value={powerState} onChange={setPowerState}
+            options={SEARCH_POWER_STATES} />
+        </div>
+        <div className="flex items-end gap-3">
+          <label className="block">
+            <span className="text-ed-muted text-xs font-mono">Permit</span>
+            <select className="input mt-0.5" value={permit} onChange={e => setPermit(e.target.value)}>
+              <option value="">Any</option>
+              <option value="open">No permit needed</option>
+              <option value="permit">Permit-locked only</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-ed-muted text-xs font-mono">Sort by</span>
+            <select className="input mt-0.5" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value="distance">Distance</option>
+              <option value="population">Population</option>
+            </select>
+          </label>
+          <button className="btn-primary" disabled={loading} onClick={() => search(0)}>
+            {loading ? 'Searching…' : '🔍 Search'}
+          </button>
+          {result && !result.error && (
+            <span className="text-ed-muted text-xs font-mono pb-2">
+              {result.count.toLocaleString()} systems
+              {result.reference ? ` near ${result.reference}` : ''}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {result?.error && (
+        <div className="panel border-ed-danger/60">
+          <p className="text-ed-danger text-sm">{result.error}</p>
+        </div>
+      )}
+
+      {!result && !loading && (
+        <EmptyState message="Filter by star class, faction attributes, population, or Powerplay — sorted from your reference system. Use * in the name for sector/boxel searches." />
+      )}
+      {result && !result.error && rows.length === 0 && (
+        <EmptyState message="No systems match those filters." />
+      )}
+
+      {rows.length > 0 && (
+        <div className="panel overflow-x-auto">
+          <table className="w-full text-sm font-mono">
+            <thead>
+              <tr className="text-ed-muted text-xs border-b border-ed-border">
+                <th className="text-left py-1.5 pr-3">System</th>
+                <th className="text-right pr-3">Dist</th>
+                <th className="text-center pr-3">Star</th>
+                <th className="text-left pr-3">Allegiance</th>
+                <th className="text-left pr-3">Government</th>
+                <th className="text-left pr-3">Sec</th>
+                <th className="text-left pr-3">Economy</th>
+                <th className="text-right pr-3">Pop</th>
+                <th className="text-right pr-3">Bodies</th>
+                <th className="text-left pr-3">Power</th>
+                <th className="text-right">Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(s => (
+                <tr key={s.name} className="border-b border-ed-border/40 hover:bg-ed-dark/60">
+                  <td className="py-1.5 pr-3">
+                    <button className="text-ed-orange hover:text-ed-gold text-left"
+                      title="Click to copy" onClick={() => copyName(s.name)}>
+                      {s.name}
+                    </button>
+                    {copied === s.name && <span className="text-ed-success text-xs ml-1">copied ✓</span>}
+                    {s.permit && <span className="text-ed-danger text-xs ml-1" title="Permit required">🔒</span>}
+                  </td>
+                  <td className="text-right pr-3 text-ed-muted">{fmtLy(s.distance)}</td>
+                  <td className={`text-center pr-3 font-bold ${STAR_COLORS[starShort(s.main_star)?.[0]] || 'text-ed-text'}`}
+                    title={s.main_star}>{starShort(s.main_star)}</td>
+                  <td className="text-left pr-3">{s.allegiance || '—'}</td>
+                  <td className="text-left pr-3">{s.government || '—'}</td>
+                  <td className="text-left pr-3">{s.security || '—'}</td>
+                  <td className="text-left pr-3">{s.economy || '—'}</td>
+                  <td className="text-right pr-3">{s.population ? fmtPop(s.population) : '—'}</td>
+                  <td className="text-right pr-3 text-ed-muted">{s.body_count || '—'}</td>
+                  <td className="text-left pr-3 text-ed-muted" title={s.power_state}>
+                    {s.power || '—'}
+                  </td>
+                  <td className="text-right text-ed-muted text-xs">{s.updated}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {pages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <button className="badge border border-ed-border text-ed-muted hover:text-ed-text px-2"
+                disabled={page <= 0 || loading} onClick={() => search(page - 1)}>← Prev</button>
+              <span className="text-ed-muted text-xs font-mono">page {page + 1} of {pages.toLocaleString()}</span>
+              <button className="badge border border-ed-border text-ed-muted hover:text-ed-text px-2"
+                disabled={page >= pages - 1 || loading} onClick={() => search(page + 1)}>Next →</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const TABS = [
   { id: 'system',      label: 'System Lookup' },
+  { id: 'search',      label: 'System Search' },
   { id: 'r2r',         label: 'Road to Riches' },
   { id: 'exo-planner', label: 'Exo Planner' },
   { id: 'exo',         label: 'Exobiology' },
@@ -1229,6 +1503,7 @@ export default function Exploration() {
       </div>
 
       {tab === 'system'      && <SystemLookupTab currentSystem={currentSystem} />}
+      {tab === 'search'      && <SystemSearchTab currentSystem={currentSystem} />}
       {tab === 'r2r'         && <R2RTab currentSystem={currentSystem} />}
       {tab === 'exo-planner' && <ExoPlannerTab currentSystem={currentSystem} />}
       {tab === 'exo'         && <ExobiologyTab currentSystem={currentSystem} />}

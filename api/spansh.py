@@ -352,6 +352,81 @@ class SpanshAPI(BaseAPI):
         })
         return resp.json().get("results", [])
 
+    # --- Star system search (attribute filters) ---
+
+    async def systems_search(
+        self,
+        reference: str,
+        max_distance: float | None = None,
+        name: str | None = None,
+        allegiances: list[str] | None = None,
+        governments: list[str] | None = None,
+        securities: list[str] | None = None,
+        primary_economies: list[str] | None = None,
+        min_population: int | None = None,
+        max_population: int | None = None,
+        needs_permit: bool | None = None,
+        controlling_powers: list[str] | None = None,
+        power_states: list[str] | None = None,
+        main_star_subtypes: list[str] | None = None,
+        sort_by: str = "distance",
+        sort_dir: str = "asc",
+        size: int = 50,
+        page: int = 0,
+    ) -> dict:
+        """POST /systems/search. Verified live (2026-07-19):
+        - allegiance / government / security / primary_economy /
+          controlling_power / power_state / needs_permit take {"value": [...]}.
+        - population MUST use {"comparison": "<=>", "value": [lo, hi]} — the
+          {"min","max"} shape is silently IGNORED and {"value": [lo, hi]}
+          returns count=0.
+        - There is NO working top-level main-star filter (main_star & friends
+          are all silently ignored) — the working form is the nested bodies
+          filter {"bodies": [{"subtype": {"value": [...]},
+          "is_main_star": {"value": true}}]} (neutron→0 near Sol, G→Sol).
+        - name takes a string, '*' wildcard supported ("Taurus Dark Region*")
+          — covers boxel/sector-prefix searching.
+        Returns {"count": total, "results": [...]} — rows carry allegiance,
+        government, security, primary_economy, population, body_count,
+        controlling_power, power_state, region, known_permit, estimated scan
+        values, bodies[] and stations[]."""
+        filters: dict = {}
+        if max_distance:
+            filters["distance"] = {"min": "0", "max": str(max_distance)}
+        if name:
+            filters["name"] = {"value": name}
+        if allegiances:
+            filters["allegiance"] = {"value": allegiances}
+        if governments:
+            filters["government"] = {"value": governments}
+        if securities:
+            filters["security"] = {"value": securities}
+        if primary_economies:
+            filters["primary_economy"] = {"value": primary_economies}
+        if min_population is not None or max_population is not None:
+            filters["population"] = {"comparison": "<=>", "value": [
+                int(min_population or 0),
+                int(max_population or 100_000_000_000_000),
+            ]}
+        if needs_permit is not None:
+            filters["needs_permit"] = {"value": needs_permit}
+        if controlling_powers:
+            filters["controlling_power"] = {"value": controlling_powers}
+        if power_states:
+            filters["power_state"] = {"value": power_states}
+        if main_star_subtypes:
+            filters["bodies"] = [{"subtype": {"value": main_star_subtypes},
+                                  "is_main_star": {"value": True}}]
+        resp = await self._post("/systems/search", json={
+            "reference_system": reference,
+            "filters": filters,
+            "sort": [{sort_by: {"direction": sort_dir}}],
+            "size": size,
+            "page": page,
+        })
+        data = resp.json()
+        return {"count": data.get("count", 0), "results": data.get("results", [])}
+
     # --- Commodity market search ---
 
     async def commodity_markets(self, system: str, commodity: str) -> list[dict]:
