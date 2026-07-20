@@ -4165,11 +4165,14 @@ remaining ly) — it just never received in-game routes.
   correctly pushed NO route (the CMDR's route had just auto-cleared on arrival
   — journal shows NavRouteClear as the last nav event). Overlay pickup of a
   freshly plotted route not yet observed in-game — check next session.
-- **v0.3.79 NOT tagged** — tag after the CMDR plots a route in-game and sees
-  jumps-left in the overlay, and confirms the hardpoint dots are gone.
+- ~~v0.3.79 NOT tagged~~ — CMDR confirmed both (route overlay pickup + dots
+  gone); **v0.3.79 tagged + pushed for CI release 2026-07-19** (commit
+  f2c0f02). Note: the v0.3.78 release step flaked once (transient — all
+  builds green, "Create GitHub Release" failed; rerun-failed-jobs fixed it).
+  If a release is missing assets, check the run before assuming a code issue.
 
 ---
-*Session 53 (cont.) — 2026-07-19 (v0.3.79 local, untagged)*
+*Session 53 (cont.) — 2026-07-19 (v0.3.79 released)*
 
 ---
 *Session checkpoint: 2026-07-19 20:51:47*
@@ -4182,3 +4185,6 @@ remaining ly) — it just never received in-game routes.
 
 ---
 *Session checkpoint: 2026-07-19 23:05:13*
+
+---
+*Session checkpoint: 2026-07-19 23:07:42*
