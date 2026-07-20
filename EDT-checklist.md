@@ -70,8 +70,8 @@
 - [x] Materials trading finder (Engineering → Traders & Brokers)
 - [x] Station search (nearest service, commodity search)
 - [x] Trade history + commodity price reference
-- [ ] Trade route planner (A↔B loop finder) ❌
-- [ ] Commodity market price alerts ❌
+- [x] ~~Trade route planner (A↔B loop finder)~~ — dropped (2026-07-19, CMDR decision)
+- [x] ~~Commodity market price alerts~~ — dropped (2026-07-19, CMDR decision)
 
 ### Exploration
 - [x] Exobiology tracker (live + overlay + carried-value backfill + sales history)
@@ -157,20 +157,21 @@
 
 ## What's left (the honest short list)
 
+Dropped by CMDR decision (2026-07-19): trade route planner, commodity
+market price alerts.
+
 Server-free and in-spirit:
-1. Trade route planner (A↔B loop profit finder)
-2. Commodity market price alerts
-3. Star system search with attribute filters + spherical/boxel search UI
-4. Tourist / passenger route planner
-5. Engineering router (best path to visit needed engineers)
-6. SLEF import/export (also solves "shareable builds" without a server)
-7. Module presets in Builder
-8. EDSY-grade pips/thermal modelling + roll % slider
-9. Codex / Canonn challenge tracker
-10. Journey tracker (could grow out of logbook + screenshots)
-11. Colonisation economy simulator + Nexus planner
-12. Ram Tah mission tracker; human sites maps
-13. Hardpoint placement editor polish (parked)
+1. Star system search with attribute filters + spherical/boxel search UI
+2. SLEF import/export (also solves "shareable builds" without a server)
+3. Tourist / passenger route planner
+4. Engineering router (best path to visit needed engineers)
+5. Module presets in Builder
+6. EDSY-grade pips/thermal modelling + roll % slider
+7. Codex / Canonn challenge tracker
+8. Journey tracker (could grow out of logbook + screenshots)
+9. Colonisation economy simulator + Nexus planner
+10. Ram Tah mission tracker; human sites maps
+11. Hardpoint placement editor polish (parked)
 
 Needs a decision first:
 - Squadron management (journal data only? limited value without CAPI)

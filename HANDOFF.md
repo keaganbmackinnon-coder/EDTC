@@ -4175,6 +4175,46 @@ remaining ly) — it just never received in-game routes.
 *Session 53 (cont.) — 2026-07-19 (v0.3.79 released)*
 
 ---
+
+## CONTINUATION POINT — remaining backlog (reconciled vs the original brief, 2026-07-19)
+
+Full annotated status lives in `EDT-checklist.md` (rewritten this session —
+every original checklist item marked ✅/🔶/❌ against the v0.3.79 codebase).
+~80% of the original brief is built; scaffold, MVP, and all module cores done.
+
+**Dropped by CMDR decision (2026-07-19)**: trade route planner (A↔B loop
+finder), commodity market price alerts. Do not build these.
+
+### The remaining list (start the next feature session from here)
+
+1. **Star system search** — attribute filters + spherical/boxel search UI (EDSM)
+2. **SLEF import/export** in Builder — also the no-server answer to
+   "shareable build links" (EDSY/Coriolis interchange)
+3. **Tourist / passenger route planner** (Spansh)
+4. **Engineering router** — best path to visit the engineers a build needs
+5. **Module presets** in Builder (one-click engineered combos)
+6. **EDSY-grade modelling** in Builder — interactive pips/thermal curves,
+   roll % slider (currently max-roll only)
+7. **Codex / Canonn challenge tracker**
+8. **Journey tracker** — could grow out of logbook + screenshots
+9. **Colonisation**: economy simulator, Nexus building planner
+10. **Ram Tah mission tracker**; human sites maps (Guardian)
+11. **Hardpoint placement editor polish** — parked behind
+    `MOUNT_MARKERS_ENABLED` in ShipView.jsx (v0.3.79)
+
+### Needs a CMDR decision before any code
+- Squadron management (limited value without CAPI)
+- Discussion boards / shareable links (conflicts with no-server philosophy)
+- Frontier CAPI / OAuth (deferred phase)
+- Public release / announcement beyond the friend group
+
+### Standing reminders
+- Overlay auto-enable prefs wiping on close is INTENTIONAL — do not "fix".
+- Mining session tracker/overlay still unexercised on a real mining run.
+- v0.3.78's release step flaked once — if a release is missing assets,
+  rerun-failed-jobs before assuming a code problem.
+
+---
 *Session checkpoint: 2026-07-19 20:51:47*
 
 ---
@@ -4188,3 +4228,15 @@ remaining ly) — it just never received in-game routes.
 
 ---
 *Session checkpoint: 2026-07-19 23:07:42*
+
+---
+*Session checkpoint: 2026-07-19 23:10:47*
+
+---
+*Session checkpoint: 2026-07-19 23:12:16*
+
+---
+*Session checkpoint: 2026-07-19 23:13:03*
+
+---
+*Session checkpoint: 2026-07-19 23:17:21*
