@@ -4247,7 +4247,13 @@ Spansh POST /systems/search, sorted from a reference system.
 - Harness 8/8 live (`scripts/test_system_search.py`): distance sort, narrowing
   proof, population preset + desc sort, neutron→0/G→Sol nested star filter,
   lowercase reference self-heal, wildcard, pagination disjoint, no-ref error.
-- **v0.3.80 NOT tagged** — tag after the CMDR tries the System Search tab.
+- ~~v0.3.80 NOT tagged~~ — CMDR confirmed the System Search tab; **v0.3.80
+  tagged + pushed for CI release 2026-07-19** (commit 4936370). Backlog
+  item 1 (star system search + spherical/boxel UI) is DONE — next up is
+  item 2, SLEF import/export.
+
+---
+*Session 54 — 2026-07-19 (v0.3.80 released)*
 
 ---
 *Session checkpoint: 2026-07-19 20:51:47*
@@ -4281,3 +4287,6 @@ Spansh POST /systems/search, sorted from a reference system.
 
 ---
 *Session checkpoint: 2026-07-19 23:34:08*
+
+---
+*Session checkpoint: 2026-07-19 23:36:01*
