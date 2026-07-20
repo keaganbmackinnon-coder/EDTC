@@ -4130,13 +4130,15 @@ All four deferred optimisations from the Session 51 audit, in one pass:
   (stations/bodies) all healthy in the log.
 
 ### State
-- **v0.3.78 NOT tagged** — tag after the CMDR confirms in-app (Traders search,
-  Mining searches, commodity search, Galnet — anything that hits Spansh/EDSM
-  now goes through the shared loop/clients).
+- ~~v0.3.78 NOT tagged~~ — CMDR confirmed; **v0.3.78 tagged + pushed for CI
+  release 2026-07-19** (commit f296560; CI run in_progress at session end).
 - No frontend changes — no npm build needed this session.
 - Swap note: the old exe was locked by FOUR EDTC.exe processes (two instances
   × main+child); `Get-Process EDTC` missed them — use
   `Get-CimInstance Win32_Process` filtered on ExecutablePath when swapping.
 
 ---
-*Session 53 — 2026-07-19 (v0.3.78 local, untagged)*
+*Session 53 — 2026-07-19 (v0.3.78 released)*
+
+---
+*Session checkpoint: 2026-07-19 20:51:47*
