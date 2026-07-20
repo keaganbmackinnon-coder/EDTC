@@ -48,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.80"  # bump this with every release
+APP_VERSION = "0.3.81"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -2294,13 +2294,17 @@ class API:
     def import_current_build(self) -> dict:
         """Snapshot the live in-game loadout as a build (every module + its real
         engineering). Falls back to scanning the latest journal for a Loadout."""
-        import re
         if not self._current_loadout.get("Modules"):
             self.get_ship_info()          # triggers journal self-heal → sets _current_loadout
         event = self._current_loadout
         if not event or not event.get("Modules"):
             return {"error": "No loadout found — launch the game so EDTC can read your ship."}
+        return self._build_from_loadout(event, source="import")
 
+    def _build_from_loadout(self, event: dict, source: str = "import") -> dict:
+        """Map a journal-shaped Loadout event to an EDTC build. Shared by the
+        live-ship import and SLEF import (a SLEF entry's `data` IS a Loadout)."""
+        import re
         idx = self._module_symbol_index()
         disp = _ship_display_name(event)
         ship_id = ""
@@ -2369,12 +2373,149 @@ class API:
             "ship_name": event.get("ShipName", ""),
             "ship_ident": event.get("ShipIdent", ""),
             "name": (event.get("ShipName") or disp or "Imported ship").strip(),
-            "source": "import",
+            "source": source,
             "unladen_mass": event.get("UnladenMass"),
             "bulkhead_index": bulkhead_index,
             "bulkhead_engineering": bulkhead_engineering,
             "slots": slots,
         }
+
+    # --- SLEF (Ship Loadout Exchange Format) ---
+
+    _BULKHEAD_SUFFIXES = ["grade1", "grade2", "grade3", "mirrored", "reactive"]
+    _HP_SIZE_NAMES = {1: "Small", 2: "Medium", 3: "Large", 4: "Huge"}
+
+    def import_slef(self, text: str) -> dict:
+        """Import a SLEF build (EDSY / Coriolis / Inara 'journal loadout'
+        export). Accepts the standard [{header, data}] array, a single
+        {header, data} object, or a bare journal Loadout event."""
+        try:
+            parsed = json.loads((text or "").strip())
+        except ValueError:
+            return {"error": "Not valid JSON — paste the full SLEF export."}
+        entry = parsed[0] if isinstance(parsed, list) and parsed else parsed
+        if not isinstance(entry, dict):
+            return {"error": "Unrecognised SLEF structure."}
+        event = entry.get("data") if isinstance(entry.get("data"), dict) else entry
+        if not event.get("Modules"):
+            return {"error": "No Modules found — is this a SLEF ship build?"}
+        build = self._build_from_loadout(event, source="slef")
+        if not build.get("ship_id"):
+            ship_name = event.get("Ship", "unknown")
+            return {"error": f'Ship type "{ship_name}" not recognised by EDTC.'}
+        app = ((entry.get("header") or {}).get("appName") or "").strip()
+        if app and app.upper() != "EDTC":
+            build["name"] = f"{build['name']} ({app})"
+        return build
+
+    def _ship_fdev_symbol(self, ship_id: str) -> str | None:
+        """EDTC ship id → journal/fdev symbol (via the display-name mapping:
+        ships.json ids like 'cobra_mk_iii' are NOT fdev names like 'cobramkiii')."""
+        ship = next((s for s in self._load_json("ships.json").get("ships", [])
+                     if s.get("id") == ship_id), None)
+        if not ship:
+            return None
+        disp = (ship.get("name") or "").strip().lower()
+        return next((k for k, v in _SHIP_DISPLAY_NAMES.items()
+                     if v.lower() == disp), None)
+
+    def _slef_engineering(self, eng: dict | None) -> dict | None:
+        """Journal-shaped Engineering block. Only exact (game-imported)
+        modifiers are exported — hand-planned EDTC engineering stores EDTC
+        blueprint ids, not journal BlueprintNames, so it exports unengineered
+        rather than emitting a block other tools can't resolve."""
+        if not eng or not eng.get("modifiers"):
+            return None
+        out = {
+            "BlueprintName": eng.get("blueprint", ""),
+            "Level": eng.get("grade") or 1,
+            "Quality": eng.get("quality") if eng.get("quality") is not None else 1.0,
+            "Modifiers": [{"Label": k, "Value": v}
+                          for k, v in eng["modifiers"].items()],
+        }
+        if eng.get("experimental"):
+            out["ExperimentalEffect"] = eng["experimental"]
+        return out
+
+    def export_slef(self, build: dict | None) -> dict:
+        """Export an EDTC build as SLEF v1 (array of {header, data} with a
+        journal-shaped Loadout in data). Slot names are reconstructed from the
+        ship's slot layout in ships.json."""
+        if not build or not build.get("slots"):
+            return {"error": "No build open to export."}
+        ship = next((s for s in self._load_json("ships.json").get("ships", [])
+                     if s.get("id") == build.get("ship_id")), None)
+        fdev = self._ship_fdev_symbol(build.get("ship_id"))
+        if not ship or not fdev:
+            return {"error": "Ship type unknown — can't reconstruct journal slot names."}
+
+        core_inv = {v: k for k, v in self._CORE_JOURNAL_SLOT.items()}
+        # hardpoint:i / optional:i are indexed largest-first in EDTC — mirror
+        # that here so slot sizes line up with the fitted modules
+        hp_sizes = sorted(ship.get("hardpoint_sizes") or [], reverse=True)
+        opt_sizes = ship.get("optional_slots") or []
+        modules = []
+
+        bi = build.get("bulkhead_index")
+        if bi is not None and 0 <= int(bi) < len(self._BULKHEAD_SUFFIXES):
+            m = {"Slot": "Armour",
+                 "Item": f"{fdev}_armour_{self._BULKHEAD_SUFFIXES[int(bi)]}",
+                 "On": True, "Priority": 0}
+            e = self._slef_engineering(build.get("bulkhead_engineering"))
+            if e:
+                m["Engineering"] = e
+            modules.append(m)
+
+        hp_counters: dict[int, int] = {}
+        for key, fitted in (build.get("slots") or {}).items():
+            if not fitted or not fitted.get("symbol"):
+                continue
+            family, _, idx_s = key.partition(":")
+            if family == "core":
+                slot = core_inv.get(idx_s)
+            elif family == "hardpoint":
+                i = int(idx_s)
+                size = hp_sizes[i] if i < len(hp_sizes) else 1
+                n = hp_counters.get(size, 0) + 1
+                hp_counters[size] = n
+                slot = f"{self._HP_SIZE_NAMES.get(size, 'Small')}Hardpoint{n}"
+            elif family == "utility":
+                slot = f"TinyHardpoint{int(idx_s) + 1}"
+            elif family == "optional":
+                i = int(idx_s)
+                size = opt_sizes[i] if i < len(opt_sizes) else 1
+                slot = f"Slot{i + 1:02d}_Size{size}"
+            elif family == "military":
+                slot = f"Military{int(idx_s) + 1:02d}"
+            else:
+                continue
+            if not slot:
+                continue
+            m = {"Slot": slot, "Item": str(fitted["symbol"]).lower(),
+                 "On": bool(fitted.get("enabled", True)),
+                 "Priority": max(0, int(fitted.get("priority") or 1) - 1)}
+            e = self._slef_engineering(fitted.get("engineering"))
+            if e:
+                m["Engineering"] = e
+            modules.append(m)
+
+        data = {
+            "event": "Loadout",
+            "Ship": fdev,
+            "ShipName": build.get("ship_name") or build.get("name", ""),
+            "ShipIdent": build.get("ship_ident", ""),
+            "Modules": modules,
+        }
+        if build.get("unladen_mass"):
+            data["UnladenMass"] = build["unladen_mass"]
+        slef = json.dumps([{
+            "header": {"appName": "EDTC", "appVersion": APP_VERSION},
+            "data": data,
+        }], indent=2)
+        planned = sum(1 for f in (build.get("slots") or {}).values()
+                      if f and f.get("engineering")
+                      and not (f["engineering"].get("modifiers") or {}))
+        return {"slef": slef, "modules": len(modules), "planned_dropped": planned}
 
     # --- Routes ---
 

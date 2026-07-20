@@ -546,6 +546,9 @@ export default function Builder() {
   const [placeSlot, setPlaceSlot] = useState(null) // slot key being placed on the hull (null = not placing)
   const [newShip, setNewShip] = useState('')
   const [busy, setBusy] = useState('')
+  const [slefOpen, setSlefOpen] = useState(false)
+  const [slefText, setSlefText] = useState('')
+  const [slefNote, setSlefNote] = useState('')
   const debounce = useRef(null)
 
   const loadSaved = useCallback(() => {
@@ -613,6 +616,22 @@ export default function Builder() {
       if (!b.ship_id) { alert('Imported, but the ship type was not recognised — stats unavailable.'); }
       setBuild(b); setDrawer(null)
     })
+  }
+
+  async function importSlef() {
+    const b = await api()?.import_slef(slefText)
+    if (!b || b.error) { alert(b?.error || 'SLEF import failed.'); return }
+    setBuild(b); setDrawer(null); setSlefOpen(false); setSlefText('')
+  }
+
+  async function exportSlef() {
+    const r = await api()?.export_slef(build)
+    if (!r || r.error) { alert(r?.error || 'SLEF export failed.'); return }
+    await api()?.copy_to_clipboard(r.slef)
+    setSlefNote(r.planned_dropped
+      ? `copied ✓ (${r.planned_dropped} planned-engineering module${r.planned_dropped === 1 ? '' : 's'} exported unengineered)`
+      : 'copied ✓')
+    setTimeout(() => setSlefNote(''), 4000)
   }
 
   function startNew() {
@@ -703,6 +722,18 @@ export default function Builder() {
           <button className="btn-primary mb-2" disabled={busy === 'import'} onClick={importShip}>
             {busy === 'import' ? 'Importing…' : '⬇ Import current ship'}
           </button>
+          <button className="btn-ghost mb-2 text-xs" onClick={() => setSlefOpen(o => !o)}>
+            📋 Import SLEF (EDSY / Coriolis / Inara)
+          </button>
+          {slefOpen && (
+            <div className="mb-2">
+              <textarea className="input w-full text-[10px] font-mono h-24 resize-none"
+                placeholder='Paste a SLEF export here — [{"header":…,"data":{…}}]'
+                value={slefText} onChange={e => setSlefText(e.target.value)} />
+              <button className="btn-primary w-full mt-1 text-xs" disabled={!slefText.trim()}
+                onClick={importSlef}>Import build</button>
+            </div>
+          )}
           <div className="flex gap-1 mb-3">
             <select className="input text-xs flex-1" value={newShip} onChange={e => setNewShip(e.target.value)}>
               <option value="">New build from…</option>
@@ -724,6 +755,7 @@ export default function Builder() {
                 <div className="text-ed-muted text-[11px] truncate">
                   {ships.find(s => s.id === b.data?.ship_id)?.name || b.ship}
                   {b.data?.source === 'import' && <span className="text-ed-success ml-1">· imported</span>}
+                  {b.data?.source === 'slef' && <span className="text-ed-gold ml-1">· SLEF</span>}
                 </div>
               </div>
             ))}
@@ -744,6 +776,10 @@ export default function Builder() {
                 <div className="flex items-center gap-2">
                   <input className="input font-ui text-lg font-semibold flex-1" value={build.name}
                     onChange={e => setBuild(b => ({ ...b, name: e.target.value }))} />
+                  <button className="btn-ghost text-xs shrink-0" onClick={exportSlef}
+                    title="Copy this build as SLEF — paste into EDSY, Coriolis, or share it">
+                    {slefNote || '⧉ SLEF'}
+                  </button>
                   <button className="btn-primary" disabled={busy === 'save'} onClick={saveBuild}>
                     {busy === 'save' ? 'Saving…' : '💾 Save'}
                   </button>

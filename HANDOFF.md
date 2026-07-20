@@ -4256,6 +4256,40 @@ Spansh POST /systems/search, sorted from a reference system.
 *Session 54 — 2026-07-19 (v0.3.80 released)*
 
 ---
+
+## Session 54 (cont.) — SLEF import/export (backlog item 2) (v0.3.81 local, untagged)
+
+Ship Builder now speaks SLEF (Ship Loadout Exchange Format — the
+EDSY/Coriolis/Inara interchange JSON; a SLEF entry's `data` is a
+journal-shaped Loadout event). This is also the no-server answer to
+"shareable build links": copy SLEF, paste anywhere.
+
+| Item | File |
+|---|---|
+| `_build_from_loadout(event, source)` — extracted from import_current_build, shared by live import + SLEF | `main.py` |
+| `import_slef(text)` — accepts standard [{header,data}] array, single object, or bare Loadout; tags non-EDTC app names into the build name; friendly errors | `main.py` |
+| `export_slef(build)` — SLEF v1 with journal slot names rebuilt from ships.json layout (core inverse-map, {Size}Hardpoint{n}, TinyHardpoint, Slot{NN}_Size{S}, Military{NN}, Armour w/ `<fdev>_armour_<suffix>`); `_ship_fdev_symbol` inverts _SHIP_DISPLAY_NAMES (ship ids ≠ fdev names) | `main.py` |
+| Builder UI: "📋 Import SLEF" paste panel in sidebar; "⧉ SLEF" copy button next to Save (reports planned-engineering drops); saved builds show a "· SLEF" badge | `frontend/src/pages/Builder.jsx` |
+
+### Design notes / limitations (intentional)
+- **Engineering export**: only exact game-imported modifiers are exported
+  (journal BlueprintName + Modifiers[]). Hand-planned EDTC engineering stores
+  EDTC blueprint ids (no journal symbol mapping exists) → those modules export
+  unengineered; the copy button reports how many ("N planned-engineering
+  modules exported unengineered").
+- **Slot assignment isn't preserved**: EDTC's build model indexes
+  hardpoints/optionals largest-slot-first, so a re-export can move a small
+  weapon into a bigger slot (always size-legal; EDSY accepts it).
+- Experimental effects may carry localised names for game-imported modules
+  (import prefers ExperimentalEffect_Localised) — cosmetic in EDSY.
+
+- Harness 6/6 (`scripts/test_slef.py`): array/object/bare parse, journal-noise
+  skip (cockpit/hatch), EDTC round-trip (export→import identical fit),
+  engineering modifier round-trip, planned-eng drop count, error cases.
+- **v0.3.81 NOT tagged** — tag after the CMDR round-trips a build with EDSY
+  (export → EDSY import, or an EDSY export pasted into EDTC).
+
+---
 *Session checkpoint: 2026-07-19 20:51:47*
 
 ---
@@ -4290,3 +4324,9 @@ Spansh POST /systems/search, sorted from a reference system.
 
 ---
 *Session checkpoint: 2026-07-19 23:36:01*
+
+---
+*Session checkpoint: 2026-07-19 23:40:29*
+
+---
+*Session checkpoint: 2026-07-19 23:49:41*
