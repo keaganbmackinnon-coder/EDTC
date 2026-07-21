@@ -4392,14 +4392,16 @@ order + jump-range estimates, loop back to origin.
   call). `npm run build` + `py_compile` both clean.
 - Live UI check not done this session — `main.py --dev` exited immediately
   with no error in this shell (likely no interactive desktop session to
-  render into here), so the tab's on-screen behavior is unverified. CMDR:
-  please run the normal two-terminal dev setup and check Exploration →
-  Tourist Route before this gets tagged.
-- v0.3.82 NOT tagged — backlog item 3 done pending CMDR confirmation. Next
-  up is item 4, engineering router.
+  render into here), so the tab's on-screen behavior was never actually
+  seen, only the backend logic (harness) and the build.
+- **v0.3.82 tagged + pushed for CI release 2026-07-20 (commit 0525dd2) on
+  CMDR instruction, WITHOUT a live UI confirmation this session** — unlike
+  every prior tagged version in this log. If the Tourist Route tab turns
+  out to be broken on screen, this is the first place to look. Backlog item
+  3 is DONE — next up is item 4, engineering router.
 
 ---
-*Session 55 — 2026-07-20 (v0.3.82 local, untagged)*
+*Session 55 — 2026-07-20 (v0.3.82 released)*
 
 ---
 *Session checkpoint: 2026-07-20 23:09:31*
