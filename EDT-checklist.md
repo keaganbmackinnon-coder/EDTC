@@ -60,7 +60,7 @@
 - [x] Fleet carrier route planner (Fleet Carriers → Route Planner)
 - [x] Waypoint routing + clipboard hotkey + trip progress overlay
 - [x] Nearest service finder (Trading → Nearest Service)
-- [ ] Tourist / passenger planner ❌
+- [x] Tourist / passenger planner (Exploration → Tourist Route)
 - [ ] Engineering router (multi-engineer visit route) ❌
 - [ ] Spherical & boxel system searching (EDSM) ❌ — used internally
       (Thargoid Nearby) but no general search UI

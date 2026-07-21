@@ -4344,3 +4344,65 @@ journal-shaped Loadout event). This is also the no-server answer to
 
 ---
 *Session checkpoint: 2026-07-19 23:57:45*
+
+---
+*Session checkpoint: 2026-07-19 23:59:11*
+
+---
+
+## Session 55 — Tourist / passenger route planner (backlog item 3) (v0.3.82 local, untagged)
+
+Exploration → **Tourist Route** tab: add attraction systems, plan visiting
+order + jump-range estimates, loop back to origin.
+
+### `/tourist/route` — actual shape (unverified stub in api/spansh.py was
+### wrong; verified live 2026-07-20)
+- GET always 400s ("source, destination and range are required") — the old
+  stub used GET with `from`/`to`/`range`. Real call is **POST (form)** with
+  `source`, `range`, and a **repeated `destination` field per attraction**
+  (not comma-joined — httpx encodes a list value as repeated form fields).
+- Spansh picks the visiting order itself (not input order) and always loops
+  back to `source` — no working no-loop option (`loop=false` makes the job
+  fail with "Unable to find route", so it's not sent at all).
+- `system_jumps` rows are **not cumulative** — each row is that leg's
+  distance/jumps from the PREVIOUS stop. Verified against real distances:
+  a Sol→Colonia leg = 22000.47 ly (the actual Sol-Colonia distance); in a
+  3-attraction route a later BeaglePoint→SagA* leg = 25899.99 ly (the actual
+  Sol-SagA* distance — i.e. today's return leg, proving it's per-leg not a
+  running total). The bridge method sums these into running totals itself.
+- Row 0 of `system_jumps` is the origin itself (distance/jumps 0) — kept in
+  the UI as a "(depart)" row for a clean sequential stop list.
+- `source`/`destination` matching is case-insensitive (no self-heal needed,
+  unlike `reference_system` on the search endpoints). Unknown destinations
+  400 with a genuinely useful `{"error": "Could not find destination
+  systems [...]"}` — `_post()` now surfaces any 400's `error` field as a
+  `RuntimeError` message instead of the generic httpx "400 Bad Request"
+  (small general improvement, not tourist-specific).
+
+| Item | File |
+|---|---|
+| `tourist_route(origin, destinations, range_ly)` — rewritten from the wrong GET stub to the verified POST/form shape | `api/spansh.py` |
+| `_post()` — 400 responses now raise `RuntimeError` with Spansh's own `error` message when present | `api/spansh.py` |
+| `plan_tourist_route(origin, destinations, range_ly)` — validates inputs, sums per-leg rows into running distance/jumps | `main.py` |
+| Tourist Route tab — origin/range inputs, add/remove attraction chips, stop table (leg + running distance/jumps, click-to-copy names) | `frontend/src/pages/Exploration.jsx` |
+
+- Harness 5/5 live (`scripts/test_tourist_route.py`): single-destination
+  loop, multi-destination order + running totals, case-insensitive origin,
+  unknown-destination error message, missing-input validation (no network
+  call). `npm run build` + `py_compile` both clean.
+- Live UI check not done this session — `main.py --dev` exited immediately
+  with no error in this shell (likely no interactive desktop session to
+  render into here), so the tab's on-screen behavior is unverified. CMDR:
+  please run the normal two-terminal dev setup and check Exploration →
+  Tourist Route before this gets tagged.
+- v0.3.82 NOT tagged — backlog item 3 done pending CMDR confirmation. Next
+  up is item 4, engineering router.
+
+---
+*Session 55 — 2026-07-20 (v0.3.82 local, untagged)*
+
+---
+*Session checkpoint: 2026-07-20 23:09:31*
+
+---
+*Session checkpoint: 2026-07-20 23:35:44*

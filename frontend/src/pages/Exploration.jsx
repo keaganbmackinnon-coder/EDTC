@@ -1457,10 +1457,178 @@ function SystemSearchTab({ currentSystem }) {
   )
 }
 
+// ---- Tab: Tourist / Passenger Route (Spansh) ----
+
+function TouristTab({ currentSystem }) {
+  const [origin, setOrigin] = useState('')
+  const [range, setRange] = useState('40')
+  const [destInput, setDestInput] = useState('')
+  const [destinations, setDestinations] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [copied, setCopied] = useState('')
+
+  useEffect(() => {
+    if (currentSystem && !origin) setOrigin(currentSystem)
+  }, [currentSystem])
+
+  function addDest() {
+    const v = destInput.trim()
+    if (!v || destinations.includes(v)) return
+    setDestinations(d => [...d, v])
+    setDestInput('')
+  }
+
+  function removeDest(v) {
+    setDestinations(d => d.filter(x => x !== v))
+  }
+
+  async function plan() {
+    const r = parseFloat(range)
+    if (!origin.trim() || destinations.length === 0 || isNaN(r) || r <= 0) return
+    setLoading(true)
+    setResult(null)
+    const res = await api()?.plan_tourist_route(origin.trim(), destinations, r)
+    setResult(res ?? { error: 'No response' })
+    setLoading(false)
+  }
+
+  function copyName(n) {
+    api()?.copy_to_clipboard(n)
+    setCopied(n)
+    setTimeout(() => setCopied(c => (c === n ? '' : c)), 1500)
+  }
+
+  const stops = result?.stops ?? []
+
+  return (
+    <div>
+      <p className="text-ed-muted text-sm mb-4">
+        Add the attractions you want to visit — Spansh works out the shortest visiting
+        order and loops back to your origin. Leg distances/jumps are straight-line
+        estimates for the range you enter, not a charted route.
+      </p>
+
+      <div className="panel mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Origin</label>
+            <input
+              className="input font-mono text-sm w-full"
+              value={origin}
+              onChange={e => setOrigin(e.target.value)}
+              placeholder="Sol"
+            />
+          </div>
+          <div>
+            <label className="text-ed-muted text-xs font-mono mb-1 block">Jump Range (ly)</label>
+            <input
+              className="input font-mono text-sm w-full"
+              type="number"
+              min="5"
+              max="500"
+              value={range}
+              onChange={e => setRange(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <label className="text-ed-muted text-xs font-mono mb-1 block">Add attraction</label>
+        <div className="flex gap-2 mb-3">
+          <input
+            className="input font-mono text-sm flex-1"
+            value={destInput}
+            onChange={e => setDestInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addDest())}
+            placeholder="e.g. Beagle Point"
+          />
+          <button className="btn-ghost text-sm" onClick={addDest} disabled={!destInput.trim()}>
+            + Add
+          </button>
+        </div>
+
+        {destinations.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {destinations.map(d => (
+              <span key={d} className="badge border border-ed-border text-ed-text flex items-center gap-1.5 pr-1.5">
+                {d}
+                <button className="text-ed-muted hover:text-ed-danger" onClick={() => removeDest(d)}>✕</button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <button
+          className="btn-primary text-sm disabled:opacity-40"
+          onClick={plan}
+          disabled={loading || !origin.trim() || destinations.length === 0}
+        >
+          {loading ? 'Planning route…' : 'Plan Route'}
+        </button>
+      </div>
+
+      {result?.error && (
+        <div className="panel border border-ed-danger/30 mb-3">
+          <p className="text-ed-danger text-sm font-mono">{result.error}</p>
+        </div>
+      )}
+
+      {stops.length > 0 && (
+        <div className="panel overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-ed-muted text-sm font-mono">{stops.length} stops</p>
+            <p className="text-ed-gold font-mono font-semibold">
+              {fmtLy(result.total_distance)} total · {result.total_jumps} jumps (est.)
+            </p>
+          </div>
+          <table className="w-full text-sm font-mono">
+            <thead>
+              <tr className="text-ed-muted text-xs border-b border-ed-border">
+                <th className="text-left py-1.5 pr-3">#</th>
+                <th className="text-left pr-3">System</th>
+                <th className="text-right pr-3">Leg dist</th>
+                <th className="text-right pr-3">Leg jumps</th>
+                <th className="text-right pr-3">Running dist</th>
+                <th className="text-right">Running jumps</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stops.map((s, i) => {
+                const isEndpoint = i === 0 || i === stops.length - 1
+                return (
+                  <tr key={i} className="border-b border-ed-border/40 hover:bg-ed-dark/60">
+                    <td className="py-1.5 pr-3 text-ed-muted">{i + 1}</td>
+                    <td className="pr-3">
+                      <button className={`text-left hover:text-ed-gold ${isEndpoint ? 'text-ed-muted' : 'text-ed-orange'}`}
+                        title="Click to copy" onClick={() => copyName(s.system)}>
+                        {s.system}{isEndpoint && i === 0 ? ' (depart)' : isEndpoint ? ' (return)' : ''}
+                      </button>
+                      {copied === s.system && <span className="text-ed-success text-xs ml-1">copied ✓</span>}
+                    </td>
+                    <td className="text-right pr-3 text-ed-muted">{fmtLy(s.leg_distance)}</td>
+                    <td className="text-right pr-3 text-ed-muted">{s.leg_jumps}</td>
+                    <td className="text-right pr-3">{fmtLy(s.total_distance)}</td>
+                    <td className="text-right">{s.total_jumps}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!result && !loading && (
+        <EmptyState message="Set an origin and jump range, add a few attractions, then click Plan Route." />
+      )}
+    </div>
+  )
+}
+
 const TABS = [
   { id: 'system',      label: 'System Lookup' },
   { id: 'search',      label: 'System Search' },
   { id: 'r2r',         label: 'Road to Riches' },
+  { id: 'tourist',     label: 'Tourist Route' },
   { id: 'exo-planner', label: 'Exo Planner' },
   { id: 'exo',         label: 'Exobiology' },
   { id: 'scanner',     label: 'Session Scanner' },
@@ -1505,6 +1673,7 @@ export default function Exploration() {
       {tab === 'system'      && <SystemLookupTab currentSystem={currentSystem} />}
       {tab === 'search'      && <SystemSearchTab currentSystem={currentSystem} />}
       {tab === 'r2r'         && <R2RTab currentSystem={currentSystem} />}
+      {tab === 'tourist'     && <TouristTab currentSystem={currentSystem} />}
       {tab === 'exo-planner' && <ExoPlannerTab currentSystem={currentSystem} />}
       {tab === 'exo'         && <ExobiologyTab currentSystem={currentSystem} />}
       {tab === 'scanner'     && <SessionScannerTab currentSystem={currentSystem} />}

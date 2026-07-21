@@ -48,7 +48,7 @@ DEV_URL = "http://localhost:5173"
 
 DEV_MODE = "--dev" in sys.argv
 
-APP_VERSION = "0.3.81"  # bump this with every release
+APP_VERSION = "0.3.82"  # bump this with every release
 
 # exe + db paths identify WHICH install is running — a stale duplicate exe
 # (with its own empty edtc.db beside it) looks identical from inside the app
@@ -3774,6 +3774,50 @@ class API:
             return {"systems": systems}
         except Exception as e:
             return {"error": str(e), "systems": []}
+
+    def plan_tourist_route(
+        self, origin: str, destinations: list[str], range_ly: float
+    ) -> dict:
+        """Tourist/passenger route (Spansh /tourist/route): optimises the
+        visiting order for a list of attraction systems and loops back to
+        origin. Trims the raw per-leg rows (each leg's distance/jumps is
+        FROM the previous stop, not cumulative — see api/spansh.py) into a
+        display list with running totals for the frontend."""
+        origin = (origin or "").strip()
+        dests = [d.strip() for d in (destinations or []) if d and d.strip()]
+        if not origin:
+            return {"error": "Enter an origin system.", "stops": []}
+        if not dests:
+            return {"error": "Add at least one destination.", "stops": []}
+        from api.spansh import SpanshAPI
+        spansh = self._shared_api(SpanshAPI)
+        try:
+            result = self._run_async(
+                spansh.tourist_route(origin, dests, range_ly))
+        except Exception as e:
+            return {"error": str(e), "stops": []}
+
+        legs = result.get("system_jumps", [])
+        stops = []
+        total_distance = 0.0
+        total_jumps = 0
+        for leg in legs:
+            total_distance += leg.get("distance", 0) or 0
+            total_jumps += leg.get("jumps", 0) or 0
+            stops.append({
+                "system": leg.get("system", ""),
+                "leg_distance": round(leg.get("distance", 0) or 0, 1),
+                "leg_jumps": leg.get("jumps", 0) or 0,
+                "total_distance": round(total_distance, 1),
+                "total_jumps": total_jumps,
+            })
+        return {
+            "origin": result.get("source_system", origin),
+            "destinations": result.get("destination_systems", dests),
+            "stops": stops,
+            "total_distance": round(total_distance, 1),
+            "total_jumps": total_jumps,
+        }
 
     # --- Commander ---
 

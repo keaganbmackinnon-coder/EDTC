@@ -69,6 +69,16 @@ class SpanshAPI(BaseAPI):
         if resp.status_code >= 400:
             log.warning("Spansh POST %s -> %s | payload=%s | body=%s",
                         path, resp.status_code, json or data, resp.text[:500])
+            if resp.status_code == 400:
+                # Some endpoints (e.g. /tourist/route) return a genuinely
+                # useful message here ("Could not find destination systems
+                # [...]") — surface it instead of the generic httpx message.
+                try:
+                    msg = resp.json().get("error")
+                except ValueError:
+                    msg = None
+                if msg:
+                    raise RuntimeError(f"Spansh: {msg}")
         resp.raise_for_status()
         return resp
 
@@ -185,21 +195,35 @@ class SpanshAPI(BaseAPI):
         result = await self._poll_job(job_id)
         return result.get("jumps", [])
 
-    # --- Tourist route ---
+    # --- Tourist / passenger route ---
 
     async def tourist_route(
-        self, origin: str, waypoints: list[str], range_ly: float
-    ) -> list[dict]:
-        data = await self.get("/tourist/route", {
-            "from": origin,
-            "to": ",".join(waypoints),
+        self, origin: str, destinations: list[str], range_ly: float
+    ) -> dict:
+        """POST /tourist/route (form) — GET always 400s ("source, destination
+        and range are required"; verified live 2026-07-19). `destination` is
+        a REPEATED form field, one per attraction, not comma-joined — Spansh
+        visits them in its own optimised order and always loops back to
+        `source` (there's no working no-loop option: `loop=false` makes the
+        job fail with "Unable to find route").
+        Each `system_jumps` row is that LEG's distance/jumps from the
+        PREVIOUS stop, NOT cumulative from source (verified against known
+        real distances: Sol->Colonia leg = 22000.47 ly = the real Sol-Colonia
+        distance; a later BeaglePoint->SagA* leg = 25899.99 ly = the real
+        Sol-SagA* distance, i.e. today's real return leg, not a running
+        total). `source`/`destination` matching is case-insensitive; an
+        unknown destination 400s with a clear "Could not find destination
+        systems [...]" message (raised as RuntimeError by `_post`)."""
+        resp = await self._post("/tourist/route", data={
+            "source": origin,
+            "destination": destinations,
             "range": range_ly,
         })
-        job_id = data.get("job")
+        job_id = resp.json().get("job")
         if not job_id:
-            return []
+            return {"stops": []}
         result = await self._poll_job(job_id)
-        return result.get("system_jumps", [])
+        return result
 
     # --- Nearest ---
 
